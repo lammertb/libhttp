@@ -22,101 +22,9 @@
  * THE SOFTWARE.
  */
 
-#if defined(_WIN32)
-#if !defined(_CRT_SECURE_NO_WARNINGS)
-#define _CRT_SECURE_NO_WARNINGS /* Disable deprecation warning in VS2005 */
-#endif
-#ifndef _WIN32_WINNT /* defined for tdm-gcc so we can use getnameinfo */
-#define _WIN32_WINNT 0x0501
-#endif
-#else
-#if defined(__GNUC__) && !defined(_GNU_SOURCE)
-#define _GNU_SOURCE /* for setgroups() */
-#endif
-#if defined(__linux__) && !defined(_XOPEN_SOURCE)
-#define _XOPEN_SOURCE 600 /* For flockfile() on Linux */
-#endif
-#ifndef _LARGEFILE_SOURCE
-#define _LARGEFILE_SOURCE /* For fseeko(), ftello() */
-#endif
-#ifndef _FILE_OFFSET_BITS
-#define _FILE_OFFSET_BITS 64 /* Use 64-bit file offsets by default */
-#endif
-#ifndef __STDC_FORMAT_MACROS
-#define __STDC_FORMAT_MACROS /* <inttypes.h> wants this for C++ */
-#endif
-#ifndef __STDC_LIMIT_MACROS
-#define __STDC_LIMIT_MACROS /* C++ wants that for INT64_MAX */
-#endif
-#ifdef __sun
-#define __EXTENSIONS__  /* to expose flockfile and friends in stdio.h */
-#define __inline inline /* not recognized on older compiler versions */
-#endif
-#endif
-
-#if defined(USE_LUA) && defined(USE_WEBSOCKET)
-#define USE_TIMERS
-#endif
-
-#if defined(_MSC_VER)
-/* 'type cast' : conversion from 'int' to 'HANDLE' of greater size */
-#pragma warning(disable : 4306)
-/* conditional expression is constant: introduced by FD_SET(..) */
-#pragma warning(disable : 4127)
-/* non-constant aggregate initializer: issued due to missing C99 support */
-#pragma warning(disable : 4204)
-/* padding added after data member */
-#pragma warning(disable : 4820)
-/* not defined as a preprocessor macro, replacing with '0' for '#if/#elif' */
-#pragma warning(disable : 4668)
-/* no function prototype given: converting '()' to '(void)' */
-#pragma warning(disable : 4255)
-/* function has been selected for automatic inline expansion */
-#pragma warning(disable : 4711)
-#endif
 
 
-/* This code uses static_assert to check some conditions.
- * Unfortunately some compilers still do not support it, so we have a
- * replacement function here. */
-#if defined(_MSC_VER) && (_MSC_VER >= 1600)
-#define mg_static_assert static_assert
-#elif defined(__cplusplus) && (__cplusplus >= 201103L)
-#define mg_static_assert static_assert
-#elif defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 201112L)
-#define mg_static_assert _Static_assert
-#else
-char static_assert_replacement[1];
-#define mg_static_assert(cond, txt)                                            \
-	extern char static_assert_replacement[(cond) ? 1 : -1]
-#endif
-
-mg_static_assert(sizeof(int) == 4 || sizeof(int) == 8, "int data type size check");
-mg_static_assert(sizeof(void *) == 4 || sizeof(void *) == 8, "pointer data type size check");
-mg_static_assert(sizeof(void *) >= sizeof(int), "data type size check");
-
-
-/* DTL -- including winsock2.h works better if lean and mean */
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-
-/* Include the header file here, so the LibHTTP interface is defined for the
- * entire implementation, including the following forward definitions. */
-#include "libhttp.h"
-
-
-#ifndef IGNORE_UNUSED_RESULT
-#define IGNORE_UNUSED_RESULT(a) ((void)((a) && 1))
-#endif
-
-#ifndef _WIN32_WCE /* Some ANSI #includes are not available on Windows CE */
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <errno.h>
-#include <signal.h>
-#include <fcntl.h>
-#endif /* !_WIN32_WCE */
+#include "libhttp-private.h"
 
 #ifdef __MACH__
 
@@ -366,19 +274,6 @@ struct file;
 static const char *mg_fgets(char *buf, size_t size, struct file *filep, char **p);
 
 
-#if defined(HAVE_STDINT)
-#include <stdint.h>
-#else
-typedef unsigned char uint8_t;
-typedef unsigned short uint16_t;
-typedef unsigned int uint32_t;
-typedef unsigned __int64 uint64_t;
-typedef __int64 int64_t;
-#ifndef INT64_MAX
-#define INT64_MAX (9223372036854775807)
-#endif
-#endif /* HAVE_STDINT */
-
 /* POSIX dirent interface */
 struct dirent {
 	char d_name[PATH_MAX];
@@ -416,7 +311,6 @@ struct pollfd {
 #include <arpa/inet.h>
 #include <sys/time.h>
 #include <sys/utsname.h>
-#include <stdint.h>
 #include <inttypes.h>
 #include <netdb.h>
 #include <netinet/tcp.h>
@@ -506,8 +400,7 @@ static DWORD pthread_self(void) {
 }
 
 
-static int
-pthread_key_create( pthread_key_t *key, void (*_ignored)(void *)) {
+static int pthread_key_create( pthread_key_t *key, void (*_ignored)(void *)) {
 
 	(void)_ignored;
 
@@ -516,25 +409,29 @@ pthread_key_create( pthread_key_t *key, void (*_ignored)(void *)) {
 		return (*key != TLS_OUT_OF_INDEXES) ? 0 : -1;
 	}
 	return -2;
-}
+
+}  /* pthread_key_create */
 
 
 static int pthread_key_delete(pthread_key_t key) {
 
 	return TlsFree(key) ? 0 : 1;
-}
+
+}  /* pthread_key_delete */
 
 
 static int pthread_setspecific(pthread_key_t key, void *value) {
 
 	return TlsSetValue(key, value) ? 0 : 1;
-}
+
+}  /* pthread_setspecific */
 
 
 static void * pthread_getspecific(pthread_key_t key) {
 
 	return TlsGetValue(key);
-}
+
+}  /* pthread_getspecific */
 
 #if defined(__MINGW32__)
 /* Enable unused function warning again */
@@ -592,33 +489,33 @@ static time_t time(time_t *ptime) {
 }
 
 
-static struct tm * localtime_s(const time_t *ptime, struct tm *ptm) {
+static struct tm * localtime_s( const time_t *ptime, struct tm *ptm ) {
 
 	int64_t t = ((int64_t)*ptime) * RATE_DIFF + EPOCH_DIFF;
 	FILETIME ft, lft;
 	SYSTEMTIME st;
 	TIME_ZONE_INFORMATION tzinfo;
 
-	if (ptm == NULL) {
-		return NULL;
-	}
+	if ( ptm == NULL ) return NULL;
 
 	*(int64_t *)&ft = t;
-	FileTimeToLocalFileTime(&ft, &lft);
-	FileTimeToSystemTime(&lft, &st);
-	ptm->tm_year = st.wYear - 1900;
-	ptm->tm_mon = st.wMonth - 1;
-	ptm->tm_wday = st.wDayOfWeek;
-	ptm->tm_mday = st.wDay;
-	ptm->tm_hour = st.wHour;
-	ptm->tm_min = st.wMinute;
-	ptm->tm_sec = st.wSecond;
-	ptm->tm_yday = 0; /* hope nobody uses this */
-	ptm->tm_isdst =
-	    (GetTimeZoneInformation(&tzinfo) == TIME_ZONE_ID_DAYLIGHT) ? 1 : 0;
+
+	FileTimeToLocalFileTime( &ft, &lft );
+	FileTimeToSystemTime(   &lft, &st  );
+
+	ptm->tm_year  = st.wYear - 1900;
+	ptm->tm_mon   = st.wMonth - 1;
+	ptm->tm_wday  = st.wDayOfWeek;
+	ptm->tm_mday  = st.wDay;
+	ptm->tm_hour  = st.wHour;
+	ptm->tm_min   = st.wMinute;
+	ptm->tm_sec   = st.wSecond;
+	ptm->tm_yday  = 0; /* hope nobody uses this */
+	ptm->tm_isdst = (GetTimeZoneInformation(&tzinfo) == TIME_ZONE_ID_DAYLIGHT) ? 1 : 0;
 
 	return ptm;
-}
+
+}  /* localtime_s */
 
 
 static struct tm * gmtime_s(const time_t *ptime, struct tm *ptm) {
@@ -630,21 +527,23 @@ static int mg_atomic_inc(volatile int *addr);
 static struct tm tm_array[MAX_WORKER_THREADS];
 static int tm_index = 0;
 
-static struct tm * localtime(const time_t *ptime) {
+static struct tm * localtime( const time_t *ptime ) {
 
 	int i = mg_atomic_inc(&tm_index) % (sizeof(tm_array) / sizeof(tm_array[0]));
 	return localtime_s(ptime, tm_array + i);
-}
+
+}  /* localtime */
 
 
 static struct tm * gmtime(const time_t *ptime) {
 
 	int i = mg_atomic_inc(&tm_index) % ARRAY_SIZE(tm_array);
 	return gmtime_s(ptime, tm_array + i);
-}
+
+}  /* strftime */
 
 
-static size_t strftime(char *dst, size_t dst_size, const char *fmt, const struct tm *tm) {
+static size_t strftime( char *dst, size_t dst_size, const char *fmt, const struct tm *tm ) {
 
 	/* TODO */ //(void)mg_snprintf(NULL, dst, dst_size, "implement strftime()
 	// for WinCE");
@@ -664,7 +563,8 @@ static int rename(const char *a, const char *b) {
 	path_to_unicode(NULL, b, wb, ARRAY_SIZE(wb));
 
 	return MoveFileW(wa, wb) ? 0 : -1;
-}
+
+}  /* rename */
 
 struct stat {
 	int64_t st_size;
@@ -693,7 +593,8 @@ static int stat(const char *name, struct stat *st) {
 	else                              st->st_mtime = write_time;
 
 	return 0;
-}
+
+}  /* stat */
 
 #define access(x, a) 1 /* not required anyway */
 
@@ -709,14 +610,10 @@ static int stat(const char *name, struct stat *st) {
 
 #endif /* defined(_WIN32_WCE) */
 
-static void DEBUG_TRACE_FUNC(const char *func,
-                             unsigned line,
-                             PRINTF_FORMAT_STRING(const char *fmt),
-                             ...) PRINTF_ARGS(3, 4);
+static void DEBUG_TRACE_FUNC(const char *func, unsigned line, PRINTF_FORMAT_STRING(const char *fmt), ...) PRINTF_ARGS(3, 4); 
 
-static void
-DEBUG_TRACE_FUNC(const char *func, unsigned line, const char *fmt, ...)
-{
+static void DEBUG_TRACE_FUNC(const char *func, unsigned line, const char *fmt, ...) {
+
 	va_list args;
 	flockfile(stdout);
 	printf("*** %lu.%p.%s.%u: ", (unsigned long)time(NULL), (void *)pthread_self(), func, line);
@@ -726,7 +623,8 @@ DEBUG_TRACE_FUNC(const char *func, unsigned line, const char *fmt, ...)
 	putchar('\n');
 	fflush(stdout);
 	funlockfile(stdout);
-}
+
+}  /* DEBUG_TRACE_FUNC */
 
 #define DEBUG_TRACE(fmt, ...)                                                  \
 	DEBUG_TRACE_FUNC(__func__, __LINE__, fmt, __VA_ARGS__)
@@ -774,19 +672,18 @@ static void * mg_malloc_ex(size_t size, const char *file, unsigned line) {
 }
 
 
-static void *
-mg_calloc_ex(size_t count, size_t size, const char *file, unsigned line)
-{
+static void * mg_calloc_ex( size_t count, size_t size, const char *file, unsigned line ) {
+
 	void *data = mg_malloc_ex(size * count, file, line);
 	if ( data != NULL ) memset( data, 0, size * count );
 
 	return data;
-}
+
+}  /* mg_calloc_ex */
 
 
-static void
-mg_free_ex(void *memory, const char *file, unsigned line)
-{
+static void mg_free_ex(void *memory, const char *file, unsigned line) {
+
 	char mallocStr[256];
 	void *data = (void *)(((char *)memory) - sizeof(size_t));
 	size_t size;
@@ -811,12 +708,12 @@ mg_free_ex(void *memory, const char *file, unsigned line)
 
 		free(data);
 	}
-}
+
+}  /* mg_free_ex */
 
 
-static void *
-mg_realloc_ex(void *memory, size_t newsize, const char *file, unsigned line)
-{
+static void * mg_realloc_ex(void *memory, size_t newsize, const char *file, unsigned line) {
+
 	char mallocStr[256];
 	void *data;
 	void *_realloc;
@@ -888,22 +785,26 @@ mg_realloc_ex(void *memory, size_t newsize, const char *file, unsigned line)
 static __inline void * mg_malloc(size_t a) {
 
 	return malloc(a);
-}
+
+}  /* mg_malloc */
 
 static __inline void * mg_calloc(size_t a, size_t b) {
 
 	return calloc(a, b);
-}
+
+}  /* mg_calloc */
 
 static __inline void * mg_realloc(void *a, size_t b) {
 
 	return realloc(a, b);
-}
+
+}  /* mg_realloc */
 
 static __inline void mg_free(void *a) {
 
 	free(a);
-}
+
+}  /* mg_free */
 
 #endif
 
@@ -1602,7 +1503,8 @@ static void * event_create(void) {
 		return 0;
 	}
 	return (void *)ret;
-}
+
+}  /* event_create */
 
 
 static int event_wait(void *eventhdl) {
@@ -1615,7 +1517,8 @@ static int event_wait(void *eventhdl) {
 	}
 	(void)u; /* the value is not required */
 	return 1;
-}
+
+}  /* event_wait */
 
 
 static int event_signal(void *eventhdl) {
@@ -1627,13 +1530,14 @@ static int event_signal(void *eventhdl) {
 		return 0;
 	}
 	return 1;
-}
+
+}  /* event_signal */
 
 
 static void event_destroy(void *eventhdl) {
 
 	close((int)eventhdl);
-}
+}  /* event_destroy */
 #endif
 
 #endif
@@ -1650,23 +1554,22 @@ struct posix_event {
 static void * event_create(void) {
 
 	struct posix_event *ret = mg_malloc(sizeof(struct posix_event));
-	if (ret == 0) {
-		/* out of memory */
-		return 0;
-	}
+	if ( ret == NULL ) return NULL;
+
 	if (0 != pthread_mutex_init(&(ret->mutex), NULL)) {
 		/* pthread mutex not available */
 		mg_free(ret);
-		return 0;
+		return NULL;
 	}
 	if (0 != pthread_cond_init(&(ret->cond), NULL)) {
 		/* pthread cond not available */
 		pthread_mutex_destroy(&(ret->mutex));
 		mg_free(ret);
-		return 0;
+		return NULL;
 	}
 	return (void *)ret;
-}
+
+}  /* event_create */
 
 
 static int event_wait(void *eventhdl) {
@@ -1676,7 +1579,8 @@ static int event_wait(void *eventhdl) {
 	pthread_cond_wait(&(ev->cond), &(ev->mutex));
 	pthread_mutex_unlock(&(ev->mutex));
 	return 1;
-}
+
+}  /* event_wait */
 
 
 static int event_signal(void *eventhdl) {
@@ -1686,7 +1590,8 @@ static int event_signal(void *eventhdl) {
 	pthread_cond_signal(&(ev->cond));
 	pthread_mutex_unlock(&(ev->mutex));
 	return 1;
-}
+
+}  /* event_signal */
 
 
 static void event_destroy(void *eventhdl) {
@@ -1695,7 +1600,9 @@ static void event_destroy(void *eventhdl) {
 	pthread_cond_destroy(&(ev->cond));
 	pthread_mutex_destroy(&(ev->mutex));
 	mg_free(ev);
-}
+
+}  /* event_destroy */
+
 #endif
 
 
@@ -1736,19 +1643,21 @@ static void mg_set_thread_name(const char *name) {
 	/* on linux we can use the old prctl function */
 	(void)prctl(PR_SET_NAME, threadName, 0, 0, 0);
 #endif
-}
+}  /* mg_set_thread_name */
+
 #else /* !defined(NO_THREAD_NAME) */
 void
 mg_set_thread_name(const char *threadName)
 {
-}
+}  /* mg_set_thread_name */
 #endif
 
 
 const struct mg_option * mg_get_valid_options(void) {
 
 	return config_options;
-}
+
+}  /* mg_get_valid_options */
 
 
 static int is_file_in_memory(const struct mg_connection *conn, const char *path, struct file *filep) {
@@ -1767,15 +1676,17 @@ static int is_file_in_memory(const struct mg_connection *conn, const char *path,
 	}
 
 	return filep->membuf != NULL;
-}
+
+}  /* is_file_in_memory */
 
 
-static int is_file_opened(const struct file *filep) {
+static bool is_file_opened( const struct file *filep ) {
 
-	if (!filep) return 0;
+	if ( filep == NULL ) return false;
 
-	return filep->membuf != NULL || filep->fp != NULL;
-}
+	return ( filep->membuf != NULL  ||  filep->fp != NULL );
+
+}  /* is_file_opened */
 
 
 /* mg_fopen will open a file either in memory or on the disk.
@@ -1787,7 +1698,7 @@ static int mg_fopen(const struct mg_connection *conn, const char *path, const ch
 
 	struct stat st;
 
-	if (!filep) { return 0; } 
+	if (!filep) return 0; 
 
 	/* TODO (high): mg_fopen should only open a file, while mg_stat should
 	 * only get the file status. They should not work on different members of
@@ -3010,7 +2921,8 @@ static DIR * mg_opendir(const struct mg_connection *conn, const char *name) {
 	}
 
 	return dir;
-}
+
+}  /* mg_opendir */
 
 
 static int mg_closedir(DIR *dir) {
@@ -3179,21 +3091,20 @@ static HANDLE dlopen(const char *dll_name, int flags) {
 	(void)flags;
 	path_to_unicode(NULL, dll_name, wbuf, ARRAY_SIZE(wbuf));
 	return LoadLibraryW(wbuf);
-}
+
+}  /* dlopen */
 
 
 static int dlclose(void *handle) {
 
 	int result;
 
-	if (FreeLibrary((HMODULE)handle) != 0) {
-		result = 0;
-	} else {
-		result = -1;
-	}
+	if ( FreeLibrary((HMODULE)handle) != 0 ) result = 0;
+	else                                     result = -1;
 
 	return result;
-}
+
+}  /* dlclose */
 
 
 #if defined(__MINGW32__)
@@ -3217,13 +3128,12 @@ static int kill(pid_t pid, int sig_num) {
 }  /* kill */
 
 
-static void trim_trailing_whitespaces(char *s)
-{
+static void trim_trailing_whitespaces( char *s ) {
+
 	char *e = s + strlen(s) - 1;
-	while (e > s && isspace(*(unsigned char *)e)) {
-		*e-- = '\0';
-	}
-}
+	while (e > s && isspace(*(unsigned char *)e)) *e-- = '\0';
+
+}  /* trim_trailing_whitespaces */
 
 
 static pid_t spawn_process(struct mg_connection *conn, const char *prog, char *envblk, char *envp[], int fdin[2], int fdout[2], int fderr[2], const char *dir) {
@@ -3326,7 +3236,8 @@ static int set_non_blocking_mode(SOCKET sock) {
 
 	unsigned long on = 1;
 	return ioctlsocket(sock, (long)FIONBIO, &on);
-}
+
+}  /* set_non_blocking_mode */
 
 #else
 
@@ -3347,16 +3258,17 @@ static int mg_stat(struct mg_connection *conn, const char *path, struct file *fi
 	}
 
 	return 0;
-}
+
+}  /* mg_stat */
 
 
-static void
-set_close_on_exec(SOCKET fd, struct mg_connection *conn /* may be null */)
-{
+static void set_close_on_exec(SOCKET fd, struct mg_connection *conn /* may be null */) {
+
 	if (fcntl(fd, F_SETFD, FD_CLOEXEC) != 0) {
 		if (conn) { mg_cry(conn, "%s: fcntl(F_SETFD FD_CLOEXEC) failed: %s", __func__, strerror(ERRNO)); }
 	}
-}
+
+}  /* set_close_on_exec */
 
 
 int mg_start_thread(mg_thread_func_t func, void *param) {
@@ -3365,20 +3277,20 @@ int mg_start_thread(mg_thread_func_t func, void *param) {
 	pthread_attr_t attr;
 	int result;
 
-	(void)pthread_attr_init(&attr);
-	(void)pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+	pthread_attr_init(&attr);
+	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
 
 #if defined(USE_STACK_SIZE) && (USE_STACK_SIZE > 1)
 	/* Compile-time option to control stack size,
 	 * e.g. -DUSE_STACK_SIZE=16384 */
-	(void)pthread_attr_setstacksize(&attr, USE_STACK_SIZE);
+	pthread_attr_setstacksize(&attr, USE_STACK_SIZE);
 #endif /* defined(USE_STACK_SIZE) && (USE_STACK_SIZE > 1) */
 
 	result = pthread_create(&thread_id, &attr, func, param);
 	pthread_attr_destroy(&attr);
 
 	return result;
-}
+}  /* mg_start_thread */
 
 
 /* Start a thread storing the thread context. */
@@ -3402,7 +3314,8 @@ static int mg_start_thread_with_id(mg_thread_func_t func, void *param, pthread_t
 		*threadidptr = thread_id;
 	}
 	return result;
-}
+
+}  /* mg_start_thread_with_id */
 
 
 /* Wait for a thread to finish. */
@@ -3412,7 +3325,8 @@ static int mg_join_thread(pthread_t threadid) {
 
 	result = pthread_join(threadid, NULL);
 	return result;
-}
+
+}  /* mg_join_thread */
 
 
 #ifndef NO_CGI
@@ -3650,7 +3564,8 @@ static int64_t push_all(struct mg_context *ctx, FILE *fp, SOCKET sock, SSL *ssl,
 	}
 
 	return nwritten;
-}
+
+}  /* push_all */
 
 
 /* Read from IO channel - opened file descriptor, socket, or SSL descriptor.
@@ -8560,19 +8475,15 @@ mg_websocket_write_exec(struct mg_connection *conn,
 	return retval;
 }
 
-int
-mg_websocket_write(struct mg_connection *conn,
-                   int opcode,
-                   const char *data,
-                   size_t dataLen)
-{
+int mg_websocket_write(struct mg_connection *conn, int opcode, const char *data, size_t dataLen) {
+
 	return mg_websocket_write_exec(conn, opcode, data, dataLen, 0);
-}
+
+}  /* mg_websocket_write */
 
 
-static void
-mask_data(const char *in, size_t in_len, uint32_t masking_key, char *out)
-{
+static void mask_data(const char *in, size_t in_len, uint32_t masking_key, char *out) {
+
 	size_t i = 0;
 
 	i = 0;
@@ -8593,15 +8504,12 @@ mask_data(const char *in, size_t in_len, uint32_t masking_key, char *out)
 			i++;
 		}
 	}
-}
+
+}  /* mask_data */
 
 
-int
-mg_websocket_client_write(struct mg_connection *conn,
-                          int opcode,
-                          const char *data,
-                          size_t dataLen)
-{
+int mg_websocket_client_write(struct mg_connection *conn, int opcode, const char *data, size_t dataLen) {
+
 	int retval = -1;
 	char *masked_data = (char *)mg_malloc(((dataLen + 7) / 4) * 4);
 	uint32_t masking_key = (uint32_t)get_random();
@@ -8616,12 +8524,12 @@ mg_websocket_client_write(struct mg_connection *conn,
 
 	mask_data(data, dataLen, masking_key, masked_data);
 
-	retval = mg_websocket_write_exec(
-	    conn, opcode, masked_data, dataLen, masking_key);
+	retval = mg_websocket_write_exec( conn, opcode, masked_data, dataLen, masking_key );
 	mg_free(masked_data);
 
 	return retval;
-}
+
+}  /* mg_websocket_client_write */
 
 
 static void
@@ -12558,9 +12466,8 @@ mg_stop(struct mg_context *ctx)
 }
 
 
-static void
-get_system_name(char **sysName)
-{
+static void get_system_name( char **sysName ) {
+
 #if defined(_WIN32)
 #if defined(_WIN32_WCE)
 	*sysName = mg_strdup("WinCE");
@@ -12586,10 +12493,7 @@ get_system_name(char **sysName)
 	dwBuild = ((dwVersion < 0x80000000) ? (DWORD)(HIWORD(dwVersion)) : 0);
 	(void)dwBuild;
 
-	sprintf(name,
-	        "Windows %u.%u",
-	        (unsigned)dwMajorVersion,
-	        (unsigned)dwMinorVersion);
+	sprintf(name, "Windows %u.%u", (unsigned)dwMajorVersion, (unsigned)dwMinorVersion);
 	*sysName = mg_strdup(name);
 #endif
 #else
@@ -12598,267 +12502,5 @@ get_system_name(char **sysName)
 	uname(&name);
 	*sysName = mg_strdup(name.sysname);
 #endif
-}
 
-
-struct mg_context *
-mg_start(const struct mg_callbacks *callbacks,
-         void *user_data,
-         const char **options)
-{
-	struct mg_context *ctx;
-	const char *name, *value, *default_value;
-	int idx, ok, workerthreadcount;
-	unsigned int i;
-	void (*exit_callback)(const struct mg_context *ctx) = 0;
-
-	struct mg_workerTLS tls;
-
-#if defined(_WIN32)
-	WSADATA data;
-	WSAStartup(MAKEWORD(2, 2), &data);
-#endif /* _WIN32 */
-
-	/* Allocate context and initialize reasonable general case defaults. */
-	if ((ctx = (struct mg_context *)mg_calloc(1, sizeof(*ctx))) == NULL) {
-		return NULL;
-	}
-
-	/* Random number generator will initialize at the first call */
-	ctx->auth_nonce_mask =
-	    (uint64_t)get_random() ^ (uint64_t)(ptrdiff_t)(options);
-
-	if (mg_atomic_inc(&sTlsInit) == 1) {
-
-#if defined(_WIN32)
-		InitializeCriticalSection(&global_log_file_lock);
-#endif /* _WIN32 */
-#if !defined(_WIN32)
-		pthread_mutexattr_init(&pthread_mutex_attr);
-		pthread_mutexattr_settype(&pthread_mutex_attr, PTHREAD_MUTEX_RECURSIVE);
-#endif
-
-		if (0 != pthread_key_create(&sTlsKey, tls_dtor)) {
-			/* Fatal error - abort start. However, this situation should
-			 * never
-			 * occur in practice. */
-			mg_atomic_dec(&sTlsInit);
-			mg_cry(fc(ctx), "Cannot initialize thread local storage");
-			mg_free(ctx);
-			return NULL;
-		}
-	} else {
-		/* TODO (low): istead of sleeping, check if sTlsKey is already
-		 * initialized. */
-		mg_sleep(1);
-	}
-
-	tls.is_master = -1;
-	tls.thread_idx = (unsigned)mg_atomic_inc(&thread_idx_max);
-#if defined(_WIN32)
-	tls.pthread_cond_helper_mutex = NULL;
-#endif
-	pthread_setspecific(sTlsKey, &tls);
-
-#if defined(USE_LUA)
-	lua_init_optional_libraries();
-#endif
-
-	ok = 0 == pthread_mutex_init(&ctx->thread_mutex, &pthread_mutex_attr);
-#if !defined(ALTERNATIVE_QUEUE)
-	ok &= 0 == pthread_cond_init(&ctx->sq_empty, NULL);
-	ok &= 0 == pthread_cond_init(&ctx->sq_full, NULL);
-#endif
-	ok &= 0 == pthread_mutex_init(&ctx->nonce_mutex, &pthread_mutex_attr);
-	if (!ok) {
-		/* Fatal error - abort start. However, this situation should never
-		 * occur in practice. */
-		mg_cry(fc(ctx), "Cannot initialize thread synchronization objects");
-		mg_free(ctx);
-		pthread_setspecific(sTlsKey, NULL);
-		return NULL;
-	}
-
-	if (callbacks) {
-		ctx->callbacks = *callbacks;
-		exit_callback = callbacks->exit_context;
-		ctx->callbacks.exit_context = 0;
-	}
-	ctx->user_data = user_data;
-	ctx->handlers = NULL;
-
-#if defined(USE_LUA) && defined(USE_WEBSOCKET)
-	ctx->shared_lua_websockets = 0;
-#endif
-
-	while (options && (name = *options++) != NULL) {
-		if ((idx = get_option_index(name)) == -1) {
-			mg_cry(fc(ctx), "Invalid option: %s", name);
-			free_context(ctx);
-			pthread_setspecific(sTlsKey, NULL);
-			return NULL;
-		} else if ((value = *options++) == NULL) {
-			mg_cry(fc(ctx), "%s: option value cannot be NULL", name);
-			free_context(ctx);
-			pthread_setspecific(sTlsKey, NULL);
-			return NULL;
-		}
-		if (ctx->config[idx] != NULL) {
-			mg_cry(fc(ctx), "warning: %s: duplicate option", name);
-			mg_free(ctx->config[idx]);
-		}
-		ctx->config[idx] = mg_strdup(value);
-		DEBUG_TRACE("[%s] -> [%s]", name, value);
-	}
-
-	/* Set default value if needed */
-	for (i = 0; config_options[i].name != NULL; i++) {
-		default_value = config_options[i].default_value;
-		if (ctx->config[i] == NULL && default_value != NULL) {
-			ctx->config[i] = mg_strdup(default_value);
-		}
-	}
-
-#if defined(NO_FILES)
-	if (ctx->config[DOCUMENT_ROOT] != NULL) {
-		mg_cry(fc(ctx), "%s", "Document root must not be set");
-		free_context(ctx);
-		pthread_setspecific(sTlsKey, NULL);
-		return NULL;
-	}
-#endif
-
-	get_system_name(&ctx->systemName);
-
-	/* NOTE(lsm): order is important here. SSL certificates must
-	 * be initialized before listening ports. UID must be set last. */
-	if (!set_gpass_option(ctx) ||
-#if !defined(NO_SSL)
-	    !set_ssl_option(ctx) ||
-#endif
-	    !set_ports_option(ctx) ||
-#if !defined(_WIN32)
-	    !set_uid_option(ctx) ||
-#endif
-	    !set_acl_option(ctx)) {
-		free_context(ctx);
-		pthread_setspecific(sTlsKey, NULL);
-		return NULL;
-	}
-
-#if !defined(_WIN32)
-	/* Ignore SIGPIPE signal, so if browser cancels the request, it
-	 * won't kill the whole process. */
-	(void)signal(SIGPIPE, SIG_IGN);
-#endif /* !_WIN32 */
-
-	workerthreadcount = atoi(ctx->config[NUM_THREADS]);
-
-	if (workerthreadcount > MAX_WORKER_THREADS) {
-		mg_cry(fc(ctx), "Too many worker threads");
-		free_context(ctx);
-		pthread_setspecific(sTlsKey, NULL);
-		return NULL;
-	}
-
-	if (workerthreadcount > 0) {
-		ctx->cfg_worker_threads = ((unsigned int)(workerthreadcount));
-		ctx->workerthreadids =
-		    (pthread_t *)mg_calloc(ctx->cfg_worker_threads, sizeof(pthread_t));
-		if (ctx->workerthreadids == NULL) {
-			mg_cry(fc(ctx), "Not enough memory for worker thread ID array");
-			free_context(ctx);
-			pthread_setspecific(sTlsKey, NULL);
-			return NULL;
-		}
-
-#if defined(ALTERNATIVE_QUEUE)
-		ctx->client_wait_events = mg_calloc(sizeof(ctx->client_wait_events[0]),
-		                                    ctx->cfg_worker_threads);
-		if (ctx->client_wait_events == NULL) {
-			mg_cry(fc(ctx), "Not enough memory for worker event array");
-			mg_free(ctx->workerthreadids);
-			free_context(ctx);
-			pthread_setspecific(sTlsKey, NULL);
-			return NULL;
-		}
-
-		ctx->client_socks =
-		    mg_calloc(sizeof(ctx->client_socks[0]), ctx->cfg_worker_threads);
-		if (ctx->client_wait_events == NULL) {
-			mg_cry(fc(ctx), "Not enough memory for worker socket array");
-			mg_free(ctx->client_socks);
-			mg_free(ctx->workerthreadids);
-			free_context(ctx);
-			pthread_setspecific(sTlsKey, NULL);
-			return NULL;
-		}
-
-		for (i = 0; (unsigned)i < ctx->cfg_worker_threads; i++) {
-			ctx->client_wait_events[i] = event_create();
-			if (ctx->client_wait_events[i] == 0) {
-				mg_cry(fc(ctx), "Error creating worker event %i", i);
-				/* TODO: clean all and exit */
-			}
-		}
-#endif
-	}
-
-#if defined(USE_TIMERS)
-	if (timers_init(ctx) != 0) {
-		mg_cry(fc(ctx), "Error creating timers");
-		free_context(ctx);
-		pthread_setspecific(sTlsKey, NULL);
-		return NULL;
-	}
-#endif
-
-	/* Context has been created - init user libraries */
-	if (ctx->callbacks.init_context) {
-		ctx->callbacks.init_context(ctx);
-	}
-	ctx->callbacks.exit_context = exit_callback;
-	ctx->context_type = 1; /* server context */
-
-	/* Start master (listening) thread */
-	mg_start_thread_with_id(master_thread, ctx, &ctx->masterthreadid);
-
-	/* Start worker threads */
-	for (i = 0; i < ctx->cfg_worker_threads; i++) {
-		struct worker_thread_args *wta =
-		    mg_malloc(sizeof(struct worker_thread_args));
-		if (wta) {
-			wta->ctx = ctx;
-			wta->index = (int)i;
-		}
-
-		if ((wta == NULL)
-		    || (mg_start_thread_with_id(worker_thread,
-		                                wta,
-		                                &ctx->workerthreadids[i]) != 0)) {
-
-			/* thread was not created */
-			if (wta != NULL) {
-				mg_free(wta);
-			}
-
-			if (i > 0) {
-				mg_cry(fc(ctx),
-				       "Cannot start worker thread %i: error %ld",
-				       i + 1,
-				       (long)ERRNO);
-			} else {
-				mg_cry(fc(ctx),
-				       "Cannot create threads: error %ld",
-				       (long)ERRNO);
-				free_context(ctx);
-				pthread_setspecific(sTlsKey, NULL);
-				return NULL;
-			}
-			break;
-		}
-	}
-
-	pthread_setspecific(sTlsKey, NULL);
-	return ctx;
-}
+}  /* get_system_name */

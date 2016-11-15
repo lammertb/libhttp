@@ -24,7 +24,7 @@
 
 
 
-#include "libhttp.h"
+#include "libhttp-private.h"
 
 
 
