@@ -1,4 +1,5 @@
 #
+# Copyright (c) 2016 Lammert Bies
 # Copyright (c) 2013 No Face Press, LLC
 # License http://opensource.org/licenses/mit-license.php MIT License
 #
@@ -9,9 +10,9 @@
 
 include resources/Makefile.in-os
 
-CPROG = civetweb
-#CXXPROG = civetweb
-UNIT_TEST_PROG = civetweb_test
+CPROG = libhttp
+#CXXPROG = libhttp
+UNIT_TEST_PROG = libhttp_test
 
 BUILD_DIR = out
 
@@ -40,7 +41,7 @@ PORTS = 8080
 
 BUILD_DIRS = $(BUILD_DIR) $(BUILD_DIR)/src $(BUILD_DIR)/resources
 
-LIB_SOURCES = src/civetweb.c
+LIB_SOURCES = src/libhttp.c
 LIB_INLINE  = src/mod_lua.inl src/md5.inl
 APP_SOURCES = src/main.c
 WINDOWS_RESOURCES = resources/res.rc
@@ -71,7 +72,7 @@ else
 endif
 
 ifdef WITH_CPP
-  OBJECTS += src/CivetServer.o
+  OBJECTS += src/LibHTTPtServer.o
   LCC = $(CXX)
 else
   LCC = $(CC)
@@ -213,7 +214,7 @@ build: $(CPROG) $(CXXPROG)
 unit_test: $(UNIT_TEST_PROG)
 
 ifeq ($(CAN_INSTALL),1)
-install: $(HTMLDIR)/index.html $(SYSCONFDIR)/civetweb.conf
+install: $(HTMLDIR)/index.html $(SYSCONFDIR)/libhttp.conf
 	install -d -m 755  "$(DOCDIR)"
 	install -m 644 *.md "$(DOCDIR)"
 	install -d -m 755 "$(BINDIR)"
@@ -228,11 +229,11 @@ $(HTMLDIR)/index.html:
 
 # Install target we do not want to overwrite
 # as it may be an upgrade
-$(SYSCONFDIR)/civetweb.conf:
+$(SYSCONFDIR)/libhttp.conf:
 	install -d -m 755  "$(SYSCONFDIR)"
-	install -m 644 resources/civetweb.conf  "$(SYSCONFDIR)/"
-	@sed -i 's#^document_root.*$$#document_root $(DOCUMENT_ROOT)#' "$(SYSCONFDIR)/civetweb.conf"
-	@sed -i 's#^listening_ports.*$$#listening_ports $(PORTS)#' "$(SYSCONFDIR)/civetweb.conf"
+	install -m 644 resources/libhttp.conf  "$(SYSCONFDIR)/"
+	@sed -i 's#^document_root.*$$#document_root $(DOCUMENT_ROOT)#' "$(SYSCONFDIR)/libhttp.conf"
+	@sed -i 's#^listening_ports.*$$#listening_ports $(PORTS)#' "$(SYSCONFDIR)/libhttp.conf"
 
 else
 install:
@@ -247,7 +248,7 @@ slib: lib$(CPROG).$(SHARED_LIB)
 
 clean:
 	$(RMRF) $(BUILD_DIR)
-	$(eval version=$(shell grep "define CIVETWEB_VERSION" include/civetweb.h | sed 's|.*VERSION "\(.*\)"|\1|g'))
+	$(eval version=$(shell grep "define LIBHTTP_VERSION" include/libhttp.h | sed 's|.*VERSION "\(.*\)"|\1|g'))
 	$(eval major=$(shell echo $(version) | cut -d'.' -f1))
 	$(RMRF) lib$(CPROG).a
 	$(RMRF) lib$(CPROG).so
@@ -269,7 +270,7 @@ lib$(CPROG).a: $(LIB_OBJECTS)
 
 lib$(CPROG).so: CFLAGS += -fPIC
 lib$(CPROG).so: $(LIB_OBJECTS)
-	$(eval version=$(shell grep "define CIVETWEB_VERSION" include/civetweb.h | sed 's|.*VERSION "\(.*\)"|\1|g'))
+	$(eval version=$(shell grep "define LIBHTTP_VERSION" include/libhttp.h | sed 's|.*VERSION "\(.*\)"|\1|g'))
 	$(eval major=$(shell echo $(version) | cut -d'.' -f1))
 	$(LCC) -shared -Wl,-soname,$@.$(major) -o $@.$(version).0 $(CFLAGS) $(LDFLAGS) $(LIB_OBJECTS)
 	ln -s -f $@.$(major) $@

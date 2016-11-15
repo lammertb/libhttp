@@ -1,4 +1,6 @@
-/* Copyright (c) 2013-2016 the Civetweb developers
+/* 
+ * Copyright (c) 2016 Lammert Bies
+ * Copyright (c) 2013-2016 the Civetweb developers
  * Copyright (c) 2004-2013 Sergey Lyubka
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -66,13 +68,12 @@
 #include <ctype.h>
 #include <assert.h>
 
-#include "civetweb.h"
+#include "libhttp.h"
 
 #define printf                                                                 \
 	DO_NOT_USE_THIS_FUNCTION__USE_fprintf /* Required for unit testing */
 
-#if defined(_WIN32)                                                            \
-    && !defined(__SYMBIAN32__) /* WINDOWS / UNIX include block */
+#if defined(_WIN32)  /* WINDOWS / UNIX include block */
 #ifndef _WIN32_WINNT
 #define _WIN32_WINNT 0x0501 /* for tdm-gcc so we can use getconsolewindow */
 #endif
@@ -103,7 +104,7 @@ static int guard = 0; /* test if any dialog is already open */
 #define WINCDECL __cdecl
 #define abs_path(rel, abs, abs_size) (_fullpath((abs), (rel), (abs_size)))
 
-#else /* defined(_WIN32) && !defined(__SYMBIAN32__) - WINDOWS / UNIX include   \
+#else /* defined(_WIN32)- WINDOWS / UNIX include   \
          block */
 
 #include <sys/utsname.h>
@@ -113,7 +114,7 @@ static int guard = 0; /* test if any dialog is already open */
 #define WINCDECL
 #define abs_path(rel, abs, abs_size) (realpath((rel), (abs)))
 
-#endif /* defined(_WIN32) && !defined(__SYMBIAN32__) - WINDOWS / UNIX include  \
+#endif /* defined(_WIN32) - WINDOWS / UNIX include  \
           block */
 
 #ifndef PATH_MAX
@@ -133,12 +134,12 @@ static const char *g_server_name;   /* Set by init_server_name() */
 static const char *g_icon_name;     /* Set by init_server_name() */
 static char g_config_file_name[PATH_MAX] =
     "";                          /* Set by process_command_line_arguments() */
-static struct mg_context *g_ctx; /* Set by start_civetweb() */
+static struct mg_context *g_ctx; /* Set by start_libhttp() */
 static struct tuser_data
-    g_user_data; /* Passed to mg_start() by start_civetweb() */
+    g_user_data; /* Passed to mg_start() by start_libhttp() */
 
 #if !defined(CONFIG_FILE)
-#define CONFIG_FILE "civetweb.conf"
+#define CONFIG_FILE "libhttp.conf"
 #endif /* !CONFIG_FILE */
 
 #if !defined(PASSWORDS_FILE_NAME)
@@ -147,7 +148,7 @@ static struct tuser_data
 
 /* backup config file */
 #if !defined(CONFIG_FILE2) && defined(__linux__)
-#define CONFIG_FILE2 "/usr/local/etc/civetweb.conf"
+#define CONFIG_FILE2 "/usr/local/etc/libhttp.conf"
 #endif
 
 enum { OPTION_TITLE, OPTION_ICON, NUM_MAIN_OPTIONS };
@@ -178,9 +179,9 @@ die(const char *fmt, ...)
 
 #if defined(_WIN32)
 	MessageBox(NULL, msg, "Error", MB_OK);
-#else
+#else  /* _WIN32 */
 	fprintf(stderr, "%s\n", msg);
-#endif
+#endif  /* _WIN32 */
 
 	exit(EXIT_FAILURE);
 }
@@ -188,7 +189,7 @@ die(const char *fmt, ...)
 
 #ifdef WIN32
 static int MakeConsole(void);
-#endif
+#endif  /* WIN32 */
 
 
 static void
@@ -196,9 +197,9 @@ show_server_name(void)
 {
 #ifdef WIN32
 	(void)MakeConsole();
-#endif
+#endif  /* WIN32 */
 
-	fprintf(stderr, "CivetWeb v%s, built on %s\n", mg_version(), __DATE__);
+	fprintf(stderr, "LibHTTP v%s, built on %s\n", mg_version(), __DATE__);
 }
 
 
@@ -209,7 +210,7 @@ show_usage_and_exit(const char *exeName)
 	int i;
 
 	if (exeName == 0 || *exeName == 0) {
-		exeName = "civetweb";
+		exeName = "libhttp";
 	}
 
 	show_server_name();
@@ -252,14 +253,14 @@ show_usage_and_exit(const char *exeName)
 }
 
 
-#if defined(_WIN32) || defined(USE_COCOA)
+#if defined(_WIN32) || defined(USE_COCOA)  /* GUI */
 static const char *config_file_top_comment =
-    "# Civetweb web server configuration file.\n"
+    "# LibHTTP web server configuration file.\n"
     "# For detailed description of every option, visit\n"
-    "# https://github.com/civetweb/civetweb/blob/master/docs/UserManual.md\n"
+    "# https://github.com/lammertb/libhttp/blob/master/docs/UserManual.md\n"
     "# Lines starting with '#' and empty lines are ignored.\n"
     "# To make a change, remove leading '#', modify option's value,\n"
-    "# save this file and then restart Civetweb.\n\n";
+    "# save this file and then restart LibHTTP.\n\n";
 
 static const char *
 get_url_to_first_open_port(const struct mg_context *ctx)
@@ -310,16 +311,13 @@ create_config_file(const struct mg_context *ctx, const char *path)
 		options = mg_get_valid_options();
 		for (i = 0; options[i].name != NULL; i++) {
 			value = mg_get_option(ctx, options[i].name);
-			fprintf(fp,
-			        "# %s %s\n",
-			        options[i].name,
-			        value ? value : "<value>");
+			fprintf( fp, "# %s %s\n", options[i].name, (value) ? value : "<value>" );
 		}
-		fclose(fp);
+		fclose( fp );
 	}
 }
-#endif
-#endif
+#endif  /* ENABLE_CREATE_CONFIG_FILE */
+#endif  /* GUI */
 
 
 static char *
@@ -368,7 +366,7 @@ set_option(char **options, const char *name, const char *value)
 
 	for (i = 0; main_config_options[i].name != NULL; i++) {
 		if (0 == strcmp(name, main_config_options[i].name)) {
-			/* This option is evaluated by main.c, not civetweb.c - just skip it
+			/* This option is evaluated by main.c, not libhttp.c - just skip it
 			 * and return OK */
 			return 1;
 		}
@@ -518,7 +516,7 @@ process_command_line_arguments(int argc, char *argv[], char **options)
 	size_t i, cmd_line_opts_start = 1;
 #ifdef CONFIG_FILE2
 	FILE *fp = NULL;
-#endif
+#endif  /* CONFIG_FILE2 */
 
 	/* Should we use a config file ? */
 	if ((argc > 1) && (argv[1] != NULL) && (argv[1][0] != '-')
@@ -532,10 +530,7 @@ process_command_line_arguments(int argc, char *argv[], char **options)
 	} else if ((p = strrchr(argv[0], DIRSEP)) == NULL) {
 		/* No config file set. No path in arg[0] found.
 		 * Use default file name in the current path. */
-		snprintf(g_config_file_name,
-		         sizeof(g_config_file_name) - 1,
-		         "%s",
-		         CONFIG_FILE);
+		snprintf( g_config_file_name, sizeof(g_config_file_name) - 1, "%s", CONFIG_FILE );
 	} else {
 		/* No config file set. Path to exe found in arg[0].
 		 * Use default file name next to the executable. */
@@ -559,10 +554,9 @@ process_command_line_arguments(int argc, char *argv[], char **options)
 			strcpy(g_config_file_name, CONFIG_FILE2);
 		}
 	}
-	if (fp != NULL) {
-		fclose(fp);
-	}
-#endif
+	if ( fp != NULL ) fclose(fp);
+
+#endif  /* CONFIG_FILE2 */
 
 	/* read all configurations from a config file */
 	if (0 == read_config_file(g_config_file_name, options)) {
@@ -573,7 +567,7 @@ process_command_line_arguments(int argc, char *argv[], char **options)
 			    g_config_file_name,
 			    strerror(errno));
 		}
-		/* Otherwise: CivetWeb can work without a config file */
+		/* Otherwise: LibHTTP can work without a config file */
 	}
 
 	/* If we're under MacOS and started by launchd, then the second
@@ -607,7 +601,7 @@ init_server_name(int argc, const char *argv[])
 	assert((strlen(mg_version()) + 12) < sizeof(g_server_base_name));
 	snprintf(g_server_base_name,
 	         sizeof(g_server_base_name),
-	         "CivetWeb V%s",
+	         "LibHTTP V%s",
 	         mg_version());
 
 	g_server_name = g_server_base_name;
@@ -654,9 +648,9 @@ is_path_absolute(const char *path)
 	                                                      \\server\dir */
 	           (isalpha(path[0]) && path[1] == ':'
 	            && path[2] == '\\')); /* E.g. X:\dir */
-#else
+#else  /* _WIN32 */
 	return path != NULL && path[0] == '/';
-#endif
+#endif  /* _WIN32 */
 }
 
 
@@ -672,8 +666,8 @@ verify_existence(char **options, const char *option_name, int must_be_dir)
 	int len;
 
 	if (path) {
-		memset(wbuf, 0, sizeof(wbuf));
-		memset(mbbuf, 0, sizeof(mbbuf));
+		memset( wbuf,  0, sizeof(wbuf)  );
+		memset( mbbuf, 0, sizeof(mbbuf) );
 		len = MultiByteToWideChar(CP_UTF8,
 		                          0,
 		                          path,
@@ -684,12 +678,12 @@ verify_existence(char **options, const char *option_name, int must_be_dir)
 		path = mbbuf;
 		(void)len;
 	}
-#endif
+#endif  /* _WIN32 */
 
 	if (path != NULL && (stat(path, &st) != 0
 	                     || ((S_ISDIR(st.st_mode) ? 1 : 0) != must_be_dir))) {
 		die("Invalid path for %s: [%s]: (%s). Make sure that path is either "
-		    "absolute, or it is relative to civetweb executable.",
+		    "absolute, or it is relative to libhttp executable.",
 		    option_name,
 		    path,
 		    strerror(errno));
@@ -700,7 +694,7 @@ verify_existence(char **options, const char *option_name, int must_be_dir)
 static void
 set_absolute_path(char *options[],
                   const char *option_name,
-                  const char *path_to_civetweb_exe)
+                  const char *path_to_libhttp_exe)
 {
 	char path[PATH_MAX] = "", absolute[PATH_MAX] = "";
 	const char *option_value;
@@ -712,17 +706,17 @@ set_absolute_path(char *options[],
 	/* If option is already set and it is an absolute path,
 	   leave it as it is -- it's already absolute. */
 	if (option_value != NULL && !is_path_absolute(option_value)) {
-		/* Not absolute. Use the directory where civetweb executable lives
+		/* Not absolute. Use the directory where libhttp executable lives
 		   be the relative directory for everything.
-		   Extract civetweb executable directory into path. */
-		if ((p = strrchr(path_to_civetweb_exe, DIRSEP)) == NULL) {
+		   Extract libhttp executable directory into path. */
+		if ((p = strrchr(path_to_libhttp_exe, DIRSEP)) == NULL) {
 			IGNORE_UNUSED_RESULT(getcwd(path, sizeof(path)));
 		} else {
 			snprintf(path,
 			         sizeof(path) - 1,
 			         "%.*s",
-			         (int)(p - path_to_civetweb_exe),
-			         path_to_civetweb_exe);
+			         (int)(p - path_to_libhttp_exe),
+			         path_to_libhttp_exe);
 			path[sizeof(path) - 1] = 0;
 		}
 
@@ -738,8 +732,8 @@ set_absolute_path(char *options[],
 
 #ifdef USE_LUA
 
-#include "civetweb_lua.h"
-#include "civetweb_private_lua.h"
+#include "libhttp_lua.h"
+#include "libhttp_private_lua.h"
 
 static int
 run_lua(const char *file_name)
@@ -751,14 +745,14 @@ run_lua(const char *file_name)
 
 #ifdef WIN32
 	(void)MakeConsole();
-#endif
+#endif  /* WIN32 */
 
 	L = luaL_newstate();
 	if (L == NULL) {
 		fprintf(stderr, "Error: Cannot create Lua state\n");
 		return EXIT_FAILURE;
 	}
-	civetweb_open_lua_libs(L);
+	libhttp_open_lua_libs(L);
 
 	lua_ret = luaL_loadfile(L, file_name);
 	if (lua_ret != LUA_OK) {
@@ -781,18 +775,15 @@ run_lua(const char *file_name)
 			        lua_err_txt);
 		} else {
 			/* Script executed */
-			if (lua_type(L, -1) == LUA_TNUMBER) {
-				func_ret = (int)lua_tonumber(L, -1);
-			} else {
-				func_ret = EXIT_SUCCESS;
-			}
+			if (lua_type(L, -1) == LUA_TNUMBER) func_ret = (int)lua_tonumber(L, -1);
+			else                                func_ret = EXIT_SUCCESS;
 		}
 	}
 	lua_close(L);
 
 	return func_ret;
 }
-#endif
+#endif  /* USE_LUA */
 
 
 #ifdef USE_DUKTAPE
@@ -806,7 +797,7 @@ run_duktape(const char *file_name)
 
 #ifdef WIN32
 	(void)MakeConsole();
-#endif
+#endif /* WIN32 */
 
 	ctx = duk_create_heap_default();
 	if (!ctx) {
@@ -825,17 +816,17 @@ finished:
 
 	return 0;
 }
-#endif
+#endif /* USE_DUKTAPE */
 
 
 #if defined(__MINGW32__) || defined(__MINGW64__)
 /* For __MINGW32/64_MAJOR/MINOR_VERSION define */
 #include <_mingw.h>
-#endif
+#endif  /* __MINGW32__  ||  __MINGW64__ */
 
 
 static void
-start_civetweb(int argc, char *argv[])
+start_libhttp(int argc, char *argv[])
 {
 	struct mg_callbacks callbacks;
 	char *options[2 * MAX_OPTIONS + 1];
@@ -847,7 +838,6 @@ start_civetweb(int argc, char *argv[])
 	if (argc > 1 && !strcmp(argv[1], "-I")) {
 		const char *version = mg_version();
 #if defined(_WIN32)
-#if !defined(__SYMBIAN32__)
 		DWORD dwVersion = 0;
 		DWORD dwMajorVersion = 0;
 		DWORD dwMinorVersion = 0;
@@ -859,22 +849,18 @@ start_civetweb(int argc, char *argv[])
 #pragma warning(push)
 // GetVersion was declared deprecated
 #pragma warning(disable : 4996)
-#endif
+#endif  /* _MSC_VER */
 		dwVersion = GetVersion();
 #ifdef _MSC_VER
 #pragma warning(pop)
-#endif
+#endif  /* _MSC_VER */
 
 		dwMajorVersion = (DWORD)(LOBYTE(LOWORD(dwVersion)));
 		dwMinorVersion = (DWORD)(HIBYTE(LOWORD(dwVersion)));
 
 		(void)MakeConsole();
-		fprintf(stdout, "\n%s\n", g_server_name);
-		fprintf(stdout,
-		        "%s - Windows %u.%u\n",
-		        g_server_base_name,
-		        (unsigned)dwMajorVersion,
-		        (unsigned)dwMinorVersion);
+		fprintf( stdout, "\n%s\n", g_server_name );
+		fprintf( stdout, "%s - Windows %u.%u\n", g_server_base_name, (unsigned)dwMajorVersion, (unsigned)dwMinorVersion );
 
 		fprintf(stdout,
 		        "CPU: type %u, cores %u, mask %x\n",
@@ -882,89 +868,46 @@ start_civetweb(int argc, char *argv[])
 		        (unsigned)si.dwNumberOfProcessors,
 		        (unsigned)si.dwActiveProcessorMask);
 
-#else
+#else  /* _WIN32 */
 		fprintf(stdout, "\n%s\n", g_server_name);
 		fprintf(stdout, "%s - Symbian\n", g_server_base_name);
-#endif
-#else
-		struct utsname name;
-		memset(&name, 0, sizeof(name));
-		uname(&name);
-		fprintf(stdout, "\n%s\n", g_server_name);
-		fprintf(stdout,
-		        "%s - %s %s (%s) - %s\n",
-		        g_server_base_name,
-		        name.sysname,
-		        name.version,
-		        name.release,
-		        name.machine);
-#endif
+#endif  /* _WIN32 */
 
-		fprintf(stdout, "Features:");
-		if (mg_check_feature(1)) {
-			fprintf(stdout, " Files");
-		}
-		if (mg_check_feature(2)) {
-			fprintf(stdout, " HTTPS");
-		}
-		if (mg_check_feature(4)) {
-			fprintf(stdout, " CGI");
-		}
-		if (mg_check_feature(8)) {
-			fprintf(stdout, " IPv6");
-		}
-		if (mg_check_feature(16)) {
-			fprintf(stdout, " WebSockets");
-		}
-		if (mg_check_feature(32)) {
-			fprintf(stdout, " Lua");
-		}
-		fprintf(stdout, "\n");
+		struct utsname name;
+		memset( &name, 0, sizeof(name) );
+		uname( &name );
+		fprintf( stdout, "\n%s\n", g_server_name );
+		fprintf( stdout, "%s - %s %s (%s) - %s\n", g_server_base_name, name.sysname, name.version, name.release, name.machine );
+
+
+		fprintf( stdout, "Features:" );
+		if ( mg_check_feature(  1 ) ) fprintf( stdout, " Files"      );
+		if ( mg_check_feature(  2 ) ) fprintf( stdout, " HTTPS"      );
+		if ( mg_check_feature(  4 ) ) fprintf( stdout, " CGI"        );
+		if ( mg_check_feature(  8 ) ) fprintf( stdout, " IPv6"       );
+		if ( mg_check_feature( 16 ) ) fprintf( stdout, " WebSockets" );
+		if ( mg_check_feature( 32 ) ) fprintf( stdout, " Lua"        );
+		fprintf( stdout, "\n" );
 
 #ifdef USE_LUA
-		fprintf(stdout,
-		        "Lua Version: %u (%s)\n",
-		        (unsigned)LUA_VERSION_NUM,
-		        LUA_RELEASE);
+		fprintf( stdout, "Lua Version: %u (%s)\n", (unsigned)LUA_VERSION_NUM, LUA_RELEASE );
 #endif
 
 		fprintf(stdout, "Version: %s\n", version);
-
 		fprintf(stdout, "Build: %s\n", __DATE__);
 
 /* http://sourceforge.net/p/predef/wiki/Compilers/ */
 #if defined(_MSC_VER)
-		fprintf(stdout,
-		        "MSC: %u (%u)\n",
-		        (unsigned)_MSC_VER,
-		        (unsigned)_MSC_FULL_VER);
+		fprintf(stdout, "MSC: %u (%u)\n", (unsigned)_MSC_VER, (unsigned)_MSC_FULL_VER);
 #elif defined(__MINGW64__)
-		fprintf(stdout,
-		        "MinGW64: %u.%u\n",
-		        (unsigned)__MINGW64_VERSION_MAJOR,
-		        (unsigned)__MINGW64_VERSION_MINOR);
-		fprintf(stdout,
-		        "MinGW32: %u.%u\n",
-		        (unsigned)__MINGW32_MAJOR_VERSION,
-		        (unsigned)__MINGW32_MINOR_VERSION);
+		fprintf(stdout, "MinGW64: %u.%u\n", (unsigned)__MINGW64_VERSION_MAJOR, (unsigned)__MINGW64_VERSION_MINOR);
+		fprintf(stdout, "MinGW32: %u.%u\n", (unsigned)__MINGW32_MAJOR_VERSION, (unsigned)__MINGW32_MINOR_VERSION);
 #elif defined(__MINGW32__)
-		fprintf(stdout,
-		        "MinGW32: %u.%u\n",
-		        (unsigned)__MINGW32_MAJOR_VERSION,
-		        (unsigned)__MINGW32_MINOR_VERSION);
+		fprintf(stdout, "MinGW32: %u.%u\n", (unsigned)__MINGW32_MAJOR_VERSION, (unsigned)__MINGW32_MINOR_VERSION);
 #elif defined(__clang__)
-		fprintf(stdout,
-		        "clang: %u.%u.%u (%s)\n",
-		        __clang_major__,
-		        __clang_minor__,
-		        __clang_patchlevel__,
-		        __clang_version__);
+		fprintf(stdout, "clang: %u.%u.%u (%s)\n", __clang_major__, __clang_minor__, __clang_patchlevel__, __clang_version__);
 #elif defined(__GNUC__)
-		fprintf(stdout,
-		        "gcc: %u.%u.%u\n",
-		        (unsigned)__GNUC__,
-		        (unsigned)__GNUC_MINOR__,
-		        (unsigned)__GNUC_PATCHLEVEL__);
+		fprintf(stdout, "gcc: %u.%u.%u\n", (unsigned)__GNUC__, (unsigned)__GNUC_MINOR__, (unsigned)__GNUC_PATCHLEVEL__);
 #elif defined(__INTEL_COMPILER)
 		fprintf(stdout, "Intel C/C++: %u\n", (unsigned)__INTEL_COMPILER);
 #elif defined(__BORLANDC__)
@@ -973,7 +916,7 @@ start_civetweb(int argc, char *argv[])
 		fprintf(stdout, "Solaris: 0x%x\n", (unsigned)__SUNPRO_C);
 #else
 		fprintf(stdout, "Other\n");
-#endif
+#endif  /* Compiler version */
 		/* Determine 32/64 bit data mode.
 		 * see https://en.wikipedia.org/wiki/64-bit_computing */
 		fprintf(stdout,
@@ -1016,7 +959,7 @@ start_civetweb(int argc, char *argv[])
 		         : EXIT_FAILURE);
 	}
 
-	/* Call Lua with additional CivetWeb specific Lua functions, if -L option
+	/* Call Lua with additional LibHTTP specific Lua functions, if -L option
 	 * is specified */
 	if (argc > 1 && !strcmp(argv[1], "-L")) {
 
@@ -1025,11 +968,11 @@ start_civetweb(int argc, char *argv[])
 			show_usage_and_exit(argv[0]);
 		}
 		exit(run_lua(argv[2]));
-#else
+#else  /* USE_LUA */
 		show_server_name();
 		fprintf(stderr, "\nError: Lua support not enabled\n");
 		exit(EXIT_FAILURE);
-#endif
+#endif  /* USE_LUA */
 	}
 
 	/* Call Duktape, if -E option is specified */
@@ -1040,11 +983,11 @@ start_civetweb(int argc, char *argv[])
 			show_usage_and_exit(argv[0]);
 		}
 		exit(run_duktape(argv[2]));
-#else
+#else  /* USE_DUKTAPE */
 		show_server_name();
 		fprintf(stderr, "\nError: Ecmascript support not enabled\n");
 		exit(EXIT_FAILURE);
-#endif
+#endif  /* USE_DUKTAPE */
 	}
 
 	/* Show usage if -h or --help options are specified */
@@ -1068,7 +1011,7 @@ start_civetweb(int argc, char *argv[])
 	set_absolute_path(options, "global_auth_file", argv[0]);
 #ifdef USE_LUA
 	set_absolute_path(options, "lua_preload_file", argv[0]);
-#endif
+#endif  /* USE_LUA */
 	set_absolute_path(options, "ssl_certificate", argv[0]);
 
 	/* Make extra verification for certain options */
@@ -1079,7 +1022,7 @@ start_civetweb(int argc, char *argv[])
 	verify_existence(options, "ssl_ca_file", 0);
 #ifdef USE_LUA
 	verify_existence(options, "lua_preload_file", 0);
-#endif
+#endif  /* USE_LUA */
 
 	/* Setup signal handler: quit on Ctrl-C */
 	signal(SIGTERM, signal_handler);
@@ -1088,7 +1031,7 @@ start_civetweb(int argc, char *argv[])
 	/* Initialize user data */
 	memset(&g_user_data, 0, sizeof(g_user_data));
 
-	/* Start Civetweb */
+	/* Start LibHTTP */
 	memset(&callbacks, 0, sizeof(callbacks));
 	callbacks.log_message = &log_message;
 	g_ctx = mg_start(&callbacks, &g_user_data, (const char **)options);
@@ -1110,7 +1053,7 @@ start_civetweb(int argc, char *argv[])
 
 
 static void
-stop_civetweb(void)
+stop_libhttp(void)
 {
 	mg_stop(g_ctx);
 	free(g_user_data.first_message);
@@ -1185,7 +1128,7 @@ ServiceMain(void)
 	while (ss.dwCurrentState == SERVICE_RUNNING) {
 		Sleep(1000);
 	}
-	stop_civetweb();
+	stop_libhttp();
 
 	ss.dwCurrentState = SERVICE_STOPPED;
 	ss.dwWin32ExitCode = (DWORD)-1;
@@ -1274,8 +1217,8 @@ SettingsDlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 			if ((fp = fopen(g_config_file_name, "w+")) != NULL) {
 				save_config(hDlg, fp);
 				fclose(fp);
-				stop_civetweb();
-				start_civetweb(__argc, __argv);
+				stop_libhttp();
+				start_libhttp(__argc, __argv);
 			}
 			EnableWindow(GetDlgItem(hDlg, ID_SAVE), TRUE);
 			break;
@@ -2235,11 +2178,11 @@ WindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 	case WM_CREATE:
 		if (__argv[1] != NULL && !strcmp(__argv[1], service_magic_argument)) {
-			start_civetweb(1, service_argv);
+			start_libhttp(1, service_argv);
 			StartServiceCtrlDispatcher(service_table);
 			exit(EXIT_SUCCESS);
 		} else {
-			start_civetweb(__argc, __argv);
+			start_libhttp(__argc, __argv);
 			s_uTaskbarRestart = RegisterWindowMessage(TEXT("TaskbarCreated"));
 		}
 		break;
@@ -2247,7 +2190,7 @@ WindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	case WM_COMMAND:
 		switch (LOWORD(wParam)) {
 		case ID_QUIT:
-			stop_civetweb();
+			stop_libhttp();
 			Shell_NotifyIcon(NIM_DELETE, &TrayIcon);
 			g_exit_flag = 1;
 			PostQuitMessage(0);
@@ -2316,7 +2259,7 @@ WindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		break;
 
 	case WM_CLOSE:
-		stop_civetweb();
+		stop_libhttp();
 		Shell_NotifyIcon(NIM_DELETE, &TrayIcon);
 		g_exit_flag = 1;
 		PostQuitMessage(0);
@@ -2512,15 +2455,15 @@ main(int argc, char *argv[])
 }
 
 
-#elif defined(USE_COCOA)
+#elif defined(USE_COCOA)  /* GUI */
 #import <Cocoa/Cocoa.h>
 
-@interface Civetweb : NSObject <NSApplicationDelegate>
+@interface LibHTTP : NSObject <NSApplicationDelegate>
 - (void)openBrowser;
 - (void)shutDown;
 @end
 
-@implementation Civetweb
+@implementation LibHTTP
 - (void)openBrowser
 {
 	[[NSWorkspace sharedWorkspace]
@@ -2552,13 +2495,13 @@ int
 main(int argc, char *argv[])
 {
 	init_server_name(argc, (const char **)argv);
-	start_civetweb(argc, argv);
+	start_libhttp(argc, argv);
 
 	[NSAutoreleasePool new];
 	[NSApplication sharedApplication];
 
 	/* Add delegate to process menu item actions */
-	Civetweb *myDelegate = [[Civetweb alloc] autorelease];
+	LibHTTP *myDelegate = [[LibHTTP alloc] autorelease];
 	[NSApp setDelegate:myDelegate];
 
 	/* Run this app as agent */
@@ -2608,18 +2551,18 @@ main(int argc, char *argv[])
 	[NSApp activateIgnoringOtherApps:YES];
 	[NSApp run];
 
-	stop_civetweb();
+	stop_libhttp();
 
 	return EXIT_SUCCESS;
 }
 
-#else
+#else  /* GUI */
 
 int
 main(int argc, char *argv[])
 {
 	init_server_name(argc, (const char **)argv);
-	start_civetweb(argc, argv);
+	start_libhttp(argc, argv);
 	fprintf(stdout,
 	        "%s started on port(s) %s with web root [%s]\n",
 	        g_server_name,
@@ -2632,9 +2575,9 @@ main(int argc, char *argv[])
 	        "Exiting on signal %d, waiting for all threads to finish...",
 	        g_exit_flag);
 	fflush(stdout);
-	stop_civetweb();
+	stop_libhttp();
 	fprintf(stdout, "%s", " done.\n");
 
 	return EXIT_SUCCESS;
 }
-#endif /* _WIN32 */
+#endif /* GUI / _WIN32 */
