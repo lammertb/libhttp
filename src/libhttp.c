@@ -2155,13 +2155,6 @@ static struct mg_connection * fc(struct mg_context *ctx) {
 }
 
 
-const char *mg_version( void ) {
-
-	return LIBHTTP_VERSION;
-
-}  /* mg_version */
-
-
 const struct mg_request_info * mg_get_request_info( const struct mg_connection *conn ) {
 
 	if ( conn == NULL ) return NULL;
