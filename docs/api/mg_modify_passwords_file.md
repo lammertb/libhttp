@@ -1,4 +1,4 @@
-# Civetweb API Reference
+# LibHTTP API Reference
 
 ### `mg_modify_passwords_file( passwords_file_name, domain, user, password );`
 

@@ -1,7 +1,7 @@
 Adding OpenSSL Support
 =====
 
-Civetweb supports *HTTPS* connections using the OpenSSL transport layer
+LibHTTP supports *HTTPS* connections using the OpenSSL transport layer
 security (TLS) library. OpenSSL is a free, open source library (see
 http://www.openssl.org/).
 
@@ -11,17 +11,17 @@ Getting Started
 
 - Install OpenSSL on your system. There are OpenSSL install packages for all
   major Linux distributions as well as a setup for Windows.
-- The default build configuration of the civetweb web server will load the
+- The default build configuration of the LibHTTP web server will load the
   required OpenSSL libraries, if a HTTPS certificate has been configured.
 
 
-Civetweb Configuration
+LibHTTP Configuration
 ----
 
 The configuration file must contain an https port, identified by a letter 's'
 attached to the port number.
 To serve http and https from their standard ports use the following line in
-the configuration file 'civetweb.conf':
+the configuration file 'libhttp.conf':
 <pre>
   listening_ports 80, 443s
 </pre>
@@ -32,7 +32,7 @@ To serve only https use:
 
 Furthermore the SSL certificate file must be set:
 <pre>
-  ssl_certificate d:\civetweb\certificate\server.pem
+  ssl_certificate d:\libhttp\certificate\server.pem
 </pre>
 
 
@@ -40,7 +40,7 @@ Creating a self signed certificate
 ----
 
 OpenSSL provides a command line interface, that can be used to create the
-certificate file required by civetweb (server.pem).
+certificate file required by LibHTTP (server.pem).
 
 One can use the following steps in Windows (in Linux replace "copy" by "cp"
 and "type" by "cat"):
@@ -102,7 +102,7 @@ xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 Including a certificate from a certificate authority
 ----
 
-CivetWeb requires one certificate file in PEM format.
+LibHTTP requires one certificate file in PEM format.
 If you got multiple files from your certificate authority,
 you need to copy their content together into one file.
 Make sure the file has one section BEGIN RSA PRIVATE KEY /
@@ -124,7 +124,7 @@ Common Problems
 ----
 
 In case the OpenSSL configuration is not set up correctly, the server will not
-start. Configure an error log file in 'civetweb.conf' to get more information:
+start. Configure an error log file in 'libhttp.conf' to get more information:
 <pre>
   error_log_file error.log
 </pre>

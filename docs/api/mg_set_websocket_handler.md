@@ -1,4 +1,4 @@
-# Civetweb API Reference
+# LibHTTP API Reference
 
 ### `mg_set_websocket_handler( ctx, uri, connect_handler, ready_handler, data_handler, close_handler, cbdata );`
 

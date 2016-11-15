@@ -1,4 +1,4 @@
-# Civetweb API Reference
+# LibHTTP API Reference
 
 ### `mg_lock_context( ctx );`
 

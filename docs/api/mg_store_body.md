@@ -1,4 +1,4 @@
-# Civetweb API Reference
+# LibHTTP API Reference
 
 ### `mg_store_body( conn, path );`
 

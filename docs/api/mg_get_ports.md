@@ -1,4 +1,4 @@
-# Civetweb API Reference
+# LibHTTP API Reference
 
 ### ~~`mg_get_ports( ctx, size, ports, ssl );`~~
 
@@ -21,7 +21,7 @@
 
 This function is deprecated. Use [`mg_get_server_ports()`](mg_get_server_ports.md) instead.
 
-The function `mg_get_ports()` returns a list of ports the Civetweb server is listening on. The port numbers are stored in a buffer of integers which is supplied by the calling party. The function also stores information if SSL is used on the ports. This information is stored in a second buffer which should be capable of storing the same amount of items as the ports buffer.
+The function `mg_get_ports()` returns a list of ports the LibHTTP server is listening on. The port numbers are stored in a buffer of integers which is supplied by the calling party. The function also stores information if SSL is used on the ports. This information is stored in a second buffer which should be capable of storing the same amount of items as the ports buffer.
 
 The function returns the number of ports actually stored in the buffer.
 

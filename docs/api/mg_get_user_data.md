@@ -1,4 +1,4 @@
-# Civetweb API Reference
+# LibHTTP API Reference
 
 ### `mg_get_user_data( ctx );`
 
@@ -16,7 +16,7 @@
 
 ### Description
 
-The function `mg_get_user_data()` returns the user data associated with a Civetweb context. This is a pointer value which has previously been used in the call to [`mg_start()`](mg_start.md) to initialize the server context.
+The function `mg_get_user_data()` returns the user data associated with a LibHTTP context. This is a pointer value which has previously been used in the call to [`mg_start()`](mg_start.md) to initialize the server context.
 
 ### See Also
 

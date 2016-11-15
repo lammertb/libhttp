@@ -1,4 +1,6 @@
-/* Copyright (c) 2013-2016 the Civetweb developers
+/* 
+ * Copyright (C) 2016 Lammert Bies
+ * Copyright (c) 2013-2016 the Civetweb developers
  * Copyright (c) 2004-2013 Sergey Lyubka
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -95,47 +97,47 @@ struct client_cert {
 };
 
 
-/* This structure needs to be passed to mg_start(), to let civetweb know
+/* This structure needs to be passed to mg_start(), to let LibHTTP know
    which callbacks to invoke. For a detailed description, see
-   https://github.com/civetweb/civetweb/blob/master/docs/UserManual.md */
+   https://github.com/lammertb/libhttp/blob/master/docs/UserManual.md */
 struct mg_callbacks {
-	/* Called when civetweb has received new HTTP request.
+	/* Called when LibHTTP has received new HTTP request.
 	   If the callback returns one, it must process the request
-	   by sending valid HTTP headers and a body. Civetweb will not do
+	   by sending valid HTTP headers and a body. LibHTTP will not do
 	   any further processing. Otherwise it must return zero.
 	   Note that since V1.7 the "begin_request" function is called
 	   before an authorization check. If an authorization check is
 	   required, use a request_handler instead.
 	   Return value:
-	     0: civetweb will process the request itself. In this case,
+	     0: LibHTTP will process the request itself. In this case,
 	        the callback must not send any data to the client.
-	     1-999: callback already processed the request. Civetweb will
+	     1-999: callback already processed the request. LibHTTP will
 	            not send any data after the callback returned. The
 	            return code is stored as a HTTP status code for the
 	            access log. */
 	int (*begin_request)(struct mg_connection *);
 
-	/* Called when civetweb has finished processing request. */
+	/* Called when LibHTTP has finished processing request. */
 	void (*end_request)(const struct mg_connection *, int reply_status_code);
 
-	/* Called when civetweb is about to log a message. If callback returns
-	   non-zero, civetweb does not log anything. */
+	/* Called when LibHTTP is about to log a message. If callback returns
+	   non-zero, LibHTTP does not log anything. */
 	int (*log_message)(const struct mg_connection *, const char *message);
 
-	/* Called when civetweb is about to log access. If callback returns
-	   non-zero, civetweb does not log anything. */
+	/* Called when LibHTTP is about to log access. If callback returns
+	   non-zero, LibHTTP does not log anything. */
 	int (*log_access)(const struct mg_connection *, const char *message);
 
-	/* Called when civetweb initializes SSL library.
+	/* Called when LibHTTP initializes SSL library.
 	   Parameters:
 	     user_data: parameter user_data passed when starting the server.
 	   Return value:
-	     0: civetweb will set up the SSL certificate.
-	     1: civetweb assumes the callback already set up the certificate.
+	     0: LibHTTP will set up the SSL certificate.
+	     1: LibHTTP assumes the callback already set up the certificate.
 	    -1: initializing ssl fails. */
 	int (*init_ssl)(void *ssl_context, void *user_data);
 
-	/* Called when civetweb is closing a connection.  The per-context mutex is
+	/* Called when LibHTTP is closing a connection.  The per-context mutex is
 	   locked when this is invoked.  This is primarily useful for noting when
 	   a websocket is closing and removing it from any application-maintained
 	   list of clients.
@@ -143,7 +145,7 @@ struct mg_callbacks {
 	   mg_set_websocket_handler instead. */
 	void (*connection_close)(const struct mg_connection *);
 
-	/* Called when civetweb tries to open a file. Used to intercept file open
+	/* Called when LibHTTP tries to open a file. Used to intercept file open
 	   calls, and serve file data from memory instead.
 	   Parameters:
 	      path:     Full path to the file to open.
@@ -157,22 +159,22 @@ struct mg_callbacks {
 	                         const char *path,
 	                         size_t *data_len);
 
-	/* Called when civetweb is about to serve Lua server page, if
+	/* Called when LibHTTP is about to serve Lua server page, if
 	   Lua support is enabled.
 	   Parameters:
 	     lua_context: "lua_State *" pointer. */
 	void (*init_lua)(const struct mg_connection *, void *lua_context);
 
-	/* Called when civetweb is about to send HTTP error to the client.
+	/* Called when LibHTTP is about to send HTTP error to the client.
 	   Implementing this callback allows to create custom error pages.
 	   Parameters:
 	     status: HTTP error status code.
 	   Return value:
-	     1: run civetweb error handler.
+	     1: run LibHTTP error handler.
 	     0: callback already handled the error. */
 	int (*http_error)(struct mg_connection *, int status);
 
-	/* Called after civetweb context has been created, before requests
+	/* Called after LibHTTP context has been created, before requests
 	   are processed.
 	   Parameters:
 	     ctx: context handle */
@@ -188,7 +190,7 @@ struct mg_callbacks {
 	       */
 	void (*init_thread)(const struct mg_context *ctx, int thread_type);
 
-	/* Called when civetweb context is deleted.
+	/* Called when LibHTTP context is deleted.
 	   Parameters:
 	     ctx: context handle */
 	void (*exit_context)(const struct mg_context *ctx);
@@ -200,7 +202,7 @@ struct mg_callbacks {
    Parameters:
      callbacks: mg_callbacks structure with user-defined callbacks.
      options: NULL terminated list of option_name, option_value pairs that
-              specify Civetweb configuration parameters.
+              specify LibHTTP configuration parameters.
 
    Side-effects: on UNIX, ignores SIGCHLD and SIGPIPE signals. If custom
       processing is required for these, signal handlers must be set up
@@ -215,7 +217,7 @@ struct mg_callbacks {
      };
      struct mg_context *ctx = mg_start(&my_func, NULL, options);
 
-   Refer to https://github.com/civetweb/civetweb/blob/master/docs/UserManual.md
+   Refer to https://github.com/lammertb/libhttp/blob/master/docs/UserManual.md
    for the list of valid option and their possible values.
 
    Return:
@@ -228,7 +230,7 @@ CIVETWEB_API struct mg_context *mg_start(const struct mg_callbacks *callbacks,
 /* Stop the web server.
 
    Must be called last, when an application wants to stop the web server and
-   release all associated resources. This function blocks until all Civetweb
+   release all associated resources. This function blocks until all LibHTTP
    threads are stopped. Context pointer becomes invalid. */
 CIVETWEB_API void mg_stop(struct mg_context *);
 
@@ -281,7 +283,7 @@ CIVETWEB_API void mg_set_request_handler(struct mg_context *ctx,
        Is called when the client intends to establish a websocket connection,
        before websocket handshake.
        Return value:
-         0: civetweb proceeds with websocket handshake.
+         0: LibHTTP proceeds with websocket handshake.
          1: connection is closed immediately.
 
    mg_websocket_ready_handler
@@ -352,7 +354,7 @@ CIVETWEB_API void mg_set_auth_handler(struct mg_context *ctx,
 
 
 /* Get the value of particular configuration parameter.
-   The value returned is read-only. Civetweb does not allow changing
+   The value returned is read-only. LibHTTP does not allow changing
    configuration at run time.
    If given parameter name is not valid, NULL is returned. For valid
    names, return value is guaranteed to be non-NULL. If parameter is not
@@ -399,7 +401,7 @@ enum {
 
 
 /* Return array of struct mg_option, representing all valid configuration
-   options of civetweb.c.
+   options of libhttp.c.
    The array is terminated by a NULL name option. */
 CIVETWEB_API const struct mg_option *mg_get_valid_options(void);
 
@@ -416,7 +418,7 @@ struct mg_server_ports {
 };
 
 
-/* Get the list of ports that civetweb is listening on.
+/* Get the list of ports that LibHTTP is listening on.
    The parameter size is the size of the ports array in elements.
    The caller is responsibility to allocate the required memory.
    This function returns the number of struct mg_server_ports elements
@@ -468,7 +470,7 @@ CIVETWEB_API int mg_write(struct mg_connection *, const void *buf, size_t len);
    a request simultaneously.
 
    Send data to a websocket client wrapped in a websocket frame.
-   This function is available when civetweb is compiled with -DUSE_WEBSOCKET
+   This function is available when LibHTTP is compiled with -DUSE_WEBSOCKET
 
    Return:
     0   when the connection has been closed
@@ -486,7 +488,7 @@ CIVETWEB_API int mg_websocket_write(struct mg_connection *conn,
    a request simultaneously.
 
    Send data to a websocket server wrapped in a masked websocket frame.
-   This function is available when civetweb is compiled with -DUSE_WEBSOCKET
+   This function is available when LibHTTP is compiled with -DUSE_WEBSOCKET
 
    Return:
     0   when the connection has been closed
@@ -822,7 +824,7 @@ CIVETWEB_API const char *mg_get_response_code_text(struct mg_connection *conn,
                                                    int response_code);
 
 
-/* Return CivetWeb version. */
+/* Return LibHTTP version. */
 CIVETWEB_API const char *mg_version(void);
 
 
@@ -956,7 +958,7 @@ CIVETWEB_API int mg_get_response(struct mg_connection *conn,
                                  int timeout);
 
 
-/* Check which features where set when civetweb has been compiled.
+/* Check which features where set when LibHTTP has been compiled.
    Parameters:
      feature: specifies which feature should be checked
          1  serve files (NO_FILES not set)

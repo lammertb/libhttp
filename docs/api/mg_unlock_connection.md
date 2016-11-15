@@ -1,4 +1,4 @@
-# Civetweb API Reference
+# Libhttp API Reference
 
 ### `mg_unlock_connection( conn );`
 

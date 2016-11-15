@@ -1,4 +1,4 @@
-# Civetweb API Reference
+# LibHTTP API Reference
 
 ### `mg_get_var2( data, data_len, var_name, dst, dst_len, occurrence );`
 

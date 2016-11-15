@@ -1,4 +1,4 @@
-# Civetweb API Reference
+# LibHTTP API Reference
 
 ### `struct mg_option;`
 
@@ -12,7 +12,7 @@
 
 ### Description
 
-A list of valid configuration options of the Civetweb instance can be retrieved with a call to [`mg_get_valid_options()`](mg_get_valid_options.md). This function fills a list of `struct mg_option` structures where the content of each structure represents a configuration option. Each structure contains three fields. One field contains the name of the option, the second contains the value of the option and the third is an identifier used to define the type of the option and how the value contents should be interpreted.
+A list of valid configuration options of the LibHTTP instance can be retrieved with a call to [`mg_get_valid_options()`](mg_get_valid_options.md). This function fills a list of `struct mg_option` structures where the content of each structure represents a configuration option. Each structure contains three fields. One field contains the name of the option, the second contains the value of the option and the third is an identifier used to define the type of the option and how the value contents should be interpreted.
 
 The field `type` can be one of the following values:
 

@@ -1,4 +1,4 @@
-# Civetweb API Reference
+# LibHTTP API Reference
 
 ### `mg_set_auth_handler( ctx, uri, handler, cbdata );`
 

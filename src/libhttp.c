@@ -1,4 +1,6 @@
-/* Copyright (c) 2013-2016 the Civetweb developers
+/* 
+ * Copyright (C) 2016 Lammert Bies
+ * Copyright (c) 2013-2016 the Civetweb developers
  * Copyright (c) 2004-2013 Sergey Lyubka
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -108,9 +110,9 @@ mg_static_assert(sizeof(void *) >= sizeof(int), "data type size check");
 #endif /* __SYMBIAN32__ */
 
 
-/* Include the header file here, so the CivetWeb interface is defined for the
+/* Include the header file here, so the LibHTTP interface is defined for the
  * entire implementation, including the following forward definitions. */
-#include "civetweb.h"
+#include "libhttp.h"
 
 
 #ifndef IGNORE_UNUSED_RESULT
@@ -1482,7 +1484,7 @@ struct mg_handler_info {
 struct mg_context {
 	volatile int stop_flag;        /* Should we stop event loop */
 	SSL_CTX *ssl_ctx;              /* SSL context */
-	char *config[NUM_OPTIONS];     /* Civetweb configuration parameters */
+	char *config[NUM_OPTIONS];     /* LibHTTP configuration parameters */
 	struct mg_callbacks callbacks; /* User-defined callback function */
 	void *user_data;               /* User-defined data */
 	int context_type;              /* 1 = server context, 2 = client context */
@@ -1782,7 +1784,7 @@ mg_set_thread_name(const char *name)
 	char threadName[16 + 1]; /* 16 = Max. thread length in Linux/OSX/.. */
 
 	mg_snprintf(
-	    NULL, NULL, threadName, sizeof(threadName), "civetweb-%s", name);
+	    NULL, NULL, threadName, sizeof(threadName), "libhttp-%s", name);
 
 #if defined(_WIN32)
 #if defined(_MSC_VER)
@@ -7728,7 +7730,7 @@ prepare_cgi_environment(struct mg_connection *conn,
 	addenv(env, "SERVER_NAME=%s", conn->ctx->config[AUTHENTICATION_DOMAIN]);
 	addenv(env, "SERVER_ROOT=%s", conn->ctx->config[DOCUMENT_ROOT]);
 	addenv(env, "DOCUMENT_ROOT=%s", conn->ctx->config[DOCUMENT_ROOT]);
-	addenv(env, "SERVER_SOFTWARE=%s/%s", "Civetweb", mg_version());
+	addenv(env, "SERVER_SOFTWARE=%s/%s", "LibHTTP", mg_version());
 
 	/* Prepare the environment block */
 	addenv(env, "%s", "GATEWAY_INTERFACE=CGI/1.1");
@@ -10072,9 +10074,9 @@ get_request_handler(struct mg_connection *conn,
 }
 
 
-/* This is the heart of the Civetweb's logic.
+/* This is the heart of the LibHTTP's logic.
  * This function is called when the request is read, parsed and validated,
- * and Civetweb must decide what action to take: serve a file, or
+ * and LibHTTP must decide what action to take: serve a file, or
  * a directory, or call embedded function, etcetera. */
 static void
 handle_request(struct mg_connection *conn)
@@ -10162,7 +10164,7 @@ handle_request(struct mg_connection *conn)
 				conn->status_code = i;
 				return;
 			} else if (i == 0) {
-				/* civetweb should process the request */
+				/* LibHTTP should process the request */
 			} else {
 				/* unspecified - may change with the next version */
 				return;
@@ -11606,8 +11608,8 @@ set_ssl_option(struct mg_context *ctx)
 	        ? 0
 	        : (ctx->callbacks.init_ssl(ctx->ssl_ctx, ctx->user_data));
 
-	/* If callback returns 0, civetweb sets up the SSL certificate.
-	 * If it returns 1, civetweb assumes the calback already did this.
+	/* If callback returns 0, LibHTTP sets up the SSL certificate.
+	 * If it returns 1, LibHTTP assumes the calback already did this.
 	 * If it returns -1, initializing ssl fails. */
 	if (callback_ret < 0) {
 		mg_cry(fc(ctx), "SSL callback returned error: %i", callback_ret);
@@ -12205,7 +12207,7 @@ get_uri_type(const char *uri)
 
 	/* It could be an absolute uri: */
 	/* This function only checks if the uri is valid, not if it is
-	 * addressing the current server. So civetweb can also be used
+	 * addressing the current server. So LibHTTP can also be used
 	 * as a proxy server. */
 	for (i = 0; abs_uri_protocols[i].proto != NULL; i++) {
 		if (mg_strncasecmp(uri,

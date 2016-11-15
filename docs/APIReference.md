@@ -1,7 +1,7 @@
-# CivetWeb API Reference
+# Libhttp API Reference
 
-CivetWeb is often used as HTTP and HTTPS library inside a larger application.
-A C API is available to integrate the CivetWeb functionality in a larger
+Libhttp is often used as HTTP and HTTPS library inside a larger application.
+A C API is available to integrate the Libhttp functionality in a larger
 codebase. A C++ wrapper is also available, although it is not guaranteed
 that all functionality available through the C API can also be accessed
 from C++. This document describes the public C API. Basic usage examples of
@@ -43,7 +43,6 @@ the API can be found in [Embedding.md](Embedding.md).
 * [`mg_get_server_ports( ctx, size, ports );`](api/mg_get_server_ports.md)
 * [`mg_get_user_connection_data( conn );`](api/mg_get_user_connection_data.md)
 * [`mg_get_user_data( ctx );`](api/mg_get_user_data.md)
-* [~~`mg_get_valid_option_names();`~~](api/mg_get_valid_option_names.md)
 * [`mg_get_valid_options();`](api/mg_get_valid_options.md)
 * [`mg_get_var( data, data_len, var_name, dst, dst_len );`](api/mg_get_var.md)
 * [`mg_get_var2( data, data_len, var_name, dst, dst_len, occurrence );`](api/mg_get_var2.md)
@@ -69,7 +68,6 @@ the API can be found in [Embedding.md](Embedding.md).
 * [`mg_strncasecmp( s1, s2, len );`](api/mg_strncasecmp.md)
 * [`mg_unlock_connection( conn );`](api/mg_unlock_connection.md)
 * [`mg_unlock_context( ctx );`](api/mg_unlock_context.md)
-* [~~`mg_upload( conn, destination_dir );`~~](api/mg_upload.md)
 * [`mg_url_decode( src, src_len, dst, dst_len, is_form_url_encoded );`](api/mg_url_decode.md)
 * [`mg_url_encode( src, dst, dst_len );`](api/mg_url_encode.md)
 * [`mg_version();`](api/mg_version.md)

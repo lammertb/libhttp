@@ -1,4 +1,9 @@
+# Libhttp Contributors
+
+* Lammert Bies
+
 # Civetweb Contributors
+Libhttp is based on Civetweb which is based on the MIT licensed version of Mongoose. The contributors list mentioned here is the list as it was present in the CREDITS.md file of the Civetweb project when it was forked to Libhttp.
 
 * Alex Kozlov
 * bel2125

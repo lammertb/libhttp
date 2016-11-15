@@ -1,44 +1,21 @@
-Building CivetWeb
+Building LibHTTP
 =========
 
 This guide covers the build instructions for the stand-alone web server.
-See [Embedding.md](https://github.com/civetweb/civetweb/blob/master/docs/Embedding.md) for information on extending an existing C or C++ application. A brief overview of the source code files can be found in [Embedding.md](https://github.com/civetweb/civetweb/blob/master/docs/Embedding.md) as well.
+See [Embedding.md](Embedding.md) for information on extending an existing C or C++ application. A brief overview of the source code files can be found in [Embedding.md](Embedding.md) as well.
 
 #### Where to get the source code?
 
 The latest version can be found at
-https://github.com/civetweb/civetweb
+https://github.com/lammertb/libhttp
 
 Released versions can be found at
-https://github.com/civetweb/civetweb/releases
+https://github.com/lammertb/libhttp/releases
 
 
-Building for Windows
+Building for Windows, Linux, BSD, OSX
 ---------
-
-#### Using Visual Studio
-
-Open the *VS/civetweb.sln* in Visual Studio.
-To include SSL support, you may have to add an extra library for the cryptography support. You might wish to use yaSSL.  However, it is GPL licensed or uses a commercial license. See [yaSSL.md](https://github.com/civetweb/civetweb/blob/master/docs/yaSSL.md) for more information.
-Alternatively, you might wish to use OpenSSL. See [OpenSSL.md](https://github.com/civetweb/civetweb/blob/master/docs/OpenSSL.md) for more information.
-
-#### Using MinGW-w64 or TDM-GCC
-In the start menu locate and run the "Run terminal" batch file. For TDM-GCC this is named "MinGW Command Prompt".
-Navigate to the civetweb sources directory and run:
-```
-mingw32-make CC=gcc
-```
-
-#### Using Qt Creator
-Open the Qt Designer project in the Qt folder
-
-#### Using CMake
-Except for the components in the `third_party` folder (e.g., Lua and Duktape), CivetWeb can also be built with CMake.
-CMake can be used for all supported operating systems.
-
-
-Building for Linux, BSD, and OSX
----------
+Builds for all operating systems are created with GNU Make.
 
 ## Using Make
 
@@ -62,7 +39,7 @@ make lib WITH_CPP=1 WITH_IPV6=1
 make clean slib WITH_CPP=1 WITH_LUA=1 WITH_WEBSOCKET=1
 ```
 Build the static and shared libraries.
-The *WITH_CPP* make option is to include the CivetServer class.
+The *WITH_CPP* make option is to include the LibHTTPServer class.
 The additional make options configure the library just as it would the application.
 
 The *slib* option should be done on a separate clean build as position
@@ -143,37 +120,21 @@ one additional *package* rule.
 make -f Makefile.osx package
 ```
 
-Building with Buildroot
----------
-
-[Buildroot](http://buildroot.uclibc.org/) is a tool for creating cross compiled file systems.  Including Civetweb in buildroot is fairly easy.  There is even support for various build options.
-
-1. First, check if it already there.
-  - In buildroot, make menuconfig
-     - Package Selection for the target --->
-     - Networking applications  --->
-     - civetweb
-2. If not there, just add it
-  - copy *Config.in* and *civetweb.mk* from Civetweb's *contrib/buildroot/* to Buildroot's *package/civetweb/* directory.
-  - In Buildroot's *package/Config.in, insert the following line in were you will know how to find it in the menu.
-    > ``` source "package/civetweb/Config.in" ```
-
-
 Building on Android
 ---------
 
-This is a small guide to help you run civetweb on Android. Currently it is
+This is a small guide to help you run LibHTTP on Android. Currently it is
 tested on the HTC Wildfire. If you have managed to run it on other devices
 as well, please comment or drop an email in the mailing list.
-Note: You do not need root access to run civetweb on Android.
+Note: You do not need root access to run LibHTTP on Android.
 
 - Download the source from the Downloads page.
 - Download the Android NDK from [http://developer.android.com/tools/sdk/ndk/index.html](http://developer.android.com/tools/sdk/ndk/index.html)
-- Run `/path-to-ndk/ndk-build -C /path-to-civetweb/resources`
-  That should generate civetweb/lib/armeabi/civetweb
+- Run `/path-to-ndk/ndk-build -C /path-to-libhttp/resources`
+  That should generate libhttp/lib/armeabi/libhttp
 - Using the adb tool (you need to have Android SDK installed for that),
-  push the generated civetweb binary to `/data/local` folder on device.
-- From adb shell, navigate to `/data/local` and execute `./civetweb`.
+  push the generated libhttp binary to `/data/local` folder on device.
+- From adb shell, navigate to `/data/local` and execute `./libhttp`.
 - To test if the server is running fine, visit your web-browser and
   navigate to `http://127.0.0.1:8080` You should see the `Index of /` page.
 
@@ -183,7 +144,7 @@ Note: You do not need root access to run civetweb on Android.
 Notes:
 
 - `jni` stands for Java Native Interface. Read up on Android NDK if you want
-  to know how to interact with the native C functions of civetweb in Android
+  to know how to interact with the native C functions of libhttp in Android
   Java applications.
 - TODO: A Java application that interacts with the native binary or a
   shared library.

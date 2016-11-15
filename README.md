@@ -12,41 +12,37 @@ Libhttp can be used by developers as a library, to add web server functionality 
 It can also be used by end users as a stand-alone web server. It is available as single executable, no installation is required.
 
 Libhttp is a fork of the Mongoose (MIT)/Civetweb family of http server libraries with the focus on event
-driven efficient communication and good documentation.
+driven efficient communication, clean code and good documentation.
 
 
 Where to find the official version?
 -----------------------------------
 
-End users can download Libhttp at Github
-<!-- [https://sourceforge.net/projects/civetweb/](https://sourceforge.net/projects/civetweb/) -->
+Documentation of the library can be found on [www.libhttp.org](http://www.libhttp.org)
 
-Developers can contribute to Libhttp via GitHub
+Developers can download and contribute to Libhttp via GitHub
 [https://github.com/lammertb/libhttp](https://github.com/lammertb/libhttp)
 
 Trouble tickets should be filed on GitHub
 [https://github.com/lammertb/libhttp/issues](https://github.com/lammertb/libhttp/issues)
 
-<!-- Discussion/support group and announcements are at Google Groups
-[https://groups.google.com/d/forum/civetweb](https://groups.google.com/d/forum/civetweb) -->
-
-
 Quick start documentation
 --------------------------
 
-- [docs/Installing.md](https://github.com/civetweb/civetweb/blob/master/docs/Installing.md) - Install Guide (for end users using pre-built binaries)
-- [docs/UserManual.md](https://github.com/civetweb/civetweb/blob/master/docs/UserManual.md) - End User Guide
-- [docs/Building.md](https://github.com/civetweb/civetweb/blob/master/docs/Building.md) - Building the Server (quick start guide)
-- [docs/Embedding.md](https://github.com/civetweb/civetweb/blob/master/docs/Embedding.md) - Embedding (how to add HTTP support to an existing application)
-- [docs/OpenSSL.md](https://github.com/civetweb/civetweb/blob/master/docs/OpenSSL.md) - Adding HTTPS (SSL/TLS) support using OpenSSL.
-- [RELEASE_NOTES.md](https://github.com/civetweb/civetweb/blob/master/RELEASE_NOTES.md) - Release Notes
-- [LICENSE.md](https://github.com/civetweb/civetweb/blob/master/LICENSE.md) - Copyright License
+- [docs/APIReference.md](docs/APIReference.md) - Reference of the C programming API
+- [docs/Installing.md](docs/Installing.md) - Install Guide (for end users using pre-built binaries)
+- [docs/UserManual.md](docs/UserManual.md) - End User Guide
+- [docs/Building.md](docs/Building.md) - Building the Server (quick start guide)
+- [docs/Embedding.md](docs/Embedding.md) - Embedding (how to add HTTP support to an existing application)
+- [docs/OpenSSL.md](docs/OpenSSL.md) - Adding HTTPS (SSL/TLS) support using OpenSSL.
+- [RELEASE_NOTES.md](RELEASE_NOTES.md) - Release Notes
+- [LICENSE.md](LICENSE.md) - Copyright License
 
 
 Overview
 --------
 
-CivetWeb keeps the balance between functionality and
+LibHTTP keeps the balance between functionality and
 simplicity by a carefully selected list of features:
 
 - Liberal, commercial-friendly, permissive,
@@ -56,7 +52,7 @@ simplicity by a carefully selected list of features:
 - Forked from [Mongoose](https://code.google.com/p/mongoose/) in 2013, before
   it changed the licence from MIT to commercial + GPL. A lot of enchancements
   have been added since that time, see
-  [RELEASE_NOTES.md](https://github.com/civetweb/civetweb/blob/master/RELEASE_NOTES.md).
+  [RELEASE_NOTES.md](RELEASE_NOTES.md).
 - Works on Windows, Mac, Linux, UNIX, iPhone, Android, Buildroot, and many
   other platforms.
 - Scripting and database support (Lua scipts, Lua Server Pages, CGI + SQLite
@@ -78,31 +74,30 @@ simplicity by a carefully selected list of features:
 ### Optionally included software
 
 <a href="http://lua.org">
-![Lua](https://raw.github.com/civetweb/civetweb/master/resources/lua-logo.jpg "Lua Logo")
+![Lua](https://raw.github.com/lammertb/libhttp/master/resources/lua-logo.jpg "Lua Logo")
 </a>
 <a href="http://sqlite.org">
-![Sqlite3](https://raw.github.com/civetweb/civetweb/master/resources/sqlite3-logo.jpg "Sqlite3 Logo")
+![Sqlite3](https://raw.github.com/lammertb/libhttp/master/resources/sqlite3-logo.jpg "Sqlite3 Logo")
 </a>
 <a href="http://keplerproject.github.io/luafilesystem/">
-![LuaFileSystem](https://raw.github.com/civetweb/civetweb/master/resources/luafilesystem-logo.jpg "LuaFileSystem Logo")
+![LuaFileSystem](https://raw.github.com/lammertb/libhttp/master/resources/luafilesystem-logo.jpg "LuaFileSystem Logo")
 </a>
 <a href="http://lua.sqlite.org/index.cgi/index">
-![LuaSQLite3](https://raw.github.com/civetweb/civetweb/master/resources/luasqlite-logo.jpg "LuaSQLite3 Logo")
+![LuaSQLite3](https://raw.github.com/lammertb/libhttp/master/resources/luasqlite-logo.jpg "LuaSQLite3 Logo")
 </a>
 <a href="http://viremo.eludi.net/LuaXML/index.html">
-![LuaXML](https://raw.github.com/civetweb/civetweb/master/resources/luaxml-logo.jpg "LuaXML Logo")
+![LuaXML](https://raw.github.com/lammertb/libhttp/master/resources/luaxml-logo.jpg "LuaXML Logo")
 </a>
 <a href="http://duktape.org">
-![Duktape](https://raw.github.com/civetweb/civetweb/master/resources/duktape-logo.png "Duktape Logo")
+![Duktape](https://raw.github.com/lammertb/libhttp/master/resources/duktape-logo.png "Duktape Logo")
 </a>
 
 
 Support
 -------
 
-This project is very easy to install and use. Please read the [documentation](https://github.com/civetweb/civetweb/blob/master/docs/)
-and have a look at the [examples] (https://github.com/civetweb/civetweb/blob/master/examples/).
-More information may be found on the [mailing list](https://groups.google.com/d/forum/civetweb).
+This project is very easy to install and use. Please read the [documentation](docs/)
+and have a look at the [examples] (examples/).
 
 
 Contributions
@@ -113,24 +108,27 @@ Contributions are welcome provided all contributions carry the MIT license.
 DO NOT APPLY fixes copied from Mongoose to this project to prevent GPL tainting.
 Since 2013 CivetWeb and Mongoose are developed independently. By now the code base differs, so patches cannot be safely transfered in either direction.
 
-Some guidelines can be found in [docs/Contribution.md](https://github.com/civetweb/civetweb/blob/master/docs/Contribution.md).
+Some guidelines can be found in [docs/Contribution.md](docs/Contribution.md).
 
 
 ### Authors
 
-CivetWeb is based on the Mongoose project.  The original author of Mongoose was
+LibHTTP is based on CivetWeb which in turn is based on the Mongoose project.  The original author of Mongoose was
 Sergey Lyubka (Copyright (c) 2004-2013 Sergey Lyubka, MIT license).
 
 However, in August 16, 2013, the [license of Mongoose has been changed](https://groups.google.com/forum/#!topic/mongoose-users/aafbOnHonkI)
 after writing and distributing the original code this project is based on.
-The license change used to be described on the Mongoose Wikipedia page as well, but it's getting deleted there regularly.
 
 CivetWeb has been forked from the last MIT version of Mongoose. 
 Since 2013, CivetWeb has seen many improvements from various authors 
 (Copyright (c) 2013-2016 the CivetWeb developers, MIT license).
-A list of authors can be found in [CREDITS.md](https://github.com/civetweb/civetweb/blob/master/CREDITS.md).
+A list of authors can be found in [CREDITS.md](CREDITS.md).
 
-Using the CivetWeb project ensures the MIT licenses terms are applied and
+LibHTTP has been forked from a 2016 version of CivetWeb. It contains all updates in CivetWeb
+upto the moment of forking and updates of later dates in CivetWeb may be used in LibHTTP
+because they both use the same license. It is expected though that both projects will
+go in different directions though so future compatibility is not guaranteed.
+
+Using the LibHTTP project ensures the MIT licenses terms are applied and
 GPL cannot be imposed on any of this code as long as it is sourced from
 here. This code will remain free with the MIT license protection.
-

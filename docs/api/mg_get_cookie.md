@@ -1,4 +1,4 @@
-# Civetweb API Reference
+# LibHTTP API Reference
 
 ### `mg_get_cookie( cookie, var_name, buf, buf_len );`
 

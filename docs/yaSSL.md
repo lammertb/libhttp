@@ -1,12 +1,12 @@
 Adding wolfSSL (formerly CyaSSL) support
 =====
 
-In order to support SSL *HTTPS* connections in Civetweb,
+In order to support SSL *HTTPS* connections in LibHTTP,
 you may wish to use the GPLv2 licensed CyaSSL library.  By using this
 library, the resulting binary may have to have the GPL license unless
 you buy a commercial license from [wolfSSL](http://www.yassl.com/).
 
-*Note: The following instructions have not been checked for the most recent versions of CivetWeb and wolfSSL. Some information might be outdated.*
+*Note: The following instructions have not been checked for the most recent versions of LibHTTP and wolfSSL. Some information might be outdated.*
 
 
 Getting Started
@@ -14,20 +14,20 @@ Getting Started
 
 - Download Cayssl at https://www.wolfssl.com (formerly http://www.yassl.com/)
 - Extract the zip file
-    - To make this seemless, extract to a directory parallel to with Civetweb is
+    - To make this seemless, extract to a directory parallel to with LibHTTP is
 
 ### Example Project
 
-If you download cyaSSL to cyassl-2.7.0 in a directory parallel to Civetweb, you can open the *VS/civetweb_yassl* solution in Visual Studio.
+If you download cyaSSL to cyassl-2.7.0 in a directory parallel to LibHTTP, you can open the *VS/libhttp_yassl* solution in Visual Studio.
 
 Build Configuration
 ----
 
-#### Required include paths for both civetweb and cyassl
+#### Required include paths for both LibHTTP and cyassl
  - *cyassl_directory*\
  - *cyassl_directory*\cyassl\
 
-#### Required civetweb preprocessor defines
+#### Required LibHTTP preprocessor defines
  - USE_YASSL
  - NO_SSL_DL
 

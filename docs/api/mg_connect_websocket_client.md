@@ -1,4 +1,4 @@
-# Civetweb API Reference
+# LibHTTP API Reference
 
 ### `mg_connect_websocket_client( host, port, use_ssl, error_buffer, error_buffer_size, path, origin, data_func, close_func, user-data);`
 
@@ -27,7 +27,7 @@
 
 The function `mg_connect_websocket_client()` connects to a websocket on a server as a client. Data and close events are processed with callback functions which must be provided in the call.
 
-Civetweb supports both IPv4 and IPv6 communication, but only if the use if IPv6 has been enabled at compile time. When running an application it is possible to check if IPv6 addressing is available by calling the [`mg_check_feature()`](mg_check_feature.md) function with the `USE_IPV6` parameter.
+LibHTTP supports both IPv4 and IPv6 communication, but only if the use if IPv6 has been enabled at compile time. When running an application it is possible to check if IPv6 addressing is available by calling the [`mg_check_feature()`](mg_check_feature.md) function with the `USE_IPV6` parameter.
 
 ### See Also
 

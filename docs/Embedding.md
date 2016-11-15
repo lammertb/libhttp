@@ -1,38 +1,38 @@
-Embedding CivetWeb
+Embedding LibHTTP
 =========
 
-CivetWeb is primarily designed so applications can easily add HTTP and HTTPS server as well as WebSocket functionality.  For example, an application server could use CivetWeb to enable a web service interface for automation or remote control.
+LibHTTP is primarily designed so applications can easily add HTTP and HTTPS server as well as WebSocket functionality.  For example, an application server could use LibHTTP to enable a web service interface for automation or remote control.
 
-However, it can also be used as a stand-alone executable. It can deliver static files and offers built-in server side Lua, JavaScript and CGI support. Some instructions how to build the stand-alone server can be found in [Building.md](https://github.com/civetweb/civetweb/blob/master/docs/Building.md).
+However, it can also be used as a stand-alone executable. It can deliver static files and offers built-in server side Lua, JavaScript and CGI support. Some instructions how to build the stand-alone server can be found in [Building.md](Building.md).
 
 Files
 ------
 
 There is just a small set of files to compile in to the application,
-but if a library is desired, see [Building.md](https://github.com/CivetWeb/CivetWeb/blob/master/docs/Building.md)
+but if a library is desired, see [Building.md](Building.md)
 
 #### Regarding the INL file extension
-The *INL* file extension represents code that is statically included inline in a source file.  Slightly different from C++ where it means "inline" code which is technically not the same as static code. CivetWeb overloads this extension for the sake of clarity as opposed to having .c extensions on files that should not be directly compiled.
+The *INL* file extension represents code that is statically included inline in a source file.  Slightly different from C++ where it means "inline" code which is technically not the same as static code. LibHTTP overloads this extension for the sake of clarity as opposed to having .c extensions on files that should not be directly compiled.
 
 #### HTTP Server Source Files
 
-These files constitute the CivetWeb library.  They do not contain a `main` function,
+These files constitute the LibHTTP library.  They do not contain a `main` function,
 but all functions required to run a HTTP server.
 
   - HTTP server API
-    - include/civetweb.h
+    - include/libhttp.h
   - C implementation
-    - src/civetweb.c
+    - src/libhttp.c
     - src/md5.inl (MD5 calculation)
     - src/handle_form.inl (HTML form handling functions)
   - Optional: C++ wrapper
-    - include/CivetServer.h (C++ interface)
-    - src/CivetServer.cpp (C++ wrapper implementation)
+    - include/LibHTTPServer.h (C++ interface)
+    - src/LibHTTPServer.cpp (C++ wrapper implementation)
   - Optional: Third party components
     - src/third_party/* (third party components, mainly used for the standalone server)
-    - src/mod_*.inl (modules to access third party components from civetweb)
+    - src/mod_*.inl (modules to access third party components from LibHTTP)
 
-Note: The C++ wrapper uses the official C interface (civetweb.h) and does not add new features to the server. Some features available in the C interface might be missing in the C++ interface.
+Note: The C++ wrapper uses the official C interface (libhttp.h) and does not add new features to the server. Some features available in the C interface might be missing in the C++ interface.
 
 #### Additional Source Files for Executables
 
@@ -54,7 +54,7 @@ Quick Start
 By default, the server will automatically serve up files like a normal HTTP server.  An embedded server is most likely going to overload this functionality.
 
 ### C
-  - Include the C interface ```civetweb.h```.
+  - Include the C interface ```libhttp.h```.
   - Use `mg_start()` to start the server.
       - Use *options* to select the port and document root among other things.
       - Use *callbacks* to add your own hooks.
@@ -62,11 +62,11 @@ By default, the server will automatically serve up files like a normal HTTP serv
   - Use `mg_stop()` to stop the server.
 
 ### C++
-  - Note that CivetWeb is Clean C, and C++ interface ```CivetServer.h``` is only a wrapper layer around the C interface.
-    Not all CivetWeb features available in C are also available in C++.
-  - Create CivetHandlers for each URI.
-  - Register the handlers with `CivetServer::addHandler()`
-  - `CivetServer` starts on contruction and stops on destruction.
+  - Note that LibHTTP is Clean C, and C++ interface ```LibHTTPServer.h``` is only a wrapper layer around the C interface.
+    Not all LibHTTP features available in C are also available in C++.
+  - Create LibHTTPHandlers for each URI.
+  - Register the handlers with `LibHTTPServer::addHandler()`
+  - `LibHTTPServer` starts on contruction and stops on destruction.
   - Use contructor *options* to select the port and document root among other things.
   - Use constructor *callbacks* to add your own hooks.
 
@@ -130,17 +130,17 @@ This build is valid for Lua version Lua 5.2. It is also possible to build with L
 JavaScript Support
 ------
 
-CivetWeb can be built with server side JavaScript support by including the Duktape library.
+LibHTTP can be built with server side JavaScript support by including the Duktape library.
 
 
-CivetWeb internals
+LibHTTP internals
 ------
 
-CivetWeb is multithreaded web server. `mg_start()` function allocates
+LibHTTP is multithreaded web server. `mg_start()` function allocates
 web server context (`struct mg_context`), which holds all information
 about web server instance:
 
-- configuration options. Note that CivetWeb makes internal copies of
+- configuration options. Note that LibHTTP makes internal copies of
   passed options.
 - SSL context, if any
 - user-defined callbacks
@@ -153,11 +153,11 @@ When `mg_start()` returns, all initialization is guaranteed to be complete
 some threads: a master thread, that accepts new connections, and several
 worker threads, that process accepted connections. The number of worker threads
 is configurable via `num_threads` configuration option. That number puts a
-limit on number of simultaneous requests that can be handled by CivetWeb.
-If you embed CivetWeb into a program that uses SSL outside CivetWeb as well,
+limit on number of simultaneous requests that can be handled by LibHTTP.
+If you embed LibHTTP into a program that uses SSL outside LibHTTP as well,
 you may need to initialize SSL before calling `mg_start()`, and set the pre-
 processor define SSL_ALREADY_INITIALIZED. This is not required if SSL is used
-only within CivetWeb.
+only within LibHTTP.
 
 When master thread accepts new a connection, a new accepted socket (described
 by `struct socket`) it placed into the accepted sockets queue,
@@ -180,7 +180,7 @@ looks something like this:
       }
     }
 
-Function `consume_socket()` gets a new accepted socket from the CivetWeb socket
+Function `consume_socket()` gets a new accepted socket from the LibHTTP socket
 queue, atomically removing it from the queue. If the queue is empty,
 `consume_socket()` blocks and waits until a new socket is placed in the queue
 by the master thread.
@@ -195,6 +195,6 @@ listening sockets. `poll()` is used to avoid `FD_SETSIZE` limitation of
 to use hi-performance alternatives like `epoll()` or `kqueue()`. Worker
 threads use blocking IO on accepted sockets for reading and writing data.
 All accepted sockets have `SO_RCVTIMEO` and `SO_SNDTIMEO` socket options set
-(controlled by the `request_timeout_ms` CivetWeb option, 30 seconds default)
+(controlled by the `request_timeout_ms` LibHTTP option, 30 seconds default)
 which specifies a read/write timeout on client connections.
 

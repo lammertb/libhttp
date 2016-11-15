@@ -1,4 +1,4 @@
-# Civetweb API Reference
+# LibHTTP API Reference
 
 ### `mg_get_response( conn, ebuf, ebuf_len, timeout );`
 

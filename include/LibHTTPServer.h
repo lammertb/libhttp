@@ -1,4 +1,6 @@
-/* Copyright (c) 2013-2014 the Civetweb developers
+/* 
+ * Copyright (c) 2016 Lammert Bies
+ * Copyright (c) 2013-2014 the Civetweb developers
  * Copyright (c) 2013 No Face Press, LLC
  *
  * License http://opensource.org/licenses/mit-license.php MIT License
@@ -8,22 +10,22 @@
 #define _CIVETWEB_SERVER_H_
 #ifdef __cplusplus
 
-#include "civetweb.h"
+#include "libhttp.h"
 #include <map>
 #include <string>
 #include <vector>
 #include <stdexcept>
 
 // forward declaration
-class CivetServer;
+class LibHTTPServer;
 
 /**
- * Exception class for thrown exceptions within the CivetHandler object.
+ * Exception class for thrown exceptions within the LibHTTPHandler object.
  */
-class CIVETWEB_API CivetException : public std::runtime_error
+class CIVETWEB_API LibHTTPException : public std::runtime_error
 {
   public:
-	CivetException(const std::string &msg) : std::runtime_error(msg)
+	LibHTTPException(const std::string &msg) : std::runtime_error(msg)
 	{
 	}
 };
@@ -32,13 +34,13 @@ class CIVETWEB_API CivetException : public std::runtime_error
  * Basic interface for a URI request handler.  Handlers implementations
  * must be reentrant.
  */
-class CIVETWEB_API CivetHandler
+class CIVETWEB_API LibHTTPHandler
 {
   public:
 	/**
 	 * Destructor
 	 */
-	virtual ~CivetHandler()
+	virtual ~LibHTTPHandler()
 	{
 	}
 
@@ -49,7 +51,7 @@ class CIVETWEB_API CivetHandler
 	 * @param conn - the connection information
 	 * @returns true if implemented, false otherwise
 	 */
-	virtual bool handleGet(CivetServer *server, struct mg_connection *conn);
+	virtual bool handleGet(LibHTTPServer *server, struct mg_connection *conn);
 
 	/**
 	 * Callback method for POST request.
@@ -58,7 +60,7 @@ class CIVETWEB_API CivetHandler
 	 * @param conn - the connection information
 	 * @returns true if implemented, false otherwise
 	 */
-	virtual bool handlePost(CivetServer *server, struct mg_connection *conn);
+	virtual bool handlePost(LibHTTPServer *server, struct mg_connection *conn);
 
 	/**
 	 * Callback method for HEAD request.
@@ -67,7 +69,7 @@ class CIVETWEB_API CivetHandler
 	 * @param conn - the connection information
 	 * @returns true if implemented, false otherwise
 	 */
-	virtual bool handleHead(CivetServer *server, struct mg_connection *conn);
+	virtual bool handleHead(LibHTTPServer *server, struct mg_connection *conn);
 
 	/**
 	 * Callback method for PUT request.
@@ -76,7 +78,7 @@ class CIVETWEB_API CivetHandler
 	 * @param conn - the connection information
 	 * @returns true if implemented, false otherwise
 	 */
-	virtual bool handlePut(CivetServer *server, struct mg_connection *conn);
+	virtual bool handlePut(LibHTTPServer *server, struct mg_connection *conn);
 
 	/**
 	 * Callback method for DELETE request.
@@ -85,7 +87,7 @@ class CIVETWEB_API CivetHandler
 	 * @param conn - the connection information
 	 * @returns true if implemented, false otherwise
 	 */
-	virtual bool handleDelete(CivetServer *server, struct mg_connection *conn);
+	virtual bool handleDelete(LibHTTPServer *server, struct mg_connection *conn);
 
 	/**
 	 * Callback method for OPTIONS request.
@@ -94,7 +96,7 @@ class CIVETWEB_API CivetHandler
 	 * @param conn - the connection information
 	 * @returns true if implemented, false otherwise
 	 */
-	virtual bool handleOptions(CivetServer *server, struct mg_connection *conn);
+	virtual bool handleOptions(LibHTTPServer *server, struct mg_connection *conn);
 
 	/**
 	 * Callback method for PATCH request.
@@ -103,20 +105,20 @@ class CIVETWEB_API CivetHandler
 	 * @param conn - the connection information
 	 * @returns true if implemented, false otherwise
 	 */
-	virtual bool handlePatch(CivetServer *server, struct mg_connection *conn);
+	virtual bool handlePatch(LibHTTPServer *server, struct mg_connection *conn);
 };
 
 /**
  * Basic interface for a URI authorization handler.  Handler implementations
  * must be reentrant.
  */
-class CIVETWEB_API CivetAuthHandler
+class CIVETWEB_API LibHTTPAuthHandler
 {
   public:
 	/**
 	 * Destructor
 	 */
-	virtual ~CivetAuthHandler()
+	virtual ~LibHTTPAuthHandler()
 	{
 	}
 
@@ -128,20 +130,20 @@ class CIVETWEB_API CivetAuthHandler
 	 * @param conn - the connection information
 	 * @returns true if authorization succeeded, false otherwise
 	 */
-	virtual bool authorize(CivetServer *server, struct mg_connection *conn) = 0;
+	virtual bool authorize(LibHTTPServer *server, struct mg_connection *conn) = 0;
 };
 
 /**
  * Basic interface for a websocket handler.  Handlers implementations
  * must be reentrant.
  */
-class CIVETWEB_API CivetWebSocketHandler
+class CIVETWEB_API LibHTTPWebSocketHandler
 {
   public:
 	/**
 	 * Destructor
 	 */
-	virtual ~CivetWebSocketHandler()
+	virtual ~LibHTTPWebSocketHandler()
 	{
 	}
 
@@ -153,7 +155,7 @@ class CIVETWEB_API CivetWebSocketHandler
 	 * @param conn - the connection information
 	 * @returns true to keep socket open, false to close it
 	 */
-	virtual bool handleConnection(CivetServer *server,
+	virtual bool handleConnection(LibHTTPServer *server,
 	                              const struct mg_connection *conn);
 
 	/**
@@ -163,7 +165,7 @@ class CIVETWEB_API CivetWebSocketHandler
 	 * @param server - the calling server
 	 * @param conn - the connection information
 	 */
-	virtual void handleReadyState(CivetServer *server,
+	virtual void handleReadyState(LibHTTPServer *server,
 	                              struct mg_connection *conn);
 
 	/**
@@ -176,7 +178,7 @@ class CIVETWEB_API CivetWebSocketHandler
 	 * @data, data_len: payload, with mask (if any) already applied.
 	 * @returns true to keep socket open, false to close it
 	 */
-	virtual bool handleData(CivetServer *server,
+	virtual bool handleData(LibHTTPServer *server,
 	                        struct mg_connection *conn,
 	                        int bits,
 	                        char *data,
@@ -188,25 +190,25 @@ class CIVETWEB_API CivetWebSocketHandler
 	 * @param server - the calling server
 	 * @param conn - the connection information
 	 */
-	virtual void handleClose(CivetServer *server,
+	virtual void handleClose(LibHTTPServer *server,
 	                         const struct mg_connection *conn);
 };
 
 /**
- * CivetCallbacks
+ * LibHTTPCallbacks
  *
  * wrapper for mg_callbacks
  */
-struct CIVETWEB_API CivetCallbacks : public mg_callbacks {
-	CivetCallbacks();
+struct CIVETWEB_API LibHTTPCallbacks : public mg_callbacks {
+	LiBHTTPCallbacks();
 };
 
 /**
- * CivetServer
+ * LibHTTPServer
  *
  * Basic class for embedded web server.  This has an URL mapping built-in.
  */
-class CIVETWEB_API CivetServer
+class CIVETWEB_API LibHTTPServer
 {
   public:
 	/**
@@ -216,7 +218,7 @@ class CIVETWEB_API CivetServer
 	 * It is good practice to call getContext() after this in case there
 	 * were errors starting the server.
 	 *
-	 * Note: CivetServer should not be used as a static instance in a Windows
+	 * Note: LibHTTPServer should not be used as a static instance in a Windows
 	 * DLL, since the constructor creates threads and the destructor joins
 	 * them again (creating/joining threads should not be done in static
 	 * constructors).
@@ -224,17 +226,17 @@ class CIVETWEB_API CivetServer
 	 * @param options - the web server options.
 	 * @param callbacks - optional web server callback methods.
 	 *
-	 * @throws CivetException
+	 * @throws LibHTTPException
 	 */
-	CivetServer(const char **options,
-	            const struct CivetCallbacks *callbacks = 0);
-	CivetServer(std::vector<std::string> options,
-	            const struct CivetCallbacks *callbacks = 0);
+	LibHTTPServer(const char **options,
+	            const struct LibHTTPCallbacks *callbacks = 0);
+	LibHTTPServer(std::vector<std::string> options,
+	            const struct LibHTTPCallbacks *callbacks = 0);
 
 	/**
 	 * Destructor
 	 */
-	virtual ~CivetServer();
+	virtual ~LibHTTPServer();
 
 	/**
 	 * close()
@@ -255,7 +257,7 @@ class CIVETWEB_API CivetServer
 	}
 
 	/**
-	 * addHandler(const std::string &, CivetHandler *)
+	 * addHandler(const std::string &, LibHTTPHandler *)
 	 *
 	 * Adds a URI handler.  If there is existing URI handler, it will
 	 * be replaced with this one.
@@ -265,10 +267,10 @@ class CIVETWEB_API CivetServer
 	 *  @param uri - URI to match.
 	 *  @param handler - handler instance to use.
 	 */
-	void addHandler(const std::string &uri, CivetHandler *handler);
+	void addHandler(const std::string &uri, LibHTTPHandler *handler);
 
 	void
-	addHandler(const std::string &uri, CivetHandler &handler)
+	addHandler(const std::string &uri, LibHTTPHandler &handler)
 	{
 		addHandler(uri, &handler);
 	}
@@ -286,10 +288,10 @@ class CIVETWEB_API CivetServer
 	 *  @param handler - handler instance to use.
 	 */
 	void addWebSocketHandler(const std::string &uri,
-	                         CivetWebSocketHandler *handler);
+	                         LibHTTPWebSocketHandler *handler);
 
 	void
-	addWebSocketHandler(const std::string &uri, CivetWebSocketHandler &handler)
+	addWebSocketHandler(const std::string &uri, LibHTTPWebSocketHandler &handler)
 	{
 		addWebSocketHandler(uri, &handler);
 	}
@@ -313,7 +315,7 @@ class CIVETWEB_API CivetServer
 	void removeWebSocketHandler(const std::string &uri);
 
 	/**
-	 * addAuthHandler(const std::string &, CivetAuthHandler *)
+	 * addAuthHandler(const std::string &, LibHTTPAuthHandler *)
 	 *
 	 * Adds a URI authorization handler.  If there is existing URI authorization
 	 * handler, it will be replaced with this one.
@@ -323,10 +325,10 @@ class CIVETWEB_API CivetServer
 	 * @param uri - URI to match.
 	 * @param handler - authorization handler instance to use.
 	 */
-	void addAuthHandler(const std::string &uri, CivetAuthHandler *handler);
+	void addAuthHandler(const std::string &uri, LibHTTPAuthHandler *handler);
 
 	void
-	addAuthHandler(const std::string &uri, CivetAuthHandler &handler)
+	addAuthHandler(const std::string &uri, LibHTTPAuthHandler &handler)
 	{
 		addAuthHandler(uri, &handler);
 	}
@@ -532,18 +534,18 @@ class CIVETWEB_API CivetServer
 	                      bool append = false);
 
   protected:
-	class CivetConnection
+	class LibHTTPConnection
 	{
 	  public:
 		char *postData;
 		unsigned long postDataLen;
 
-		CivetConnection();
-		~CivetConnection();
+		LibHTTPConnection();
+		~LibHTTPConnection();
 	};
 
 	struct mg_context *context;
-	std::map<struct mg_connection *, class CivetConnection> connections;
+	std::map<struct mg_connection *, class LibHTTPConnection> connections;
 
   private:
 	/**
@@ -552,7 +554,7 @@ class CIVETWEB_API CivetServer
 	 * Handles the incomming request.
 	 *
 	 * @param conn - the connection information
-	 * @param cbdata - pointer to the CivetHandler instance.
+	 * @param cbdata - pointer to the LibHTTPHandler instance.
 	 * @returns 0 if implemented, false otherwise
 	 */
 	static int requestHandler(struct mg_connection *conn, void *cbdata);
@@ -573,7 +575,7 @@ class CIVETWEB_API CivetServer
 	 * Handles the authorization requests.
 	 *
 	 * @param conn - the connection information
-	 * @param cbdata - pointer to the CivetAuthHandler instance.
+	 * @param cbdata - pointer to the LibHTTPAuthHandler instance.
 	 * @returns 1 if authorized, 0 otherwise
 	 */
 	static int authHandler(struct mg_connection *conn, void *cbdata);

@@ -1,4 +1,16 @@
-Release Notes v1.9 (work in progress)
+Release Notes v2.0 (work in progress)
+===
+### Objectives: *Clean up source code, proper documentation, focus on embedding*
+
+Changes
+-------
+- Changed references from CivetWeb to LibHTTP in documentation
+- Removed deprecated function `mg_upload();`
+- Removed deprecated function `mg_get_valid_option_names();`
+- Removed all build scripts except the script for `make`
+
+
+Release Notes v1.9 (will never be released as LibHTTP)
 ===
 ### Objectives: *Read client certificate information, bug fixes*
 

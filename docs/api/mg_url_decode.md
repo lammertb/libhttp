@@ -1,4 +1,4 @@
-# Civetweb API Reference
+# LibHTTP API Reference
 
 ### `mg_url_decode( src, src_len, dst, dst_len, is_form_url_encoded );`
 

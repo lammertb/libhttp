@@ -1,4 +1,4 @@
-# Civetweb API Reference
+# LibHTTP API Reference
 
 ### `mg_send_mime_file2( conn, path, mime_type, additional_headers );`
 
