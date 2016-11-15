@@ -69,11 +69,6 @@ struct mg_request_info {
 	                               used */
 	char remote_addr[48];       /* Client's IP address as a string. */
 
-#if defined(MG_LEGACY_INTERFACE)
-	long remote_ip; /* Client's IP address. Deprecated: use remote_addr instead
-	                   */
-#endif
-
 	long long content_length; /* Length (in bytes) of the request body,
 	                             can be -1 if no length was given. */
 	int remote_port;          /* Client's port */
@@ -140,34 +135,6 @@ struct mg_callbacks {
 	    -1: initializing ssl fails. */
 	int (*init_ssl)(void *ssl_context, void *user_data);
 
-#if defined(MG_LEGACY_INTERFACE)
-	/* Called when websocket request is received, before websocket handshake.
-	   Return value:
-	     0: civetweb proceeds with websocket handshake.
-	     1: connection is closed immediately.
-	   This callback is deprecated: Use mg_set_websocket_handler instead. */
-	int (*websocket_connect)(const struct mg_connection *);
-
-	/* Called when websocket handshake is successfully completed, and
-	   connection is ready for data exchange.
-	   This callback is deprecated: Use mg_set_websocket_handler instead. */
-	void (*websocket_ready)(struct mg_connection *);
-
-	/* Called when data frame has been received from the client.
-	   Parameters:
-	     bits: first byte of the websocket frame, see websocket RFC at
-	           http://tools.ietf.org/html/rfc6455, section 5.2
-	     data, data_len: payload, with mask (if any) already applied.
-	   Return value:
-	     1: keep this websocket connection open.
-	     0: close this websocket connection.
-	   This callback is deprecated: Use mg_set_websocket_handler instead. */
-	int (*websocket_data)(struct mg_connection *,
-	                      int bits,
-	                      char *data,
-	                      size_t data_len);
-#endif /* MG_LEGACY_INTERFACE */
-
 	/* Called when civetweb is closing a connection.  The per-context mutex is
 	   locked when this is invoked.  This is primarily useful for noting when
 	   a websocket is closing and removing it from any application-maintained
@@ -195,15 +162,6 @@ struct mg_callbacks {
 	   Parameters:
 	     lua_context: "lua_State *" pointer. */
 	void (*init_lua)(const struct mg_connection *, void *lua_context);
-
-#if defined(MG_LEGACY_INTERFACE)
-	/* Called when civetweb has uploaded a file to a temporary directory as a
-	   result of mg_upload() call.
-	   Note that mg_upload is deprecated. Use mg_handle_form_request instead.
-	   Parameters:
-	     file_name: full path name to the uploaded file. */
-	void (*upload)(struct mg_connection *, const char *file_name);
-#endif
 
 	/* Called when civetweb is about to send HTTP error to the client.
 	   Implementing this callback allows to create custom error pages.
@@ -422,16 +380,6 @@ CIVETWEB_API void *
 mg_get_user_connection_data(const struct mg_connection *conn);
 
 
-#if defined(MG_LEGACY_INTERFACE)
-/* Return array of strings that represent valid configuration options.
-   For each option, option name and default value is returned, i.e. the
-   number of entries in the array equals to number_of_options x 2.
-   Array is NULL terminated. */
-/* Deprecated: Use mg_get_valid_options instead. */
-CIVETWEB_API const char **mg_get_valid_option_names(void);
-#endif
-
-
 struct mg_option {
 	const char *name;
 	int type;
@@ -557,12 +505,6 @@ CIVETWEB_API int mg_websocket_client_write(struct mg_connection *conn,
    communication in direct response to a message. */
 CIVETWEB_API void mg_lock_connection(struct mg_connection *conn);
 CIVETWEB_API void mg_unlock_connection(struct mg_connection *conn);
-
-
-#if defined(MG_LEGACY_INTERFACE)
-#define mg_lock mg_lock_connection
-#define mg_unlock mg_unlock_connection
-#endif
 
 
 /* Lock server context.  This lock may be used to protect resources
@@ -769,16 +711,6 @@ mg_download(const char *host,
 
 /* Close the connection opened by mg_download(). */
 CIVETWEB_API void mg_close_connection(struct mg_connection *conn);
-
-
-#if defined(MG_LEGACY_INTERFACE)
-/* File upload functionality. Each uploaded file gets saved into a temporary
-   file and MG_UPLOAD event is sent.
-   Return number of uploaded files.
-   Deprecated: Use mg_handle_form_request instead. */
-CIVETWEB_API int mg_upload(struct mg_connection *conn,
-                           const char *destination_dir);
-#endif
 
 
 /* This structure contains callback functions for handling form fields.
