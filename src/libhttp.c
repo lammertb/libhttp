@@ -2446,102 +2446,6 @@ static void handle_file_based_request(struct mg_connection *conn, const char *pa
 
 static int mg_stat(struct mg_connection *conn, const char *path, struct file *filep);
 
-
-const char *mg_get_response_code_text( struct mg_connection *conn, int response_code ) {
-
-	/* See IANA HTTP status code assignment:
-	 * http://www.iana.org/assignments/http-status-codes/http-status-codes.xhtml
-	 */
-
-	switch ( response_code ) {
-
-		case 100 : return "Continue";				/* RFC2616 Section 10.1.1					*/
-		case 101 : return "Switching Protocols";		/* RFC2616 Section 10.1.2					*/
-		case 102 : return "Processing";				/* RFC2518 Section 10.1						*/
-
-		case 200 : return "OK";					/* RFC2616 Section 10.2.1					*/
-		case 201 : return "Created";				/* RFC2616 Section 10.2.2					*/
-		case 202 : return "Accepted";				/* RFC2616 Section 10.2.3					*/
-		case 203 : return "Non-Authoritative Information";	/* RFC2616 Section 10.2.4					*/
-		case 204 : return "No Content";				/* RFC2616 Section 10.2.5					*/
-		case 205 : return "Reset Content";			/* RFC2616 Section 10.2.6					*/
-		case 206 : return "Partial Content";			/* RFC2616 Section 10.2.7					*/
-		case 207 : return "Multi-Status";			/* RFC2518 Section 10.2, RFC4918 Section 11.1			*/
-		case 208 : return "Already Reported";			/* RFC5842 Section 7.1						*/
-		case 226 : return "IM used";				/* RFC3229 Section 10.4.1					*/
-
-		case 300 : return "Multiple Choices";			/* RFC2616 Section 10.3.1					*/
-		case 301 : return "Moved Permanently";			/* RFC2616 Section 10.3.2					*/
-		case 302 : return "Found";				/* RFC2616 Section 10.3.3					*/
-		case 303 : return "See Other";				/* RFC2616 Section 10.3.4					*/
-		case 304 : return "Not Modified";			/* RFC2616 Section 10.3.5					*/
-		case 305 : return "Use Proxy";				/* RFC2616 Section 10.3.6					*/
-		case 307 : return "Temporary Redirect";			/* RFC2616 Section 10.3.8					*/
-		case 308 : return "Permanent Redirect";			/* RFC7238 Section 3						*/
-
-		case 400 : return "Bad Request";			/* RFC2616 Section 10.4.1					*/
-		case 401 : return "Unauthorized";			/* RFC2616 Section 10.4.2					*/
-		case 402 : return "Payment Required";			/* RFC2616 Section 10.4.3					*/
-		case 403 : return "Forbidden";				/* RFC2616 Section 10.4.4					*/
-		case 404 : return "Not Found";				/* RFC2616 Section 10.4.5					*/
-		case 405 : return "Method Not Allowed";			/* RFC2616 Section 10.4.6					*/
-		case 406 : return "Not Acceptable";			/* RFC2616 Section 10.4.7					*/
-		case 407 : return "Proxy Authentication Required";	/* RFC2616 Section 10.4.8					*/
-		case 408 : return "Request Time-out";			/* RFC2616 Section 10.4.9					*/
-		case 409 : return "Conflict";				/* RFC2616 Section 10.4.10					*/
-		case 410 : return "Gone";				/* RFC2616 Section 10.4.11					*/
-		case 411 : return "Length Required";			/* RFC2616 Section 10.4.12					*/
-		case 412 : return "Precondition Failed";		/* RFC2616 Section 10.4.13					*/
-		case 413 : return "Request Entity Too Large";		/* RFC2616 Section 10.4.14					*/
-		case 414 : return "Request-URI Too Large";		/* RFC2616 Section 10.4.15					*/
-		case 415 : return "Unsupported Media Type";		/* RFC2616 Section 10.4.16					*/
-		case 416 : return "Requested range not satisfiable";	/* RFC2616 Section 10.4.17					*/
-		case 417 : return "Expectation Failed";			/* RFC2616 Section 10.4.18					*/
-		case 418 : return "I am a teapot";			/* RFC2324 Section 2.3.2					*/
-		case 419 : return "Authentication Timeout";		/* common use							*/
-		case 420 : return "Enhance Your Calm";			/* common use							*/
-		case 421 : return "Misdirected Request";		/* RFC7540 Section 9.1.2					*/
-		case 422 : return "Unproccessable entity";		/* RFC2518 Section 10.3, RFC4918 Section 11.2			*/
-		case 423 : return "Locked";				/* RFC2518 Section 10.4, RFC4918 Section 11.3			*/
-		case 424 : return "Failed Dependency";			/* RFC2518 Section 10.5, RFC4918 Section 11.4			*/
-		case 426 : return "Upgrade Required";			/* RFC 2817 Section 4						*/
-		case 428 : return "Precondition Required";		/* RFC 6585, Section 3						*/
-		case 429 : return "Too Many Requests";			/* RFC 6585, Section 4						*/
-		case 431 : return "Request Header Fields Too Large";	/* RFC 6585, Section 5						*/
-		case 440 : return "Login Timeout";			/* common use							*/
-		case 451 : return "Unavailable For Legal Reasons";	/* draft-tbray-http-legally-restricted-status-05, Section 3	*/
-
-		case 500 : return "Internal Server Error";		/* RFC2616 Section 10.5.1					*/
-		case 501 : return "Not Implemented";			/* RFC2616 Section 10.5.2					*/
-		case 502 : return "Bad Gateway";			/* RFC2616 Section 10.5.3					*/
-		case 503 : return "Service Unavailable";		/* RFC2616 Section 10.5.4					*/
-		case 504 : return "Gateway Time-out";			/* RFC2616 Section 10.5.5					*/
-		case 505 : return "HTTP Version not supported";		/* RFC2616 Section 10.5.6					*/
-		case 506 : return "Variant Also Negotiates";		/* RFC 2295, Section 8.1					*/
-		case 507 : return "Insufficient Storage";		/* RFC2518 Section 10.6, RFC4918 Section 11.5			*/
-		case 508 : return "Loop Detected";			/* RFC5842 Section 7.1						*/
-		case 509 : return "Bandwidth Limit Exceeded";		/* common use							*/
-		case 510 : return "Not Extended";			/* RFC 2774, Section 7						*/
-		case 511 : return "Network Authentication Required";	/* RFC 6585, Section 6						*/
-
-
-	default:
-		/* This error code is unknown. This should not happen. */
-		if ( conn !=  NULL) mg_cry( conn, "Unknown HTTP response code: %u", response_code );
-
-		/* Return at least a category according to RFC 2616 Section 10. */
-		if (response_code >= 100 && response_code < 200) return "Information";
-		if (response_code >= 200 && response_code < 300) return "Success";
-		if (response_code >= 300 && response_code < 400) return "Redirection";
-		if (response_code >= 400 && response_code < 500) return "Client Error";
-		if (response_code >= 500 && response_code < 600) return "Server Error";
-
-		return "";
-	}
-
-}  /* mg_get_response_code_text */
-
-
 static void send_http_error(struct mg_connection *, int, PRINTF_FORMAT_STRING(const char *fmt), ...) PRINTF_ARGS(3, 4); 
 
 static void send_http_error(struct mg_connection *conn, int status, const char *fmt, ...) {
@@ -6348,9 +6252,8 @@ handle_not_modified_static_file_request(struct mg_connection *conn,
 	char date[64], lm[64], etag[64];
 	time_t curtime = time(NULL);
 
-	if (conn == NULL || filep == NULL) {
-		return;
-	}
+	if (conn == NULL || filep == NULL) return;
+
 	conn->status_code = 304;
 	gmt_time_string(date, sizeof(date), &curtime);
 	gmt_time_string(lm, sizeof(lm), &filep->last_modified);
@@ -6375,18 +6278,14 @@ handle_not_modified_static_file_request(struct mg_connection *conn,
 #endif
 
 
-void
-mg_send_file(struct mg_connection *conn, const char *path)
-{
+void mg_send_file(struct mg_connection *conn, const char *path) {
+
 	mg_send_mime_file(conn, path, NULL);
 }
 
 
-void
-mg_send_mime_file(struct mg_connection *conn,
-                  const char *path,
-                  const char *mime_type)
-{
+void mg_send_mime_file(struct mg_connection *conn, const char *path, const char *mime_type) {
+
 	mg_send_mime_file2(conn, path, mime_type, NULL);
 }
 
@@ -8105,28 +8004,19 @@ handle_propfind(struct mg_connection *conn,
 }
 #endif
 
-void
-mg_lock_connection(struct mg_connection *conn)
-{
-	if (conn) {
-		(void)pthread_mutex_lock(&conn->mutex);
-	}
+void mg_lock_connection(struct mg_connection *conn) {
+
+	if (conn) pthread_mutex_lock(&conn->mutex);
 }
 
-void
-mg_unlock_connection(struct mg_connection *conn)
-{
-	if (conn) {
-		(void)pthread_mutex_unlock(&conn->mutex);
-	}
+void mg_unlock_connection(struct mg_connection *conn) {
+
+	if (conn) pthread_mutex_unlock(&conn->mutex);
 }
 
-void
-mg_lock_context(struct mg_context *ctx)
-{
-	if (ctx) {
-		(void)pthread_mutex_lock(&ctx->nonce_mutex);
-	}
+void mg_lock_context(struct mg_context *ctx) {
+
+	if (ctx) pthread_mutex_lock(&ctx->nonce_mutex);
 }
 
 void
@@ -8975,12 +8865,9 @@ set_throttle(const char *spec, uint32_t remote_ip, const char *uri)
 }
 
 
-static uint32_t
-get_remote_ip(const struct mg_connection *conn)
-{
-	if (!conn) {
-		return 0;
-	}
+static uint32_t get_remote_ip(const struct mg_connection *conn) {
+
+	if (!conn) return 0;
 	return ntohl(*(const uint32_t *)&conn->client.rsa.sin.sin_addr);
 }
 
@@ -8990,9 +8877,8 @@ get_remote_ip(const struct mg_connection *conn)
 
 
 
-static int
-get_first_ssl_listener_index(const struct mg_context *ctx)
-{
+static int get_first_ssl_listener_index(const struct mg_context *ctx) {
+
 	unsigned int i;
 	int idx = -1;
 	if (ctx) {
@@ -9201,23 +9087,9 @@ mg_set_handler_type(struct mg_context *ctx,
 }
 
 
-void
-mg_set_request_handler(struct mg_context *ctx,
-                       const char *uri,
-                       mg_request_handler handler,
-                       void *cbdata)
-{
-	mg_set_handler_type(ctx,
-	                    uri,
-	                    REQUEST_HANDLER,
-	                    handler == NULL,
-	                    handler,
-	                    NULL,
-	                    NULL,
-	                    NULL,
-	                    NULL,
-	                    NULL,
-	                    cbdata);
+void mg_set_request_handler(struct mg_context *ctx, const char *uri, mg_request_handler handler, void *cbdata) {
+
+	mg_set_handler_type(ctx, uri, REQUEST_HANDLER, handler == NULL, handler, NULL, NULL, NULL, NULL, NULL, cbdata);
 }
 
 
@@ -9247,23 +9119,9 @@ mg_set_websocket_handler(struct mg_context *ctx,
 }
 
 
-void
-mg_set_auth_handler(struct mg_context *ctx,
-                    const char *uri,
-                    mg_request_handler handler,
-                    void *cbdata)
-{
-	mg_set_handler_type(ctx,
-	                    uri,
-	                    AUTH_HANDLER,
-	                    handler == NULL,
-	                    NULL,
-	                    NULL,
-	                    NULL,
-	                    NULL,
-	                    NULL,
-	                    handler,
-	                    cbdata);
+void mg_set_auth_handler(struct mg_context *ctx, const char *uri, mg_request_handler handler, void *cbdata) {
+
+	mg_set_handler_type(ctx, uri, AUTH_HANDLER, handler == NULL, NULL, NULL, NULL, NULL, NULL, handler, cbdata);
 }
 
 

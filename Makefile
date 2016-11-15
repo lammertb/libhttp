@@ -41,7 +41,9 @@ PORTS = 8080
 
 BUILD_DIRS = $(BUILD_DIR) $(BUILD_DIR)/src $(BUILD_DIR)/resources
 
-LIB_SOURCES = src/libhttp.c src/httplib_version.c
+LIB_SOURCES =	src/libhttp.c				\
+		src/httplib_get_response_code_text.c	\
+		src/httplib_version.c
 LIB_INLINE  = src/mod_lua.inl src/md5.inl
 APP_SOURCES = src/main.c
 WINDOWS_RESOURCES = resources/res.rc
