@@ -405,6 +405,8 @@ typedef int SOCKET;
           WINDOWS / UNIX include block */
 
 
+#define ARRAY_SIZE(array) (sizeof(array) / sizeof(array[0]))
+
 
 #if !defined(MSG_NOSIGNAL)
 #define MSG_NOSIGNAL (0)
@@ -808,10 +810,16 @@ struct mg_connection *	XX_httplib_fc( struct mg_context *ctx );
 void			XX_httplib_free_context( struct mg_context *ctx );
 int			XX_httplib_get_option_index( const char *name );
 uint64_t		XX_httplib_get_random( void );
+const char *		XX_httplib_get_rel_url_at_current_server( const char *uri, const struct mg_connection *conn );
 void			XX_httplib_get_system_name( char **sysName );
+int			XX_httplib_get_uri_type( const char *uri );
+int			XX_httplib_getreq( struct mg_connection *conn, char *ebuf, size_t ebuf_len, int *err );
+void			XX_httplib_handle_request( struct mg_connection *conn );
 int			XX_httplib_join_thread( pthread_t threadid );
+void			XX_httplib_log_access( const struct mg_connection *conn );
 void			XX_httplib_process_new_connection( struct mg_connection *conn );
 void			XX_httplib_produce_socket( struct mg_context *ctx, const struct socket *sp );
+void			XX_httplib_send_http_error( struct mg_connection *, int, PRINTF_FORMAT_STRING(const char *fmt), ... ) PRINTF_ARGS(3, 4); 
 int			XX_httplib_set_acl_option( struct mg_context *ctx );
 int			XX_httplib_set_gpass_option( struct mg_context *ctx );
 int			XX_httplib_set_ports_option( struct mg_context *ctx );
@@ -820,6 +828,8 @@ int			XX_httplib_set_ssl_option( struct mg_context *ctx );
 int			XX_httplib_set_tcp_nodelay( SOCKET sock, int nodelay_on );
 void			XX_httplib_set_thread_name( const char *name );
 int			XX_httplib_set_uid_option( struct mg_context *ctx );
+int			XX_httplib_should_keep_alive( const struct mg_connection *conn );
+void			XX_httplib_snprintf( const struct mg_connection *conn, int *truncated, char *buf, size_t buflen, PRINTF_FORMAT_STRING(const char *fmt), ... ) PRINTF_ARGS(5, 6);
 void			XX_httplib_sockaddr_to_string(char *buf, size_t len, const union usa *usa);
 void			XX_httplib_ssl_get_client_cert_info( struct mg_connection *conn );
 int			XX_httplib_sslize( struct mg_connection *conn, SSL_CTX *s, int (*func)(SSL *) );

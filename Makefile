@@ -44,10 +44,13 @@ BUILD_DIRS = $(BUILD_DIR) $(BUILD_DIR)/src $(BUILD_DIR)/resources
 LIB_SOURCES =	src/libhttp.c				\
 		src/httplib_accept_new_connection.c	\
 		src/httplib_check_feature.c		\
+		src/httplib_consume_socket.c		\
 		src/httplib_free_context.c		\
 		src/httplib_get_response_code_text.c	\
 		src/httplib_get_system_name.c		\
 		src/httplib_master_thread.c		\
+		src/httplib_process_new_connection.c	\
+		src/httplib_produce_socket.c		\
 		src/httplib_start.c			\
 		src/httplib_stop.c			\
 		src/httplib_version.c			\
