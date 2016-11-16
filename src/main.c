@@ -786,38 +786,6 @@ run_lua(const char *file_name)
 #endif  /* USE_LUA */
 
 
-#ifdef USE_DUKTAPE
-
-#include "duktape.h"
-
-static int
-run_duktape(const char *file_name)
-{
-	duk_context *ctx = NULL;
-
-#ifdef WIN32
-	(void)MakeConsole();
-#endif /* WIN32 */
-
-	ctx = duk_create_heap_default();
-	if (!ctx) {
-		fprintf(stderr, "Failed to create a Duktape heap.\n");
-		goto finished;
-	}
-
-	if (duk_peval_file(ctx, file_name) != 0) {
-		fprintf(stderr, "%s\n", duk_safe_to_string(ctx, -1));
-		goto finished;
-	}
-	duk_pop(ctx); /* ignore result */
-
-finished:
-	duk_destroy_heap(ctx);
-
-	return 0;
-}
-#endif /* USE_DUKTAPE */
-
 
 #if defined(__MINGW32__) || defined(__MINGW64__)
 /* For __MINGW32/64_MAJOR/MINOR_VERSION define */
@@ -973,21 +941,6 @@ start_libhttp(int argc, char *argv[])
 		fprintf(stderr, "\nError: Lua support not enabled\n");
 		exit(EXIT_FAILURE);
 #endif  /* USE_LUA */
-	}
-
-	/* Call Duktape, if -E option is specified */
-	if (argc > 1 && !strcmp(argv[1], "-E")) {
-
-#ifdef USE_DUKTAPE
-		if (argc != 3) {
-			show_usage_and_exit(argv[0]);
-		}
-		exit(run_duktape(argv[2]));
-#else  /* USE_DUKTAPE */
-		show_server_name();
-		fprintf(stderr, "\nError: Ecmascript support not enabled\n");
-		exit(EXIT_FAILURE);
-#endif  /* USE_DUKTAPE */
 	}
 
 	/* Show usage if -h or --help options are specified */

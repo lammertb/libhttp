@@ -640,12 +640,6 @@ struct mg_option XX_httplib_config_options[] = {
     {"lua_script_pattern", CONFIG_TYPE_EXT_PATTERN, "**.lua$"},
     {"lua_server_page_pattern", CONFIG_TYPE_EXT_PATTERN, "**.lp$|**.lsp$"},
 #endif
-#if defined(USE_DUKTAPE)
-    /* The support for duktape is still in alpha version state.
-     * The name of this config option might change. */
-    {"duktape_script_pattern", CONFIG_TYPE_EXT_PATTERN, "**.ssjs$"},
-#endif
-
 #if defined(USE_WEBSOCKET)
     {"websocket_root", CONFIG_TYPE_DIRECTORY, NULL},
 #endif
@@ -3628,7 +3622,7 @@ interpret_uri(struct mg_connection *conn,   /* in: request (must be valid) */
 	/* Local file path and name, corresponding to requested URI
 	 * is now stored in "filename" variable. */
 	if (mg_stat(conn, filename, filep)) {
-#if !defined(NO_CGI) || defined(USE_LUA) || defined(USE_DUKTAPE)
+#if !defined(NO_CGI) || defined(USE_LUA)
 		/* File exists. Check if it is a script type. */
 		if (0
 #if !defined(NO_CGI)
@@ -3639,12 +3633,6 @@ interpret_uri(struct mg_connection *conn,   /* in: request (must be valid) */
 #if defined(USE_LUA)
 		    || match_prefix(conn->ctx->config[LUA_SCRIPT_EXTENSIONS],
 		                    strlen(conn->ctx->config[LUA_SCRIPT_EXTENSIONS]),
-		                    filename) > 0
-#endif
-#if defined(USE_DUKTAPE)
-		    || match_prefix(conn->ctx->config[DUKTAPE_SCRIPT_EXTENSIONS],
-		                    strlen(
-		                        conn->ctx->config[DUKTAPE_SCRIPT_EXTENSIONS]),
 		                    filename) > 0
 #endif
 		    ) {
@@ -3660,7 +3648,7 @@ interpret_uri(struct mg_connection *conn,   /* in: request (must be valid) */
 			 * generated response. */
 			*is_script_resource = !*is_put_or_delete_request;
 		}
-#endif /* !defined(NO_CGI) || defined(USE_LUA) || defined(USE_DUKTAPE) */
+#endif /* !defined(NO_CGI) || defined(USE_LUA) */
 		*is_found = 1;
 		return;
 	}
@@ -3691,7 +3679,7 @@ interpret_uri(struct mg_connection *conn,   /* in: request (must be valid) */
 		}
 	}
 
-#if !defined(NO_CGI) || defined(USE_LUA) || defined(USE_DUKTAPE)
+#if !defined(NO_CGI) || defined(USE_LUA)
 	/* Support PATH_INFO for CGI scripts. */
 	for (p = filename + strlen(filename); p > filename + 1; p--) {
 		if (*p == '/') {
@@ -3707,12 +3695,6 @@ interpret_uri(struct mg_connection *conn,   /* in: request (must be valid) */
 			                     strlen(
 			                         conn->ctx->config[LUA_SCRIPT_EXTENSIONS]),
 			                     filename) > 0
-#endif
-#if defined(USE_DUKTAPE)
-			     || match_prefix(
-			            conn->ctx->config[DUKTAPE_SCRIPT_EXTENSIONS],
-			            strlen(conn->ctx->config[DUKTAPE_SCRIPT_EXTENSIONS]),
-			            filename) > 0
 #endif
 			     ) && mg_stat(conn, filename, filep)) {
 				/* Shift PATH_INFO block one character right, e.g.
@@ -3731,7 +3713,7 @@ interpret_uri(struct mg_connection *conn,   /* in: request (must be valid) */
 			}
 		}
 	}
-#endif /* !defined(NO_CGI) || defined(USE_LUA) || defined(USE_DUKTAPE) */
+#endif /* !defined(NO_CGI) || defined(USE_LUA) */
 #endif /* !defined(NO_FILES) */
 	return;
 
@@ -7200,10 +7182,6 @@ mg_unlock_context(struct mg_context *ctx)
 #include "mod_lua.inl"
 #endif /* USE_LUA */
 
-#ifdef USE_DUKTAPE
-#include "mod_duktape.inl"
-#endif /* USE_DUKTAPE */
-
 #if defined(USE_WEBSOCKET)
 
 /* START OF SHA-1 code
@@ -8802,14 +8780,6 @@ handle_file_based_request(struct mg_connection *conn,
 		 * the
 		 * entire reply. */
 		mg_exec_lua_script(conn, path, NULL);
-#endif
-#if defined(USE_DUKTAPE)
-	} else if (match_prefix(conn->ctx->config[DUKTAPE_SCRIPT_EXTENSIONS],
-	                        strlen(
-	                            conn->ctx->config[DUKTAPE_SCRIPT_EXTENSIONS]),
-	                        path) > 0) {
-		/* Call duktape to generate the page */
-		mg_exec_duktape_script(conn, path);
 #endif
 #if !defined(NO_CGI)
 	} else if (match_prefix(conn->ctx->config[CGI_EXTENSIONS],

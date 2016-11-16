@@ -967,7 +967,6 @@ CIVETWEB_API int mg_get_response(struct mg_connection *conn,
          8  support IPv6 (USE_IPV6 set)
         16  support WebSocket (USE_WEBSOCKET set)
         32  support Lua scripts and Lua server pages (USE_LUA is set)
-        64  support server side JavaScript (USE_DUKTAPE is set)
        128  support caching (NO_CACHING not set)
        The result is undefined for all other feature values.
 

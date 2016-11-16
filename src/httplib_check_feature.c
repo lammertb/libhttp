@@ -59,9 +59,6 @@ unsigned mg_check_feature( unsigned feature ) {
 #if defined(USE_LUA)
 	                                    | 0x0020u
 #endif
-#if defined(USE_DUKTAPE)
-	                                    | 0x0040u
-#endif
 #if !defined(NO_CACHING)
 	                                    | 0x0080u
 #endif
