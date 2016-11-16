@@ -4,6 +4,8 @@ Release Notes v2.0 (work in progress)
 
 Changes
 -------
+
+- Removed sqlite3 from the distribution
 - Removed Lua embedding
 - Removed Duktape embedding
 - Removed Symbian support
