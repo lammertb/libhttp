@@ -112,7 +112,7 @@ url_encoded_field_get(const struct mg_connection *conn,
 	                     (size_t)value_dec_len,
 	                     fdh->user_data);
 
-	mg_free(value_dec);
+	XX_httplib_free(value_dec);
 
 	return ret;
 }

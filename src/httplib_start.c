@@ -60,7 +60,7 @@ struct mg_context *mg_start( const struct mg_callbacks *callbacks, void *user_da
 	/* Random number generator will initialize at the first call */
 	ctx->auth_nonce_mask = (uint64_t)get_random() ^ (uint64_t)(ptrdiff_t)(options);
 
-	if (mg_atomic_inc(&sTlsInit) == 1) {
+	if (XX_httplib_atomic_inc(&sTlsInit) == 1) {
 
 #if defined(_WIN32)
 		InitializeCriticalSection(&global_log_file_lock);
@@ -74,9 +74,9 @@ struct mg_context *mg_start( const struct mg_callbacks *callbacks, void *user_da
 			/* Fatal error - abort start. However, this situation should
 			 * never
 			 * occur in practice. */
-			mg_atomic_dec(&sTlsInit);
-			mg_cry(fc(ctx), "Cannot initialize thread local storage");
-			mg_free(ctx);
+			XX_httplib_atomic_dec(&sTlsInit);
+			mg_cry( XX_httplib_fc(ctx), "Cannot initialize thread local storage");
+			XX_httplib_free(ctx);
 			return NULL;
 		}
 	} else {
@@ -86,7 +86,7 @@ struct mg_context *mg_start( const struct mg_callbacks *callbacks, void *user_da
 	}
 
 	tls.is_master  = -1;
-	tls.thread_idx = (unsigned)mg_atomic_inc(&thread_idx_max);
+	tls.thread_idx = (unsigned)XX_httplib_atomic_inc(&thread_idx_max);
 #if defined(_WIN32)
 	tls.pthread_cond_helper_mutex = NULL;
 #endif
@@ -105,8 +105,8 @@ struct mg_context *mg_start( const struct mg_callbacks *callbacks, void *user_da
 	if (!ok) {
 		/* Fatal error - abort start. However, this situation should never
 		 * occur in practice. */
-		mg_cry(fc(ctx), "Cannot initialize thread synchronization objects");
-		mg_free(ctx);
+		mg_cry( XX_httplib_fc(ctx), "Cannot initialize thread synchronization objects");
+		XX_httplib_free(ctx);
 		pthread_setspecific(sTlsKey, NULL);
 		return NULL;
 	}
@@ -125,19 +125,19 @@ struct mg_context *mg_start( const struct mg_callbacks *callbacks, void *user_da
 
 	while (options && (name = *options++) != NULL) {
 		if ((idx = get_option_index(name)) == -1) {
-			mg_cry(fc(ctx), "Invalid option: %s", name);
+			mg_cry( XX_httplib_fc(ctx), "Invalid option: %s", name);
 			free_context(ctx);
 			pthread_setspecific(sTlsKey, NULL);
 			return NULL;
 		} else if ((value = *options++) == NULL) {
-			mg_cry(fc(ctx), "%s: option value cannot be NULL", name);
+			mg_cry( XX_httplib_fc(ctx), "%s: option value cannot be NULL", name);
 			free_context(ctx);
 			pthread_setspecific(sTlsKey, NULL);
 			return NULL;
 		}
 		if (ctx->config[idx] != NULL) {
-			mg_cry(fc(ctx), "warning: %s: duplicate option", name);
-			mg_free(ctx->config[idx]);
+			mg_cry( XX_httplib_fc(ctx), "warning: %s: duplicate option", name);
+			XX_httplib_free(ctx->config[idx]);
 		}
 		ctx->config[idx] = mg_strdup(value);
 		DEBUG_TRACE("[%s] -> [%s]", name, value);
@@ -153,7 +153,7 @@ struct mg_context *mg_start( const struct mg_callbacks *callbacks, void *user_da
 
 #if defined(NO_FILES)
 	if (ctx->config[DOCUMENT_ROOT] != NULL) {
-		mg_cry(fc(ctx), "%s", "Document root must not be set");
+		mg_cry( XX_httplib_fc(ctx), "%s", "Document root must not be set");
 		free_context(ctx);
 		pthread_setspecific(sTlsKey, NULL);
 		return NULL;
@@ -187,7 +187,7 @@ struct mg_context *mg_start( const struct mg_callbacks *callbacks, void *user_da
 	workerthreadcount = atoi(ctx->config[NUM_THREADS]);
 
 	if (workerthreadcount > MAX_WORKER_THREADS) {
-		mg_cry(fc(ctx), "Too many worker threads");
+		mg_cry( XX_httplib_fc(ctx), "Too many worker threads");
 		free_context(ctx);
 		pthread_setspecific(sTlsKey, NULL);
 		return NULL;
@@ -198,7 +198,7 @@ struct mg_context *mg_start( const struct mg_callbacks *callbacks, void *user_da
 		ctx->workerthreadids =
 		    (pthread_t *)mg_calloc(ctx->cfg_worker_threads, sizeof(pthread_t));
 		if (ctx->workerthreadids == NULL) {
-			mg_cry(fc(ctx), "Not enough memory for worker thread ID array");
+			mg_cry( XX_httplib_fc(ctx), "Not enough memory for worker thread ID array");
 			free_context(ctx);
 			pthread_setspecific(sTlsKey, NULL);
 			return NULL;
@@ -208,8 +208,8 @@ struct mg_context *mg_start( const struct mg_callbacks *callbacks, void *user_da
 		ctx->client_wait_events = mg_calloc(sizeof(ctx->client_wait_events[0]),
 		                                    ctx->cfg_worker_threads);
 		if (ctx->client_wait_events == NULL) {
-			mg_cry(fc(ctx), "Not enough memory for worker event array");
-			mg_free(ctx->workerthreadids);
+			mg_cry( XX_httplib_fc(ctx), "Not enough memory for worker event array");
+			XX_httplib_free(ctx->workerthreadids);
 			free_context(ctx);
 			pthread_setspecific(sTlsKey, NULL);
 			return NULL;
@@ -218,9 +218,9 @@ struct mg_context *mg_start( const struct mg_callbacks *callbacks, void *user_da
 		ctx->client_socks =
 		    mg_calloc(sizeof(ctx->client_socks[0]), ctx->cfg_worker_threads);
 		if (ctx->client_wait_events == NULL) {
-			mg_cry(fc(ctx), "Not enough memory for worker socket array");
-			mg_free(ctx->client_socks);
-			mg_free(ctx->workerthreadids);
+			mg_cry( XX_httplib_fc(ctx), "Not enough memory for worker socket array");
+			XX_httplib_free(ctx->client_socks);
+			XX_httplib_free(ctx->workerthreadids);
 			free_context(ctx);
 			pthread_setspecific(sTlsKey, NULL);
 			return NULL;
@@ -229,7 +229,7 @@ struct mg_context *mg_start( const struct mg_callbacks *callbacks, void *user_da
 		for (i = 0; (unsigned)i < ctx->cfg_worker_threads; i++) {
 			ctx->client_wait_events[i] = event_create();
 			if (ctx->client_wait_events[i] == 0) {
-				mg_cry(fc(ctx), "Error creating worker event %i", i);
+				mg_cry( XX_httplib_fc(ctx), "Error creating worker event %i", i);
 				/* TODO: clean all and exit */
 			}
 		}
@@ -238,7 +238,7 @@ struct mg_context *mg_start( const struct mg_callbacks *callbacks, void *user_da
 
 #if defined(USE_TIMERS)
 	if (timers_init(ctx) != 0) {
-		mg_cry(fc(ctx), "Error creating timers");
+		mg_cry( XX_httplib_fc(ctx), "Error creating timers");
 		free_context(ctx);
 		pthread_setspecific(sTlsKey, NULL);
 		return NULL;
@@ -271,16 +271,16 @@ struct mg_context *mg_start( const struct mg_callbacks *callbacks, void *user_da
 
 			/* thread was not created */
 			if (wta != NULL) {
-				mg_free(wta);
+				XX_httplib_free(wta);
 			}
 
 			if (i > 0) {
-				mg_cry(fc(ctx),
+				mg_cry( XX_httplib_fc(ctx),
 				       "Cannot start worker thread %i: error %ld",
 				       i + 1,
 				       (long)ERRNO);
 			} else {
-				mg_cry(fc(ctx),
+				mg_cry( XX_httplib_fc(ctx),
 				       "Cannot create threads: error %ld",
 				       (long)ERRNO);
 				free_context(ctx);
