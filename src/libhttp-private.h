@@ -802,6 +802,12 @@ struct websocket_client_thread_data {
 };
 
 
+struct uriprot_tp {
+	const char *proto;
+	size_t proto_len;
+	unsigned default_port;
+};
+
 /*
  * Functions local to the server. These functions all begin with XX_httplib to
  * indicate that these are private functions.
@@ -825,6 +831,7 @@ void			XX_httplib_get_system_name( char **sysName );
 int			XX_httplib_get_uri_type( const char *uri );
 int			XX_httplib_getreq( struct mg_connection *conn, char *ebuf, size_t ebuf_len, int *err );
 void			XX_httplib_handle_request( struct mg_connection *conn );
+int			XX_httplib_is_valid_port( unsigned long port );
 int			XX_httplib_join_thread( pthread_t threadid );
 void			XX_httplib_log_access( const struct mg_connection *conn );
 int			XX_httplib_parse_http_message( char *buf, int len, struct mg_request_info *ri );
@@ -883,8 +890,9 @@ void			XX_httplib_free( void *a );
 void *			XX_httplib_malloc( size_t a );
 #endif  /* MEMORY_DEBUGGING */
 
-extern struct mg_option	XX_httplib_config_options[];
-extern struct ssl_func	XX_httplib_ssl_sw[];
-extern int		XX_httplib_sTlsInit;
-extern pthread_key_t	XX_httplib_sTlsKey;
-extern int		XX_httplib_thread_idx_max;
+extern const struct uriprot_tp	XX_httplib_abs_uri_protocols[];
+extern struct mg_option		XX_httplib_config_options[];
+extern struct ssl_func		XX_httplib_ssl_sw[];
+extern int			XX_httplib_sTlsInit;
+extern pthread_key_t		XX_httplib_sTlsKey;
+extern int			XX_httplib_thread_idx_max;

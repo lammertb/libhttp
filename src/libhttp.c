@@ -4270,10 +4270,11 @@ int mg_modify_passwords_file(const char *fname, const char *domain, const char *
 }
 
 
-static int is_valid_port(unsigned long port) {
+int XX_httplib_is_valid_port(unsigned long port) {
 
 	return port < 0xffff;
-}
+
+}  /* XX_httplib_is_valid_port */
 
 
 static int mg_inet_pton(int af, const char *src, void *dst, size_t dstlen) {
@@ -4334,7 +4335,7 @@ connect_socket(struct mg_context *ctx /* may be NULL */,
 		return 0;
 	}
 
-	if (port < 0 || !is_valid_port((unsigned)port)) {
+	if (port < 0 || !XX_httplib_is_valid_port((unsigned)port)) {
 		XX_httplib_snprintf(NULL, NULL, ebuf, ebuf_len, "%s", "invalid port");
 		return 0;
 	}
@@ -8147,7 +8148,7 @@ static int parse_port_string(const struct vec *vec, struct socket *so, int *ip_v
 	so->ssl_redir = (ch == 'r');
 
 	/* Make sure the port is valid and vector ends with 's', 'r' or ',' */
-	if (is_valid_port(port)
+	if (XX_httplib_is_valid_port(port)
 	    && (ch == '\0' || ch == 's' || ch == 'r' || ch == ',')) {
 		return 1;
 	}
@@ -9520,11 +9521,7 @@ struct mg_connection * mg_connect_client(const char *host, int port, int use_ssl
 }
 
 
-static const struct {
-	const char *proto;
-	size_t proto_len;
-	unsigned default_port;
-} abs_uri_protocols[] = {{"http://", 7, 80},
+const struct uriprot_tp XX_httplib_abs_uri_protocols[] = {{"http://", 7, 80},
                          {"https://", 8, 443},
                          {"ws://", 5, 80},
                          {"wss://", 6, 443},
@@ -9595,22 +9592,22 @@ int XX_httplib_get_uri_type( const char *uri ) {
 	/* This function only checks if the uri is valid, not if it is
 	 * addressing the current server. So LibHTTP can also be used
 	 * as a proxy server. */
-	for (i = 0; abs_uri_protocols[i].proto != NULL; i++) {
+	for (i = 0; XX_httplib_abs_uri_protocols[i].proto != NULL; i++) {
 		if (mg_strncasecmp(uri,
-		                   abs_uri_protocols[i].proto,
-		                   abs_uri_protocols[i].proto_len) == 0) {
+		                   XX_httplib_abs_uri_protocols[i].proto,
+		                   XX_httplib_abs_uri_protocols[i].proto_len) == 0) {
 
-			hostend = strchr(uri + abs_uri_protocols[i].proto_len, '/');
+			hostend = strchr(uri + XX_httplib_abs_uri_protocols[i].proto_len, '/');
 			if (!hostend) {
 				return 0;
 			}
-			portbegin = strchr(uri + abs_uri_protocols[i].proto_len, ':');
+			portbegin = strchr(uri + XX_httplib_abs_uri_protocols[i].proto_len, ':');
 			if (!portbegin) {
 				return 3;
 			}
 
 			port = strtoul(portbegin + 1, &portend, 10);
-			if ((portend != hostend) || !port || !is_valid_port(port)) {
+			if ((portend != hostend) || !port || !XX_httplib_is_valid_port(port)) {
 				return 0;
 			}
 
@@ -9621,84 +9618,3 @@ int XX_httplib_get_uri_type( const char *uri ) {
 	return 0;
 
 }  /* XX_httplib_get_uri_type */
-
-
-/* Return NULL or the relative uri at the current server */
-const char * XX_httplib_get_rel_url_at_current_server( const char *uri, const struct mg_connection *conn ) {
-
-	const char *server_domain;
-	size_t server_domain_len;
-	size_t request_domain_len = 0;
-	unsigned long port = 0;
-	int i;
-	const char *hostbegin = NULL;
-	const char *hostend = NULL;
-	const char *portbegin;
-	char *portend;
-
-	/* DNS is case insensitive, so use case insensitive string compare here
-	 */
-	server_domain = conn->ctx->config[AUTHENTICATION_DOMAIN];
-	if (!server_domain) {
-		return 0;
-	}
-	server_domain_len = strlen(server_domain);
-	if (!server_domain_len) {
-		return 0;
-	}
-
-	for (i = 0; abs_uri_protocols[i].proto != NULL; i++) {
-		if (mg_strncasecmp(uri,
-		                   abs_uri_protocols[i].proto,
-		                   abs_uri_protocols[i].proto_len) == 0) {
-
-			hostbegin = uri + abs_uri_protocols[i].proto_len;
-			hostend = strchr(hostbegin, '/');
-			if (!hostend) {
-				return 0;
-			}
-			portbegin = strchr(hostbegin, ':');
-			if ((!portbegin) || (portbegin > hostend)) {
-				port = abs_uri_protocols[i].default_port;
-				request_domain_len = (size_t)(hostend - hostbegin);
-			} else {
-				port = strtoul(portbegin + 1, &portend, 10);
-				if ((portend != hostend) || !port || !is_valid_port(port)) {
-					return 0;
-				}
-				request_domain_len = (size_t)(portbegin - hostbegin);
-			}
-			/* protocol found, port set */
-			break;
-		}
-	}
-
-	if (!port) {
-		/* port remains 0 if the protocol is not found */
-		return 0;
-	}
-
-#if defined(USE_IPV6)
-	if (conn->client.lsa.sa.sa_family == AF_INET6) {
-		if (ntohs(conn->client.lsa.sin6.sin6_port) != port) {
-			/* Request is directed to a different port */
-			return 0;
-		}
-	} else
-#endif
-	{
-		if (ntohs(conn->client.lsa.sin.sin_port) != port) {
-			/* Request is directed to a different port */
-			return 0;
-		}
-	}
-
-	if ((request_domain_len != server_domain_len)
-	    || (0 != memcmp(server_domain, hostbegin, server_domain_len))) {
-		/* Request is directed to another server */
-		return 0;
-	}
-
-	return hostend;
-
-}  /* XX_httplib_get_rel_url_at_current_server */
