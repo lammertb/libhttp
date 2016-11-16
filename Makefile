@@ -42,6 +42,7 @@ PORTS = 8080
 BUILD_DIRS = $(BUILD_DIR) $(BUILD_DIR)/src $(BUILD_DIR)/resources
 
 LIB_SOURCES =	src/libhttp.c				\
+		src/httplib_accept_new_connection.c	\
 		src/httplib_check_feature.c		\
 		src/httplib_free_context.c		\
 		src/httplib_get_response_code_text.c	\

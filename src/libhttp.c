@@ -490,9 +490,6 @@ typedef int socklen_t;
 #endif /* NO_SOCKLEN_T */
 #define _DARWIN_UNLIMITED_SELECT
 
-#define IP_ADDR_STR_LEN (50) /* IPv6 hex string is 46 chars */
-
-
 
 #if !defined(NO_SSL)  &&  !defined(NO_SSL_DL)
 
@@ -1168,7 +1165,7 @@ int mg_get_server_ports(const struct mg_context *ctx, int size, struct mg_server
 }
 
 
-static void sockaddr_to_string(char *buf, size_t len, const union usa *usa) {
+void XX_httplib_sockaddr_to_string(char *buf, size_t len, const union usa *usa) {
 
 	buf[0] = '\0';
 
@@ -1182,7 +1179,8 @@ static void sockaddr_to_string(char *buf, size_t len, const union usa *usa) {
 		getnameinfo(&usa->sa, sizeof(usa->sin6), buf, (unsigned)len, NULL, 0, NI_NUMERICHOST);
 	}
 #endif
-}
+
+}  /* XX_httplib_sockaddr_to_string */
 
 
 /* Convert time_t to a string. According to RFC2616, Sec 14.18, this must be
@@ -1246,7 +1244,7 @@ void mg_cry(const struct mg_connection *conn, const char *fmt, ...) {
 			flockfile(fi.fp);
 			timestamp = time(NULL);
 
-			sockaddr_to_string(src_addr, sizeof(src_addr), &conn->client.rsa);
+			XX_httplib_sockaddr_to_string(src_addr, sizeof(src_addr), &conn->client.rsa);
 			fprintf(fi.fp,
 			        "[%010lu] [error] [client %s] ",
 			        (unsigned long)timestamp,
@@ -2221,17 +2219,17 @@ static int poll(struct pollfd *pfd, unsigned int n, int milliseconds) {
 #pragma GCC diagnostic pop
 #endif
 
+/* conn parameter may be NULL */
+void XX_httplib_set_close_on_exec( SOCKET sock, struct mg_connection *conn ) {
 
-static void
-set_close_on_exec(SOCKET sock, struct mg_connection *conn /* may be null */)
-{
 	(void)conn; /* Unused. */
 #if defined(_WIN32_WCE)
 	(void)sock;
 #else
 	SetHandleInformation((HANDLE)(intptr_t)sock, HANDLE_FLAG_INHERIT, 0);
 #endif
-}
+
+}  /* XX_httplib_set_close_on_exec */
 
 
 int
@@ -2474,14 +2472,14 @@ static int mg_stat(struct mg_connection *conn, const char *path, struct file *fi
 
 }  /* mg_stat */
 
-
-static void set_close_on_exec(SOCKET fd, struct mg_connection *conn /* may be null */) {
+/* conn may be NULL */
+void XX_httplib_set_close_on_exec( SOCKET fd, struct mg_connection *conn ) {
 
 	if (fcntl(fd, F_SETFD, FD_CLOEXEC) != 0) {
 		if (conn) { mg_cry(conn, "%s: fcntl(F_SETFD FD_CLOEXEC) failed: %s", __func__, strerror(ERRNO)); }
 	}
 
-}  /* set_close_on_exec */
+}  /* XX_httplib_set_close_on_exec */
 
 
 int mg_start_thread(mg_thread_func_t func, void *param) {
@@ -4549,7 +4547,7 @@ connect_socket(struct mg_context *ctx /* may be NULL */,
 		return 0;
 	}
 
-	set_close_on_exec(*sock, XX_httplib_fc(ctx));
+	XX_httplib_set_close_on_exec(*sock, XX_httplib_fc(ctx));
 
 	if ((ip_ver == 4)
 	    && (connect(*sock, (struct sockaddr *)&sa->sin, sizeof(sa->sin))
@@ -5904,7 +5902,7 @@ static void prepare_cgi_environment(struct mg_connection *conn, const char *prog
 		addenv(env, "SERVER_PORT=%d", ntohs(conn->client.lsa.sin.sin_port));
 	}
 
-	sockaddr_to_string(src_addr, sizeof(src_addr), &conn->client.rsa);
+	XX_httplib_sockaddr_to_string(src_addr, sizeof(src_addr), &conn->client.rsa);
 	addenv(env, "REMOTE_ADDR=%s", src_addr);
 
 	addenv(env, "REQUEST_METHOD=%s", conn->request_info.request_method);
@@ -6094,12 +6092,12 @@ static void handle_cgi_request(struct mg_connection *conn, const char *prog) {
 	}
 
 	/* Make sure child closes all pipe descriptors. It must dup them to 0,1 */
-	set_close_on_exec((SOCKET)fdin[0], conn);  /* stdin read */
-	set_close_on_exec((SOCKET)fdout[1], conn); /* stdout write */
-	set_close_on_exec((SOCKET)fderr[1], conn); /* stderr write */
-	set_close_on_exec((SOCKET)fdin[1], conn);  /* stdin write */
-	set_close_on_exec((SOCKET)fdout[0], conn); /* stdout read */
-	set_close_on_exec((SOCKET)fderr[0], conn); /* stderr read */
+	XX_httplib_set_close_on_exec((SOCKET)fdin[0], conn);  /* stdin read */
+	XX_httplib_set_close_on_exec((SOCKET)fdout[1], conn); /* stdout write */
+	XX_httplib_set_close_on_exec((SOCKET)fderr[1], conn); /* stderr write */
+	XX_httplib_set_close_on_exec((SOCKET)fdin[1], conn);  /* stdin write */
+	XX_httplib_set_close_on_exec((SOCKET)fdout[0], conn); /* stdout read */
+	XX_httplib_set_close_on_exec((SOCKET)fderr[0], conn); /* stderr read */
 
 	/* Parent closes only one side of the pipes.
 	 * If we don't mark them as closed, close() attempt before
@@ -7741,9 +7739,7 @@ static void redirect_to_https_port(struct mg_connection *conn, int ssl_index) {
 	} else {
 		/* Cannot get host from the Host: header.
 		 * Fallback to our IP address. */
-		if (conn) {
-			sockaddr_to_string(host, hostlen, &conn->client.lsa);
-		}
+		if (conn) XX_httplib_sockaddr_to_string(host, hostlen, &conn->client.lsa);
 	}
 
 	/* Send host, port, uri and (if it exists) ?query_string */
@@ -8806,7 +8802,7 @@ int XX_httplib_set_ports_option( struct mg_context *ctx ) {
 			continue;
 		}
 
-		set_close_on_exec(so.sock, XX_httplib_fc(ctx));
+		XX_httplib_set_close_on_exec(so.sock, XX_httplib_fc(ctx));
 		ctx->listening_sockets = ptr;
 		ctx->listening_sockets[ctx->num_listening_sockets] = so;
 		ctx->listening_socket_fds = pfd;
@@ -8877,7 +8873,7 @@ static void log_access(const struct mg_connection *conn) {
 
 	ri = &conn->request_info;
 
-	sockaddr_to_string(src_addr, sizeof(src_addr), &conn->client.rsa);
+	XX_httplib_sockaddr_to_string(src_addr, sizeof(src_addr), &conn->client.rsa);
 	referer = header_val(conn, "Referer");
 	user_agent = header_val(conn, "User-Agent");
 
@@ -8916,7 +8912,7 @@ static void log_access(const struct mg_connection *conn) {
 /* Verify given socket address against the ACL.
  * Return -1 if ACL is malformed, 0 if address is disallowed, 1 if allowed.
  */
-static int check_acl(struct mg_context *ctx, uint32_t remote_ip) {
+int XX_httplib_check_acl( struct mg_context *ctx, uint32_t remote_ip ) {
 
 	int allowed, flag;
 	uint32_t net, mask;
@@ -8938,15 +8934,14 @@ static int check_acl(struct mg_context *ctx, uint32_t remote_ip) {
 				return -1;
 			}
 
-			if (net == (remote_ip & mask)) {
-				allowed = flag;
-			}
+			if (net == (remote_ip & mask)) allowed = flag;
 		}
 
 		return allowed == '+';
 	}
 	return -1;
-}
+
+}  /* XX_httplib_check_acl */
 
 
 #if !defined(_WIN32)
@@ -9638,7 +9633,7 @@ int XX_httplib_set_gpass_option( struct mg_context *ctx ) {
 
 int XX_httplib_set_acl_option(struct mg_context *ctx) {
 
-	return check_acl(ctx, (uint32_t)0x7f000001UL) != -1;
+	return XX_httplib_check_acl(ctx, (uint32_t)0x7f000001UL) != -1;
 
 }  /* XX_httplib_set_acl_option */
 
@@ -9666,7 +9661,7 @@ static void reset_per_request_attributes(struct mg_connection *conn) {
 }
 
 
-static int set_sock_timeout(SOCKET sock, int milliseconds) {
+int XX_httplib_set_sock_timeout( SOCKET sock, int milliseconds ) {
 
 	int r0 = 0, r1, r2;
 
@@ -9702,17 +9697,19 @@ static int set_sock_timeout(SOCKET sock, int milliseconds) {
 	r2 = setsockopt( sock, SOL_SOCKET, SO_SNDTIMEO, (SOCK_OPT_TYPE)&tv, sizeof(tv));
 
 	return r0 || r1 || r2;
-}
+
+}  /* XX_httplib_set_sock_timeout */
 
 
-static int set_tcp_nodelay(SOCKET sock, int nodelay_on) {
+int XX_httplib_set_tcp_nodelay( SOCKET sock, int nodelay_on ) {
 
 	if (setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, (SOCK_OPT_TYPE)&nodelay_on, sizeof(nodelay_on)) != 0) { /* Error */
 		return 1;
 	}
 	/* OK */
 	return 0;
-}
+
+}  /* XX_httplib_set_tcp_nodelay */
 
 
 static void close_socket_gracefully(struct mg_connection *conn) {
@@ -10232,7 +10229,7 @@ int mg_get_response(struct mg_connection *conn, char *ebuf, size_t ebuf_len, int
 		if (timeout >= 0) {
 			mg_snprintf(conn, NULL, txt, sizeof(txt), "%i", timeout);
 			rctx.config[REQUEST_TIMEOUT] = txt;
-			set_sock_timeout(conn->client.sock, timeout);
+			XX_httplib_set_sock_timeout(conn->client.sock, timeout);
 		} else {
 			rctx.config[REQUEST_TIMEOUT] = NULL;
 		}
@@ -10582,9 +10579,8 @@ process_new_connection(struct mg_connection *conn)
 
 #if defined(ALTERNATIVE_QUEUE)
 
-static void
-produce_socket(struct mg_context *ctx, const struct socket *sp)
-{
+void XX_httplib_produce_socket( struct mg_context *ctx, const struct socket *sp ) {
+
 	unsigned int i;
 
 	for (;;) {
@@ -10600,12 +10596,12 @@ produce_socket(struct mg_context *ctx, const struct socket *sp)
 		/* queue is full */
 		mg_sleep(1);
 	}
-}
+
+}  /* XX_httplib_produce_socket */
 
 
-static int
-consume_socket(struct mg_context *ctx, struct socket *sp, int thread_index)
-{
+static int consume_socket(struct mg_context *ctx, struct socket *sp, int thread_index) {
+
 	ctx->client_socks[thread_index].in_use = 0;
 	event_wait(ctx->client_wait_events[thread_index]);
 	*sp = ctx->client_socks[thread_index];
@@ -10652,9 +10648,8 @@ consume_socket(struct mg_context *ctx, struct socket *sp, int thread_index)
 
 
 /* Master thread adds accepted socket to a queue */
-static void
-produce_socket(struct mg_context *ctx, const struct socket *sp)
-{
+void XX_httplib_produce_socket(struct mg_context *ctx, const struct socket *sp) {
+
 #define QUEUE_SIZE(ctx) ((int)(ARRAY_SIZE(ctx->queue)))
 	if (!ctx) {
 		return;
@@ -10676,7 +10671,9 @@ produce_socket(struct mg_context *ctx, const struct socket *sp)
 	(void)pthread_cond_signal(&ctx->sq_full);
 	(void)pthread_mutex_unlock(&ctx->thread_mutex);
 #undef QUEUE_SIZE
-}
+
+}  /* XX_httplib_produce_socket */
+
 #endif /* ALTERNATIVE_QUEUE */
 
 
@@ -10738,7 +10735,7 @@ static void * worker_thread_run( struct worker_thread_args *thread_args ) {
 				    ntohs(conn->client.rsa.sin.sin_port);
 			}
 
-			sockaddr_to_string(conn->request_info.remote_addr,
+			XX_httplib_sockaddr_to_string(conn->request_info.remote_addr,
 			                   sizeof(conn->request_info.remote_addr),
 			                   &conn->client.rsa);
 
@@ -10818,73 +10815,3 @@ void *XX_httplib_worker_thread( void *thread_func_param ) {
 }  /* XX_httplib_worker_thread */
 
 #endif /* _WIN32 */
-
-
-void XX_httplib_accept_new_connection( const struct socket *listener, struct mg_context *ctx ) {
-
-	struct socket so;
-	char src_addr[IP_ADDR_STR_LEN];
-	socklen_t len = sizeof(so.rsa);
-	int on = 1;
-	int timeout;
-
-	if (!listener) {
-		return;
-	}
-
-	if ((so.sock = accept(listener->sock, &so.rsa.sa, &len))
-	    == INVALID_SOCKET) {
-	} else if (!check_acl(ctx, ntohl(*(uint32_t *)&so.rsa.sin.sin_addr))) {
-		sockaddr_to_string(src_addr, sizeof(src_addr), &so.rsa);
-		mg_cry( XX_httplib_fc(ctx), "%s: %s is not allowed to connect", __func__, src_addr);
-		closesocket(so.sock);
-		so.sock = INVALID_SOCKET;
-	} else {
-		/* Put so socket structure into the queue */
-		set_close_on_exec(so.sock, XX_httplib_fc(ctx));
-		so.is_ssl = listener->is_ssl;
-		so.ssl_redir = listener->ssl_redir;
-		if (getsockname(so.sock, &so.lsa.sa, &len) != 0) {
-			mg_cry( XX_httplib_fc(ctx), "%s: getsockname() failed: %s", __func__, strerror(ERRNO));
-		}
-
-		/* Set TCP keep-alive. This is needed because if HTTP-level
-		 * keep-alive
-		 * is enabled, and client resets the connection, server won't get
-		 * TCP FIN or RST and will keep the connection open forever. With
-		 * TCP keep-alive, next keep-alive handshake will figure out that
-		 * the client is down and will close the server end.
-		 * Thanks to Igor Klopov who suggested the patch. */
-		if (setsockopt(so.sock, SOL_SOCKET, SO_KEEPALIVE, (SOCK_OPT_TYPE)&on, sizeof(on)) != 0) {
-
-			mg_cry( XX_httplib_fc(ctx), "%s: setsockopt(SOL_SOCKET SO_KEEPALIVE) failed: %s", __func__, strerror(ERRNO));
-		}
-
-		/* Disable TCP Nagle's algorithm. Normally TCP packets are coalesced
-		 * to effectively fill up the underlying IP packet payload and
-		 * reduce the overhead of sending lots of small buffers. However
-		 * this hurts the server's throughput (ie. operations per second)
-		 * when HTTP 1.1 persistent connections are used and the responses
-		 * are relatively small (eg. less than 1400 bytes).
-		 */
-		if ((ctx != NULL) && (ctx->config[CONFIG_TCP_NODELAY] != NULL)
-		    && (!strcmp(ctx->config[CONFIG_TCP_NODELAY], "1"))) {
-			if (set_tcp_nodelay(so.sock, 1) != 0) {
-				mg_cry( XX_httplib_fc(ctx), "%s: setsockopt(IPPROTO_TCP TCP_NODELAY) failed: %s", __func__, strerror(ERRNO));
-			}
-		}
-
-		if (ctx && ctx->config[REQUEST_TIMEOUT]) {
-			timeout = atoi(ctx->config[REQUEST_TIMEOUT]);
-		} else {
-			timeout = -1;
-		}
-
-		if (timeout > 0) {
-			set_sock_timeout(so.sock, timeout);
-		}
-
-		produce_socket(ctx, &so);
-	}
-}
-
