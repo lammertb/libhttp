@@ -92,10 +92,6 @@ struct mg_context *mg_start( const struct mg_callbacks *callbacks, void *user_da
 #endif
 	pthread_setspecific(XX_httplib_sTlsKey, &tls);
 
-#if defined(USE_LUA)
-	lua_init_optional_libraries();
-#endif
-
 	ok = 0 == pthread_mutex_init(&ctx->thread_mutex, &XX_httplib_pthread_mutex_attr);
 #if !defined(ALTERNATIVE_QUEUE)
 	ok &= 0 == pthread_cond_init(&ctx->sq_empty, NULL);
@@ -118,10 +114,6 @@ struct mg_context *mg_start( const struct mg_callbacks *callbacks, void *user_da
 	}
 	ctx->user_data = user_data;
 	ctx->handlers = NULL;
-
-#if defined(USE_LUA) && defined(USE_WEBSOCKET)
-	ctx->shared_lua_websockets = 0;
-#endif
 
 	while (options && (name = *options++) != NULL) {
 		if ((idx = XX_httplib_get_option_index(name)) == -1) {

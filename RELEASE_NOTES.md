@@ -4,6 +4,8 @@ Release Notes v2.0 (work in progress)
 
 Changes
 -------
+- Removed Lua embedding
+- Removed Duktape embedding
 - Removed Symbian support
 - Changed references from CivetWeb to LibHTTP in documentation
 - Removed deprecated function `mg_upload();`

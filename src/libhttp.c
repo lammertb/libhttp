@@ -603,14 +603,7 @@ struct mg_option XX_httplib_config_options[] = {
     {"enable_directory_listing", CONFIG_TYPE_BOOLEAN, "yes"},
     {"error_log_file", CONFIG_TYPE_FILE, NULL},
     {"global_auth_file", CONFIG_TYPE_FILE, NULL},
-    {"index_files",
-     CONFIG_TYPE_STRING,
-#ifdef USE_LUA
-     "index.xhtml,index.html,index.htm,index.lp,index.lsp,index.lua,index.cgi,"
-     "index.shtml,index.php"},
-#else
-     "index.xhtml,index.html,index.htm,index.cgi,index.shtml,index.php"},
-#endif
+    {"index_files", CONFIG_TYPE_STRING, "index.xhtml,index.html,index.htm,index.cgi,index.shtml,index.php"},
     {"enable_keep_alive", CONFIG_TYPE_BOOLEAN, "no"},
     {"access_control_list", CONFIG_TYPE_STRING, NULL},
     {"extra_mime_types", CONFIG_TYPE_STRING, NULL},
@@ -635,16 +628,8 @@ struct mg_option XX_httplib_config_options[] = {
 #endif
     {"decode_url", CONFIG_TYPE_BOOLEAN, "yes"},
 
-#if defined(USE_LUA)
-    {"lua_preload_file", CONFIG_TYPE_FILE, NULL},
-    {"lua_script_pattern", CONFIG_TYPE_EXT_PATTERN, "**.lua$"},
-    {"lua_server_page_pattern", CONFIG_TYPE_EXT_PATTERN, "**.lp$|**.lsp$"},
-#endif
 #if defined(USE_WEBSOCKET)
     {"websocket_root", CONFIG_TYPE_DIRECTORY, NULL},
-#endif
-#if defined(USE_LUA) && defined(USE_WEBSOCKET)
-    {"lua_websocket_pattern", CONFIG_TYPE_EXT_PATTERN, "**.lua$"},
 #endif
     {"access_control_allow_origin", CONFIG_TYPE_STRING, "*"},
     {"error_pages", CONFIG_TYPE_DIRECTORY, NULL},
@@ -3446,7 +3431,7 @@ int mg_get_cookie(const char *cookie_header, const char *var_name, char *dst, si
 }
 
 
-#if defined(USE_WEBSOCKET) || defined(USE_LUA)
+#if defined(USE_WEBSOCKET)
 static void base64_encode(const unsigned char *src, int src_len, char *dst) {
 
 	static const char *b64 =
@@ -3471,50 +3456,6 @@ static void base64_encode(const unsigned char *src, int src_len, char *dst) {
 		dst[j++] = '=';
 	}
 	dst[j++] = '\0';
-}
-#endif
-
-
-#if defined(USE_LUA)
-static unsigned char b64reverse(char letter) {
-
-	if (letter >= 'A' && letter <= 'Z') { return letter - 'A'; }
-	if (letter >= 'a' && letter <= 'z') { return letter - 'a' + 26; }
-	if (letter >= '0' && letter <= '9') { return letter - '0' + 52; }
-	if (letter == '+') { return 62; }
-	if (letter == '/') { return 63; }
-	if (letter == '=') { return 255; /* normal end */ }
-	return 254; /* error */
-}
-
-
-static int base64_decode(const unsigned char *src, int src_len, char *dst, size_t *dst_len) {
-
-	int i;
-	unsigned char a, b, c, d;
-
-	*dst_len = 0;
-
-	for (i = 0; i < src_len; i += 4) {
-		a = b64reverse(src[i]);
-		if (a >= 254) { return i; }
-
-		b = b64reverse(((i + 1) >= src_len) ? 0 : src[i + 1]);
-		if (b >= 254) { return i + 1; }
-
-		c = b64reverse(((i + 2) >= src_len) ? 0 : src[i + 2]);
-		if (c == 254) { return i + 2; }
-
-		d = b64reverse(((i + 3) >= src_len) ? 0 : src[i + 3]);
-		if (d == 254) { return i + 3; }
-
-		dst[(*dst_len)++] = (a << 2) + (b >> 4);
-		if (c != 255) {
-			dst[(*dst_len)++] = (b << 4) + (c >> 2);
-			if (d != 255) { dst[(*dst_len)++] = (c << 6) + d; }
-		}
-	}
-	return -1;
 }
 #endif
 
@@ -3552,7 +3493,7 @@ interpret_uri(struct mg_connection *conn,   /* in: request (must be valid) */
 	char gz_path[PATH_MAX];
 	char const *accept_encoding;
 	int truncated;
-#if !defined(NO_CGI) || defined(USE_LUA)
+#if !defined(NO_CGI)
 	char *p;
 #endif
 #else
@@ -3618,17 +3559,12 @@ interpret_uri(struct mg_connection *conn,   /* in: request (must be valid) */
 	/* Local file path and name, corresponding to requested URI
 	 * is now stored in "filename" variable. */
 	if (mg_stat(conn, filename, filep)) {
-#if !defined(NO_CGI) || defined(USE_LUA)
+#if !defined(NO_CGI)
 		/* File exists. Check if it is a script type. */
 		if (0
 #if !defined(NO_CGI)
 		    || match_prefix(conn->ctx->config[CGI_EXTENSIONS],
 		                    strlen(conn->ctx->config[CGI_EXTENSIONS]),
-		                    filename) > 0
-#endif
-#if defined(USE_LUA)
-		    || match_prefix(conn->ctx->config[LUA_SCRIPT_EXTENSIONS],
-		                    strlen(conn->ctx->config[LUA_SCRIPT_EXTENSIONS]),
 		                    filename) > 0
 #endif
 		    ) {
@@ -3644,7 +3580,7 @@ interpret_uri(struct mg_connection *conn,   /* in: request (must be valid) */
 			 * generated response. */
 			*is_script_resource = !*is_put_or_delete_request;
 		}
-#endif /* !defined(NO_CGI) || defined(USE_LUA) */
+#endif /* !defined(NO_CGI) */
 		*is_found = 1;
 		return;
 	}
@@ -3675,7 +3611,7 @@ interpret_uri(struct mg_connection *conn,   /* in: request (must be valid) */
 		}
 	}
 
-#if !defined(NO_CGI) || defined(USE_LUA)
+#if !defined(NO_CGI)
 	/* Support PATH_INFO for CGI scripts. */
 	for (p = filename + strlen(filename); p > filename + 1; p--) {
 		if (*p == '/') {
@@ -3684,12 +3620,6 @@ interpret_uri(struct mg_connection *conn,   /* in: request (must be valid) */
 #if !defined(NO_CGI)
 			     || match_prefix(conn->ctx->config[CGI_EXTENSIONS],
 			                     strlen(conn->ctx->config[CGI_EXTENSIONS]),
-			                     filename) > 0
-#endif
-#if defined(USE_LUA)
-			     || match_prefix(conn->ctx->config[LUA_SCRIPT_EXTENSIONS],
-			                     strlen(
-			                         conn->ctx->config[LUA_SCRIPT_EXTENSIONS]),
 			                     filename) > 0
 #endif
 			     ) && mg_stat(conn, filename, filep)) {
@@ -3709,7 +3639,7 @@ interpret_uri(struct mg_connection *conn,   /* in: request (must be valid) */
 			}
 		}
 	}
-#endif /* !defined(NO_CGI) || defined(USE_LUA) */
+#endif /* !defined(NO_CGI) */
 #endif /* !defined(NO_FILES) */
 	return;
 
@@ -7019,10 +6949,6 @@ void mg_unlock_context(struct mg_context *ctx) {
 #include "timer.inl"
 #endif /* USE_TIMERS */
 
-#ifdef USE_LUA
-#include "mod_lua.inl"
-#endif /* USE_LUA */
-
 #if defined(USE_WEBSOCKET)
 
 /* START OF SHA-1 code
@@ -7599,9 +7525,7 @@ static void handle_websocket_request(struct mg_connection *conn,
 	const char *version = mg_get_header(conn, "Sec-WebSocket-Version");
 	int lua_websock = 0;
 
-#if !defined(USE_LUA)
 	(void)path;
-#endif
 
 	/* Step 1: Check websocket protocol version. */
 	/* Step 1.1: Check Sec-WebSocket-Key. */
@@ -7656,28 +7580,6 @@ static void handle_websocket_request(struct mg_connection *conn,
 			return;
 		}
 	}
-#if defined(USE_LUA)
-	/* Step 3: No callback. Check if Lua is responsible. */
-	else {
-		/* Step 3.1: Check if Lua is responsible. */
-		if (conn->ctx->config[LUA_WEBSOCKET_EXTENSIONS]) {
-			lua_websock =
-			    match_prefix(conn->ctx->config[LUA_WEBSOCKET_EXTENSIONS],
-			                 strlen(
-			                     conn->ctx->config[LUA_WEBSOCKET_EXTENSIONS]),
-			                 path);
-		}
-
-		if (lua_websock) {
-			/* Step 3.2: Lua is responsible: call it. */
-			conn->lua_websocket_state = lua_websocket_new(path, conn);
-			if (!conn->lua_websocket_state) {
-				/* Lua rejected the new client */
-				return;
-			}
-		}
-	}
-#endif
 
 	/* Step 4: Check if there is a responsible websocket handler. */
 	if (!is_callback_resource && !lua_websock) {
@@ -7700,22 +7602,11 @@ static void handle_websocket_request(struct mg_connection *conn,
 		if (ws_ready_handler != NULL) {
 			ws_ready_handler(conn, cbData);
 		}
-#if defined(USE_LUA)
-	} else if (lua_websock) {
-		if (!lua_websocket_ready(conn, conn->lua_websocket_state)) {
-			/* the ready handler returned false */
-			return;
-		}
-#endif
 	}
 
 	/* Step 7: Enter the read loop */
 	if (is_callback_resource) {
 		read_websocket(conn, ws_data_handler, cbData);
-#if defined(USE_LUA)
-	} else if (lua_websock) {
-		read_websocket(conn, lua_websocket_data, conn->lua_websocket_state);
-#endif
 	}
 
 	/* Step 8: Call the close handler */
@@ -8575,23 +8466,6 @@ static void handle_file_based_request(struct mg_connection *conn, const char *pa
 	if (!conn || !conn->ctx) { return; }
 
 	if (0) {
-#ifdef USE_LUA
-	} else if (match_prefix(conn->ctx->config[LUA_SERVER_PAGE_EXTENSIONS],
-	                        strlen(
-	                            conn->ctx->config[LUA_SERVER_PAGE_EXTENSIONS]),
-	                        path) > 0) {
-		/* Lua server page: an SSI like page containing mostly plain html
-		 * code
-		 * plus some tags with server generated contents. */
-		handle_lsp_request(conn, path, file, NULL);
-	} else if (match_prefix(conn->ctx->config[LUA_SCRIPT_EXTENSIONS],
-	                        strlen(conn->ctx->config[LUA_SCRIPT_EXTENSIONS]),
-	                        path) > 0) {
-		/* Lua in-server module script: a CGI like script used to generate
-		 * the
-		 * entire reply. */
-		mg_exec_lua_script(conn, path, NULL);
-#endif
 #if !defined(NO_CGI)
 	} else if (match_prefix(conn->ctx->config[CGI_EXTENSIONS],
 	                        strlen(conn->ctx->config[CGI_EXTENSIONS]),
@@ -9916,13 +9790,6 @@ static void close_socket_gracefully(struct mg_connection *conn) {
 static void close_connection(struct mg_connection *conn) {
 
 	if (!conn || !conn->ctx) { return; }
-
-#if defined(USE_LUA) && defined(USE_WEBSOCKET)
-	if (conn->lua_websocket_state) {
-		lua_websocket_close(conn, conn->lua_websocket_state);
-		conn->lua_websocket_state = NULL;
-	}
-#endif
 
 	/* call the connection_close callback if assigned */
 	if ((conn->ctx->callbacks.connection_close != NULL)

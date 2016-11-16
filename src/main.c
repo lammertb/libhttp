@@ -730,62 +730,6 @@ set_absolute_path(char *options[],
 }
 
 
-#ifdef USE_LUA
-
-#include "libhttp_lua.h"
-#include "libhttp_private_lua.h"
-
-static int
-run_lua(const char *file_name)
-{
-	struct lua_State *L;
-	int lua_ret;
-	int func_ret = EXIT_FAILURE;
-	const char *lua_err_txt;
-
-#ifdef WIN32
-	(void)MakeConsole();
-#endif  /* WIN32 */
-
-	L = luaL_newstate();
-	if (L == NULL) {
-		fprintf(stderr, "Error: Cannot create Lua state\n");
-		return EXIT_FAILURE;
-	}
-	libhttp_open_lua_libs(L);
-
-	lua_ret = luaL_loadfile(L, file_name);
-	if (lua_ret != LUA_OK) {
-		/* Error when loading the file (e.g. file not found, out of memory, ...)
-		 */
-		lua_err_txt = lua_tostring(L, -1);
-		fprintf(stderr, "Error loading file %s: %s\n", file_name, lua_err_txt);
-	} else {
-		/* The script file is loaded, now call it */
-		lua_ret = lua_pcall(L,
-		                    /* no arguments */ 0,
-		                    /* zero or one return value */ 1,
-		                    /* errors as strint return value */ 0);
-		if (lua_ret != LUA_OK) {
-			/* Error when executing the script */
-			lua_err_txt = lua_tostring(L, -1);
-			fprintf(stderr,
-			        "Error running file %s: %s\n",
-			        file_name,
-			        lua_err_txt);
-		} else {
-			/* Script executed */
-			if (lua_type(L, -1) == LUA_TNUMBER) func_ret = (int)lua_tonumber(L, -1);
-			else                                func_ret = EXIT_SUCCESS;
-		}
-	}
-	lua_close(L);
-
-	return func_ret;
-}
-#endif  /* USE_LUA */
-
-
 
 #if defined(__MINGW32__) || defined(__MINGW64__)
 /* For __MINGW32/64_MAJOR/MINOR_VERSION define */
@@ -857,10 +801,6 @@ start_libhttp(int argc, char *argv[])
 		if ( mg_check_feature( 32 ) ) fprintf( stdout, " Lua"        );
 		fprintf( stdout, "\n" );
 
-#ifdef USE_LUA
-		fprintf( stdout, "Lua Version: %u (%s)\n", (unsigned)LUA_VERSION_NUM, LUA_RELEASE );
-#endif
-
 		fprintf(stdout, "Version: %s\n", version);
 		fprintf(stdout, "Build: %s\n", __DATE__);
 
@@ -927,22 +867,6 @@ start_libhttp(int argc, char *argv[])
 		         : EXIT_FAILURE);
 	}
 
-	/* Call Lua with additional LibHTTP specific Lua functions, if -L option
-	 * is specified */
-	if (argc > 1 && !strcmp(argv[1], "-L")) {
-
-#ifdef USE_LUA
-		if (argc != 3) {
-			show_usage_and_exit(argv[0]);
-		}
-		exit(run_lua(argv[2]));
-#else  /* USE_LUA */
-		show_server_name();
-		fprintf(stderr, "\nError: Lua support not enabled\n");
-		exit(EXIT_FAILURE);
-#endif  /* USE_LUA */
-	}
-
 	/* Show usage if -h or --help options are specified */
 	if (argc == 2 && (!strcmp(argv[1], "-h") || !strcmp(argv[1], "-H")
 	                  || !strcmp(argv[1], "--help"))) {
@@ -962,9 +886,6 @@ start_libhttp(int argc, char *argv[])
 	set_absolute_path(options, "access_log_file", argv[0]);
 	set_absolute_path(options, "error_log_file", argv[0]);
 	set_absolute_path(options, "global_auth_file", argv[0]);
-#ifdef USE_LUA
-	set_absolute_path(options, "lua_preload_file", argv[0]);
-#endif  /* USE_LUA */
 	set_absolute_path(options, "ssl_certificate", argv[0]);
 
 	/* Make extra verification for certain options */
@@ -973,9 +894,6 @@ start_libhttp(int argc, char *argv[])
 	verify_existence(options, "ssl_certificate", 0);
 	verify_existence(options, "ssl_ca_path", 1);
 	verify_existence(options, "ssl_ca_file", 0);
-#ifdef USE_LUA
-	verify_existence(options, "lua_preload_file", 0);
-#endif  /* USE_LUA */
 
 	/* Setup signal handler: quit on Ctrl-C */
 	signal(SIGTERM, signal_handler);

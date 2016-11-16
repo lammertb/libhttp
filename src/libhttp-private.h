@@ -54,10 +54,6 @@
 #endif
 #endif
 
-#if defined(USE_LUA) && defined(USE_WEBSOCKET)
-#define USE_TIMERS
-#endif
-
 #if defined(_MSC_VER)
 /* 'type cast' : conversion from 'int' to 'HANDLE' of greater size */
 #pragma warning(disable : 4306)
@@ -474,17 +470,8 @@ enum {
 
 	DECODE_URL,
 
-#if defined(USE_LUA)
-	LUA_PRELOAD_FILE,
-	LUA_SCRIPT_EXTENSIONS,
-	LUA_SERVER_PAGE_EXTENSIONS,
-#endif
-
 #if defined(USE_WEBSOCKET)
 	WEBSOCKET_ROOT,
-#endif
-#if defined(USE_LUA) && defined(USE_WEBSOCKET)
-	LUA_WEBSOCKET_EXTENSIONS,
 #endif
 
 	ACCESS_CONTROL_ALLOW_ORIGIN,
@@ -752,11 +739,6 @@ struct mg_context {
 	/* linked list of uri handlers */
 	struct mg_handler_info *handlers;
 
-#if defined(USE_LUA) && defined(USE_WEBSOCKET)
-	/* linked list of shared lua websockets */
-	struct mg_shared_lua_websocket_list *shared_lua_websockets;
-#endif
-
 #ifdef USE_TIMERS
 	struct ttimers *timers;
 #endif
@@ -794,9 +776,6 @@ struct mg_connection {
 	time_t last_throttle_time;		/* Last time throttled data was sent							*/
 	int64_t last_throttle_bytes;		/* Bytes sent this second								*/
 	pthread_mutex_t mutex;			/* Used by mg_(un)lock_connection to ensure atomic transmissions for websockets		*/
-#if defined(USE_LUA) && defined(USE_WEBSOCKET)
-	void *lua_websocket_state;		/* Lua_State for a websocket connection							*/
-#endif
 
 	int thread_index;			/* Thread index within ctx								*/
 };
