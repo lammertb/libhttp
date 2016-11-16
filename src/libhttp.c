@@ -1315,7 +1315,7 @@ static char * skip(char **buf, const char *delimiters) {
 
 
 /* Return HTTP header value, or NULL if not found. */
-static const char * get_header(const struct mg_request_info *ri, const char *name) {
+const char * XX_httplib_get_header( const struct mg_request_info *ri, const char *name ) {
 
 	int i;
 	if (ri) {
@@ -1325,14 +1325,15 @@ static const char * get_header(const struct mg_request_info *ri, const char *nam
 	}
 
 	return NULL;
-}
+
+}  /* XX_httplib_get_header */
 
 
 const char *mg_get_header( const struct mg_connection *conn, const char *name ) {
 
 	if ( conn == NULL ) return NULL;
 
-	return get_header( & conn->request_info, name );
+	return XX_httplib_get_header( & conn->request_info, name );
 
 }  /* mg_get_header */
 
@@ -5239,7 +5240,7 @@ static int is_valid_http_method(const char *method) {
  *   re (out): parsed header as mg_request_info
  * buf and ri must be valid pointers (not NULL), len>0.
  * Returns <0 on error. */
-static int parse_http_message(char *buf, int len, struct mg_request_info *ri) {
+int XX_httplib_parse_http_message( char *buf, int len, struct mg_request_info *ri ) {
 
 	int is_request, request_length;
 	char *start_line;
@@ -5283,7 +5284,8 @@ static int parse_http_message(char *buf, int len, struct mg_request_info *ri) {
 		}
 	}
 	return request_length;
-}
+
+}  /* XX_httplib_parse_http_message */
 
 
 /* Keep reading the input (either opened file descriptor fd, or socket sock,
@@ -5291,7 +5293,7 @@ static int parse_http_message(char *buf, int len, struct mg_request_info *ri) {
  * buffer (which marks the end of HTTP request). Buffer buf may already
  * have some data. The length of the data is stored in nread.
  * Upon every read operation, increase nread by the number of bytes read. */
-static int read_request(FILE *fp, struct mg_connection *conn, char *buf, int bufsiz, int *nread) {
+int XX_httplib_read_request( FILE *fp, struct mg_connection *conn, char *buf, int bufsiz, int *nread ) {
 
 	int request_len, n = 0;
 	struct timespec last_action_time;
@@ -5327,7 +5329,8 @@ static int read_request(FILE *fp, struct mg_connection *conn, char *buf, int buf
 	}
 
 	return ((request_len <= 0) && (n <= 0)) ? -1 : request_len;
-}
+
+}  /* XX_httplib_read_request */
 
 #if !defined(NO_FILES)
 /* For given directory path, substitute it to valid index file.
@@ -5822,7 +5825,7 @@ static void handle_cgi_request(struct mg_connection *conn, const char *prog) {
 		       (unsigned int)buflen);
 		goto done;
 	}
-	headers_len = read_request(out, conn, buf, (int)buflen, &data_len);
+	headers_len = XX_httplib_read_request(out, conn, buf, (int)buflen, &data_len);
 	if (headers_len <= 0) {
 
 		/* Could not parse the CGI response. Check if some error message on
@@ -5851,19 +5854,19 @@ static void handle_cgi_request(struct mg_connection *conn, const char *prog) {
 
 	/* Make up and send the status line */
 	status_text = "OK";
-	if ((status = get_header(&ri, "Status")) != NULL) {
+	if ((status = XX_httplib_get_header(&ri, "Status")) != NULL) {
 		conn->status_code = atoi(status);
 		status_text = status;
 		while (isdigit(*(const unsigned char *)status_text)
 		       || *status_text == ' ') {
 			status_text++;
 		}
-	} else if (get_header(&ri, "Location") != NULL) {
+	} else if (XX_httplib_get_header(&ri, "Location") != NULL) {
 		conn->status_code = 302;
 	} else {
 		conn->status_code = 200;
 	}
-	connection_state = get_header(&ri, "Connection");
+	connection_state = XX_httplib_get_header(&ri, "Connection");
 	if (!header_has_option(connection_state, "keep-alive")) {
 		conn->must_close = 1;
 	}
@@ -9202,27 +9205,31 @@ int XX_httplib_set_acl_option(struct mg_context *ctx) {
 }  /* XX_httplib_set_acl_option */
 
 
-static void reset_per_request_attributes(struct mg_connection *conn) {
+void XX_httplib_reset_per_request_attributes( struct mg_connection *conn ) {
 
-	if (!conn) { return; }
-	conn->path_info = NULL;
-	conn->num_bytes_sent = conn->consumed_content = 0;
-	conn->status_code = -1;
-	conn->is_chunked = 0;
-	conn->must_close = conn->request_len = conn->throttle = 0;
+	if ( conn == NULL ) return;
+
+	conn->path_info                   = NULL;
+	conn->num_bytes_sent              = 0;
+	conn->consumed_content            = 0;
+	conn->status_code                 = -1;
+	conn->is_chunked                  = 0;
+	conn->must_close                  = 0;
+	conn->request_len                 = 0;
+	conn->throttle                    = 0;
 	conn->request_info.content_length = -1;
-	conn->request_info.remote_user = NULL;
+	conn->request_info.remote_user    = NULL;
 	conn->request_info.request_method = NULL;
-	conn->request_info.request_uri = NULL;
-	conn->request_info.local_uri = NULL;
-	conn->request_info.uri = NULL; /* TODO: cleanup uri,
-	                                * local_uri and request_uri */
-	conn->request_info.http_version = NULL;
-	conn->request_info.num_headers = 0;
-	conn->data_len = 0;
-	conn->chunk_remainder = 0;
-	conn->internal_error = 0;
-}
+	conn->request_info.request_uri    = NULL;
+	conn->request_info.local_uri      = NULL;
+	conn->request_info.uri            = NULL; /* TODO: cleanup uri, local_uri and request_uri */
+	conn->request_info.http_version   = NULL;
+	conn->request_info.num_headers    = 0;
+	conn->data_len                    = 0;
+	conn->chunk_remainder             = 0;
+	conn->internal_error              = 0;
+
+}  /* XX_httplib_reset_per_request_attributes */
 
 
 int XX_httplib_set_sock_timeout( SOCKET sock, int milliseconds ) {
@@ -9695,87 +9702,3 @@ const char * XX_httplib_get_rel_url_at_current_server( const char *uri, const st
 	return hostend;
 
 }  /* XX_httplib_get_rel_url_at_current_server */
-
-
-int XX_httplib_getreq( struct mg_connection *conn, char *ebuf, size_t ebuf_len, int *err ) {
-
-	const char *cl;
-
-	if (ebuf_len > 0) ebuf[0] = '\0';
-	*err = 0;
-
-	reset_per_request_attributes(conn);
-
-	if (!conn) {
-		XX_httplib_snprintf(conn, NULL, ebuf, ebuf_len, "%s", "Internal error");
-		*err = 500;
-		return 0;
-	}
-	/* Set the time the request was received. This value should be used for
-	 * timeouts. */
-	clock_gettime(CLOCK_MONOTONIC, &(conn->req_time));
-
-	conn->request_len =
-	    read_request(NULL, conn, conn->buf, conn->buf_size, &conn->data_len);
-	/* assert(conn->request_len < 0 || conn->data_len >= conn->request_len);
-	 */
-	if (conn->request_len >= 0 && conn->data_len < conn->request_len) {
-		XX_httplib_snprintf(conn, NULL, ebuf, ebuf_len, "%s", "Invalid request size");
-		*err = 500;
-		return 0;
-	}
-
-	if (conn->request_len == 0 && conn->data_len == conn->buf_size) {
-		XX_httplib_snprintf(conn, NULL, ebuf, ebuf_len, "%s", "Request Too Large");
-		*err = 413;
-		return 0;
-	} else if (conn->request_len <= 0) {
-		if (conn->data_len > 0) {
-			XX_httplib_snprintf(conn, NULL, ebuf, ebuf_len, "%s", "Client sent malformed request");
-			*err = 400;
-		} else {
-			/* Server did not send anything -> just close the connection */
-			conn->must_close = 1;
-			XX_httplib_snprintf(conn, NULL, ebuf, ebuf_len, "%s", "Client did not send a request");
-			*err = 0;
-		}
-		return 0;
-	} else if (parse_http_message(conn->buf, conn->buf_size, &conn->request_info) <= 0) {
-		XX_httplib_snprintf(conn, NULL, ebuf, ebuf_len, "%s", "Bad Request");
-		*err = 400;
-		return 0;
-	} else {
-		/* Message is a valid request or response */
-		if ((cl = get_header(&conn->request_info, "Content-Length")) != NULL) {
-			/* Request/response has content length set */
-			char *endptr = NULL;
-			conn->content_len = strtoll(cl, &endptr, 10);
-			if (endptr == cl) {
-				XX_httplib_snprintf(conn, NULL, ebuf, ebuf_len, "%s", "Bad Request");
-				*err = 411;
-				return 0;
-			}
-			/* Publish the content length back to the request info. */
-			conn->request_info.content_length = conn->content_len;
-		} else if ((cl = get_header(&conn->request_info, "Transfer-Encoding"))
-		               != NULL
-		           && !mg_strcasecmp(cl, "chunked")) {
-			conn->is_chunked = 1;
-		} else if (!mg_strcasecmp(conn->request_info.request_method, "POST")
-		           || !mg_strcasecmp(conn->request_info.request_method,
-		                             "PUT")) {
-			/* POST or PUT request without content length set */
-			conn->content_len = -1;
-		} else if (!mg_strncasecmp(conn->request_info.request_method,
-		                           "HTTP/",
-		                           5)) {
-			/* Response without content length set */
-			conn->content_len = -1;
-		} else {
-			/* Other request */
-			conn->content_len = 0;
-		}
-	}
-	return 1;
-
-}  /* XX_httplib_getreq */

@@ -817,6 +817,7 @@ int			XX_httplib_consume_socket( struct mg_context *ctx, struct socket *sp, int 
 void			XX_httplib_set_close_on_exec( SOCKET sock, struct mg_connection *conn );
 struct mg_connection *	XX_httplib_fc( struct mg_context *ctx );
 void			XX_httplib_free_context( struct mg_context *ctx );
+const char *		XX_httplib_get_header( const struct mg_request_info *ri, const char *name );
 int			XX_httplib_get_option_index( const char *name );
 uint64_t		XX_httplib_get_random( void );
 const char *		XX_httplib_get_rel_url_at_current_server( const char *uri, const struct mg_connection *conn );
@@ -826,9 +827,12 @@ int			XX_httplib_getreq( struct mg_connection *conn, char *ebuf, size_t ebuf_len
 void			XX_httplib_handle_request( struct mg_connection *conn );
 int			XX_httplib_join_thread( pthread_t threadid );
 void			XX_httplib_log_access( const struct mg_connection *conn );
+int			XX_httplib_parse_http_message( char *buf, int len, struct mg_request_info *ri );
 void			XX_httplib_process_new_connection( struct mg_connection *conn );
 void			XX_httplib_produce_socket( struct mg_context *ctx, const struct socket *sp );
+int			XX_httplib_read_request( FILE *fp, struct mg_connection *conn, char *buf, int bufsiz, int *nread );
 void			XX_httplib_read_websocket( struct mg_connection *conn, mg_websocket_data_handler ws_data_handler, void *callback_data );
+void			XX_httplib_reset_per_request_attributes( struct mg_connection *conn );
 void			XX_httplib_send_http_error( struct mg_connection *, int, PRINTF_FORMAT_STRING(const char *fmt), ... ) PRINTF_ARGS(3, 4); 
 int			XX_httplib_set_acl_option( struct mg_context *ctx );
 int			XX_httplib_set_gpass_option( struct mg_context *ctx );

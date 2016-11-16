@@ -613,7 +613,7 @@ mg_handle_form_request(struct mg_connection *conn,
 
 			/* According to the RFC, every part has to have a header field like:
 			 * Content-Disposition: form-data; name="..." */
-			content_disp = get_header(&part_header, "Content-Disposition");
+			content_disp = XX_httplib_get_header(&part_header, "Content-Disposition");
 			if (!content_disp) {
 				/* Malformed request */
 				return -1;
