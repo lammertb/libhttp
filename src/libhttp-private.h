@@ -846,6 +846,8 @@ int			XX_httplib_sslize( struct mg_connection *conn, SSL_CTX *s, int (*func)(SSL
 char *			XX_httplib_strdup( const char *str );
 void			XX_httplib_tls_dtor( void *key );
 void			XX_httplib_uninitialize_ssl( struct mg_context *ctx );
+int			XX_httplib_vprintf( struct mg_connection *conn, const char *fmt, va_list ap );
+
 
 
 #ifdef _WIN32

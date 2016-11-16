@@ -3147,7 +3147,7 @@ static int alloc_vprintf(char **out_buf, char *prealloc_buf, size_t prealloc_siz
 }
 
 
-static int mg_vprintf(struct mg_connection *conn, const char *fmt, va_list ap) {
+int XX_httplib_vprintf( struct mg_connection *conn, const char *fmt, va_list ap ) {
 
 	char mem[MG_BUF_LEN];
 	char *buf = NULL;
@@ -3159,7 +3159,7 @@ static int mg_vprintf(struct mg_connection *conn, const char *fmt, va_list ap) {
 	if (buf != mem && buf != NULL) XX_httplib_free(buf);
 
 	return len;
-}
+}  /* XX_httplib_vprintf */
 
 
 int mg_printf(struct mg_connection *conn, const char *fmt, ...) {
@@ -3168,7 +3168,7 @@ int mg_printf(struct mg_connection *conn, const char *fmt, ...) {
 	int result;
 
 	va_start(ap, fmt);
-	result = mg_vprintf(conn, fmt, ap);
+	result = XX_httplib_vprintf(conn, fmt, ap);
 	va_end(ap);
 
 	return result;
@@ -9811,41 +9811,4 @@ int mg_get_response(struct mg_connection *conn, char *ebuf, size_t ebuf_len, int
 		return (ret == 0) ? -1 : +1;
 	}
 	return -1;
-}
-
-
-struct mg_connection * mg_download(const char *host, int port, int use_ssl, char *ebuf, size_t ebuf_len, const char *fmt, ...) {
-
-	struct mg_connection *conn;
-	va_list ap;
-	int i;
-	int reqerr;
-
-	va_start(ap, fmt);
-	ebuf[0] = '\0';
-
-	/* open a connection */
-	conn = mg_connect_client(host, port, use_ssl, ebuf, ebuf_len);
-
-	if (conn != NULL) {
-		i = mg_vprintf(conn, fmt, ap);
-		if (i <= 0) {
-			XX_httplib_snprintf(conn, NULL, ebuf, ebuf_len, "%s", "Error sending request");
-		} else {
-			XX_httplib_getreq(conn, ebuf, ebuf_len, &reqerr);
-
-			/* TODO: 1) uri is deprecated;
-			 *       2) here, ri.uri is the http response code */
-			conn->request_info.uri = conn->request_info.request_uri;
-		}
-	}
-
-	/* if an error occured, close the connection */
-	if (ebuf[0] != '\0' && conn != NULL) {
-		mg_close_connection(conn);
-		conn = NULL;
-	}
-
-	va_end(ap);
-	return conn;
 }
