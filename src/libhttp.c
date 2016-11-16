@@ -500,7 +500,7 @@ typedef int socklen_t;
  * It loads SSL library dynamically and changes NULLs to the actual addresses
  * of respective functions. The macros above (like SSL_connect()) are really
  * just calling these functions indirectly via the pointer. */
-static struct ssl_func ssl_sw[] = {{"SSL_free", NULL},
+struct ssl_func XX_httplib_ssl_sw[] = {{"SSL_free", NULL},
                                    {"SSL_accept", NULL},
                                    {"SSL_connect", NULL},
                                    {"SSL_read", NULL},
@@ -535,7 +535,7 @@ static struct ssl_func ssl_sw[] = {{"SSL_free", NULL},
                                    {NULL, NULL}};
 
 
-/* Similar array as ssl_sw. These functions could be located in different
+/* Similar array as XX_httplib_ssl_sw. These functions could be located in different
  * lib. */
 static struct ssl_func crypto_sw[] = {{"CRYPTO_num_locks", NULL},
                                       {"CRYPTO_set_locking_callback", NULL},
@@ -9490,7 +9490,7 @@ int XX_httplib_set_ssl_option( struct mg_context *ctx ) {
 
 #if !defined(NO_SSL_DL)
 	if (!ssllib_dll_handle) {
-		ssllib_dll_handle = load_dll(ctx, SSL_LIB, ssl_sw);
+		ssllib_dll_handle = load_dll(ctx, SSL_LIB, XX_httplib_ssl_sw);
 		if (!ssllib_dll_handle) {
 			return 0;
 		}
@@ -11007,9 +11007,7 @@ master_thread_run(void *thread_func_param)
 	}
 
 #if !defined(NO_SSL)
-	if (ctx->ssl_ctx != NULL) {
-		uninitialize_ssl(ctx);
-	}
+	if (ctx->ssl_ctx != NULL) uninitialize_ssl(ctx);
 #endif
 
 #if defined(_WIN32)
@@ -11044,89 +11042,3 @@ void *XX_httplib_master_thread( void *thread_func_param ) {
 }  /* XX_httplib_master_thread */
 
 #endif /* _WIN32 */
-
-
-void XX_httplib_free_context( struct mg_context *ctx ) {
-
-	int i;
-	struct mg_handler_info *tmp_rh;
-
-	if (ctx == NULL) {
-		return;
-	}
-
-	if (ctx->callbacks.exit_context) {
-		ctx->callbacks.exit_context(ctx);
-	}
-
-	/* All threads exited, no sync is needed. Destroy thread mutex and
-	 * condvars
-	 */
-	(void)pthread_mutex_destroy(&ctx->thread_mutex);
-#if defined(ALTERNATIVE_QUEUE)
-	XX_httplib_free(ctx->client_socks);
-	for (i = 0; (unsigned)i < ctx->cfg_worker_threads; i++) {
-		event_destroy(ctx->client_wait_events[i]);
-	}
-	XX_httplib_free(ctx->client_wait_events);
-#else
-	pthread_cond_destroy(&ctx->sq_empty);
-	pthread_cond_destroy(&ctx->sq_full);
-#endif
-
-	/* Destroy other context global data structures mutex */
-	pthread_mutex_destroy(&ctx->nonce_mutex);
-
-#if defined(USE_TIMERS)
-	timers_exit(ctx);
-#endif
-
-	/* Deallocate config parameters */
-	for (i = 0; i < NUM_OPTIONS; i++) {
-		if (ctx->config[i] != NULL) {
-#if defined(_MSC_VER)
-#pragma warning(suppress : 6001)
-#endif
-			XX_httplib_free(ctx->config[i]);
-		}
-	}
-
-	/* Deallocate request handlers */
-	while (ctx->handlers) {
-		tmp_rh = ctx->handlers;
-		ctx->handlers = tmp_rh->next;
-		XX_httplib_free(tmp_rh->uri);
-		XX_httplib_free(tmp_rh);
-	}
-
-#ifndef NO_SSL
-	/* Deallocate SSL context */
-	if (ctx->ssl_ctx != NULL) {
-		SSL_CTX_free(ctx->ssl_ctx);
-	}
-#endif /* !NO_SSL */
-
-	/* Deallocate worker thread ID array */
-	if (ctx->workerthreadids != NULL) {
-		XX_httplib_free(ctx->workerthreadids);
-	}
-
-	/* Deallocate the tls variable */
-	if (XX_httplib_atomic_dec(&XX_httplib_sTlsInit) == 0) {
-#if defined(_WIN32)
-		DeleteCriticalSection(&global_log_file_lock);
-#endif /* _WIN32 */
-#if !defined(_WIN32)
-		pthread_mutexattr_destroy(&XX_httplib_pthread_mutex_attr);
-#endif
-
-		pthread_key_delete(XX_httplib_sTlsKey);
-	}
-
-	/* deallocate system name string */
-	XX_httplib_free(ctx->systemName);
-
-	/* Deallocate context itself */
-	XX_httplib_free(ctx);
-
-}  /* XX_httplib_free_context */

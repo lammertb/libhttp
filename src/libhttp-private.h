@@ -550,51 +550,51 @@ struct ssl_func {
 	void (*ptr)(void); /* Function pointer */
 };
 
-#define SSL_free (*(void (*)(SSL *))ssl_sw[0].ptr)
-#define SSL_accept (*(int (*)(SSL *))ssl_sw[1].ptr)
-#define SSL_connect (*(int (*)(SSL *))ssl_sw[2].ptr)
-#define SSL_read (*(int (*)(SSL *, void *, int))ssl_sw[3].ptr)
-#define SSL_write (*(int (*)(SSL *, const void *, int))ssl_sw[4].ptr)
-#define SSL_get_error (*(int (*)(SSL *, int))ssl_sw[5].ptr)
-#define SSL_set_fd (*(int (*)(SSL *, SOCKET))ssl_sw[6].ptr)
-#define SSL_new (*(SSL * (*)(SSL_CTX *))ssl_sw[7].ptr)
-#define SSL_CTX_new (*(SSL_CTX * (*)(SSL_METHOD *))ssl_sw[8].ptr)
-#define SSLv23_server_method (*(SSL_METHOD * (*)(void))ssl_sw[9].ptr)
-#define SSL_library_init (*(int (*)(void))ssl_sw[10].ptr)
+#define SSL_free (*(void (*)(SSL *))XX_httplib_ssl_sw[0].ptr)
+#define SSL_accept (*(int (*)(SSL *))XX_httplib_ssl_sw[1].ptr)
+#define SSL_connect (*(int (*)(SSL *))XX_httplib_ssl_sw[2].ptr)
+#define SSL_read (*(int (*)(SSL *, void *, int))XX_httplib_ssl_sw[3].ptr)
+#define SSL_write (*(int (*)(SSL *, const void *, int))XX_httplib_ssl_sw[4].ptr)
+#define SSL_get_error (*(int (*)(SSL *, int))XX_httplib_ssl_sw[5].ptr)
+#define SSL_set_fd (*(int (*)(SSL *, SOCKET))XX_httplib_ssl_sw[6].ptr)
+#define SSL_new (*(SSL * (*)(SSL_CTX *))XX_httplib_ssl_sw[7].ptr)
+#define SSL_CTX_new (*(SSL_CTX * (*)(SSL_METHOD *))XX_httplib_ssl_sw[8].ptr)
+#define SSLv23_server_method (*(SSL_METHOD * (*)(void))XX_httplib_ssl_sw[9].ptr)
+#define SSL_library_init (*(int (*)(void))XX_httplib_ssl_sw[10].ptr)
 #define SSL_CTX_use_PrivateKey_file                                            \
-	(*(int (*)(SSL_CTX *, const char *, int))ssl_sw[11].ptr)
+	(*(int (*)(SSL_CTX *, const char *, int))XX_httplib_ssl_sw[11].ptr)
 #define SSL_CTX_use_certificate_file                                           \
-	(*(int (*)(SSL_CTX *, const char *, int))ssl_sw[12].ptr)
+	(*(int (*)(SSL_CTX *, const char *, int))XX_httplib_ssl_sw[12].ptr)
 #define SSL_CTX_set_default_passwd_cb                                          \
-	(*(void (*)(SSL_CTX *, mg_callback_t))ssl_sw[13].ptr)
-#define SSL_CTX_free (*(void (*)(SSL_CTX *))ssl_sw[14].ptr)
-#define SSL_load_error_strings (*(void (*)(void))ssl_sw[15].ptr)
+	(*(void (*)(SSL_CTX *, mg_callback_t))XX_httplib_ssl_sw[13].ptr)
+#define SSL_CTX_free (*(void (*)(SSL_CTX *))XX_httplib_ssl_sw[14].ptr)
+#define SSL_load_error_strings (*(void (*)(void))XX_httplib_ssl_sw[15].ptr)
 #define SSL_CTX_use_certificate_chain_file                                     \
-	(*(int (*)(SSL_CTX *, const char *))ssl_sw[16].ptr)
-#define SSLv23_client_method (*(SSL_METHOD * (*)(void))ssl_sw[17].ptr)
-#define SSL_pending (*(int (*)(SSL *))ssl_sw[18].ptr)
+	(*(int (*)(SSL_CTX *, const char *))XX_httplib_ssl_sw[16].ptr)
+#define SSLv23_client_method (*(SSL_METHOD * (*)(void))XX_httplib_ssl_sw[17].ptr)
+#define SSL_pending (*(int (*)(SSL *))XX_httplib_ssl_sw[18].ptr)
 #define SSL_CTX_set_verify                                                     \
 	(*(void (*)(SSL_CTX *,                                                     \
 	            int,                                                           \
-	            int (*verify_callback)(int, X509_STORE_CTX *)))ssl_sw[19].ptr)
-#define SSL_shutdown (*(int (*)(SSL *))ssl_sw[20].ptr)
+	            int (*verify_callback)(int, X509_STORE_CTX *)))XX_httplib_ssl_sw[19].ptr)
+#define SSL_shutdown (*(int (*)(SSL *))XX_httplib_ssl_sw[20].ptr)
 #define SSL_CTX_load_verify_locations                                          \
-	(*(int (*)(SSL_CTX *, const char *, const char *))ssl_sw[21].ptr)
-#define SSL_CTX_set_default_verify_paths (*(int (*)(SSL_CTX *))ssl_sw[22].ptr)
-#define SSL_CTX_set_verify_depth (*(void (*)(SSL_CTX *, int))ssl_sw[23].ptr)
-#define SSL_get_peer_certificate (*(X509 * (*)(SSL *))ssl_sw[24].ptr)
-#define SSL_get_version (*(const char *(*)(SSL *))ssl_sw[25].ptr)
-#define SSL_get_current_cipher (*(SSL_CIPHER * (*)(SSL *))ssl_sw[26].ptr)
+	(*(int (*)(SSL_CTX *, const char *, const char *))XX_httplib_ssl_sw[21].ptr)
+#define SSL_CTX_set_default_verify_paths (*(int (*)(SSL_CTX *))XX_httplib_ssl_sw[22].ptr)
+#define SSL_CTX_set_verify_depth (*(void (*)(SSL_CTX *, int))XX_httplib_ssl_sw[23].ptr)
+#define SSL_get_peer_certificate (*(X509 * (*)(SSL *))XX_httplib_ssl_sw[24].ptr)
+#define SSL_get_version (*(const char *(*)(SSL *))XX_httplib_ssl_sw[25].ptr)
+#define SSL_get_current_cipher (*(SSL_CIPHER * (*)(SSL *))XX_httplib_ssl_sw[26].ptr)
 #define SSL_CIPHER_get_name                                                    \
-	(*(const char *(*)(const SSL_CIPHER *))ssl_sw[27].ptr)
-#define SSL_CTX_check_private_key (*(int (*)(SSL_CTX *))ssl_sw[28].ptr)
+	(*(const char *(*)(const SSL_CIPHER *))XX_httplib_ssl_sw[27].ptr)
+#define SSL_CTX_check_private_key (*(int (*)(SSL_CTX *))XX_httplib_ssl_sw[28].ptr)
 #define SSL_CTX_set_session_id_context                                         \
-	(*(int (*)(SSL_CTX *, const unsigned char *, unsigned int))ssl_sw[29].ptr)
-#define SSL_CTX_ctrl (*(long (*)(SSL_CTX *, int, long, void *))ssl_sw[30].ptr)
+	(*(int (*)(SSL_CTX *, const unsigned char *, unsigned int))XX_httplib_ssl_sw[29].ptr)
+#define SSL_CTX_ctrl (*(long (*)(SSL_CTX *, int, long, void *))XX_httplib_ssl_sw[30].ptr)
 
 
 #define SSL_CTX_set_cipher_list                                                \
-	(*(int (*)(SSL_CTX *, const char *))ssl_sw[31].ptr)
+	(*(int (*)(SSL_CTX *, const char *))XX_httplib_ssl_sw[31].ptr)
 #define SSL_CTX_set_options(ctx, op)                                           \
 	SSL_CTX_ctrl((ctx), SSL_CTRL_OPTIONS, (op), NULL)
 #define SSL_CTX_clear_options(ctx, op)                                         \
@@ -834,6 +834,7 @@ void *			XX_httplib_malloc( size_t a );
 #endif  /* MEMORY_DEBUGGING */
 
 extern struct mg_option	XX_httplib_config_options[];
+extern struct ssl_func	XX_httplib_ssl_sw[];
 extern int		XX_httplib_sTlsInit;
 extern pthread_key_t	XX_httplib_sTlsKey;
 extern int		XX_httplib_thread_idx_max;
