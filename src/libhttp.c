@@ -1132,27 +1132,7 @@ void * mg_get_user_connection_data(const struct mg_connection *conn) {
 }
 
 
-size_t mg_get_ports(const struct mg_context *ctx, size_t size, int *ports, int *ssl) {
-
-	size_t i;
-	if (!ctx) { return 0; }
-
-	for (i = 0; i < size && i < ctx->num_listening_sockets; i++) {
-		ssl[i] = ctx->listening_sockets[i].is_ssl;
-		ports[i] =
-#if defined(USE_IPV6)
-		    (ctx->listening_sockets[i].lsa.sa.sa_family == AF_INET6)
-		        ? ntohs(ctx->listening_sockets[i].lsa.sin6.sin6_port)
-		        :
-#endif
-		        ntohs(ctx->listening_sockets[i].lsa.sin.sin_port);
-	}
-	return i;
-}
-
-
-int
-mg_get_server_ports(const struct mg_context *ctx, int size, struct mg_server_ports *ports) {
+int mg_get_server_ports(const struct mg_context *ctx, int size, struct mg_server_ports *ports) {
 
 	int i, cnt = 0;
 

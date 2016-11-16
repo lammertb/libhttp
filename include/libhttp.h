@@ -423,14 +423,7 @@ struct mg_server_ports {
    The caller is responsibility to allocate the required memory.
    This function returns the number of struct mg_server_ports elements
    filled in, or <0 in case of an error. */
-CIVETWEB_API int mg_get_server_ports(const struct mg_context *ctx,
-                                     int size,
-                                     struct mg_server_ports *ports);
-
-
-/* Deprecated: Use mg_get_server_ports instead. */
-CIVETWEB_API size_t
-mg_get_ports(const struct mg_context *ctx, size_t size, int *ports, int *ssl);
+CIVETWEB_API int mg_get_server_ports(const struct mg_context *ctx, int size, struct mg_server_ports *ports);
 
 
 /* Add, edit or delete the entry in the passwords file.
@@ -445,15 +438,11 @@ mg_get_ports(const struct mg_context *ctx, size_t size, int *ports, int *ssl);
 
    Return:
      1 on success, 0 on error. */
-CIVETWEB_API int mg_modify_passwords_file(const char *passwords_file_name,
-                                          const char *domain,
-                                          const char *user,
-                                          const char *password);
+CIVETWEB_API int mg_modify_passwords_file(const char *passwords_file_name, const char *domain, const char *user, const char *password);
 
 
 /* Return information associated with the request. */
-CIVETWEB_API const struct mg_request_info *
-mg_get_request_info(const struct mg_connection *);
+CIVETWEB_API const struct mg_request_info *mg_get_request_info(const struct mg_connection *);
 
 
 /* Send data to the client.
