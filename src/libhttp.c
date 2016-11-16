@@ -6811,7 +6811,7 @@ static int send_websocket_handshake(struct mg_connection *conn, const char *webs
 }
 
 
-static void read_websocket(struct mg_connection *conn, mg_websocket_data_handler ws_data_handler, void *callback_data) {
+void XX_httplib_read_websocket( struct mg_connection *conn, mg_websocket_data_handler ws_data_handler, void *callback_data ) {
 
 	/* Pointer to the beginning of the portion of the incoming websocket
 	 * message queue.
@@ -6974,7 +6974,7 @@ static void read_websocket(struct mg_connection *conn, mg_websocket_data_handler
 
 	XX_httplib_set_thread_name("worker");
 
-}
+}  /* XX_httplib_read_websocket */
 
 
 static int mg_websocket_write_exec(struct mg_connection *conn, int opcode, const char *data, size_t dataLen, uint32_t masking_key) {
@@ -7067,7 +7067,7 @@ int mg_websocket_client_write(struct mg_connection *conn, int opcode, const char
 
 	int retval = -1;
 	char *masked_data = (char *)XX_httplib_malloc(((dataLen + 7) / 4) * 4);
-	uint32_t masking_key = (uint32_t)get_random();
+	uint32_t masking_key = (uint32_t)XX_httplib_get_random();
 
 	if (masked_data == NULL) {
 		/* Return -1 in an error case */
@@ -7177,14 +7177,10 @@ static void handle_websocket_request(struct mg_connection *conn,
 	}
 
 	/* Step 7: Enter the read loop */
-	if (is_callback_resource) {
-		read_websocket(conn, ws_data_handler, cbData);
-	}
+	if (is_callback_resource) XX_httplib_read_websocket(conn, ws_data_handler, cbData);
 
 	/* Step 8: Call the close handler */
-	if (ws_close_handler) {
-		ws_close_handler(conn, cbData);
-	}
+	if (ws_close_handler) ws_close_handler(conn, cbData);
 }
 
 
@@ -9853,50 +9849,3 @@ struct mg_connection * mg_download(const char *host, int port, int use_ssl, char
 	va_end(ap);
 	return conn;
 }
-
-
-struct websocket_client_thread_data {
-	struct mg_connection *conn;
-	mg_websocket_data_handler data_handler;
-	mg_websocket_close_handler close_handler;
-	void *callback_data;
-};
-
-
-#if defined(USE_WEBSOCKET)
-#ifdef _WIN32
-static unsigned __stdcall websocket_client_thread(void *data)
-#else  /* _WIN32 */
-static void *
-websocket_client_thread(void *data)
-#endif  /* _WIN32 */
-{
-	struct websocket_client_thread_data *cdata =
-	    (struct websocket_client_thread_data *)data;
-
-	XX_httplib_set_thread_name("ws-client");
-
-	if (cdata->conn->ctx) {
-		if (cdata->conn->ctx->callbacks.init_thread) {
-			/* 3 indicates a websocket client thread */
-			/* TODO: check if conn->ctx can be set */
-			cdata->conn->ctx->callbacks.init_thread(cdata->conn->ctx, 3);
-		}
-	}
-
-	read_websocket(cdata->conn, cdata->data_handler, cdata->callback_data);
-
-	if (cdata->close_handler != NULL) {
-		cdata->close_handler(cdata->conn, cdata->callback_data);
-	}
-
-	XX_httplib_free((void *)cdata);
-
-
-#ifdef _WIN32
-	return 0;
-#else  /* _WIN32 */
-	return NULL;
-#endif  /* _WIN32 */
-}
-#endif

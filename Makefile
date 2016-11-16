@@ -55,6 +55,7 @@ LIB_SOURCES =	src/libhttp.c				\
 		src/httplib_start.c			\
 		src/httplib_stop.c			\
 		src/httplib_version.c			\
+		src/httplib_websocket_client_thread.c	\
 		src/httplib_worker_thread.c
 LIB_INLINE  = src/mod_lua.inl src/md5.inl
 APP_SOURCES = src/main.c
@@ -74,7 +75,7 @@ BUILD_DIRS += $(BUILD_DIR)/test
 endif
 
 # only set main compile options if none were chosen
-CFLAGS += -Wall -Wextra -Werror -Wshadow -Wformat-security -Winit-self -Wmissing-prototypes -D$(TARGET_OS) -Iinclude $(COPT) -DUSE_STACK_SIZE=102400
+CFLAGS += -Wall -Wextra -Werror -Wshadow -Wformat-security -Winit-self -Wmissing-prototypes -D$(TARGET_OS) -Iinclude $(COPT) -DUSE_STACK_SIZE=102400 -DUSE_WEBSOCKET
 
 LIBS = -lpthread -lm
 

@@ -98,11 +98,9 @@ struct mg_connection *mg_connect_websocket_client(const char *host,
 	newctx->user_data = user_data;
 	newctx->context_type = 2;       /* client context type */
 	newctx->cfg_worker_threads = 1; /* one worker thread will be created */
-	newctx->workerthreadids =
-	    (pthread_t *)XX_httplib_calloc(newctx->cfg_worker_threads, sizeof(pthread_t));
+	newctx->workerthreadids = (pthread_t *)XX_httplib_calloc(newctx->cfg_worker_threads, sizeof(pthread_t));
 	conn->ctx = newctx;
-	thread_data = (struct websocket_client_thread_data *)
-	    XX_httplib_calloc(sizeof(struct websocket_client_thread_data), 1);
+	thread_data = (struct websocket_client_thread_data *) XX_httplib_calloc(sizeof(struct websocket_client_thread_data), 1);
 	thread_data->conn = conn;
 	thread_data->data_handler = data_func;
 	thread_data->close_handler = close_func;
@@ -111,7 +109,7 @@ struct mg_connection *mg_connect_websocket_client(const char *host,
 	/* Start a thread to read the websocket client connection
 	 * This thread will automatically stop when mg_disconnect is
 	 * called on the client connection */
-	if (mg_start_thread_with_id(websocket_client_thread, (void *)thread_data, newctx->workerthreadids) != 0) {
+	if (XX_httplib_start_thread_with_id( XX_httplib_websocket_client_thread, (void *)thread_data, newctx->workerthreadids) != 0) {
 
 		XX_httplib_free((void *)thread_data);
 		XX_httplib_free((void *)newctx->workerthreadids);

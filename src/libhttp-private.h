@@ -793,6 +793,15 @@ struct worker_thread_args {
 	int index;
 };
 
+
+struct websocket_client_thread_data {
+	struct mg_connection *conn;
+	mg_websocket_data_handler data_handler;
+	mg_websocket_close_handler close_handler;
+	void *callback_data;
+};
+
+
 /*
  * Functions local to the server. These functions all begin with XX_httplib to
  * indicate that these are private functions.
@@ -819,6 +828,7 @@ int			XX_httplib_join_thread( pthread_t threadid );
 void			XX_httplib_log_access( const struct mg_connection *conn );
 void			XX_httplib_process_new_connection( struct mg_connection *conn );
 void			XX_httplib_produce_socket( struct mg_context *ctx, const struct socket *sp );
+void			XX_httplib_read_websocket( struct mg_connection *conn, mg_websocket_data_handler ws_data_handler, void *callback_data );
 void			XX_httplib_send_http_error( struct mg_connection *, int, PRINTF_FORMAT_STRING(const char *fmt), ... ) PRINTF_ARGS(3, 4); 
 int			XX_httplib_set_acl_option( struct mg_context *ctx );
 int			XX_httplib_set_gpass_option( struct mg_context *ctx );
@@ -841,12 +851,14 @@ void			XX_httplib_uninitialize_ssl( struct mg_context *ctx );
 #ifdef _WIN32
 unsigned __stdcall	XX_httplib_master_thread( void *thread_func_param );
 int			XX_httplib_start_thread_with_id( unsigned(__stdcall *f)(void *), void *p, pthread_t *threadidptr );
+unsigned __stdcall	XX_httplib_websocket_client_thread( void *data );
 unsigned __stdcall	XX_httplib_worker_thread( void *thread_func_param );
 
 extern struct pthread_mutex_undefined_struct *	XX_httplib_pthread_mutex_attr;
 #else  /* _WIN32 */
 void *			XX_httplib_master_thread( void *thread_func_param );
 int			XX_httplib_start_thread_with_id( mg_thread_func_t func, void *param, pthread_t *threadidptr );
+void *			XX_httplib_websocket_client_thread( void *data );
 void *			XX_httplib_worker_thread( void *thread_func_param );
 
 extern pthread_mutexattr_t	XX_httplib_pthread_mutex_attr;
