@@ -171,10 +171,6 @@ pthread_mutexattr_t XX_httplib_pthread_mutex_attr;
 #define MAX_CGI_ENVIR_VARS (256)
 #define MG_BUF_LEN (8192)
 
-#ifndef MAX_REQUEST_SIZE
-#define MAX_REQUEST_SIZE (16384)
-#endif
-
 mg_static_assert(MAX_REQUEST_SIZE >= 256, "request size length must be a positive number");
 
 #define ARRAY_SIZE(array) (sizeof(array) / sizeof(array[0]))
@@ -9114,15 +9110,13 @@ static int refresh_trust(struct mg_connection *conn) {
 static pthread_mutex_t *ssl_mutexes;
 
 
-static int sslize(struct mg_connection *conn, SSL_CTX *s, int (*func)(SSL *)) {
+int XX_httplib_sslize( struct mg_connection *conn, SSL_CTX *s, int (*func)(SSL *) ) {
 
 	int ret, err;
 	int short_trust;
 	unsigned i;
 
-	if (!conn) {
-		return 0;
-	}
+	if (!conn) { return 0; }
 
 	short_trust =
 	    (conn->ctx->config[SSL_SHORT_TRUST] != NULL)
@@ -9136,9 +9130,7 @@ static int sslize(struct mg_connection *conn, SSL_CTX *s, int (*func)(SSL *)) {
 	}
 
 	conn->ssl = SSL_new(s);
-	if (conn->ssl == NULL) {
-		return 0;
-	}
+	if (conn->ssl == NULL) { return 0; }
 
 	ret = SSL_set_fd(conn->ssl, conn->client.sock);
 	if (ret != 1) {
@@ -9186,7 +9178,8 @@ static int sslize(struct mg_connection *conn, SSL_CTX *s, int (*func)(SSL *)) {
 	}
 
 	return 1;
-}
+
+}  /* XX_httplib_sslize */
 
 
 /* Return OpenSSL error message (from CRYPTO lib) */
@@ -9223,7 +9216,7 @@ static int hexdump2string(void *mem, int memlen, char *buf, int buflen) {
 }
 
 
-static void ssl_get_client_cert_info(struct mg_connection *conn) {
+void XX_httplib_ssl_get_client_cert_info( struct mg_connection *conn ) {
 
 	X509 *cert = SSL_get_peer_certificate(conn->ssl);
 	if (cert) {
@@ -9283,7 +9276,8 @@ static void ssl_get_client_cert_info(struct mg_connection *conn) {
 
 		X509_free(cert);
 	}
-}
+
+}  /* XX_httplib_ssl_get_client_cert_info */
 
 
 static void ssl_locking_callback(int mode, int mutex_num, const char *file, int line) {
@@ -9767,7 +9761,7 @@ static void close_socket_gracefully(struct mg_connection *conn) {
 }
 
 
-static void close_connection(struct mg_connection *conn) {
+void XX_httplib_close_connection( struct mg_connection *conn ) {
 
 	if (!conn || !conn->ctx) { return; }
 
@@ -9799,7 +9793,8 @@ static void close_connection(struct mg_connection *conn) {
 	}
 
 	mg_unlock_connection(conn);
-}
+
+}  /* XX_httplib_close_connection */
 
 
 void mg_close_connection(struct mg_connection *conn) {
@@ -9822,7 +9817,7 @@ void mg_close_connection(struct mg_connection *conn) {
 		SSL_CTX_free((SSL_CTX *)conn->client_ssl_ctx);
 	}
 #endif
-	close_connection(conn);
+	XX_httplib_close_connection(conn);
 	if (client_ctx != NULL) {
 		/* join worker thread and free context */
 		for (i = 0; i < client_ctx->cfg_worker_threads; i++) {
@@ -9916,12 +9911,8 @@ static struct mg_connection * mg_connect_client_impl(const struct mg_client_opti
 				SSL_CTX_set_verify(conn->client_ssl_ctx, SSL_VERIFY_NONE, NULL);
 			}
 
-			if (!sslize(conn, conn->client_ssl_ctx, SSL_connect)) {
-				mg_snprintf(NULL,
-				            NULL, /* No truncation check for ebuf */
-				            ebuf,
-				            ebuf_len,
-				            "SSL connection error");
+			if (!XX_httplib_sslize(conn, conn->client_ssl_ctx, SSL_connect)) {
+				mg_snprintf(NULL, NULL, ebuf, ebuf_len, "SSL connection error");
 				SSL_CTX_free(conn->client_ssl_ctx);
 				closesocket(sock);
 				XX_httplib_free(conn);
@@ -10441,9 +10432,8 @@ mg_connect_websocket_client(const char *host,
 }
 
 
-static void
-process_new_connection(struct mg_connection *conn)
-{
+void XX_httplib_process_new_connection(struct mg_connection *conn) {
+
 	if (conn && conn->ctx) {
 		struct mg_request_info *ri = &conn->request_info;
 		int keep_alive_enabled, keep_alive, discard_len;
@@ -10574,7 +10564,8 @@ process_new_connection(struct mg_connection *conn)
 
 		} while (keep_alive);
 	}
-}
+
+}  /* XX_httplib_process_new_connection */
 
 
 #if defined(ALTERNATIVE_QUEUE)
@@ -10600,21 +10591,21 @@ void XX_httplib_produce_socket( struct mg_context *ctx, const struct socket *sp 
 }  /* XX_httplib_produce_socket */
 
 
-static int consume_socket(struct mg_context *ctx, struct socket *sp, int thread_index) {
+int XX_httplib_consume_socket( struct mg_context *ctx, struct socket *sp, int thread_index ) {
 
 	ctx->client_socks[thread_index].in_use = 0;
 	event_wait(ctx->client_wait_events[thread_index]);
 	*sp = ctx->client_socks[thread_index];
 
 	return !ctx->stop_flag;
-}
+
+}  /* XX_httplib_consume_socket */
 
 #else /* ALTERNATIVE_QUEUE */
 
 /* Worker threads take accepted socket from the queue */
-static int
-consume_socket(struct mg_context *ctx, struct socket *sp, int thread_index)
-{
+int XX_httplib_consume_socket( struct mg_context *ctx, struct socket *sp, int thread_index ) {
+
 #define QUEUE_SIZE(ctx) ((int)(ARRAY_SIZE(ctx->queue)))
 
 	(void)thread_index;
@@ -10644,7 +10635,8 @@ consume_socket(struct mg_context *ctx, struct socket *sp, int thread_index)
 
 	return !ctx->stop_flag;
 #undef QUEUE_SIZE
-}
+
+}  /* XX_httplib_consume_socket */
 
 
 /* Master thread adds accepted socket to a queue */
@@ -10675,143 +10667,3 @@ void XX_httplib_produce_socket(struct mg_context *ctx, const struct socket *sp) 
 }  /* XX_httplib_produce_socket */
 
 #endif /* ALTERNATIVE_QUEUE */
-
-
-
-
-static void * worker_thread_run( struct worker_thread_args *thread_args ) {
-
-	struct mg_context *ctx = thread_args->ctx;
-	struct mg_connection *conn;
-	struct mg_workerTLS tls;
-
-	XX_httplib_set_thread_name("worker");
-
-	tls.is_master = 0;
-	tls.thread_idx = (unsigned)XX_httplib_atomic_inc(&XX_httplib_thread_idx_max);
-#if defined(_WIN32)
-	tls.pthread_cond_helper_mutex = CreateEvent(NULL, FALSE, FALSE, NULL);
-#endif
-
-	if (ctx->callbacks.init_thread) {
-		/* call init_thread for a worker thread (type 1) */
-		ctx->callbacks.init_thread(ctx, 1);
-	}
-
-	conn =
-	    (struct mg_connection *)XX_httplib_calloc(1, sizeof(*conn) + MAX_REQUEST_SIZE);
-	if (conn == NULL) {
-		mg_cry( XX_httplib_fc(ctx), "%s", "Cannot create new connection struct, OOM");
-	} else {
-		pthread_setspecific(XX_httplib_sTlsKey, &tls);
-		conn->buf_size = MAX_REQUEST_SIZE;
-		conn->buf = (char *)(conn + 1);
-		conn->ctx = ctx;
-		conn->thread_index = thread_args->index;
-		conn->request_info.user_data = ctx->user_data;
-		/* Allocate a mutex for this connection to allow communication both
-		 * within the request handler and from elsewhere in the application
-		 */
-		(void)pthread_mutex_init(&conn->mutex, &XX_httplib_pthread_mutex_attr);
-
-		/* Call consume_socket() even when ctx->stop_flag > 0, to let it
-		 * signal sq_empty condvar to wake up the master waiting in
-		 * produce_socket() */
-		while (consume_socket(ctx, &conn->client, conn->thread_index)) {
-			conn->conn_birth_time = time(NULL);
-
-/* Fill in IP, port info early so even if SSL setup below fails,
- * error handler would have the corresponding info.
- * Thanks to Johannes Winkelmann for the patch.
- */
-#if defined(USE_IPV6)
-			if (conn->client.rsa.sa.sa_family == AF_INET6) {
-				conn->request_info.remote_port =
-				    ntohs(conn->client.rsa.sin6.sin6_port);
-			} else
-#endif
-			{
-				conn->request_info.remote_port =
-				    ntohs(conn->client.rsa.sin.sin_port);
-			}
-
-			XX_httplib_sockaddr_to_string(conn->request_info.remote_addr,
-			                   sizeof(conn->request_info.remote_addr),
-			                   &conn->client.rsa);
-
-			conn->request_info.is_ssl = conn->client.is_ssl;
-
-			if (conn->client.is_ssl) {
-#ifndef NO_SSL
-				/* HTTPS connection */
-				if (sslize(conn, conn->ctx->ssl_ctx, SSL_accept)) {
-					/* Get SSL client certificate information (if set) */
-					ssl_get_client_cert_info(conn);
-
-					/* process HTTPS connection */
-					process_new_connection(conn);
-
-					/* Free client certificate info */
-					if (conn->request_info.client_cert) {
-						XX_httplib_free(
-						    (void *)(conn->request_info.client_cert->subject));
-						XX_httplib_free(
-						    (void *)(conn->request_info.client_cert->issuer));
-						XX_httplib_free(
-						    (void *)(conn->request_info.client_cert->serial));
-						XX_httplib_free(
-						    (void *)(conn->request_info.client_cert->finger));
-						conn->request_info.client_cert->subject = 0;
-						conn->request_info.client_cert->issuer = 0;
-						conn->request_info.client_cert->serial = 0;
-						conn->request_info.client_cert->finger = 0;
-						XX_httplib_free(conn->request_info.client_cert);
-						conn->request_info.client_cert = 0;
-					}
-				}
-#endif
-			} else {
-				/* process HTTP connection */
-				process_new_connection(conn);
-			}
-
-			close_connection(conn);
-		}
-	}
-
-	pthread_setspecific(XX_httplib_sTlsKey, NULL);
-#if defined(_WIN32)
-	CloseHandle(tls.pthread_cond_helper_mutex);
-#endif
-	pthread_mutex_destroy(&conn->mutex);
-	XX_httplib_free(conn);
-
-	return NULL;
-}
-
-
-/* Threads have different return types on Windows and Unix. */
-#ifdef _WIN32
-unsigned __stdcall XX_httplib_worker_thread( void *thread_func_param ) {
-
-	struct worker_thread_args *pwta = (struct worker_thread_args *)thread_func_param;
-	worker_thread_run(pwta);
-	XX_httplib_free(thread_func_param);
-
-	return 0;
-
-}  /* XX_httplib_worker_thread */
-
-#else  /* _WIN32 */
-
-void *XX_httplib_worker_thread( void *thread_func_param ) {
-
-	struct worker_thread_args *pwta = (struct worker_thread_args *)thread_func_param;
-	worker_thread_run(pwta);
-	XX_httplib_free(thread_func_param);
-
-	return NULL;
-
-}  /* XX_httplib_worker_thread */
-
-#endif /* _WIN32 */

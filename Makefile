@@ -50,7 +50,8 @@ LIB_SOURCES =	src/libhttp.c				\
 		src/httplib_master_thread.c		\
 		src/httplib_start.c			\
 		src/httplib_stop.c			\
-		src/httplib_version.c
+		src/httplib_version.c			\
+		src/httplib_worker_thread.c
 LIB_INLINE  = src/mod_lua.inl src/md5.inl
 APP_SOURCES = src/main.c
 WINDOWS_RESOURCES = resources/res.rc

@@ -419,6 +419,10 @@ typedef int SOCKET;
 #define MGSQLEN (20)
 #endif
 
+#ifndef MAX_REQUEST_SIZE
+#define MAX_REQUEST_SIZE (16384)
+#endif
+
 /* Unified socket address. For IPv6 support, add IPv6 address structure in the
  * union u. */
 union usa {
@@ -797,6 +801,8 @@ int			XX_httplib_atomic_dec( volatile int *addr );
 int			XX_httplib_atomic_inc( volatile int *addr );
 int			XX_httplib_check_acl( struct mg_context *ctx, uint32_t remote_ip );
 void			XX_httplib_close_all_listening_sockets( struct mg_context *ctx );
+void			XX_httplib_close_connection( struct mg_connection *conn );
+int			XX_httplib_consume_socket( struct mg_context *ctx, struct socket *sp, int thread_index );
 void			XX_httplib_set_close_on_exec( SOCKET sock, struct mg_connection *conn );
 struct mg_connection *	XX_httplib_fc( struct mg_context *ctx );
 void			XX_httplib_free_context( struct mg_context *ctx );
@@ -804,6 +810,7 @@ int			XX_httplib_get_option_index( const char *name );
 uint64_t		XX_httplib_get_random( void );
 void			XX_httplib_get_system_name( char **sysName );
 int			XX_httplib_join_thread( pthread_t threadid );
+void			XX_httplib_process_new_connection( struct mg_connection *conn );
 void			XX_httplib_produce_socket( struct mg_context *ctx, const struct socket *sp );
 int			XX_httplib_set_acl_option( struct mg_context *ctx );
 int			XX_httplib_set_gpass_option( struct mg_context *ctx );
@@ -814,6 +821,8 @@ int			XX_httplib_set_tcp_nodelay( SOCKET sock, int nodelay_on );
 void			XX_httplib_set_thread_name( const char *name );
 int			XX_httplib_set_uid_option( struct mg_context *ctx );
 void			XX_httplib_sockaddr_to_string(char *buf, size_t len, const union usa *usa);
+void			XX_httplib_ssl_get_client_cert_info( struct mg_connection *conn );
+int			XX_httplib_sslize( struct mg_connection *conn, SSL_CTX *s, int (*func)(SSL *) );
 char *			XX_httplib_strdup( const char *str );
 void			XX_httplib_tls_dtor( void *key );
 void			XX_httplib_uninitialize_ssl( struct mg_context *ctx );
