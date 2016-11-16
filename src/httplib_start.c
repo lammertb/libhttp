@@ -58,7 +58,7 @@ struct mg_context *mg_start( const struct mg_callbacks *callbacks, void *user_da
 	if ((ctx = (struct mg_context *)mg_calloc(1, sizeof(*ctx))) == NULL) return NULL;
 
 	/* Random number generator will initialize at the first call */
-	ctx->auth_nonce_mask = (uint64_t)get_random() ^ (uint64_t)(ptrdiff_t)(options);
+	ctx->auth_nonce_mask = (uint64_t)XX_httplib_get_random() ^ (uint64_t)(ptrdiff_t)(options);
 
 	if (XX_httplib_atomic_inc(&sTlsInit) == 1) {
 
@@ -66,11 +66,11 @@ struct mg_context *mg_start( const struct mg_callbacks *callbacks, void *user_da
 		InitializeCriticalSection(&global_log_file_lock);
 #endif /* _WIN32 */
 #if !defined(_WIN32)
-		pthread_mutexattr_init(&pthread_mutex_attr);
-		pthread_mutexattr_settype(&pthread_mutex_attr, PTHREAD_MUTEX_RECURSIVE);
+		pthread_mutexattr_init(&XX_httplib_pthread_mutex_attr);
+		pthread_mutexattr_settype(&XX_httplib_pthread_mutex_attr, PTHREAD_MUTEX_RECURSIVE);
 #endif
 
-		if (0 != pthread_key_create(&sTlsKey, XX_httplib_tls_dtor)) {
+		if (0 != pthread_key_create(&XX_httplib_sTlsKey, XX_httplib_tls_dtor)) {
 			/* Fatal error - abort start. However, this situation should
 			 * never
 			 * occur in practice. */
@@ -80,34 +80,34 @@ struct mg_context *mg_start( const struct mg_callbacks *callbacks, void *user_da
 			return NULL;
 		}
 	} else {
-		/* TODO (low): istead of sleeping, check if sTlsKey is already
+		/* TODO (low): istead of sleeping, check if XX_httplib_sTlsKey is already
 		 * initialized. */
 		mg_sleep(1);
 	}
 
 	tls.is_master  = -1;
-	tls.thread_idx = (unsigned)XX_httplib_atomic_inc(&thread_idx_max);
+	tls.thread_idx = (unsigned)XX_httplib_atomic_inc(&XX_httplib_thread_idx_max);
 #if defined(_WIN32)
 	tls.pthread_cond_helper_mutex = NULL;
 #endif
-	pthread_setspecific(sTlsKey, &tls);
+	pthread_setspecific(XX_httplib_sTlsKey, &tls);
 
 #if defined(USE_LUA)
 	lua_init_optional_libraries();
 #endif
 
-	ok = 0 == pthread_mutex_init(&ctx->thread_mutex, &pthread_mutex_attr);
+	ok = 0 == pthread_mutex_init(&ctx->thread_mutex, &XX_httplib_pthread_mutex_attr);
 #if !defined(ALTERNATIVE_QUEUE)
 	ok &= 0 == pthread_cond_init(&ctx->sq_empty, NULL);
 	ok &= 0 == pthread_cond_init(&ctx->sq_full, NULL);
 #endif
-	ok &= 0 == pthread_mutex_init(&ctx->nonce_mutex, &pthread_mutex_attr);
+	ok &= 0 == pthread_mutex_init(&ctx->nonce_mutex, &XX_httplib_pthread_mutex_attr);
 	if (!ok) {
 		/* Fatal error - abort start. However, this situation should never
 		 * occur in practice. */
 		mg_cry( XX_httplib_fc(ctx), "Cannot initialize thread synchronization objects");
 		XX_httplib_free(ctx);
-		pthread_setspecific(sTlsKey, NULL);
+		pthread_setspecific(XX_httplib_sTlsKey, NULL);
 		return NULL;
 	}
 
@@ -124,22 +124,22 @@ struct mg_context *mg_start( const struct mg_callbacks *callbacks, void *user_da
 #endif
 
 	while (options && (name = *options++) != NULL) {
-		if ((idx = get_option_index(name)) == -1) {
+		if ((idx = XX_httplib_get_option_index(name)) == -1) {
 			mg_cry( XX_httplib_fc(ctx), "Invalid option: %s", name);
-			free_context(ctx);
-			pthread_setspecific(sTlsKey, NULL);
+			XX_httplib_free_context(ctx);
+			pthread_setspecific(XX_httplib_sTlsKey, NULL);
 			return NULL;
 		} else if ((value = *options++) == NULL) {
 			mg_cry( XX_httplib_fc(ctx), "%s: option value cannot be NULL", name);
-			free_context(ctx);
-			pthread_setspecific(sTlsKey, NULL);
+			XX_httplib_free_context(ctx);
+			pthread_setspecific(XX_httplib_sTlsKey, NULL);
 			return NULL;
 		}
 		if (ctx->config[idx] != NULL) {
 			mg_cry( XX_httplib_fc(ctx), "warning: %s: duplicate option", name);
 			XX_httplib_free(ctx->config[idx]);
 		}
-		ctx->config[idx] = mg_strdup(value);
+		ctx->config[idx] = XX_httplib_strdup(value);
 		DEBUG_TRACE("[%s] -> [%s]", name, value);
 	}
 
@@ -147,15 +147,15 @@ struct mg_context *mg_start( const struct mg_callbacks *callbacks, void *user_da
 	for (i = 0; config_options[i].name != NULL; i++) {
 		default_value = config_options[i].default_value;
 		if (ctx->config[i] == NULL && default_value != NULL) {
-			ctx->config[i] = mg_strdup(default_value);
+			ctx->config[i] = XX_httplib_strdup(default_value);
 		}
 	}
 
 #if defined(NO_FILES)
 	if (ctx->config[DOCUMENT_ROOT] != NULL) {
 		mg_cry( XX_httplib_fc(ctx), "%s", "Document root must not be set");
-		free_context(ctx);
-		pthread_setspecific(sTlsKey, NULL);
+		XX_httplib_free_context(ctx);
+		pthread_setspecific(XX_httplib_sTlsKey, NULL);
 		return NULL;
 	}
 #endif
@@ -173,8 +173,8 @@ struct mg_context *mg_start( const struct mg_callbacks *callbacks, void *user_da
 	    !XX_httplib_set_uid_option(ctx) ||
 #endif
 	    !XX_httplib_set_acl_option(ctx)) {
-		free_context(ctx);
-		pthread_setspecific(sTlsKey, NULL);
+		XX_httplib_free_context(ctx);
+		pthread_setspecific(XX_httplib_sTlsKey, NULL);
 		return NULL;
 	}
 
@@ -188,8 +188,8 @@ struct mg_context *mg_start( const struct mg_callbacks *callbacks, void *user_da
 
 	if (workerthreadcount > MAX_WORKER_THREADS) {
 		mg_cry( XX_httplib_fc(ctx), "Too many worker threads");
-		free_context(ctx);
-		pthread_setspecific(sTlsKey, NULL);
+		XX_httplib_free_context(ctx);
+		pthread_setspecific(XX_httplib_sTlsKey, NULL);
 		return NULL;
 	}
 
@@ -199,8 +199,8 @@ struct mg_context *mg_start( const struct mg_callbacks *callbacks, void *user_da
 		    (pthread_t *)mg_calloc(ctx->cfg_worker_threads, sizeof(pthread_t));
 		if (ctx->workerthreadids == NULL) {
 			mg_cry( XX_httplib_fc(ctx), "Not enough memory for worker thread ID array");
-			free_context(ctx);
-			pthread_setspecific(sTlsKey, NULL);
+			XX_httplib_free_context(ctx);
+			pthread_setspecific(XX_httplib_sTlsKey, NULL);
 			return NULL;
 		}
 
@@ -210,8 +210,8 @@ struct mg_context *mg_start( const struct mg_callbacks *callbacks, void *user_da
 		if (ctx->client_wait_events == NULL) {
 			mg_cry( XX_httplib_fc(ctx), "Not enough memory for worker event array");
 			XX_httplib_free(ctx->workerthreadids);
-			free_context(ctx);
-			pthread_setspecific(sTlsKey, NULL);
+			XX_httplib_free_context(ctx);
+			pthread_setspecific(XX_httplib_sTlsKey, NULL);
 			return NULL;
 		}
 
@@ -221,8 +221,8 @@ struct mg_context *mg_start( const struct mg_callbacks *callbacks, void *user_da
 			mg_cry( XX_httplib_fc(ctx), "Not enough memory for worker socket array");
 			XX_httplib_free(ctx->client_socks);
 			XX_httplib_free(ctx->workerthreadids);
-			free_context(ctx);
-			pthread_setspecific(sTlsKey, NULL);
+			XX_httplib_free_context(ctx);
+			pthread_setspecific(XX_httplib_sTlsKey, NULL);
 			return NULL;
 		}
 
@@ -239,8 +239,8 @@ struct mg_context *mg_start( const struct mg_callbacks *callbacks, void *user_da
 #if defined(USE_TIMERS)
 	if (timers_init(ctx) != 0) {
 		mg_cry( XX_httplib_fc(ctx), "Error creating timers");
-		free_context(ctx);
-		pthread_setspecific(sTlsKey, NULL);
+		XX_httplib_free_context(ctx);
+		pthread_setspecific(XX_httplib_sTlsKey, NULL);
 		return NULL;
 	}
 #endif
@@ -253,7 +253,7 @@ struct mg_context *mg_start( const struct mg_callbacks *callbacks, void *user_da
 	ctx->context_type = 1; /* server context */
 
 	/* Start master (listening) thread */
-	mg_start_thread_with_id( XX_httplib_master_thread, ctx, &ctx->masterthreadid);
+	XX_httplib_start_thread_with_id( XX_httplib_master_thread, ctx, &ctx->masterthreadid);
 
 	/* Start worker threads */
 	for (i = 0; i < ctx->cfg_worker_threads; i++) {
@@ -265,7 +265,7 @@ struct mg_context *mg_start( const struct mg_callbacks *callbacks, void *user_da
 		}
 
 		if ((wta == NULL)
-		    || (XX_httplib_mg_start_thread_with_id(XX_httplib_worker_thread,
+		    || (XX_httplib_start_thread_with_id(XX_httplib_worker_thread,
 		                                wta,
 		                                &ctx->workerthreadids[i]) != 0)) {
 
@@ -283,15 +283,15 @@ struct mg_context *mg_start( const struct mg_callbacks *callbacks, void *user_da
 				mg_cry( XX_httplib_fc(ctx),
 				       "Cannot create threads: error %ld",
 				       (long)ERRNO);
-				free_context(ctx);
-				pthread_setspecific(sTlsKey, NULL);
+				XX_httplib_free_context(ctx);
+				pthread_setspecific(XX_httplib_sTlsKey, NULL);
 				return NULL;
 			}
 			break;
 		}
 	}
 
-	pthread_setspecific(sTlsKey, NULL);
+	pthread_setspecific(XX_httplib_sTlsKey, NULL);
 	return ctx;
 
 }  /* mg_start */
