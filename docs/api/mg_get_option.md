@@ -21,4 +21,5 @@ When starting the LibHTTP webserver, options are provided to set the wanted beha
 
 ### See Also
 
+* [`mg_check_feature();`](mg_check_feature.md)
 * [`mg_start();`](mg_start.md)

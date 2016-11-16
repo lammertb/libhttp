@@ -20,3 +20,6 @@
 HTTP and HTTPS clients can send request headers to the server to provide details about the communication. These request headers can for example specify the preferred language in which the server should respond and the supported compression algorithms. The function `mg_get_header()` can be called to return the contents of a specific request header. The function will return a pointer to the value text of the header when succesful, and NULL of no matching request header from the client could be found.
 
 ### See Also
+
+* [`struct mg_header;`](mg_header.md)
+* [`mg_get_cookie();`](mg_get_cookie.md)

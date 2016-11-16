@@ -14,7 +14,7 @@
 
 | Type | Description |
 | :--- | :--- |
-|`struct mg_connection *`||
+|`struct mg_connection *`|Pointer to the connection information or NULL if an error occured|
 
 ### Description
 

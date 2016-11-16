@@ -16,3 +16,4 @@ The structure `mg_header` is used as a sub-structure in the [`struct mg_request_
 ### See Also
 
 * [`struct mg_request_info;`](mg_request_info.md)
+* [`mg_get_header();`](mg_get_header.md)

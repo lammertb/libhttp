@@ -26,3 +26,5 @@ If the password parameter is not `NULL` an entry is added to the password file. 
 The function returns 1 when successful and 0 if an error occurs.
 
 ### See Also
+
+* [`mg_md5();`](mg_md5.md)

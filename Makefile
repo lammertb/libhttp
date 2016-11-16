@@ -61,8 +61,7 @@ BUILD_RESOURCES =
 
 # The unit tests include the source files directly to get visibility to the
 # static functions.  So we clear OBJECTS so that we don't try to build or link
-# with any external object.  Later if we find WITH_LUA=1, we'll add lua objects
-# to this variable so we can run lua-specific unit tests.
+# with any external object.
 ifeq ($(MAKECMDGOALS), unit_test)
 OBJECTS =
 BUILD_DIRS += $(BUILD_DIR)/test
@@ -84,32 +83,6 @@ ifdef WITH_CPP
   LCC = $(CXX)
 else
   LCC = $(CC)
-endif
-
-ifdef WITH_LUA_SHARED
-  WITH_LUA = 1
-endif
-
-ifdef WITH_LUAJIT_SHARED
-  WITH_LUA_SHARED = 1
-  WITH_LUA = 1
-  WITH_LUA_VERSION = 501
-endif
-
-ifdef WITH_LUA
-  include resources/Makefile.in-lua
-endif
-
-ifdef WITH_SSJS
-  WITH_DUKTAPE = 1
-endif
-
-ifdef WITH_DUKTAPE_SHARED
-  WITH_DUKTAPE = 1
-endif
-
-ifdef WITH_DUKTAPE
-  include resources/Makefile.in-duktape
 endif
 
 ifdef WITH_IPV6
@@ -152,14 +125,6 @@ ifeq ($(TARGET_OS),WIN32)
   RMRF = rmdir /s /q
 endif
 
-ifdef WITH_LUAJIT_SHARED
-  LIBS += -lluajit-5.1
-else
-ifdef WITH_LUA_SHARED
-  LIBS += $(LUA_SHARED_LIB_FLAG)
-endif
-endif
-
 ifneq (, $(findstring mingw32, $(shell $(CC) -dumpmachine)))
   BUILD_RESOURCES = $(BUILD_DIR)/$(WINDOWS_RESOURCES:.rc=.o)
   LIBS += -lws2_32 -mwindows
@@ -180,12 +145,6 @@ help:
 	@echo "make unit_test           build unit tests executable"
 	@echo ""
 	@echo " Make Options"
-	@echo "   WITH_LUA=1            build with Lua support; include Lua as static library"
-	@echo "   WITH_LUA_SHARED=1     build with Lua support; use dynamic linking to liblua5.2.so"
-	@echo "   WITH_LUA_VERSION=502  build with Lua 5.2.x (501 for Lua 5.1.x to 503 for 5.3.x)"
-	@echo "   WITH_DUKTAPE=1        build with Duktape support; include as static library"
-	@echo "   WITH_DUKTAPE_SHARED=1 build with Duktape support; use libduktape1.3.so"
-#	@echo "   WITH_DUKTAPE_VERSION=103 build with Duktape 1.3.x"
 	@echo "   WITH_DEBUG=1          build with GDB debug support"
 	@echo "   WITH_IPV6=1           with IPV6 support"
 	@echo "   WITH_WEBSOCKET=1      build with web socket support"
@@ -266,8 +225,6 @@ clean:
 	$(RMF) $(UNIT_TEST_PROG)
 
 distclean: clean
-	@$(RMRF) VS2012/Debug VS2012/*/Debug  VS2012/*/*/Debug
-	@$(RMRF) VS2012/Release VS2012/*/Release  VS2012/*/*/Release
 	$(RMF) $(CPROG) lib$(CPROG).so lib$(CPROG).a *.dmg *.msi *.exe lib$(CPROG).dll lib$(CPROG).dll.a
 	$(RMF) $(UNIT_TEST_PROG)
 

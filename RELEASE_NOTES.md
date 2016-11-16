@@ -1,19 +1,20 @@
 Release Notes v2.0 (work in progress)
 ===
-### Objectives: *Clean up source code, proper documentation, focus on embedding*
+### Objectives: *Clean up source code, Proper documentation, Restructure embedding API*
 
 Changes
 -------
 
+- Removed deprecated function `mg_get_ports();`
 - Removed sqlite3 from the distribution
-- Removed Lua embedding
-- Removed Duktape embedding
+- Removed Lua support
+- Removed Duktape support
 - Removed Symbian support
 - Changed references from CivetWeb to LibHTTP in documentation
 - Removed deprecated function `mg_upload();`
 - Removed deprecated function `mg_get_valid_option_names();`
 - Removed all build scripts except the script for `make`
-
+- Added website [`www.libhttp.org`](http://www.libhttp.org)
 
 Release Notes v1.9 (will never be released as LibHTTP)
 ===
@@ -29,7 +30,7 @@ Changes
 - Fix bug in timer logic (for Lua Websockets)
 - Updated version number
 
-Release Notes v1.8
+Release Notes v1.8 (as Civetweb)
 ===
 ### Objectives: *CMake integration and continuous integration tests, Support client certificates, bug fixes*
 
@@ -77,7 +78,7 @@ Changes
 - Add status badges to the GitHub project main page
 - Updated version number
 
-Release Notes v1.7
+Release Notes v1.7 (as Civetweb)
 ===
 ### Objectives: *Examples, documentation, additional API functions, some functions rewritten, bug fixes and updates*
 
@@ -124,7 +125,7 @@ Changes
 - Fix compiler warnings
 - Updated version number
 
-Release Notes v1.6
+Release Notes v1.6 (as Civetweb)
 ===
 ### Objectives: *Enhance Lua support, configuration dialog for windows, new examples, bug fixes and updates*
 
@@ -167,7 +168,7 @@ Changes
 - Fixed Posix locking functions for Windows (bel2125)
 - Updated version number
 
-Release Notes v1.5
+Release Notes v1.5 (as Civetweb)
 ===
 ### Objectives: *Bug fixes and updates, repository restoration*
 
@@ -200,7 +201,7 @@ Changes
 - Updated version numbers.
 - Added contributor credits file.
 
-Release Notes v1.4
+Release Notes v1.4 (as Civetweb)
 ===
 ### Objectives: *New URI handler interface, feature enhancements, C++ extensions*
 The main idea behind this release is to bring about API consistency. All changes
@@ -225,7 +226,7 @@ Changes
 - Conformed source files to UNIX line endings for consistency.
 - Unified the coding style to improve reability.
 
-Release Notes v1.3
+Release Notes v1.3 (as Civetweb)
 ===
 ### Objectives: *Buildroot Integration*
 
@@ -237,7 +238,7 @@ Changes
 - Updated documentation
 - Updated Buildroot config example
 
-Release Notes v1.2
+Release Notes v1.2 (as Civetweb)
 ===
 ### Objectives: *Installation Improvements, buildroot, cross compile support*
 The objective of this release is to make installation seamless.
@@ -261,7 +262,7 @@ Known Issues
 
 - The prebuilt Window's version requires [Visual C++ Redistributable for Visual Studio 2012](http://www.microsoft.com/en-us/download/details.aspx?id=30679)
 
-Release Notes v1.1
+Release Notes v1.1 (as Civetweb)
 ===
 ### Objectives: *Build, Documentation, License Improvements*
 The objective of this release is to establish a maintable code base, ensure MIT license rights and improve usability and documentation.
@@ -305,7 +306,7 @@ Known Issues
 - Build changes may impact current users.
     + As with any change of this type, changes may impact some users.
 
-Release Notes v1.0
+Release Notes v1.0 (as Civetweb)
 ===
 
 ### Objectives: *MIT License Preservation, Rebranding*
@@ -316,6 +317,6 @@ Changes
 
 - Renamed Mongoose to Civetweb in the code and documentation.
 - Replaced copyrighted images with new images
-- Created a new code respository at https://github.com/bel2125/civetweb
-- Created a distribution site at https://sourceforge.net/projects/civetweb/
+- Created a new code respository at GitHub
+- Created a distribution site at SourceForge
 - Basic build testing

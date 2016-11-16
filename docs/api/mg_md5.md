@@ -22,3 +22,5 @@ The function `mg_md5()` caluclates the MD5 checksum of a NULL terminated list of
 The function returns a pointer to the supplied result buffer.
 
 ### See Also
+
+* [`mg_modify_passwords_file();`](mg_modify_passwords_file.md)

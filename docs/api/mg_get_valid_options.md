@@ -19,4 +19,5 @@ The function `mg_get_valid_options()` returns an array with all valid configurat
 ### See Also
 
 * [`struct mg_option;`](mg_option.md)
+* [`mg_check_feature();`](mg_check_feature.md)
 * [`mg_start();`](mg_start.md)
