@@ -2288,7 +2288,7 @@ int XX_httplib_start_thread_with_id( unsigned(__stdcall *f)(void *), void *p, pt
 
 
 /* Wait for a thread to finish. */
-static int mg_join_thread(pthread_t threadid) {
+int XX_httplib_join_thread( pthread_t threadid ) {
 
 	int result;
 	DWORD dwevent;
@@ -2304,7 +2304,10 @@ static int mg_join_thread(pthread_t threadid) {
 	}
 
 	return result;
-}
+
+}  /* XX_httplib_join_thread */
+
+
 
 #if !defined(NO_SSL_DL) && !defined(NO_SSL)
 /* If SSL is loaded dynamically, dlopen/dlclose is required. */
@@ -2550,14 +2553,14 @@ int XX_httplib_start_thread_with_id( mg_thread_func_t func, void *param, pthread
 
 
 /* Wait for a thread to finish. */
-static int mg_join_thread(pthread_t threadid) {
+int XX_httplib_join_thread( pthread_t threadid ) {
 
 	int result;
 
 	result = pthread_join(threadid, NULL);
 	return result;
 
-}  /* mg_join_thread */
+}  /* XX_httplib_join_thread */
 
 
 #ifndef NO_CGI
@@ -9847,7 +9850,7 @@ void mg_close_connection(struct mg_connection *conn) {
 		/* join worker thread and free context */
 		for (i = 0; i < client_ctx->cfg_worker_threads; i++) {
 			if (client_ctx->workerthreadids[i] != 0) {
-				mg_join_thread(client_ctx->workerthreadids[i]);
+				XX_httplib_join_thread(client_ctx->workerthreadids[i]);
 			}
 		}
 		XX_httplib_free(client_ctx->workerthreadids);
@@ -10999,7 +11002,7 @@ master_thread_run(void *thread_func_param)
 	workerthreadcount = ctx->cfg_worker_threads;
 	for (i = 0; i < workerthreadcount; i++) {
 		if (ctx->workerthreadids[i] != 0) {
-			mg_join_thread(ctx->workerthreadids[i]);
+			XX_httplib_join_thread(ctx->workerthreadids[i]);
 		}
 	}
 
@@ -11127,31 +11130,3 @@ void XX_httplib_free_context( struct mg_context *ctx ) {
 	XX_httplib_free(ctx);
 
 }  /* XX_httplib_free_context */
-
-
-void mg_stop(struct mg_context *ctx) {
-
-	pthread_t mt;
-
-	if ( ctx == NULL ) return; 
-	/* We don't use a lock here. Calling mg_stop with the same ctx from
-	 * two threads is not allowed. */
-	mt = ctx->masterthreadid;
-	if (mt == 0) return;
-
-	ctx->masterthreadid = 0;
-
-	/* Set stop flag, so all threads know they have to exit. */
-	ctx->stop_flag = 1;
-
-	/* Wait until everything has stopped. */
-	while ( ctx->stop_flag != 2 ) mg_sleep(10);
-
-	mg_join_thread(mt);
-	XX_httplib_free_context(ctx);
-
-#if defined(_WIN32)
-	WSACleanup();
-#endif /* _WIN32 */
-
-}  /* mg_stop */

@@ -797,6 +797,7 @@ void			XX_httplib_free_context( struct mg_context *ctx );
 int			XX_httplib_get_option_index( const char *name );
 uint64_t		XX_httplib_get_random( void );
 void			XX_httplib_get_system_name( char **sysName );
+int			XX_httplib_join_thread( pthread_t threadid );
 int			XX_httplib_set_acl_option( struct mg_context *ctx );
 int			XX_httplib_set_gpass_option( struct mg_context *ctx );
 int			XX_httplib_set_ports_option( struct mg_context *ctx );
