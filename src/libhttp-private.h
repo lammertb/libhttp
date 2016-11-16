@@ -790,8 +790,10 @@ struct worker_thread_args {
  * indicate that these are private functions.
  */
 
+void			XX_httplib_accept_new_connection( const struct socket *listener, struct mg_context *ctx );
 int			XX_httplib_atomic_dec( volatile int *addr );
 int			XX_httplib_atomic_inc( volatile int *addr );
+void			XX_httplib_close_all_listening_sockets( struct mg_context *ctx );
 struct mg_connection *	XX_httplib_fc( struct mg_context *ctx );
 void			XX_httplib_free_context( struct mg_context *ctx );
 int			XX_httplib_get_option_index( const char *name );
@@ -802,9 +804,12 @@ int			XX_httplib_set_acl_option( struct mg_context *ctx );
 int			XX_httplib_set_gpass_option( struct mg_context *ctx );
 int			XX_httplib_set_ports_option( struct mg_context *ctx );
 int			XX_httplib_set_ssl_option( struct mg_context *ctx );
+void			XX_httplib_set_thread_name( const char *name );
 int			XX_httplib_set_uid_option( struct mg_context *ctx );
 char *			XX_httplib_strdup( const char *str );
 void			XX_httplib_tls_dtor( void *key );
+void			XX_httplib_uninitialize_ssl( struct mg_context *ctx );
+
 
 #ifdef _WIN32
 unsigned __stdcall	XX_httplib_master_thread( void *thread_func_param );

@@ -845,7 +845,7 @@ static void event_destroy(void *eventhdl) {
 #endif
 
 
-static void mg_set_thread_name(const char *name) {
+void XX_httplib_set_thread_name(const char *name) {
 
 	char threadName[16 + 1]; /* 16 = Max. thread length in Linux/OSX/.. */
 
@@ -879,13 +879,12 @@ static void mg_set_thread_name(const char *name) {
 	/* on linux we can use the old prctl function */
 	(void)prctl(PR_SET_NAME, threadName, 0, 0, 0);
 #endif
-}  /* mg_set_thread_name */
+}  /* XX_httplib_set_thread_name */
 
 #else /* !defined(NO_THREAD_NAME) */
-void
-mg_set_thread_name(const char *threadName)
-{
-}  /* mg_set_thread_name */
+void XX_httplib_set_thread_name(const char *threadName) {
+
+}  /* XX_httplib_set_thread_name */
 #endif
 
 
@@ -7276,7 +7275,7 @@ static void read_websocket(struct mg_connection *conn, mg_websocket_data_handler
 		timeout = atoi(conn->ctx->config[REQUEST_TIMEOUT]) / 1000.0;
 	}
 
-	mg_set_thread_name("wsock");
+	XX_httplib_set_thread_name("wsock");
 
 	/* Loop continuously, reading messages from the socket, invoking the
 	 * callback, and waiting repeatedly until an error occurs. */
@@ -7401,7 +7400,8 @@ static void read_websocket(struct mg_connection *conn, mg_websocket_data_handler
 		}
 	}
 
-	mg_set_thread_name("worker");
+	XX_httplib_set_thread_name("worker");
+
 }
 
 
@@ -8491,12 +8491,11 @@ static void handle_file_based_request(struct mg_connection *conn, const char *pa
 }
 
 
-static void close_all_listening_sockets(struct mg_context *ctx) {
+void XX_httplib_close_all_listening_sockets( struct mg_context *ctx ) {
 
 	unsigned int i;
-	if (!ctx) {
-		return;
-	}
+
+	if (!ctx) return;
 
 	for (i = 0; i < ctx->num_listening_sockets; i++) {
 		closesocket(ctx->listening_sockets[i].sock);
@@ -8506,7 +8505,8 @@ static void close_all_listening_sockets(struct mg_context *ctx) {
 	ctx->listening_sockets = NULL;
 	XX_httplib_free(ctx->listening_socket_fds);
 	ctx->listening_socket_fds = NULL;
-}
+
+}  /* XX_close_all_listening_sockets */
 
 
 /* Valid listening port specification is: [ip_address:]port[s]
@@ -8835,7 +8835,7 @@ int XX_httplib_set_ports_option( struct mg_context *ctx ) {
 	}
 
 	if (portsOk != portsTotal) {
-		close_all_listening_sockets(ctx);
+		XX_httplib_close_all_listening_sockets(ctx);
 		portsOk = 0;
 	}
 
@@ -9609,7 +9609,7 @@ int XX_httplib_set_ssl_option( struct mg_context *ctx ) {
 }  /* XX_httplib_set_ssl_option */
 
 
-static void uninitialize_ssl(struct mg_context *ctx) {
+void XX_httplib_uninitialize_ssl( struct mg_context *ctx ) {
 
 	int i;
 	(void)ctx;
@@ -10329,7 +10329,7 @@ websocket_client_thread(void *data)
 	struct websocket_client_thread_data *cdata =
 	    (struct websocket_client_thread_data *)data;
 
-	mg_set_thread_name("ws-client");
+	XX_httplib_set_thread_name("ws-client");
 
 	if (cdata->conn->ctx) {
 		if (cdata->conn->ctx->callbacks.init_thread) {
@@ -10708,7 +10708,7 @@ static void * worker_thread_run( struct worker_thread_args *thread_args ) {
 	struct mg_connection *conn;
 	struct mg_workerTLS tls;
 
-	mg_set_thread_name("worker");
+	XX_httplib_set_thread_name("worker");
 
 	tls.is_master = 0;
 	tls.thread_idx = (unsigned)XX_httplib_atomic_inc(&XX_httplib_thread_idx_max);
@@ -10840,9 +10840,8 @@ void *XX_httplib_worker_thread( void *thread_func_param ) {
 #endif /* _WIN32 */
 
 
-static void
-accept_new_connection(const struct socket *listener, struct mg_context *ctx)
-{
+void XX_httplib_accept_new_connection( const struct socket *listener, struct mg_context *ctx ) {
+
 	struct socket so;
 	char src_addr[IP_ADDR_STR_LEN];
 	socklen_t len = sizeof(so.rsa);
@@ -10909,136 +10908,3 @@ accept_new_connection(const struct socket *listener, struct mg_context *ctx)
 	}
 }
 
-
-static void
-master_thread_run(void *thread_func_param)
-{
-	struct mg_context *ctx = (struct mg_context *)thread_func_param;
-	struct mg_workerTLS tls;
-	struct pollfd *pfd;
-	unsigned int i;
-	unsigned int workerthreadcount;
-
-	if (!ctx) {
-		return;
-	}
-
-	mg_set_thread_name("master");
-
-/* Increase priority of the master thread */
-#if defined(_WIN32)
-	SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL);
-#elif defined(USE_MASTER_THREAD_PRIORITY)
-	int min_prio = sched_get_priority_min(SCHED_RR);
-	int max_prio = sched_get_priority_max(SCHED_RR);
-	if ((min_prio >= 0) && (max_prio >= 0)
-	    && ((USE_MASTER_THREAD_PRIORITY) <= max_prio)
-	    && ((USE_MASTER_THREAD_PRIORITY) >= min_prio)) {
-		struct sched_param sched_param = {0};
-		sched_param.sched_priority = (USE_MASTER_THREAD_PRIORITY);
-		pthread_setschedparam(pthread_self(), SCHED_RR, &sched_param);
-	}
-#endif
-
-/* Initialize thread local storage */
-#if defined(_WIN32)
-	tls.pthread_cond_helper_mutex = CreateEvent(NULL, FALSE, FALSE, NULL);
-#endif
-	tls.is_master = 1;
-	pthread_setspecific(XX_httplib_sTlsKey, &tls);
-
-	if (ctx->callbacks.init_thread) {
-		/* Callback for the master thread (type 0) */
-		ctx->callbacks.init_thread(ctx, 0);
-	}
-
-	/* Server starts *now* */
-	ctx->start_time = time(NULL);
-
-	/* Start the server */
-	pfd = ctx->listening_socket_fds;
-	while (ctx->stop_flag == 0) {
-		for (i = 0; i < ctx->num_listening_sockets; i++) {
-			pfd[i].fd = ctx->listening_sockets[i].sock;
-			pfd[i].events = POLLIN;
-		}
-
-		if (poll(pfd, ctx->num_listening_sockets, 200) > 0) {
-			for (i = 0; i < ctx->num_listening_sockets; i++) {
-				/* NOTE(lsm): on QNX, poll() returns POLLRDNORM after the
-				 * successful poll, and POLLIN is defined as
-				 * (POLLRDNORM | POLLRDBAND)
-				 * Therefore, we're checking pfd[i].revents & POLLIN, not
-				 * pfd[i].revents == POLLIN. */
-				if (ctx->stop_flag == 0 && (pfd[i].revents & POLLIN)) {
-					accept_new_connection(&ctx->listening_sockets[i], ctx);
-				}
-			}
-		}
-	}
-
-	/* Here stop_flag is 1 - Initiate shutdown. */
-
-	/* Stop signal received: somebody called mg_stop. Quit. */
-	close_all_listening_sockets(ctx);
-
-	/* Wakeup workers that are waiting for connections to handle. */
-	(void)pthread_mutex_lock(&ctx->thread_mutex);
-#if defined(ALTERNATIVE_QUEUE)
-	for (i = 0; i < ctx->cfg_worker_threads; i++) {
-		event_signal(ctx->client_wait_events[i]);
-
-		/* Since we know all sockets, we can shutdown the connections. */
-		if (ctx->client_socks[i].in_use) {
-			shutdown(ctx->client_socks[i].sock, SHUTDOWN_BOTH);
-		}
-	}
-#else
-	pthread_cond_broadcast(&ctx->sq_full);
-#endif
-	(void)pthread_mutex_unlock(&ctx->thread_mutex);
-
-	/* Join all worker threads to avoid leaking threads. */
-	workerthreadcount = ctx->cfg_worker_threads;
-	for (i = 0; i < workerthreadcount; i++) {
-		if (ctx->workerthreadids[i] != 0) {
-			XX_httplib_join_thread(ctx->workerthreadids[i]);
-		}
-	}
-
-#if !defined(NO_SSL)
-	if (ctx->ssl_ctx != NULL) uninitialize_ssl(ctx);
-#endif
-
-#if defined(_WIN32)
-	CloseHandle(tls.pthread_cond_helper_mutex);
-#endif
-	pthread_setspecific(XX_httplib_sTlsKey, NULL);
-
-	/* Signal mg_stop() that we're done.
-	 * WARNING: This must be the very last thing this
-	 * thread does, as ctx becomes invalid after this line. */
-	ctx->stop_flag = 2;
-}
-
-
-/* Threads have different return types on Windows and Unix. */
-#ifdef _WIN32
-
-unsigned __stdcall XX_httplib_master_thread( void *thread_func_param ) {
-
-	master_thread_run( thread_func_param );
-	return 0;
-
-}  /* XX_httplib_master_thread */
-
-#else
-
-void *XX_httplib_master_thread( void *thread_func_param ) {
-
-	master_thread_run( thread_func_param );
-	return NULL;
-
-}  /* XX_httplib_master_thread */
-
-#endif /* _WIN32 */
