@@ -245,13 +245,12 @@ static struct tm * gmtime_s(const time_t *ptime, struct tm *ptm) {
 	return localtime_s(ptime, ptm);
 }
 
-static int mg_atomic_inc(volatile int *addr);
 static struct tm tm_array[MAX_WORKER_THREADS];
 static int tm_index = 0;
 
 static struct tm * localtime( const time_t *ptime ) {
 
-	int i = mg_atomic_inc(&tm_index) % (sizeof(tm_array) / sizeof(tm_array[0]));
+	int i = XX_httplib_atomic_inc(&tm_index) % (sizeof(tm_array) / sizeof(tm_array[0]));
 	return localtime_s(ptime, tm_array + i);
 
 }  /* localtime */
@@ -259,7 +258,7 @@ static struct tm * localtime( const time_t *ptime ) {
 
 static struct tm * gmtime(const time_t *ptime) {
 
-	int i = mg_atomic_inc(&tm_index) % ARRAY_SIZE(tm_array);
+	int i = XX_httplib_atomic_inc(&tm_index) % ARRAY_SIZE(tm_array);
 	return gmtime_s(ptime, tm_array + i);
 
 }  /* strftime */
@@ -405,7 +404,7 @@ static void * mg_calloc_ex( size_t count, size_t size, const char *file, unsigne
 }  /* mg_calloc_ex */
 
 
-static void mg_free_ex(void *memory, const char *file, unsigned line) {
+void XX_httplib_free_ex( void *memory, const char *file, unsigned line ) {
 
 	char mallocStr[256];
 	void *data = (void *)(((char *)memory) - sizeof(size_t));
@@ -432,7 +431,7 @@ static void mg_free_ex(void *memory, const char *file, unsigned line) {
 		free(data);
 	}
 
-}  /* mg_free_ex */
+}  /* XX_httplib_free_ex */
 
 
 static void * mg_realloc_ex(void *memory, size_t newsize, const char *file, unsigned line) {
@@ -492,16 +491,14 @@ static void * mg_realloc_ex(void *memory, size_t newsize, const char *file, unsi
 		}
 	} else {
 		data = 0;
-		mg_free_ex(memory, file, line);
+		XX_httplib_free_ex(memory, file, line);
 	}
 
 	return data;
 }
 
-#define XX_httplib_malloc(a) XX_httplib_malloc_ex(a, __FILE__, __LINE__)
 #define mg_calloc(a, b) mg_calloc_ex(a, b, __FILE__, __LINE__)
 #define mg_realloc(a, b) mg_realloc_ex(a, b, __FILE__, __LINE__)
-#define mg_free(a) mg_free_ex(a, __FILE__, __LINE__)
 
 #else  /* MEMORY_DEBUGGING */
 
@@ -523,11 +520,11 @@ static __inline void * mg_realloc(void *a, size_t b) {
 
 }  /* mg_realloc */
 
-static __inline void mg_free(void *a) {
+__inline void XX_httplib_free( void *a ) {
 
 	free(a);
 
-}  /* mg_free */
+}  /* XX_httplib_free */
 
 #endif  /* MEMORY_DEBUGGING */
 
@@ -559,7 +556,7 @@ static void mg_snprintf(const struct mg_connection *conn, int *truncated, char *
 #define malloc DO_NOT_USE_THIS_FUNCTION__USE_httplib_malloc
 #define calloc DO_NOT_USE_THIS_FUNCTION__USE_mg_calloc
 #define realloc DO_NOT_USE_THIS_FUNCTION__USE_mg_realloc
-#define free DO_NOT_USE_THIS_FUNCTION__USE_mg_free
+#define free DO_NOT_USE_THIS_FUNCTION__USE_httplib_free
 #define snprintf DO_NOT_USE_THIS_FUNCTION__USE_mg_snprintf
 #ifdef _WIN32 /* vsnprintf must not be used in any system, * \ \ \             \
                * but this define only works well for Windows. */
@@ -788,7 +785,7 @@ static int is_websocket_protocol(const struct mg_connection *conn);
 #endif
 
 
-static int mg_atomic_inc(volatile int *addr) {
+int XX_httplib_atomic_inc( volatile int *addr ) {
 
 	int ret;
 #if defined(_WIN32)
@@ -803,10 +800,11 @@ static int mg_atomic_inc(volatile int *addr) {
 	ret = (++(*addr));
 #endif
 	return ret;
-}
+
+}  /* XX_httplib_atomic_inc */
 
 
-static int mg_atomic_dec(volatile int *addr) {
+int XX_httplib_atomic_dec( volatile int *addr ) {
 
 	int ret;
 #if defined(_WIN32)
@@ -821,7 +819,8 @@ static int mg_atomic_dec(volatile int *addr) {
 	ret = (--(*addr));
 #endif
 	return ret;
-}
+
+}  /* XX_httplib_atomic_dec */
 
 #if !defined(NO_THREAD_NAME)
 #if defined(_WIN32) && defined(_MSC_VER)
@@ -910,13 +909,13 @@ static void * event_create(void) {
 
 	if (0 != pthread_mutex_init(&(ret->mutex), NULL)) {
 		/* pthread mutex not available */
-		mg_free(ret);
+		XX_httplib_free(ret);
 		return NULL;
 	}
 	if (0 != pthread_cond_init(&(ret->cond), NULL)) {
 		/* pthread cond not available */
 		pthread_mutex_destroy(&(ret->mutex));
-		mg_free(ret);
+		XX_httplib_free(ret);
 		return NULL;
 	}
 	return (void *)ret;
@@ -951,7 +950,7 @@ static void event_destroy(void *eventhdl) {
 	struct posix_event *ev = (struct posix_event *)eventhdl;
 	pthread_cond_destroy(&(ev->cond));
 	pthread_mutex_destroy(&(ev->mutex));
-	mg_free(ev);
+	XX_httplib_free(ev);
 
 }  /* event_destroy */
 
@@ -1410,12 +1409,13 @@ void mg_cry(const struct mg_connection *conn, const char *fmt, ...) {
 
 /* Return fake connection structure. Used for logging, if connection
  * is not applicable at the moment of logging. */
-static struct mg_connection * fc(struct mg_context *ctx) {
+struct mg_connection * XX_httplib_fc( struct mg_context *ctx ) {
 
 	static struct mg_connection fake_connection;
 	fake_connection.ctx = ctx;
 	return &fake_connection;
-}
+
+}  /* XX_httplib_fc */
 
 
 const struct mg_request_info * mg_get_request_info( const struct mg_connection *conn ) {
@@ -2267,7 +2267,7 @@ static DIR * mg_opendir(const struct mg_connection *conn, const char *name) {
 			dir->handle = FindFirstFileW(wpath, &dir->info);
 			dir->result.d_name[0] = '\0';
 		} else {
-			mg_free(dir);
+			XX_http_free(dir);
 			dir = NULL;
 		}
 	}
@@ -2285,7 +2285,7 @@ static int mg_closedir(DIR *dir) {
 		if (dir->handle != INVALID_HANDLE_VALUE)
 			result = FindClose(dir->handle) ? 0 : -1;
 
-		mg_free(dir);
+		XX_httplib_free(dir);
 	} else {
 		result = -1;
 		SetLastError(ERROR_BAD_ARGUMENTS);
@@ -3325,7 +3325,7 @@ static int alloc_vprintf2(char **buf, const char *fmt, va_list ap) {
 	*buf = NULL;
 	while (len < 0) {
 		if (*buf) {
-			mg_free(*buf);
+			XX_httplib_free(*buf);
 		}
 
 		size *= 4;
@@ -3408,7 +3408,7 @@ static int mg_vprintf(struct mg_connection *conn, const char *fmt, va_list ap) {
 		len = mg_write(conn, buf, (size_t)len);
 	}
 	if (buf != mem && buf != NULL) {
-		mg_free(buf);
+		XX_httplib_free(buf);
 	}
 
 	return len;
@@ -4775,7 +4775,7 @@ connect_socket(struct mg_context *ctx /* may be NULL */,
 				sa->sin6.sin6_port = htons((uint16_t)port);
 				ip_ver = 6;
 			}
-			mg_free(h);
+			XX_httplib_free(h);
 		}
 #endif
 	}
@@ -4809,7 +4809,7 @@ connect_socket(struct mg_context *ctx /* may be NULL */,
 		return 0;
 	}
 
-	set_close_on_exec(*sock, fc(ctx));
+	set_close_on_exec(*sock, XX_httplib_fc(ctx));
 
 	if ((ip_ver == 4)
 	    && (connect(*sock, (struct sockaddr *)&sa->sin, sizeof(sa->sin))
@@ -5100,7 +5100,7 @@ struct dir_scan_data {
 static void * realloc2(void *ptr, size_t size) {
 
 	void *new_ptr = mg_realloc(ptr, size);
-	if (new_ptr == NULL) mg_free(ptr);
+	if (new_ptr == NULL) XX_httplib_free(ptr);
 
 	return new_ptr;
 }
@@ -5197,9 +5197,9 @@ static void handle_directory_request(struct mg_connection *conn, const char *dir
 		      compare_dir_entries);
 		for (i = 0; i < data.num_entries; i++) {
 			print_dir_entry(&data.entries[i]);
-			mg_free(data.entries[i].file_name);
+			XX_httplib_free(data.entries[i].file_name);
 		}
-		mg_free(data.entries);
+		XX_httplib_free(data.entries);
 	}
 
 	conn->num_bytes_sent += mg_printf(conn, "%s", "</table></body></html>");
@@ -6567,8 +6567,8 @@ handle_cgi_request(struct mg_connection *conn, const char *prog)
 	send_file_data(conn, &fout, 0, INT64_MAX);
 
 done:
-	mg_free(blk.var);
-	mg_free(blk.buf);
+	XX_httplib_free(blk.var);
+	XX_httplib_free(blk.buf);
 
 	if (pid != (pid_t)-1) {
 		kill(pid, SIGKILL);
@@ -6606,7 +6606,7 @@ done:
 	}
 
 	if (buf != NULL) {
-		mg_free(buf);
+		XX_httplib_free(buf);
 	}
 }
 #endif /* !NO_CGI */
@@ -7741,7 +7741,7 @@ read_websocket(struct mg_connection *conn,
 			}
 
 			if (data != mem) {
-				mg_free(data);
+				XX_httplib_free(data);
 			}
 
 			if (exit_by_callback
@@ -7878,7 +7878,7 @@ int mg_websocket_client_write(struct mg_connection *conn, int opcode, const char
 	mask_data(data, dataLen, masking_key, masked_data);
 
 	retval = mg_websocket_write_exec( conn, opcode, masked_data, dataLen, masking_key );
-	mg_free(masked_data);
+	XX_httplib_free(masked_data);
 
 	return retval;
 
@@ -8297,8 +8297,8 @@ mg_set_handler_type(struct mg_context *ctx,
 				} else {
 					/* remove existing handler */
 					*lastref = tmp_rh->next;
-					mg_free(tmp_rh->uri);
-					mg_free(tmp_rh);
+					XX_httplib_free(tmp_rh->uri);
+					XX_httplib_free(tmp_rh);
 				}
 				mg_unlock_context(ctx);
 				return;
@@ -8318,14 +8318,14 @@ mg_set_handler_type(struct mg_context *ctx,
 	    (struct mg_handler_info *)mg_calloc(sizeof(struct mg_handler_info), 1);
 	if (tmp_rh == NULL) {
 		mg_unlock_context(ctx);
-		mg_cry(fc(ctx), "%s", "Cannot create new request handler struct, OOM");
+		mg_cry( XX_httplib_fc(ctx), "%s", "Cannot create new request handler struct, OOM");
 		return;
 	}
 	tmp_rh->uri = mg_strdup(uri);
 	if (!tmp_rh->uri) {
 		mg_unlock_context(ctx);
-		mg_free(tmp_rh);
-		mg_cry(fc(ctx), "%s", "Cannot create new request handler struct, OOM");
+		XX_httplib_free(tmp_rh);
+		mg_cry( XX_httplib_fc(ctx), "%s", "Cannot create new request handler struct, OOM");
 		return;
 	}
 	tmp_rh->uri_len = urilen;
@@ -8949,9 +8949,9 @@ close_all_listening_sockets(struct mg_context *ctx)
 		closesocket(ctx->listening_sockets[i].sock);
 		ctx->listening_sockets[i].sock = INVALID_SOCKET;
 	}
-	mg_free(ctx->listening_sockets);
+	XX_httplib_free(ctx->listening_sockets);
 	ctx->listening_sockets = NULL;
-	mg_free(ctx->listening_socket_fds);
+	XX_httplib_free(ctx->listening_socket_fds);
 	ctx->listening_socket_fds = NULL;
 }
 
@@ -9088,7 +9088,7 @@ int XX_httplib_set_ports_option( struct mg_context *ctx ) {
 		portsTotal++;
 
 		if (!parse_port_string(&vec, &so, &ip_version)) {
-			mg_cry(fc(ctx),
+			mg_cry( XX_httplib_fc(ctx),
 			       "%.*s: invalid port spec (entry %i). Expecting list of: %s",
 			       (int)vec.len,
 			       vec.ptr,
@@ -9100,7 +9100,7 @@ int XX_httplib_set_ports_option( struct mg_context *ctx ) {
 #if !defined(NO_SSL)
 		if (so.is_ssl && ctx->ssl_ctx == NULL) {
 
-			mg_cry(fc(ctx),
+			mg_cry( XX_httplib_fc(ctx),
 			       "Cannot add SSL socket (entry %i). Is -ssl_certificate "
 			       "option set?",
 			       portsTotal);
@@ -9111,7 +9111,7 @@ int XX_httplib_set_ports_option( struct mg_context *ctx ) {
 		if ((so.sock = socket(so.lsa.sa.sa_family, SOCK_STREAM, 6))
 		    == INVALID_SOCKET) {
 
-			mg_cry(fc(ctx), "cannot create socket (entry %i)", portsTotal);
+			mg_cry( XX_httplib_fc(ctx), "cannot create socket (entry %i)", portsTotal);
 			continue;
 		}
 
@@ -9132,7 +9132,7 @@ int XX_httplib_set_ports_option( struct mg_context *ctx ) {
 		               sizeof(on)) != 0) {
 
 			/* Set reuse option, but don't abort on errors. */
-			mg_cry(fc(ctx),
+			mg_cry( XX_httplib_fc(ctx),
 			       "cannot set socket option SO_EXCLUSIVEADDRUSE (entry %i)",
 			       portsTotal);
 		}
@@ -9144,7 +9144,7 @@ int XX_httplib_set_ports_option( struct mg_context *ctx ) {
 		               sizeof(on)) != 0) {
 
 			/* Set reuse option, but don't abort on errors. */
-			mg_cry(fc(ctx),
+			mg_cry( XX_httplib_fc(ctx),
 			       "cannot set socket option SO_REUSEADDR (entry %i)",
 			       portsTotal);
 		}
@@ -9161,13 +9161,13 @@ int XX_httplib_set_ports_option( struct mg_context *ctx ) {
 				                  sizeof(off)) != 0) {
 
 					/* Set IPv6 only option, but don't abort on errors. */
-					mg_cry(fc(ctx),
+					mg_cry( XX_httplib_fc(ctx),
 					       "cannot set socket option IPV6_V6ONLY (entry %i)",
 					       portsTotal);
 				}
 			}
 #else
-			mg_cry(fc(ctx), "IPv6 not available");
+			mg_cry( XX_httplib_fc(ctx), "IPv6 not available");
 			closesocket(so.sock);
 			so.sock = INVALID_SOCKET;
 			continue;
@@ -9178,7 +9178,7 @@ int XX_httplib_set_ports_option( struct mg_context *ctx ) {
 
 			len = sizeof(so.lsa.sin);
 			if (bind(so.sock, &so.lsa.sa, len) != 0) {
-				mg_cry(fc(ctx),
+				mg_cry( XX_httplib_fc(ctx),
 				       "cannot bind to %.*s: %d (%s)",
 				       (int)vec.len,
 				       vec.ptr,
@@ -9194,7 +9194,7 @@ int XX_httplib_set_ports_option( struct mg_context *ctx ) {
 
 			len = sizeof(so.lsa.sin6);
 			if (bind(so.sock, &so.lsa.sa, len) != 0) {
-				mg_cry(fc(ctx),
+				mg_cry( XX_httplib_fc(ctx),
 				       "cannot bind to IPv6 %.*s: %d (%s)",
 				       (int)vec.len,
 				       vec.ptr,
@@ -9207,7 +9207,7 @@ int XX_httplib_set_ports_option( struct mg_context *ctx ) {
 		}
 #endif
 		else {
-			mg_cry(fc(ctx),
+			mg_cry( XX_httplib_fc(ctx),
 			       "cannot bind: address family not supported (entry %i)",
 			       portsTotal);
 			continue;
@@ -9215,7 +9215,7 @@ int XX_httplib_set_ports_option( struct mg_context *ctx ) {
 
 		if (listen(so.sock, SOMAXCONN) != 0) {
 
-			mg_cry(fc(ctx),
+			mg_cry( XX_httplib_fc(ctx),
 			       "cannot listen to %.*s: %d (%s)",
 			       (int)vec.len,
 			       vec.ptr,
@@ -9230,7 +9230,7 @@ int XX_httplib_set_ports_option( struct mg_context *ctx ) {
 		    || usa.sa.sa_family != so.lsa.sa.sa_family) {
 
 			int err = (int)ERRNO;
-			mg_cry(fc(ctx),
+			mg_cry( XX_httplib_fc(ctx),
 			       "call to getsockname failed %.*s: %d (%s)",
 			       (int)vec.len,
 			       vec.ptr,
@@ -9256,7 +9256,7 @@ int XX_httplib_set_ports_option( struct mg_context *ctx ) {
 		                    (ctx->num_listening_sockets + 1)
 		                        * sizeof(ctx->listening_sockets[0]))) == NULL) {
 
-			mg_cry(fc(ctx), "%s", "Out of memory");
+			mg_cry( XX_httplib_fc(ctx), "%s", "Out of memory");
 			closesocket(so.sock);
 			so.sock = INVALID_SOCKET;
 			continue;
@@ -9267,14 +9267,14 @@ int XX_httplib_set_ports_option( struct mg_context *ctx ) {
 		         (ctx->num_listening_sockets + 1)
 		             * sizeof(ctx->listening_socket_fds[0]))) == NULL) {
 
-			mg_cry(fc(ctx), "%s", "Out of memory");
+			mg_cry( XX_httplib_fc(ctx), "%s", "Out of memory");
 			closesocket(so.sock);
 			so.sock = INVALID_SOCKET;
-			mg_free(ptr);
+			XX_httplib_free(ptr);
 			continue;
 		}
 
-		set_close_on_exec(so.sock, fc(ctx));
+		set_close_on_exec(so.sock, XX_httplib_fc(ctx));
 		ctx->listening_sockets = ptr;
 		ctx->listening_sockets[ctx->num_listening_sockets] = so;
 		ctx->listening_socket_fds = pfd;
@@ -9403,7 +9403,7 @@ check_acl(struct mg_context *ctx, uint32_t remote_ip)
 			flag = vec.ptr[0];
 			if ((flag != '+' && flag != '-')
 			    || parse_net(&vec.ptr[1], &net, &mask) == 0) {
-				mg_cry(fc(ctx),
+				mg_cry( XX_httplib_fc(ctx),
 				       "%s: subnet must be [+|-]x.x.x.x[/x]",
 				       __func__);
 				return -1;
@@ -9432,24 +9432,13 @@ int XX_httplib_set_uid_option( struct mg_context *ctx ) {
 			success = 1;
 		} else {
 			if ((pw = getpwnam(uid)) == NULL) {
-				mg_cry(fc(ctx), "%s: unknown user [%s]", __func__, uid);
+				mg_cry( XX_httplib_fc(ctx), "%s: unknown user [%s]", __func__, uid);
 			} else if (setgid(pw->pw_gid) == -1) {
-				mg_cry(fc(ctx),
-				       "%s: setgid(%s): %s",
-				       __func__,
-				       uid,
-				       strerror(errno));
+				mg_cry( XX_httplib_fc(ctx), "%s: setgid(%s): %s", __func__, uid, strerror(errno));
 			} else if (setgroups(0, NULL)) {
-				mg_cry(fc(ctx),
-				       "%s: setgroups(): %s",
-				       __func__,
-				       strerror(errno));
+				mg_cry( XX_httplib_fc(ctx), "%s: setgroups(): %s", __func__, strerror(errno));
 			} else if (setuid(pw->pw_uid) == -1) {
-				mg_cry(fc(ctx),
-				       "%s: setuid(%s): %s",
-				       __func__,
-				       uid,
-				       strerror(errno));
+				mg_cry( XX_httplib_fc(ctx), "%s: setuid(%s): %s", __func__, uid, strerror(errno));
 			} else {
 				success = 1;
 			}
@@ -9472,7 +9461,7 @@ void XX_httplib_tls_dtor( void *key ) {
 	if (tls) {
 		if (tls->is_master == 2) {
 			tls->is_master = -3; /* Mark memory as dead */
-			mg_free(tls);
+			XX_httplib_free(tls);
 		}
 	}
 	pthread_setspecific(sTlsKey, NULL);
@@ -9510,7 +9499,7 @@ ssl_id_callback(void)
 			 */
 			tls = (struct mg_workerTLS *)XX_httplib_malloc(sizeof(struct mg_workerTLS));
 			tls->is_master = -2; /* -2 means "3rd party thread" */
-			tls->thread_idx = (unsigned)mg_atomic_inc(&thread_idx_max);
+			tls->thread_idx = (unsigned)XX_httplib_atomic_inc(&thread_idx_max);
 			pthread_setspecific(sTlsKey, tls);
 		}
 		return tls->thread_idx;
@@ -9572,7 +9561,7 @@ refresh_trust(struct mg_connection *conn)
 			if (SSL_CTX_load_verify_locations(conn->ctx->ssl_ctx,
 			                                  ca_file,
 			                                  ca_path) != 1) {
-				mg_cry(fc(conn->ctx),
+				mg_cry( XX_httplib_fc(conn->ctx),
 				       "SSL_CTX_load_verify_locations error: %s "
 				       "ssl_verify_peer requires setting "
 				       "either ssl_ca_path or ssl_ca_file. Is any of them "
@@ -9583,7 +9572,7 @@ refresh_trust(struct mg_connection *conn)
 			}
 		}
 
-		if (1 == mg_atomic_inc(p_reload_lock)) {
+		if (1 == XX_httplib_atomic_inc(p_reload_lock)) {
 			if (ssl_use_pem_file(conn->ctx, pem) == 0) {
 				return 0;
 			}
@@ -9805,7 +9794,7 @@ load_dll(struct mg_context *ctx, const char *dll_name, struct ssl_func *sw)
 	struct ssl_func *fp;
 
 	if ((dll_handle = dlopen(dll_name, RTLD_LAZY)) == NULL) {
-		mg_cry(fc(ctx), "%s: cannot load %s", __func__, dll_name);
+		mg_cry( XX_httplib_fc(ctx), "%s: cannot load %s", __func__, dll_name);
 		return NULL;
 	}
 
@@ -9820,11 +9809,7 @@ load_dll(struct mg_context *ctx, const char *dll_name, struct ssl_func *sw)
 		u.p = dlsym(dll_handle, fp->name);
 #endif /* _WIN32 */
 		if (u.fp == NULL) {
-			mg_cry(fc(ctx),
-			       "%s: %s: cannot find %s",
-			       __func__,
-			       dll_name,
-			       fp->name);
+			mg_cry( XX_httplib_fc(ctx), "%s: %s: cannot find %s", __func__, dll_name, fp->name);
 			dlclose(dll_handle);
 			return NULL;
 		} else {
@@ -9864,9 +9849,7 @@ initialize_ssl(struct mg_context *ctx)
 	}
 #endif /* NO_SSL_DL */
 
-	if (mg_atomic_inc(&cryptolib_users) > 1) {
-		return 1;
-	}
+	if (XX_httplib_atomic_inc(&cryptolib_users) > 1) return 1;
 
 	/* Initialize locking callbacks, needed for thread safety.
 	 * http://www.openssl.org/support/faq.html#PROG1
@@ -9877,7 +9860,7 @@ initialize_ssl(struct mg_context *ctx)
 	}
 	size = sizeof(pthread_mutex_t) * ((size_t)(i));
 	if ((ssl_mutexes = (pthread_mutex_t *)XX_httplib_malloc(size)) == NULL) {
-		mg_cry(fc(ctx),
+		mg_cry( XX_httplib_fc(ctx),
 		       "%s: cannot allocate mutexes: %s",
 		       __func__,
 		       ssl_error());
@@ -9899,38 +9882,23 @@ static int
 ssl_use_pem_file(struct mg_context *ctx, const char *pem)
 {
 	if (SSL_CTX_use_certificate_file(ctx->ssl_ctx, pem, 1) == 0) {
-		mg_cry(fc(ctx),
-		       "%s: cannot open certificate file %s: %s",
-		       __func__,
-		       pem,
-		       ssl_error());
+		mg_cry( XX_httplib_fc(ctx), "%s: cannot open certificate file %s: %s", __func__, pem, ssl_error());
 		return 0;
 	}
 
 	/* could use SSL_CTX_set_default_passwd_cb_userdata */
 	if (SSL_CTX_use_PrivateKey_file(ctx->ssl_ctx, pem, 1) == 0) {
-		mg_cry(fc(ctx),
-		       "%s: cannot open private key file %s: %s",
-		       __func__,
-		       pem,
-		       ssl_error());
+		mg_cry( XX_httplib_fc(ctx), "%s: cannot open private key file %s: %s", __func__, pem, ssl_error());
 		return 0;
 	}
 
 	if (SSL_CTX_check_private_key(ctx->ssl_ctx) == 0) {
-		mg_cry(fc(ctx),
-		       "%s: certificate and private key do not match: %s",
-		       __func__,
-		       pem);
+		mg_cry( XX_httplib_fc(ctx), "%s: certificate and private key do not match: %s", __func__, pem);
 		return 0;
 	}
 
 	if (SSL_CTX_use_certificate_chain_file(ctx->ssl_ctx, pem) == 0) {
-		mg_cry(fc(ctx),
-		       "%s: cannot use certificate chain file %s: %s",
-		       __func__,
-		       pem,
-		       ssl_error());
+		mg_cry( XX_httplib_fc(ctx), "%s: cannot use certificate chain file %s: %s", __func__, pem, ssl_error());
 		return 0;
 	}
 	return 1;
@@ -9997,7 +9965,7 @@ int XX_httplib_set_ssl_option( struct mg_context *ctx ) {
 	SSL_load_error_strings();
 
 	if ((ctx->ssl_ctx = SSL_CTX_new(SSLv23_server_method())) == NULL) {
-		mg_cry(fc(ctx), "SSL_CTX_new (server) error: %s", ssl_error());
+		mg_cry( XX_httplib_fc(ctx), "SSL_CTX_new (server) error: %s", ssl_error());
 		return 0;
 	}
 
@@ -10020,7 +9988,7 @@ int XX_httplib_set_ssl_option( struct mg_context *ctx ) {
 	 * If it returns 1, LibHTTP assumes the calback already did this.
 	 * If it returns -1, initializing ssl fails. */
 	if (callback_ret < 0) {
-		mg_cry(fc(ctx), "SSL callback returned error: %i", callback_ret);
+		mg_cry( XX_httplib_fc(ctx), "SSL callback returned error: %i", callback_ret);
 		return 0;
 	}
 	if (callback_ret > 0) {
@@ -10064,7 +10032,7 @@ int XX_httplib_set_ssl_option( struct mg_context *ctx ) {
 		ca_file = ctx->config[SSL_CA_FILE];
 		if (SSL_CTX_load_verify_locations(ctx->ssl_ctx, ca_file, ca_path)
 		    != 1) {
-			mg_cry(fc(ctx),
+			mg_cry( XX_httplib_fc(ctx),
 			       "SSL_CTX_load_verify_locations error: %s "
 			       "ssl_verify_peer requires setting "
 			       "either ssl_ca_path or ssl_ca_file. Is any of them "
@@ -10080,7 +10048,7 @@ int XX_httplib_set_ssl_option( struct mg_context *ctx ) {
 
 		if (use_default_verify_paths
 		    && SSL_CTX_set_default_verify_paths(ctx->ssl_ctx) != 1) {
-			mg_cry(fc(ctx),
+			mg_cry( XX_httplib_fc(ctx),
 			       "SSL_CTX_set_default_verify_paths error: %s",
 			       ssl_error());
 			return 0;
@@ -10095,7 +10063,7 @@ int XX_httplib_set_ssl_option( struct mg_context *ctx ) {
 	if (ctx->config[SSL_CIPHER_LIST] != NULL) {
 		if (SSL_CTX_set_cipher_list(ctx->ssl_ctx, ctx->config[SSL_CIPHER_LIST])
 		    != 1) {
-			mg_cry(fc(ctx), "SSL_CTX_set_cipher_list error: %s", ssl_error());
+			mg_cry( XX_httplib_fc(ctx), "SSL_CTX_set_cipher_list error: %s", ssl_error());
 		}
 	}
 
@@ -10110,7 +10078,7 @@ uninitialize_ssl(struct mg_context *ctx)
 	int i;
 	(void)ctx;
 
-	if (mg_atomic_dec(&cryptolib_users) == 0) {
+	if (XX_httplib_atomic_dec(&cryptolib_users) == 0) {
 
 		/* Shutdown according to
 		 * https://wiki.openssl.org/index.php/Library_Initialization#Cleanup
@@ -10128,7 +10096,7 @@ uninitialize_ssl(struct mg_context *ctx)
 		for (i = 0; i < CRYPTO_num_locks(); i++) {
 			pthread_mutex_destroy(&ssl_mutexes[i]);
 		}
-		mg_free(ssl_mutexes);
+		XX_httplib_free(ssl_mutexes);
 		ssl_mutexes = NULL;
 	}
 }
@@ -10141,8 +10109,8 @@ int XX_httplib_set_gpass_option( struct mg_context *ctx ) {
 
 		struct file file = STRUCT_FILE_INITIALIZER;
 		const char *path = ctx->config[GLOBAL_PASSWORDS_FILE];
-		if (path != NULL && !mg_stat(fc(ctx), path, &file)) {
-			mg_cry(fc(ctx), "Cannot open %s: %s", path, strerror(ERRNO));
+		if (path != NULL && !mg_stat( XX_httplib_fc(ctx), path, &file)) {
+			mg_cry( XX_httplib_fc(ctx), "Cannot open %s: %s", path, strerror(ERRNO));
 			return 0;
 		}
 		return 1;
@@ -10378,10 +10346,10 @@ mg_close_connection(struct mg_connection *conn)
 				mg_join_thread(client_ctx->workerthreadids[i]);
 			}
 		}
-		mg_free(client_ctx->workerthreadids);
-		mg_free(client_ctx);
-		(void)pthread_mutex_destroy(&conn->mutex);
-		mg_free(conn);
+		XX_httplib_free(client_ctx->workerthreadids);
+		XX_httplib_free(client_ctx);
+		pthread_mutex_destroy(&conn->mutex);
+		XX_httplib_free(conn);
 	}
 }
 
@@ -10425,7 +10393,7 @@ mg_connect_client_impl(const struct mg_client_options *client_options,
 		            ebuf_len,
 		            "SSL_CTX_new error");
 		closesocket(sock);
-		mg_free(conn);
+		XX_httplib_free(conn);
 		conn = NULL;
 #endif /* NO_SSL */
 
@@ -10480,7 +10448,7 @@ mg_connect_client_impl(const struct mg_client_options *client_options,
 					            "Can not use SSL client certificate");
 					SSL_CTX_free(conn->client_ssl_ctx);
 					closesocket(sock);
-					mg_free(conn);
+					XX_httplib_free(conn);
 					conn = NULL;
 				}
 			}
@@ -10502,7 +10470,7 @@ mg_connect_client_impl(const struct mg_client_options *client_options,
 				            "SSL connection error");
 				SSL_CTX_free(conn->client_ssl_ctx);
 				closesocket(sock);
-				mg_free(conn);
+				XX_httplib_free(conn);
 				conn = NULL;
 			}
 		}
@@ -10973,7 +10941,8 @@ websocket_client_thread(void *data)
 		cdata->close_handler(cdata->conn, cdata->callback_data);
 	}
 
-	mg_free((void *)cdata);
+	XX_httplib_free((void *)cdata);
+
 
 #ifdef _WIN32
 	return 0;
@@ -11048,7 +11017,7 @@ mg_connect_websocket_client(const char *host,
 		}
 		DEBUG_TRACE("Websocket client connect error: %s\r\n", error_buffer);
 		if (conn != NULL) {
-			mg_free(conn);
+			XX_httplib_free(conn);
 			conn = NULL;
 		}
 		return conn;
@@ -11077,10 +11046,10 @@ mg_connect_websocket_client(const char *host,
 	if (mg_start_thread_with_id(websocket_client_thread,
 	                            (void *)thread_data,
 	                            newctx->workerthreadids) != 0) {
-		mg_free((void *)thread_data);
-		mg_free((void *)newctx->workerthreadids);
-		mg_free((void *)newctx);
-		mg_free((void *)conn);
+		XX_httplib_free((void *)thread_data);
+		XX_httplib_free((void *)newctx->workerthreadids);
+		XX_httplib_free((void *)newctx);
+		XX_httplib_free((void *)conn);
 		conn = NULL;
 		DEBUG_TRACE("%s",
 		            "Websocket client connect thread could not be started\r\n");
@@ -11195,7 +11164,7 @@ process_new_connection(struct mg_connection *conn)
 			}
 
 			if (ri->remote_user != NULL) {
-				mg_free((void *)ri->remote_user);
+				XX_httplib_free((void *)ri->remote_user);
 				/* Important! When having connections with and without auth
 				 * would cause double free and then crash */
 				ri->remote_user = NULL;
@@ -11359,7 +11328,7 @@ worker_thread_run(struct worker_thread_args *thread_args)
 	mg_set_thread_name("worker");
 
 	tls.is_master = 0;
-	tls.thread_idx = (unsigned)mg_atomic_inc(&thread_idx_max);
+	tls.thread_idx = (unsigned)XX_httplib_atomic_inc(&thread_idx_max);
 #if defined(_WIN32)
 	tls.pthread_cond_helper_mutex = CreateEvent(NULL, FALSE, FALSE, NULL);
 #endif
@@ -11372,7 +11341,7 @@ worker_thread_run(struct worker_thread_args *thread_args)
 	conn =
 	    (struct mg_connection *)mg_calloc(1, sizeof(*conn) + MAX_REQUEST_SIZE);
 	if (conn == NULL) {
-		mg_cry(fc(ctx), "%s", "Cannot create new connection struct, OOM");
+		mg_cry( XX_httplib_fc(ctx), "%s", "Cannot create new connection struct, OOM");
 	} else {
 		pthread_setspecific(sTlsKey, &tls);
 		conn->buf_size = MAX_REQUEST_SIZE;
@@ -11424,19 +11393,19 @@ worker_thread_run(struct worker_thread_args *thread_args)
 
 					/* Free client certificate info */
 					if (conn->request_info.client_cert) {
-						mg_free(
+						XX_httplib_free(
 						    (void *)(conn->request_info.client_cert->subject));
-						mg_free(
+						XX_httplib_free(
 						    (void *)(conn->request_info.client_cert->issuer));
-						mg_free(
+						XX_httplib_free(
 						    (void *)(conn->request_info.client_cert->serial));
-						mg_free(
+						XX_httplib_free(
 						    (void *)(conn->request_info.client_cert->finger));
 						conn->request_info.client_cert->subject = 0;
 						conn->request_info.client_cert->issuer = 0;
 						conn->request_info.client_cert->serial = 0;
 						conn->request_info.client_cert->finger = 0;
-						mg_free(conn->request_info.client_cert);
+						XX_httplib_free(conn->request_info.client_cert);
 						conn->request_info.client_cert = 0;
 					}
 				}
@@ -11455,7 +11424,7 @@ worker_thread_run(struct worker_thread_args *thread_args)
 	CloseHandle(tls.pthread_cond_helper_mutex);
 #endif
 	pthread_mutex_destroy(&conn->mutex);
-	mg_free(conn);
+	XX_httplib_free(conn);
 
 	DEBUG_TRACE("%s", "exiting");
 	return NULL;
@@ -11468,7 +11437,7 @@ unsigned __stdcall XX_httplib_worker_thread( void *thread_func_param ) {
 
 	struct worker_thread_args *pwta = (struct worker_thread_args *)thread_func_param;
 	worker_thread_run(pwta);
-	mg_free(thread_func_param);
+	XX_httplib_free(thread_func_param);
 
 	return 0;
 
@@ -11480,7 +11449,7 @@ void *XX_httplib_worker_thread( void *thread_func_param ) {
 
 	struct worker_thread_args *pwta = (struct worker_thread_args *)thread_func_param;
 	worker_thread_run(pwta);
-	mg_free(thread_func_param);
+	XX_httplib_free(thread_func_param);
 
 	return NULL;
 
@@ -11506,20 +11475,17 @@ accept_new_connection(const struct socket *listener, struct mg_context *ctx)
 	    == INVALID_SOCKET) {
 	} else if (!check_acl(ctx, ntohl(*(uint32_t *)&so.rsa.sin.sin_addr))) {
 		sockaddr_to_string(src_addr, sizeof(src_addr), &so.rsa);
-		mg_cry(fc(ctx), "%s: %s is not allowed to connect", __func__, src_addr);
+		mg_cry( XX_httplib_fc(ctx), "%s: %s is not allowed to connect", __func__, src_addr);
 		closesocket(so.sock);
 		so.sock = INVALID_SOCKET;
 	} else {
 		/* Put so socket structure into the queue */
 		DEBUG_TRACE("Accepted socket %d", (int)so.sock);
-		set_close_on_exec(so.sock, fc(ctx));
+		set_close_on_exec(so.sock, XX_httplib_fc(ctx));
 		so.is_ssl = listener->is_ssl;
 		so.ssl_redir = listener->ssl_redir;
 		if (getsockname(so.sock, &so.lsa.sa, &len) != 0) {
-			mg_cry(fc(ctx),
-			       "%s: getsockname() failed: %s",
-			       __func__,
-			       strerror(ERRNO));
+			mg_cry( XX_httplib_fc(ctx), "%s: getsockname() failed: %s", __func__, strerror(ERRNO));
 		}
 
 		/* Set TCP keep-alive. This is needed because if HTTP-level
@@ -11529,15 +11495,9 @@ accept_new_connection(const struct socket *listener, struct mg_context *ctx)
 		 * TCP keep-alive, next keep-alive handshake will figure out that
 		 * the client is down and will close the server end.
 		 * Thanks to Igor Klopov who suggested the patch. */
-		if (setsockopt(so.sock,
-		               SOL_SOCKET,
-		               SO_KEEPALIVE,
-		               (SOCK_OPT_TYPE)&on,
-		               sizeof(on)) != 0) {
-			mg_cry(fc(ctx),
-			       "%s: setsockopt(SOL_SOCKET SO_KEEPALIVE) failed: %s",
-			       __func__,
-			       strerror(ERRNO));
+		if (setsockopt(so.sock, SOL_SOCKET, SO_KEEPALIVE, (SOCK_OPT_TYPE)&on, sizeof(on)) != 0) {
+
+			mg_cry( XX_httplib_fc(ctx), "%s: setsockopt(SOL_SOCKET SO_KEEPALIVE) failed: %s", __func__, strerror(ERRNO));
 		}
 
 		/* Disable TCP Nagle's algorithm. Normally TCP packets are coalesced
@@ -11550,10 +11510,7 @@ accept_new_connection(const struct socket *listener, struct mg_context *ctx)
 		if ((ctx != NULL) && (ctx->config[CONFIG_TCP_NODELAY] != NULL)
 		    && (!strcmp(ctx->config[CONFIG_TCP_NODELAY], "1"))) {
 			if (set_tcp_nodelay(so.sock, 1) != 0) {
-				mg_cry(fc(ctx),
-				       "%s: setsockopt(IPPROTO_TCP TCP_NODELAY) failed: %s",
-				       __func__,
-				       strerror(ERRNO));
+				mg_cry( XX_httplib_fc(ctx), "%s: setsockopt(IPPROTO_TCP TCP_NODELAY) failed: %s", __func__, strerror(ERRNO));
 			}
 		}
 
@@ -11729,18 +11686,18 @@ free_context(struct mg_context *ctx)
 	 */
 	(void)pthread_mutex_destroy(&ctx->thread_mutex);
 #if defined(ALTERNATIVE_QUEUE)
-	mg_free(ctx->client_socks);
+	XX_httplib_free(ctx->client_socks);
 	for (i = 0; (unsigned)i < ctx->cfg_worker_threads; i++) {
 		event_destroy(ctx->client_wait_events[i]);
 	}
-	mg_free(ctx->client_wait_events);
+	XX_httplib_free(ctx->client_wait_events);
 #else
-	(void)pthread_cond_destroy(&ctx->sq_empty);
-	(void)pthread_cond_destroy(&ctx->sq_full);
+	pthread_cond_destroy(&ctx->sq_empty);
+	pthread_cond_destroy(&ctx->sq_full);
 #endif
 
 	/* Destroy other context global data structures mutex */
-	(void)pthread_mutex_destroy(&ctx->nonce_mutex);
+	pthread_mutex_destroy(&ctx->nonce_mutex);
 
 #if defined(USE_TIMERS)
 	timers_exit(ctx);
@@ -11752,7 +11709,7 @@ free_context(struct mg_context *ctx)
 #if defined(_MSC_VER)
 #pragma warning(suppress : 6001)
 #endif
-			mg_free(ctx->config[i]);
+			XX_httplib_free(ctx->config[i]);
 		}
 	}
 
@@ -11760,8 +11717,8 @@ free_context(struct mg_context *ctx)
 	while (ctx->handlers) {
 		tmp_rh = ctx->handlers;
 		ctx->handlers = tmp_rh->next;
-		mg_free(tmp_rh->uri);
-		mg_free(tmp_rh);
+		XX_httplib_free(tmp_rh->uri);
+		XX_httplib_free(tmp_rh);
 	}
 
 #ifndef NO_SSL
@@ -11773,11 +11730,11 @@ free_context(struct mg_context *ctx)
 
 	/* Deallocate worker thread ID array */
 	if (ctx->workerthreadids != NULL) {
-		mg_free(ctx->workerthreadids);
+		XX_httplib_free(ctx->workerthreadids);
 	}
 
 	/* Deallocate the tls variable */
-	if (mg_atomic_dec(&sTlsInit) == 0) {
+	if (XX_httplib_atomic_dec(&sTlsInit) == 0) {
 #if defined(_WIN32)
 		DeleteCriticalSection(&global_log_file_lock);
 #endif /* _WIN32 */
@@ -11789,10 +11746,10 @@ free_context(struct mg_context *ctx)
 	}
 
 	/* deallocate system name string */
-	mg_free(ctx->systemName);
+	XX_httplib_free(ctx->systemName);
 
 	/* Deallocate context itself */
-	mg_free(ctx);
+	XX_httplib_free(ctx);
 }
 
 

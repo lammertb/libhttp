@@ -801,6 +801,9 @@ struct mg_connection {
  * indicate that these are private functions.
  */
 
+int			XX_httplib_atomic_dec( volatile int *addr );
+int			XX_httplib_atomic_inc( volatile int *addr );
+struct mg_connection *	XX_httplib_fc( struct mg_context *ctx );
 uint64_t		XX_httplib_get_random( void );
 void			XX_httplib_get_system_name( char **sysName );
 int			XX_httplib_set_acl_option( struct mg_context *ctx );
@@ -821,8 +824,11 @@ void *			XX_httplib_worker_thread( void *thread_func_param );
 #endif /* _WIN32 */
 
 #if defined(MEMORY_DEBUGGING)
+void			XX_httplib_free_ex( void *memory, const char *file, unsigned line );
 void *			XX_httplib_malloc_ex( size_t size, const char *file, unsigned line );
+#define			XX_httplib_free(a) XX_httplib_free_ex(a, __FILE__, __LINE__)
 #define			XX_httplib_malloc(a) XX_httplib_malloc_ex(a, __FILE__, __LINE__)
 #else  /* MEMORY_DEBUGGING */
+__inline void		XX_httplib_free( void *a );
 __inline void *		XX_httplib_malloc( size_t a );
 #endif  /* MEMORY_DEBUGGING */
