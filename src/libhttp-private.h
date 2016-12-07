@@ -808,14 +808,15 @@ int			XX_httplib_set_gpass_option( struct mg_context *ctx );
 int			XX_httplib_set_ports_option( struct mg_context *ctx );
 int			XX_httplib_set_ssl_option( struct mg_context *ctx );
 int			XX_httplib_set_uid_option( struct mg_context *ctx );
-int			XX_httplib_start_thread_with_id( unsigned(__stdcall *f)(void *), void *p, pthread_t *threadidptr );
 void			XX_httplib_tls_dtor( void *key );
 
 #ifdef _WIN32
 unsigned __stdcall	XX_httplib_master_thread( void *thread_func_param );
+int			XX_httplib_start_thread_with_id( unsigned(__stdcall *f)(void *), void *p, pthread_t *threadidptr );
 unsigned __stdcall	XX_httplib_worker_thread( void *thread_func_param );
 #else  /* _WIN32 */
 void *			XX_httplib_master_thread( void *thread_func_param );
+int			XX_httplib_start_thread_with_id( mg_thread_func_t func, void *param, pthread_t *threadidptr );
 void *			XX_httplib_worker_thread( void *thread_func_param );
 #endif /* _WIN32 */
 

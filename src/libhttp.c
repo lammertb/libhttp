@@ -2646,7 +2646,7 @@ int mg_start_thread(mg_thread_func_t func, void *param) {
 
 
 /* Start a thread storing the thread context. */
-static int mg_start_thread_with_id(mg_thread_func_t func, void *param, pthread_t *threadidptr) {
+int XX_httplib_start_thread_with_id( mg_thread_func_t func, void *param, pthread_t *threadidptr ) {
 
 	pthread_t thread_id;
 	pthread_attr_t attr;
@@ -2667,7 +2667,7 @@ static int mg_start_thread_with_id(mg_thread_func_t func, void *param, pthread_t
 	}
 	return result;
 
-}  /* mg_start_thread_with_id */
+}  /* XX_httplib_start_thread_with_id */
 
 
 /* Wait for a thread to finish. */
