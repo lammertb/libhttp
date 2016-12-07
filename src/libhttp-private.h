@@ -121,7 +121,90 @@ mg_static_assert(sizeof(void *) >= sizeof(int), "data type size check");
 #include <fcntl.h>
 #endif /* !_WIN32_WCE */
 
+#if !defined(MSG_NOSIGNAL)
+#define MSG_NOSIGNAL (0)
+#endif
 
+#if !defined(SOMAXCONN)
+#define SOMAXCONN (100)
+#endif
+
+/* Size of the accepted socket queue */
+#if !defined(MGSQLEN)
+#define MGSQLEN (20)
+#endif
+
+
+/* NOTE(lsm): this enum shoulds be in sync with the config_options below. */
+enum {
+	CGI_EXTENSIONS,
+	CGI_ENVIRONMENT,
+	PUT_DELETE_PASSWORDS_FILE,
+	CGI_INTERPRETER,
+	PROTECT_URI,
+	AUTHENTICATION_DOMAIN,
+	SSI_EXTENSIONS,
+	THROTTLE,
+	ACCESS_LOG_FILE,
+	ENABLE_DIRECTORY_LISTING,
+	ERROR_LOG_FILE,
+	GLOBAL_PASSWORDS_FILE,
+	INDEX_FILES,
+	ENABLE_KEEP_ALIVE,
+	ACCESS_CONTROL_LIST,
+	EXTRA_MIME_TYPES,
+	LISTENING_PORTS,
+	DOCUMENT_ROOT,
+	SSL_CERTIFICATE,
+	NUM_THREADS,
+	RUN_AS_USER,
+	REWRITE,
+	HIDE_FILES,
+	REQUEST_TIMEOUT,
+	SSL_DO_VERIFY_PEER,
+	SSL_CA_PATH,
+	SSL_CA_FILE,
+	SSL_VERIFY_DEPTH,
+	SSL_DEFAULT_VERIFY_PATHS,
+	SSL_CIPHER_LIST,
+	SSL_PROTOCOL_VERSION,
+	SSL_SHORT_TRUST,
+
+#if defined(USE_WEBSOCKET)
+	WEBSOCKET_TIMEOUT,
+#endif
+
+	DECODE_URL,
+
+#if defined(USE_LUA)
+	LUA_PRELOAD_FILE,
+	LUA_SCRIPT_EXTENSIONS,
+	LUA_SERVER_PAGE_EXTENSIONS,
+#endif
+#if defined(USE_DUKTAPE)
+	DUKTAPE_SCRIPT_EXTENSIONS,
+#endif
+
+#if defined(USE_WEBSOCKET)
+	WEBSOCKET_ROOT,
+#endif
+#if defined(USE_LUA) && defined(USE_WEBSOCKET)
+	LUA_WEBSOCKET_EXTENSIONS,
+#endif
+
+	ACCESS_CONTROL_ALLOW_ORIGIN,
+	ERROR_PAGES,
+	CONFIG_TCP_NODELAY, /* Prepended CONFIG_ to avoid conflict with the
+                         * socket option typedef TCP_NODELAY. */
+#if !defined(NO_CACHING)
+	STATIC_FILE_MAX_AGE,
+#endif
+#if defined(__linux__)
+	ALLOW_SENDFILE_CALL,
+#endif
+
+	NUM_OPTIONS
+};
 
 #if defined(NO_SSL)
 typedef struct SSL SSL; /* dummy for SSL argument to push/pull */
@@ -275,6 +358,17 @@ struct ssl_func {
 #endif  /* NO_SSL_DL */
 #endif  /* NO_SSL */
 
+/* Describes listening socket, or socket which was accept()-ed by the master
+ * thread and queued for future handling by the worker thread. */
+struct socket {
+	SOCKET sock;             /* Listening socket */
+	union usa lsa;           /* Local socket address */
+	union usa rsa;           /* Remote socket address */
+	unsigned char is_ssl;    /* Is port SSL-ed */
+	unsigned char ssl_redir; /* Is port supposed to redirect everything to SSL
+	                          * port */
+	unsigned char in_use;    /* Is valid */
+};
 
 
 /*
