@@ -28,15 +28,6 @@
 
 #ifdef __MACH__
 
-#define CLOCK_MONOTONIC (1)
-#define CLOCK_REALTIME (2)
-
-#include <sys/time.h>
-#include <mach/clock.h>
-#include <mach/mach.h>
-#include <mach/mach_time.h>
-#include <assert.h>
-
 /* clock_gettime is not implemented on OSX prior to 10.12 */
 int _civet_clock_gettime(int clk_id, struct timespec *t);
 
@@ -63,10 +54,10 @@ int _civet_clock_gettime(int clk_id, struct timespec *t) {
 			kern_return_t mach_status = mach_timebase_info(&timebase_ifo);
 #if defined(DEBUG)
 			assert(mach_status == KERN_SUCCESS);
-#else
+#else  /* DEBUG */
 			/* appease "unused variable" warning for release builds */
 			(void)mach_status;
-#endif
+#endif  /* DEBUG */
 			clock_start_time = now;
 		}
 
@@ -95,288 +86,16 @@ _civet_safe_clock_gettime(int clk_id, struct timespec *t)
 	return _civet_clock_gettime(clk_id, t);
 }
 #define clock_gettime _civet_safe_clock_gettime
-#else
+#else  /* __CLOCK_AVAILABILITY */
 #define clock_gettime _civet_clock_gettime
-#endif
+#endif  /* __CLOCK_AVAILABILITY */
 
-#endif
+#endif  /* __MACH__ */
 
-
-#include <time.h>
-#include <stdlib.h>
-#include <stdarg.h>
-#include <assert.h>
-#include <string.h>
-#include <ctype.h>
-#include <limits.h>
-#include <stddef.h>
-#include <stdio.h>
-
-
-#ifndef MAX_WORKER_THREADS
-#define MAX_WORKER_THREADS (1024 * 64)
-#endif
-
-#define SHUTDOWN_RD (0)
-#define SHUTDOWN_WR (1)
-#define SHUTDOWN_BOTH (2)
 
 mg_static_assert(MAX_WORKER_THREADS >= 1, "worker threads must be a positive number");
 
 mg_static_assert(sizeof(size_t) == 4 || sizeof(size_t) == 8, "size_t data type size check");
-
-#if defined(_WIN32)   /* WINDOWS / UNIX include block */
-#include <windows.h>
-#include <winsock2.h> /* DTL add for SO_EXCLUSIVE */
-#include <ws2tcpip.h>
-
-typedef const char *SOCK_OPT_TYPE;
-
-#if !defined(PATH_MAX)
-#define PATH_MAX (MAX_PATH)
-#endif
-
-#if !defined(PATH_MAX)
-#define PATH_MAX (4096)
-#endif
-
-mg_static_assert(PATH_MAX >= 1, "path length must be a positive number");
-
-#ifndef _IN_PORT_T
-#ifndef in_port_t
-#define in_port_t u_short
-#endif
-#endif
-
-#ifndef _WIN32_WCE
-#include <process.h>
-#include <direct.h>
-#include <io.h>
-#else            /* _WIN32_WCE */
-#define NO_CGI   /* WinCE has no pipes */
-#define NO_POPEN /* WinCE has no popen */
-
-typedef long off_t;
-
-#define errno ((int)(GetLastError()))
-#define strerror(x) (_ultoa(x, (char *)_alloca(sizeof(x) * 3), 10))
-#endif /* _WIN32_WCE */
-
-#define MAKEUQUAD(lo, hi)                                                      \
-	((uint64_t)(((uint32_t)(lo)) | ((uint64_t)((uint32_t)(hi))) << 32))
-#define RATE_DIFF (10000000) /* 100 nsecs */
-#define EPOCH_DIFF (MAKEUQUAD(0xd53e8000, 0x019db1de))
-#define SYS2UNIX_TIME(lo, hi)                                                  \
-	((time_t)((MAKEUQUAD((lo), (hi)) - EPOCH_DIFF) / RATE_DIFF))
-
-/* Visual Studio 6 does not know __func__ or __FUNCTION__
- * The rest of MS compilers use __FUNCTION__, not C99 __func__
- * Also use _strtoui64 on modern M$ compilers */
-#if defined(_MSC_VER)
-#if (_MSC_VER < 1300)
-#define STRX(x) #x
-#define STR(x) STRX(x)
-#define __func__ __FILE__ ":" STR(__LINE__)
-#define strtoull(x, y, z) ((unsigned __int64)_atoi64(x))
-#define strtoll(x, y, z) (_atoi64(x))
-#else
-#define __func__ __FUNCTION__
-#define strtoull(x, y, z) (_strtoui64(x, y, z))
-#define strtoll(x, y, z) (_strtoi64(x, y, z))
-#endif
-#endif /* _MSC_VER */
-
-#define ERRNO ((int)(GetLastError()))
-#define NO_SOCKLEN_T
-
-#if defined(_WIN64) || defined(__MINGW64__)
-#define SSL_LIB "ssleay64.dll"
-#define CRYPTO_LIB "libeay64.dll"
-#else
-#define SSL_LIB "ssleay32.dll"
-#define CRYPTO_LIB "libeay32.dll"
-#endif
-
-#define O_NONBLOCK (0)
-#ifndef W_OK
-#define W_OK (2) /* http://msdn.microsoft.com/en-us/library/1w06ktdy.aspx */
-#endif
-#if !defined(EWOULDBLOCK)
-#define EWOULDBLOCK WSAEWOULDBLOCK
-#endif /* !EWOULDBLOCK */
-#define _POSIX_
-#define INT64_FMT "I64d"
-#define UINT64_FMT "I64u"
-
-#define WINCDECL __cdecl
-#define vsnprintf_impl _vsnprintf
-#define access _access
-#define mg_sleep(x) (Sleep(x))
-
-#define pipe(x) _pipe(x, MG_BUF_LEN, _O_BINARY)
-#ifndef popen
-#define popen(x, y) (_popen(x, y))
-#endif
-#ifndef pclose
-#define pclose(x) (_pclose(x))
-#endif
-#define close(x) (_close(x))
-#define dlsym(x, y) (GetProcAddress((HINSTANCE)(x), (y)))
-#define RTLD_LAZY (0)
-#define fseeko(x, y, z) ((_lseeki64(_fileno(x), (y), (z)) == -1) ? -1 : 0)
-#define fdopen(x, y) (_fdopen((x), (y)))
-#define write(x, y, z) (_write((x), (y), (unsigned)z))
-#define read(x, y, z) (_read((x), (y), (unsigned)z))
-#define flockfile(x) (EnterCriticalSection(&global_log_file_lock))
-#define funlockfile(x) (LeaveCriticalSection(&global_log_file_lock))
-#define sleep(x) (Sleep((x)*1000))
-#define rmdir(x) (_rmdir(x))
-#define timegm(x) (_mkgmtime(x))
-
-#if !defined(fileno)
-#define fileno(x) (_fileno(x))
-#endif /* !fileno MINGW #defines fileno */
-
-typedef HANDLE pthread_mutex_t;
-typedef DWORD pthread_key_t;
-typedef HANDLE pthread_t;
-typedef struct {
-	CRITICAL_SECTION threadIdSec;
-	struct mg_workerTLS *waiting_thread; /* The chain of threads */
-} pthread_cond_t;
-
-#ifndef __clockid_t_defined
-typedef DWORD clockid_t;
-#endif
-#ifndef CLOCK_MONOTONIC
-#define CLOCK_MONOTONIC (1)
-#endif
-#ifndef CLOCK_REALTIME
-#define CLOCK_REALTIME (2)
-#endif
-
-#if defined(_MSC_VER) && (_MSC_VER >= 1900)
-#define _TIMESPEC_DEFINED
-#endif
-#ifndef _TIMESPEC_DEFINED
-struct timespec {
-	time_t tv_sec; /* seconds */
-	long tv_nsec;  /* nanoseconds */
-};
-#endif
-
-#define pid_t HANDLE /* MINGW typedefs pid_t to int. Using #define here. */
-
-static int pthread_mutex_lock(pthread_mutex_t *);
-static int pthread_mutex_unlock(pthread_mutex_t *);
-static void path_to_unicode(const struct mg_connection *conn, const char *path, wchar_t *wbuf, size_t wbuf_len);
-struct file;
-static const char *mg_fgets(char *buf, size_t size, struct file *filep, char **p);
-
-
-/* POSIX dirent interface */
-struct dirent {
-	char d_name[PATH_MAX];
-};
-
-typedef struct DIR {
-	HANDLE handle;
-	WIN32_FIND_DATAW info;
-	struct dirent result;
-} DIR;
-
-#if defined(_WIN32) && !defined(POLLIN)
-#ifndef HAVE_POLL
-struct pollfd {
-	SOCKET fd;
-	short events;
-	short revents;
-};
-#define POLLIN (0x0300)
-#endif
-#endif
-
-/* Mark required libraries */
-#if defined(_MSC_VER)
-#pragma comment(lib, "Ws2_32.lib")
-#endif
-
-#else /* defined(_WIN32) -                          \
-         WINDOWS / UNIX include block */
-
-#include <sys/wait.h>
-#include <sys/socket.h>
-#include <sys/poll.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <sys/time.h>
-#include <sys/utsname.h>
-#include <inttypes.h>
-#include <netdb.h>
-#include <netinet/tcp.h>
-typedef const void *SOCK_OPT_TYPE;
-
-#if defined(ANDROID)
-typedef unsigned short int in_port_t;
-#endif
-
-#include <pwd.h>
-#include <unistd.h>
-#include <grp.h>
-#include <dirent.h>
-#define vsnprintf_impl vsnprintf
-
-#if !defined(NO_SSL_DL) && !defined(NO_SSL)
-#include <dlfcn.h>
-#endif
-#include <pthread.h>
-#if defined(__MACH__)
-#define SSL_LIB "libssl.dylib"
-#define CRYPTO_LIB "libcrypto.dylib"
-#else
-#if !defined(SSL_LIB)
-#define SSL_LIB "libssl.so"
-#endif
-#if !defined(CRYPTO_LIB)
-#define CRYPTO_LIB "libcrypto.so"
-#endif
-#endif
-#ifndef O_BINARY
-#define O_BINARY (0)
-#endif /* O_BINARY */
-#define closesocket(a) (close(a))
-#define mg_mkdir(conn, path, mode) (mkdir(path, mode))
-#define mg_remove(conn, x) (remove(x))
-#define mg_sleep(x) (usleep((x)*1000))
-#define mg_opendir(conn, x) (opendir(x))
-#define mg_closedir(x) (closedir(x))
-#define mg_readdir(x) (readdir(x))
-#define ERRNO (errno)
-#define INVALID_SOCKET (-1)
-#define INT64_FMT PRId64
-#define UINT64_FMT PRIu64
-typedef int SOCKET;
-#define WINCDECL
-
-#if defined(__hpux)
-/* HPUX 11 does not have monotonic, fall back to realtime */
-#ifndef CLOCK_MONOTONIC
-#define CLOCK_MONOTONIC CLOCK_REALTIME
-#endif
-
-/* HPUX defines socklen_t incorrectly as size_t which is 64bit on
- * Itanium.  Without defining _XOPEN_SOURCE or _XOPEN_SOURCE_EXTENDED
- * the prototypes use int* rather than socklen_t* which matches the
- * actual library expectation.  When called with the wrong size arg
- * accept() returns a zero client inet addr and check_acl() always
- * fails.  Since socklen_t is widely used below, just force replace
- * their typedef with int. - DTL
- */
-#define socklen_t int
-#endif /* hpux */
-
-#endif /* defined(_WIN32) -                         \
-          WINDOWS / UNIX include block */
 
 /* va_copy should always be a macro, C99 and C++11 - DTL */
 #ifndef va_copy
@@ -394,6 +113,7 @@ typedef int SOCKET;
 
 
 static CRITICAL_SECTION global_log_file_lock;
+
 static DWORD pthread_self(void) {
 
 	return GetCurrentThreadId();
