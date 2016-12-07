@@ -851,9 +851,9 @@ void *			XX_httplib_malloc_ex( size_t size, const char *file, unsigned line );
 #define			XX_httplib_free(a) XX_httplib_free_ex(a, __FILE__, __LINE__)
 #define			XX_httplib_malloc(a) XX_httplib_malloc_ex(a, __FILE__, __LINE__)
 #else  /* MEMORY_DEBUGGING */
-__inline void *		XX_httplib_calloc( size_t a, size_t b );
-__inline void		XX_httplib_free( void *a );
-__inline void *		XX_httplib_malloc( size_t a );
+void *			XX_httplib_calloc( size_t a, size_t b );
+void			XX_httplib_free( void *a );
+void *			XX_httplib_malloc( size_t a );
 #endif  /* MEMORY_DEBUGGING */
 
 extern struct mg_option	XX_httplib_config_options[];

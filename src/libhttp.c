@@ -420,25 +420,25 @@ static void * mg_realloc_ex(void *memory, size_t newsize, const char *file, unsi
 
 #else  /* MEMORY_DEBUGGING */
 
-__inline void * XX_httplib_malloc( size_t a ) {
+void * XX_httplib_malloc( size_t a ) {
 
 	return malloc(a);
 
 }  /* XX_httplib_malloc */
 
-__inline void *XX_httplib_calloc( size_t a, size_t b ) {
+void *XX_httplib_calloc( size_t a, size_t b ) {
 
 	return calloc(a, b);
 
 }  /* XX_httplib_calloc */
 
-static __inline void * mg_realloc(void *a, size_t b) {
+static void * mg_realloc(void *a, size_t b) {
 
 	return realloc(a, b);
 
 }  /* mg_realloc */
 
-__inline void XX_httplib_free( void *a ) {
+void XX_httplib_free( void *a ) {
 
 	free(a);
 
