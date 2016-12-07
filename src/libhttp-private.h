@@ -804,6 +804,8 @@ struct mg_connection {
 int			XX_httplib_atomic_dec( volatile int *addr );
 int			XX_httplib_atomic_inc( volatile int *addr );
 struct mg_connection *	XX_httplib_fc( struct mg_context *ctx );
+void			XX_httplib_free_context( struct mg_context *ctx );
+int			XX_httplib_get_option_index( const char *name );
 uint64_t		XX_httplib_get_random( void );
 void			XX_httplib_get_system_name( char **sysName );
 int			XX_httplib_set_acl_option( struct mg_context *ctx );
@@ -811,17 +813,24 @@ int			XX_httplib_set_gpass_option( struct mg_context *ctx );
 int			XX_httplib_set_ports_option( struct mg_context *ctx );
 int			XX_httplib_set_ssl_option( struct mg_context *ctx );
 int			XX_httplib_set_uid_option( struct mg_context *ctx );
+char *			XX_httplib_strdup( const char *str );
 void			XX_httplib_tls_dtor( void *key );
 
 #ifdef _WIN32
 unsigned __stdcall	XX_httplib_master_thread( void *thread_func_param );
 int			XX_httplib_start_thread_with_id( unsigned(__stdcall *f)(void *), void *p, pthread_t *threadidptr );
 unsigned __stdcall	XX_httplib_worker_thread( void *thread_func_param );
+
+extern struct pthread_mutex_undefined_struct *	XX_httplib_pthread_mutex_attr;
 #else  /* _WIN32 */
 void *			XX_httplib_master_thread( void *thread_func_param );
 int			XX_httplib_start_thread_with_id( mg_thread_func_t func, void *param, pthread_t *threadidptr );
 void *			XX_httplib_worker_thread( void *thread_func_param );
+
+extern pthread_mutexattr_t	XX_httplib_pthread_mutex_attr;
 #endif /* _WIN32 */
+
+#else  /* _WIN32 */
 
 #if defined(MEMORY_DEBUGGING)
 void			XX_httplib_free_ex( void *memory, const char *file, unsigned line );
@@ -832,3 +841,6 @@ void *			XX_httplib_malloc_ex( size_t size, const char *file, unsigned line );
 __inline void		XX_httplib_free( void *a );
 __inline void *		XX_httplib_malloc( size_t a );
 #endif  /* MEMORY_DEBUGGING */
+
+extern pthread_key_t	XX_httplib_sTlsKey;
+extern int		XX_httplib_thread_idx_max;

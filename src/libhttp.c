@@ -160,9 +160,9 @@ static void * pthread_getspecific(pthread_key_t key) {
 #pragma GCC diagnostic pop
 #endif  /* __MINGW32__ */
 
-static struct pthread_mutex_undefined_struct *pthread_mutex_attr = NULL;
+struct pthread_mutex_undefined_struct *XX_httplib_pthread_mutex_attr = NULL;
 #else  /* _WIN32 */
-static pthread_mutexattr_t pthread_mutex_attr;
+pthread_mutexattr_t XX_httplib_pthread_mutex_attr;
 #endif /* _WIN32 */
 
 
@@ -756,9 +756,9 @@ enum { REQUEST_HANDLER, WEBSOCKET_HANDLER, AUTH_HANDLER };
 
 
 
-static pthread_key_t sTlsKey; /* Thread local storage index */
+pthread_key_t XX_httplib_sTlsKey; /* Thread local storage index */
 static int sTlsInit = 0;
-static int thread_idx_max = 0;
+int XX_httplib_thread_idx_max = 0;
 
 
 struct mg_workerTLS {
@@ -1133,7 +1133,7 @@ static char * mg_strndup(const char *ptr, size_t len) {
 }
 
 
-static char * mg_strdup(const char *str) {
+char * XX_httplib_strdup( const char *str ) {
 
 	return mg_strndup(str, strlen(str));
 }
@@ -1198,7 +1198,7 @@ static void mg_snprintf(const struct mg_connection *conn, int *truncated, char *
 }
 
 
-static int get_option_index(const char *name) {
+int XX_httplib_get_option_index( const char *name ) {
 
 	int i;
 
@@ -1208,19 +1208,17 @@ static int get_option_index(const char *name) {
 		}
 	}
 	return -1;
-}
+
+}  /* XX_httplib_get_option_index */
 
 
-const char * mg_get_option(const struct mg_context *ctx, const char *name) {
+const char *mg_get_option(const struct mg_context *ctx, const char *name) {
 
 	int i;
-	if ((i = get_option_index(name)) == -1) {
-		return NULL;
-	} else if (!ctx || ctx->config[i] == NULL) {
-		return "";
-	} else {
-		return ctx->config[i];
-	}
+
+	if      ( (i = XX_httplib_get_option_index(name)) == -1 ) return NULL;
+	else if ( ctx == NULL  ||  ctx->config[i] == NULL       ) return "";
+	else                                                      return ctx->config[i];
 }
 
 
@@ -1921,7 +1919,7 @@ static int pthread_cond_init(pthread_cond_t *cv, const void *unused) {
 static int pthread_cond_timedwait(pthread_cond_t *cv, pthread_mutex_t *mutex, const struct timespec *abstime) {
 
 	struct mg_workerTLS **ptls,
-	    *tls = (struct mg_workerTLS *)pthread_getspecific(sTlsKey);
+	    *tls = (struct mg_workerTLS *)pthread_getspecific(XX_httplib_sTlsKey);
 	int ok;
 	struct timespec tsnow;
 	int64_t nsnow, nswaitabs, nswaitrel;
@@ -4324,7 +4322,7 @@ static int parse_auth_header(struct mg_connection *conn, char *buf, size_t buf_s
 
 	/* CGI needs it as REMOTE_USER */
 	if (ah->user != NULL) {
-		conn->request_info.remote_user = mg_strdup(ah->user);
+		conn->request_info.remote_user = XX_httplib_strdup(ah->user);
 	} else {
 		return 0;
 	}
@@ -4768,7 +4766,7 @@ connect_socket(struct mg_context *ctx /* may be NULL */,
 		/* While getaddrinfo on Windows will work with [::1],
 		 * getaddrinfo on Linux only works with ::1 (without []). */
 		size_t l = strlen(host + 1);
-		char *h = (l > 1) ? mg_strdup(host + 1) : NULL;
+		char *h = (l > 1) ? XX_httplib_strdup(host + 1) : NULL;
 		if (h) {
 			h[l - 1] = 0;
 			if (mg_inet_pton(AF_INET6, h, &sa->sin6, sizeof(sa->sin6))) {
@@ -5120,7 +5118,7 @@ static void dir_scan_callback(struct de *de, void *data) {
 		/* TODO(lsm, low): propagate an error to the caller */
 		dsd->num_entries = 0;
 	} else {
-		dsd->entries[dsd->num_entries].file_name = mg_strdup(de->file_name);
+		dsd->entries[dsd->num_entries].file_name = XX_httplib_strdup(de->file_name);
 		dsd->entries[dsd->num_entries].file = de->file;
 		dsd->entries[dsd->num_entries].conn = de->conn;
 		dsd->num_entries++;
@@ -8321,7 +8319,7 @@ mg_set_handler_type(struct mg_context *ctx,
 		mg_cry( XX_httplib_fc(ctx), "%s", "Cannot create new request handler struct, OOM");
 		return;
 	}
-	tmp_rh->uri = mg_strdup(uri);
+	tmp_rh->uri = XX_httplib_strdup(uri);
 	if (!tmp_rh->uri) {
 		mg_unlock_context(ctx);
 		XX_httplib_free(tmp_rh);
@@ -9456,7 +9454,7 @@ int XX_httplib_set_uid_option( struct mg_context *ctx ) {
 void XX_httplib_tls_dtor( void *key ) {
 
 	struct mg_workerTLS *tls = (struct mg_workerTLS *)key;
-	/* key == pthread_getspecific(sTlsKey); */
+	/* key == pthread_getspecific(XX_httplib_sTlsKey); */
 
 	if (tls) {
 		if (tls->is_master == 2) {
@@ -9464,7 +9462,7 @@ void XX_httplib_tls_dtor( void *key ) {
 			XX_httplib_free(tls);
 		}
 	}
-	pthread_setspecific(sTlsKey, NULL);
+	pthread_setspecific(XX_httplib_sTlsKey, NULL);
 
 }  /* XX_httplib_tls_dtor */
 
@@ -9493,14 +9491,14 @@ ssl_id_callback(void)
 		/* This is the problematic case for CRYPTO_set_id_callback:
 		 * The OS pthread_t can not be cast to unsigned long. */
 		struct mg_workerTLS *tls =
-		    (struct mg_workerTLS *)pthread_getspecific(sTlsKey);
+		    (struct mg_workerTLS *)pthread_getspecific(XX_httplib_sTlsKey);
 		if (tls == NULL) {
 			/* SSL called from an unknown thread: Create some thread index.
 			 */
 			tls = (struct mg_workerTLS *)XX_httplib_malloc(sizeof(struct mg_workerTLS));
 			tls->is_master = -2; /* -2 means "3rd party thread" */
-			tls->thread_idx = (unsigned)XX_httplib_atomic_inc(&thread_idx_max);
-			pthread_setspecific(sTlsKey, tls);
+			tls->thread_idx = (unsigned)XX_httplib_atomic_inc(&XX_httplib_thread_idx_max);
+			pthread_setspecific(XX_httplib_sTlsKey, tls);
 		}
 		return tls->thread_idx;
 	} else {
@@ -9754,10 +9752,10 @@ ssl_get_client_cert_info(struct mg_connection *conn)
 		conn->request_info.client_cert =
 		    (struct client_cert *)XX_httplib_malloc(sizeof(struct client_cert));
 		if (conn->request_info.client_cert) {
-			conn->request_info.client_cert->subject = mg_strdup(str_subject);
-			conn->request_info.client_cert->issuer = mg_strdup(str_issuer);
-			conn->request_info.client_cert->serial = mg_strdup(str_serial);
-			conn->request_info.client_cert->finger = mg_strdup(str_finger);
+			conn->request_info.client_cert->subject = XX_httplib_strdup( str_subject );
+			conn->request_info.client_cert->issuer  = XX_httplib_strdup( str_issuer  );
+			conn->request_info.client_cert->serial  = XX_httplib_strdup( str_serial  );
+			conn->request_info.client_cert->finger  = XX_httplib_strdup( str_finger  );
 		} else {
 			/* TODO: write some OOM message */
 		}
@@ -9868,7 +9866,7 @@ initialize_ssl(struct mg_context *ctx)
 	}
 
 	for (i = 0; i < CRYPTO_num_locks(); i++) {
-		pthread_mutex_init(&ssl_mutexes[i], &pthread_mutex_attr);
+		pthread_mutex_init(&ssl_mutexes[i], &XX_httplib_pthread_mutex_attr);
 	}
 
 	CRYPTO_set_locking_callback(&ssl_locking_callback);
@@ -10426,7 +10424,7 @@ mg_connect_client_impl(const struct mg_client_options *client_options,
 		}
 
 		conn->client.is_ssl = use_ssl ? 1 : 0;
-		(void)pthread_mutex_init(&conn->mutex, &pthread_mutex_attr);
+		(void)pthread_mutex_init(&conn->mutex, &XX_httplib_pthread_mutex_attr);
 
 #ifndef NO_SSL
 		if (use_ssl) {
@@ -11328,7 +11326,7 @@ worker_thread_run(struct worker_thread_args *thread_args)
 	mg_set_thread_name("worker");
 
 	tls.is_master = 0;
-	tls.thread_idx = (unsigned)XX_httplib_atomic_inc(&thread_idx_max);
+	tls.thread_idx = (unsigned)XX_httplib_atomic_inc(&XX_httplib_thread_idx_max);
 #if defined(_WIN32)
 	tls.pthread_cond_helper_mutex = CreateEvent(NULL, FALSE, FALSE, NULL);
 #endif
@@ -11343,7 +11341,7 @@ worker_thread_run(struct worker_thread_args *thread_args)
 	if (conn == NULL) {
 		mg_cry( XX_httplib_fc(ctx), "%s", "Cannot create new connection struct, OOM");
 	} else {
-		pthread_setspecific(sTlsKey, &tls);
+		pthread_setspecific(XX_httplib_sTlsKey, &tls);
 		conn->buf_size = MAX_REQUEST_SIZE;
 		conn->buf = (char *)(conn + 1);
 		conn->ctx = ctx;
@@ -11352,7 +11350,7 @@ worker_thread_run(struct worker_thread_args *thread_args)
 		/* Allocate a mutex for this connection to allow communication both
 		 * within the request handler and from elsewhere in the application
 		 */
-		(void)pthread_mutex_init(&conn->mutex, &pthread_mutex_attr);
+		(void)pthread_mutex_init(&conn->mutex, &XX_httplib_pthread_mutex_attr);
 
 		/* Call consume_socket() even when ctx->stop_flag > 0, to let it
 		 * signal sq_empty condvar to wake up the master waiting in
@@ -11419,7 +11417,7 @@ worker_thread_run(struct worker_thread_args *thread_args)
 		}
 	}
 
-	pthread_setspecific(sTlsKey, NULL);
+	pthread_setspecific(XX_httplib_sTlsKey, NULL);
 #if defined(_WIN32)
 	CloseHandle(tls.pthread_cond_helper_mutex);
 #endif
@@ -11564,7 +11562,7 @@ master_thread_run(void *thread_func_param)
 	tls.pthread_cond_helper_mutex = CreateEvent(NULL, FALSE, FALSE, NULL);
 #endif
 	tls.is_master = 1;
-	pthread_setspecific(sTlsKey, &tls);
+	pthread_setspecific(XX_httplib_sTlsKey, &tls);
 
 	if (ctx->callbacks.init_thread) {
 		/* Callback for the master thread (type 0) */
@@ -11636,7 +11634,7 @@ master_thread_run(void *thread_func_param)
 #if defined(_WIN32)
 	CloseHandle(tls.pthread_cond_helper_mutex);
 #endif
-	pthread_setspecific(sTlsKey, NULL);
+	pthread_setspecific(XX_httplib_sTlsKey, NULL);
 
 	/* Signal mg_stop() that we're done.
 	 * WARNING: This must be the very last thing this
@@ -11667,9 +11665,8 @@ void *XX_httplib_master_thread( void *thread_func_param ) {
 #endif /* _WIN32 */
 
 
-static void
-free_context(struct mg_context *ctx)
-{
+void XX_httplib_free_context( struct mg_context *ctx ) {
+
 	int i;
 	struct mg_handler_info *tmp_rh;
 
@@ -11739,10 +11736,10 @@ free_context(struct mg_context *ctx)
 		DeleteCriticalSection(&global_log_file_lock);
 #endif /* _WIN32 */
 #if !defined(_WIN32)
-		pthread_mutexattr_destroy(&pthread_mutex_attr);
+		pthread_mutexattr_destroy(&XX_httplib_pthread_mutex_attr);
 #endif
 
-		pthread_key_delete(sTlsKey);
+		pthread_key_delete(XX_httplib_sTlsKey);
 	}
 
 	/* deallocate system name string */
@@ -11750,7 +11747,8 @@ free_context(struct mg_context *ctx)
 
 	/* Deallocate context itself */
 	XX_httplib_free(ctx);
-}
+
+}  /* XX_httplib_free_context */
 
 
 void
@@ -11779,7 +11777,7 @@ mg_stop(struct mg_context *ctx)
 	}
 
 	mg_join_thread(mt);
-	free_context(ctx);
+	XX_httplib_free_context(ctx);
 
 #if defined(_WIN32)
 	(void)WSACleanup();
@@ -11791,7 +11789,7 @@ void XX_httplib_get_system_name( char **sysName ) {
 
 #if defined(_WIN32)
 #if defined(_WIN32_WCE)
-	*sysName = mg_strdup("WinCE");
+	*sysName = XX_httplib_strdup( "WinCE" );
 #else
 	char name[128];
 	DWORD dwVersion = 0;
@@ -11815,13 +11813,13 @@ void XX_httplib_get_system_name( char **sysName ) {
 	(void)dwBuild;
 
 	sprintf(name, "Windows %u.%u", (unsigned)dwMajorVersion, (unsigned)dwMinorVersion);
-	*sysName = mg_strdup(name);
+	*sysName = XX_httplib_strdup(name);
 #endif
 #else
 	struct utsname name;
 	memset(&name, 0, sizeof(name));
 	uname(&name);
-	*sysName = mg_strdup(name.sysname);
+	*sysName = XX_httplib_strdup(name.sysname);
 #endif
 
 }  /* XX_httplib_get_system_name */
