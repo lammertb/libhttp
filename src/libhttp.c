@@ -1018,7 +1018,7 @@ struct ssl_func {
 #define i2d_X509 (*(int (*)(X509 *, unsigned char **))crypto_sw[19].ptr)
 
 
-/* set_ssl_option() function updates this array.
+/* XX_httplib_set_ssl_option() function updates this array.
  * It loads SSL library dynamically and changes NULLs to the actual addresses
  * of respective functions. The macros above (like SSL_connect()) are really
  * just calling these functions indirectly via the pointer. */
@@ -1286,125 +1286,6 @@ mg_static_assert((sizeof(config_options) / sizeof(config_options[0]))
 
 enum { REQUEST_HANDLER, WEBSOCKET_HANDLER, AUTH_HANDLER };
 
-struct mg_handler_info {
-	/* Name/Pattern of the URI. */
-	char *uri;
-	size_t uri_len;
-
-	/* handler type */
-	int handler_type;
-
-	/* Handler for http/https or authorization requests. */
-	mg_request_handler handler;
-
-	/* Handler for ws/wss (websocket) requests. */
-	mg_websocket_connect_handler connect_handler;
-	mg_websocket_ready_handler ready_handler;
-	mg_websocket_data_handler data_handler;
-	mg_websocket_close_handler close_handler;
-
-	/* Handler for authorization requests */
-	mg_authorization_handler auth_handler;
-
-	/* User supplied argument for the handler function. */
-	void *cbdata;
-
-	/* next handler in a linked list */
-	struct mg_handler_info *next;
-};
-
-struct mg_context {
-	volatile int stop_flag;        /* Should we stop event loop */
-	SSL_CTX *ssl_ctx;              /* SSL context */
-	char *config[NUM_OPTIONS];     /* LibHTTP configuration parameters */
-	struct mg_callbacks callbacks; /* User-defined callback function */
-	void *user_data;               /* User-defined data */
-	int context_type;              /* 1 = server context, 2 = client context */
-
-	struct socket *listening_sockets;
-	struct pollfd *listening_socket_fds;
-	unsigned int num_listening_sockets;
-
-	pthread_mutex_t thread_mutex; /* Protects (max|num)_threads */
-
-#ifdef ALTERNATIVE_QUEUE
-	struct socket *client_socks;
-	void **client_wait_events;
-#else
-	struct socket queue[MGSQLEN]; /* Accepted sockets */
-	volatile int sq_head;         /* Head of the socket queue */
-	volatile int sq_tail;         /* Tail of the socket queue */
-	pthread_cond_t sq_full;       /* Signaled when socket is produced */
-	pthread_cond_t sq_empty;      /* Signaled when socket is consumed */
-#endif
-
-	pthread_t masterthreadid; /* The master thread ID */
-	unsigned int
-	    cfg_worker_threads;     /* The number of configured worker threads. */
-	pthread_t *workerthreadids; /* The worker thread IDs */
-
-	time_t start_time;        /* Server start time, used for authentication */
-	uint64_t auth_nonce_mask; /* Mask for all nonce values */
-	pthread_mutex_t nonce_mutex; /* Protects nonce_count */
-	unsigned long nonce_count;   /* Used nonces, used for authentication */
-
-	char *systemName; /* What operating system is running */
-
-	/* linked list of uri handlers */
-	struct mg_handler_info *handlers;
-
-#if defined(USE_LUA) && defined(USE_WEBSOCKET)
-	/* linked list of shared lua websockets */
-	struct mg_shared_lua_websocket_list *shared_lua_websockets;
-#endif
-
-#ifdef USE_TIMERS
-	struct ttimers *timers;
-#endif
-};
-
-
-struct mg_connection {
-	struct mg_request_info request_info;
-	struct mg_context *ctx;
-	SSL *ssl;                 /* SSL descriptor */
-	SSL_CTX *client_ssl_ctx;  /* SSL context for client connections */
-	struct socket client;     /* Connected client */
-	time_t conn_birth_time;   /* Time (wall clock) when connection was
-	                           * established */
-	struct timespec req_time; /* Time (since system start) when the request
-	                           * was received */
-	int64_t num_bytes_sent;   /* Total bytes sent to client */
-	int64_t content_len;      /* Content-Length header value */
-	int64_t consumed_content; /* How many bytes of content have been read */
-	int is_chunked;           /* Transfer-Encoding is chunked: 0=no, 1=yes:
-	                           * data available, 2: all data read */
-	size_t chunk_remainder;   /* Unread data from the last chunk */
-	char *buf;                /* Buffer for received data */
-	char *path_info;          /* PATH_INFO part of the URL */
-
-	int must_close;       /* 1 if connection must be closed */
-	int in_error_handler; /* 1 if in handler for user defined error
-	                       * pages */
-	int internal_error;   /* 1 if an error occured while processing the
-	                       * request */
-
-	int buf_size;                /* Buffer size */
-	int request_len;             /* Size of the request + headers in a buffer */
-	int data_len;                /* Total size of data in a buffer */
-	int status_code;             /* HTTP reply status code, e.g. 200 */
-	int throttle;                /* Throttling, bytes/sec. <= 0 means no
-	                              * throttle */
-	time_t last_throttle_time;   /* Last time throttled data was sent */
-	int64_t last_throttle_bytes; /* Bytes sent this second */
-	pthread_mutex_t mutex;       /* Used by mg_(un)lock_connection to ensure
-	                              * atomic transmissions for websockets */
-#if defined(USE_LUA) && defined(USE_WEBSOCKET)
-	void *lua_websocket_state; /* Lua_State for a websocket connection */
-#endif
-
-	int thread_index; /* Thread index within ctx */
-};
 
 
 static pthread_key_t sTlsKey; /* Thread local storage index */
@@ -3403,7 +3284,7 @@ static int set_non_blocking_mode(SOCKET sock) {
 
 
 /* Get a random number (independent of C rand function) */
-static uint64_t get_random(void) {
+uint64_t XX_httplib_get_random( void ) {
 
 	static uint64_t lfsr = 0; /* Linear feedback shift register */
 	static uint64_t lcg = 0;  /* Linear congruential generator */
@@ -3431,7 +3312,8 @@ static uint64_t get_random(void) {
 	 * of the current server time will make it hard (impossible?) to guess the
 	 * next number. */
 	return (lfsr ^ lcg ^ (uint64_t)now.tv_nsec);
-}
+
+}  /* XX_httplib_get_random */
 
 
 /* Write data to the IO channel - opened file descriptor, socket or SSL
@@ -9703,9 +9585,8 @@ parse_port_string(const struct vec *vec, struct socket *so, int *ip_version)
 }
 
 
-static int
-set_ports_option(struct mg_context *ctx)
-{
+int XX_httplib_set_ports_option( struct mg_context *ctx ) {
+
 	const char *list;
 	int on = 1;
 #if defined(USE_IPV6)
@@ -9936,7 +9817,8 @@ set_ports_option(struct mg_context *ctx)
 	}
 
 	return portsOk;
-}
+
+}  /* XX_httplib_set_ports_option */
 
 
 static const char *
@@ -10068,9 +9950,8 @@ check_acl(struct mg_context *ctx, uint32_t remote_ip)
 
 
 #if !defined(_WIN32)
-static int
-set_uid_option(struct mg_context *ctx)
-{
+int XX_httplib_set_uid_option( struct mg_context *ctx ) {
+
 	struct passwd *pw;
 	if (ctx) {
 		const char *uid = ctx->config[RUN_AS_USER];
@@ -10106,13 +9987,14 @@ set_uid_option(struct mg_context *ctx)
 		return success;
 	}
 	return 0;
-}
+
+}  /* XX_httplib_set_uid_option */
+
 #endif /* !_WIN32 */
 
 
-static void
-tls_dtor(void *key)
-{
+void XX_httplib_tls_dtor( void *key ) {
+
 	struct mg_workerTLS *tls = (struct mg_workerTLS *)key;
 	/* key == pthread_getspecific(sTlsKey); */
 
@@ -10123,7 +10005,8 @@ tls_dtor(void *key)
 		}
 	}
 	pthread_setspecific(sTlsKey, NULL);
-}
+
+}  /* XX_httplib_tls_dtor */
 
 
 #if !defined(NO_SSL)
@@ -10600,9 +10483,8 @@ ssl_get_protocol(int version_id)
 
 
 /* Dynamically load SSL library. Set up ctx->ssl_ctx pointer. */
-static int
-set_ssl_option(struct mg_context *ctx)
-{
+int XX_httplib_set_ssl_option( struct mg_context *ctx ) {
+
 	const char *pem;
 	int callback_ret;
 	int should_verify_peer;
@@ -10747,7 +10629,8 @@ set_ssl_option(struct mg_context *ctx)
 	}
 
 	return 1;
-}
+
+}  /* XX_httplib_set_ssl_option */
 
 
 static void
@@ -10781,10 +10664,10 @@ uninitialize_ssl(struct mg_context *ctx)
 #endif /* !NO_SSL */
 
 
-static int
-set_gpass_option(struct mg_context *ctx)
-{
-	if (ctx) {
+int XX_httplib_set_gpass_option( struct mg_context *ctx ) {
+
+	if ( ctx != NULL ) {
+
 		struct file file = STRUCT_FILE_INITIALIZER;
 		const char *path = ctx->config[GLOBAL_PASSWORDS_FILE];
 		if (path != NULL && !mg_stat(fc(ctx), path, &file)) {
@@ -10794,14 +10677,15 @@ set_gpass_option(struct mg_context *ctx)
 		return 1;
 	}
 	return 0;
-}
+
+}  /* XX_httplib_set_gpass_option */
 
 
-static int
-set_acl_option(struct mg_context *ctx)
-{
+int XX_httplib_set_acl_option(struct mg_context *ctx) {
+
 	return check_acl(ctx, (uint32_t)0x7f000001UL) != -1;
-}
+
+}  /* XX_httplib_set_acl_option */
 
 
 static void
@@ -12109,24 +11993,28 @@ worker_thread_run(struct worker_thread_args *thread_args)
 
 /* Threads have different return types on Windows and Unix. */
 #ifdef _WIN32
-static unsigned __stdcall worker_thread(void *thread_func_param)
-{
-	struct worker_thread_args *pwta =
-	    (struct worker_thread_args *)thread_func_param;
+unsigned __stdcall XX_httplib_worker_thread( void *thread_func_param ) {
+
+	struct worker_thread_args *pwta = (struct worker_thread_args *)thread_func_param;
 	worker_thread_run(pwta);
 	mg_free(thread_func_param);
+
 	return 0;
-}
-#else
-static void *
-worker_thread(void *thread_func_param)
-{
-	struct worker_thread_args *pwta =
-	    (struct worker_thread_args *)thread_func_param;
+
+}  /* XX_httplib_worker_thread */
+
+#else  /* _WIN32 */
+
+void *XX_httplib_worker_thread( void *thread_func_param ) {
+
+	struct worker_thread_args *pwta = (struct worker_thread_args *)thread_func_param;
 	worker_thread_run(pwta);
 	mg_free(thread_func_param);
+
 	return NULL;
-}
+
+}  /* XX_httplib_worker_thread */
+
 #endif /* _WIN32 */
 
 
@@ -12331,18 +12219,23 @@ master_thread_run(void *thread_func_param)
 
 /* Threads have different return types on Windows and Unix. */
 #ifdef _WIN32
-static unsigned __stdcall master_thread(void *thread_func_param)
-{
-	master_thread_run(thread_func_param);
+
+unsigned __stdcall XX_httplib_master_thread( void *thread_func_param ) {
+
+	master_thread_run( thread_func_param );
 	return 0;
-}
+
+}  /* XX_httplib_master_thread */
+
 #else
-static void *
-master_thread(void *thread_func_param)
-{
-	master_thread_run(thread_func_param);
+
+void *XX_httplib_master_thread( void *thread_func_param ) {
+
+	master_thread_run( thread_func_param );
 	return NULL;
-}
+
+}  /* XX_httplib_master_thread */
+
 #endif /* _WIN32 */
 
 
@@ -12466,7 +12359,7 @@ mg_stop(struct mg_context *ctx)
 }
 
 
-static void get_system_name( char **sysName ) {
+void XX_httplib_get_system_name( char **sysName ) {
 
 #if defined(_WIN32)
 #if defined(_WIN32_WCE)
@@ -12503,4 +12396,4 @@ static void get_system_name( char **sysName ) {
 	*sysName = mg_strdup(name.sysname);
 #endif
 
-}  /* get_system_name */
+}  /* XX_httplib_get_system_name */
