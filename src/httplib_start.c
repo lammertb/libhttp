@@ -70,7 +70,7 @@ struct mg_context *mg_start( const struct mg_callbacks *callbacks, void *user_da
 		pthread_mutexattr_settype(&pthread_mutex_attr, PTHREAD_MUTEX_RECURSIVE);
 #endif
 
-		if (0 != pthread_key_create(&sTlsKey, tls_dtor)) {
+		if (0 != pthread_key_create(&sTlsKey, XX_httplib_tls_dtor)) {
 			/* Fatal error - abort start. However, this situation should
 			 * never
 			 * occur in practice. */
@@ -160,19 +160,19 @@ struct mg_context *mg_start( const struct mg_callbacks *callbacks, void *user_da
 	}
 #endif
 
-	get_system_name(&ctx->systemName);
+	XX_httplib_get_system_name(&ctx->systemName);
 
 	/* NOTE(lsm): order is important here. SSL certificates must
 	 * be initialized before listening ports. UID must be set last. */
-	if (!set_gpass_option(ctx) ||
+	if (!XX_httplib_set_gpass_option(ctx) ||
 #if !defined(NO_SSL)
-	    !set_ssl_option(ctx) ||
+	    !XX_httplib_set_ssl_option(ctx) ||
 #endif
-	    !set_ports_option(ctx) ||
+	    !XX_httplib_set_ports_option(ctx) ||
 #if !defined(_WIN32)
-	    !set_uid_option(ctx) ||
+	    !XX_httplib_set_uid_option(ctx) ||
 #endif
-	    !set_acl_option(ctx)) {
+	    !XX_httplib_set_acl_option(ctx)) {
 		free_context(ctx);
 		pthread_setspecific(sTlsKey, NULL);
 		return NULL;
@@ -253,19 +253,19 @@ struct mg_context *mg_start( const struct mg_callbacks *callbacks, void *user_da
 	ctx->context_type = 1; /* server context */
 
 	/* Start master (listening) thread */
-	mg_start_thread_with_id(master_thread, ctx, &ctx->masterthreadid);
+	mg_start_thread_with_id( XX_httplib_master_thread, ctx, &ctx->masterthreadid);
 
 	/* Start worker threads */
 	for (i = 0; i < ctx->cfg_worker_threads; i++) {
 		struct worker_thread_args *wta =
-		    mg_malloc(sizeof(struct worker_thread_args));
+		    XX_httplib_malloc(sizeof(struct worker_thread_args));
 		if (wta) {
 			wta->ctx = ctx;
 			wta->index = (int)i;
 		}
 
 		if ((wta == NULL)
-		    || (mg_start_thread_with_id(worker_thread,
+		    || (XX_httplib_mg_start_thread_with_id(XX_httplib_worker_thread,
 		                                wta,
 		                                &ctx->workerthreadids[i]) != 0)) {
 
