@@ -70,7 +70,8 @@ int _civet_clock_gettime(int clk_id, struct timespec *t) {
 		return 0;
 	}
 	return -1; /* EINVAL - Clock ID is unknown */
-}
+
+}  /* _civet_clock_gettime */
 
 /* if clock_gettime is declared, then __CLOCK_AVAILABILITY will be defined */
 #ifdef __CLOCK_AVAILABILITY
@@ -79,12 +80,13 @@ int _civet_clock_gettime(int clk_id, struct timespec *t) {
  * but it may be NULL at runtime. So we need to check before using it. */
 int _civet_safe_clock_gettime(int clk_id, struct timespec *t);
 
-int
-_civet_safe_clock_gettime(int clk_id, struct timespec *t)
-{
+int _civet_safe_clock_gettime(int clk_id, struct timespec *t) {
+
 	if (clock_gettime) return clock_gettime(clk_id, t);
 	return _civet_clock_gettime(clk_id, t);
-}
+
+}  /* _civet_safe_clock_gettime */
+
 #define clock_gettime _civet_safe_clock_gettime
 #else  /* __CLOCK_AVAILABILITY */
 #define clock_gettime _civet_clock_gettime
@@ -109,7 +111,7 @@ mg_static_assert(sizeof(size_t) == 4 || sizeof(size_t) == 8, "size_t data type s
 /* Show no warning in case system functions are not used. */
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-function"
-#endif
+#endif  /* __MINGW32__ */
 
 
 static CRITICAL_SECTION global_log_file_lock;
@@ -156,10 +158,10 @@ static void * pthread_getspecific(pthread_key_t key) {
 #if defined(__MINGW32__)
 /* Enable unused function warning again */
 #pragma GCC diagnostic pop
-#endif
+#endif  /* __MINGW32__ */
 
 static struct pthread_mutex_undefined_struct *pthread_mutex_attr = NULL;
-#else
+#else  /* _WIN32 */
 static pthread_mutexattr_t pthread_mutex_attr;
 #endif /* _WIN32 */
 
@@ -188,7 +190,7 @@ mg_static_assert(MAX_REQUEST_SIZE >= 256, "request size length must be a positiv
 /* Show no warning in case system functions are not used. */
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-function"
-#endif
+#endif  /* __MINGW32__ */
 
 
 static time_t time(time_t *ptime) {
@@ -326,7 +328,7 @@ static int stat(const char *name, struct stat *st) {
 #if defined(__MINGW32__)
 /* Enable unused function warning again */
 #pragma GCC diagnostic pop
-#endif
+#endif  /* __MINGW32__ */
 
 #endif /* defined(_WIN32_WCE) */
 
@@ -357,11 +359,11 @@ static void DEBUG_TRACE_FUNC(const char *func, unsigned line, const char *fmt, .
 #endif /* DEBUG_TRACE */
 
 #if defined(MEMORY_DEBUGGING)
-unsigned long mg_memory_debug_blockCount = 0;
+unsigned long mg_memory_debug_blockCount   = 0;
 unsigned long mg_memory_debug_totalMemUsed = 0;
 
 
-static void * mg_malloc_ex(size_t size, const char *file, unsigned line) {
+void *XX_httplib_malloc_ex( size_t size, const char *file, unsigned line ) {
 
 	void *data = malloc(size + sizeof(size_t));
 	void *memory = 0;
@@ -384,17 +386,18 @@ static void * mg_malloc_ex(size_t size, const char *file, unsigned line) {
 	        line);
 #if defined(_WIN32)
 	OutputDebugStringA(mallocStr);
-#else
+#else  /* _WIN32 */
 	DEBUG_TRACE("%s", mallocStr);
-#endif
+#endif  /* _WIN32 */
 
 	return memory;
-}
+
+}  /* XX_httplib_malloc_ex */
 
 
 static void * mg_calloc_ex( size_t count, size_t size, const char *file, unsigned line ) {
 
-	void *data = mg_malloc_ex(size * count, file, line);
+	void *data = XX_httplib_malloc_ex(size * count, file, line);
 	if ( data != NULL ) memset( data, 0, size * count );
 
 	return data;
@@ -422,9 +425,9 @@ static void mg_free_ex(void *memory, const char *file, unsigned line) {
 		        line);
 #if defined(_WIN32)
 		OutputDebugStringA(mallocStr);
-#else
+#else  /* _WIN32 */
 		DEBUG_TRACE("%s", mallocStr);
-#endif
+#endif  /* _WIN32 */
 
 		free(data);
 	}
@@ -457,9 +460,9 @@ static void * mg_realloc_ex(void *memory, size_t newsize, const char *file, unsi
 				        line);
 #if defined(_WIN32)
 				OutputDebugStringA(mallocStr);
-#else
+#else  /* _WIN32 */
 				DEBUG_TRACE("%s", mallocStr);
-#endif
+#endif  /* _WIN32 */
 				mg_memory_debug_totalMemUsed += newsize;
 				sprintf(mallocStr,
 				        "MEM: %p %5lu r-alloc %7lu %4lu --- %s:%u\n",
@@ -471,21 +474,21 @@ static void * mg_realloc_ex(void *memory, size_t newsize, const char *file, unsi
 				        line);
 #if defined(_WIN32)
 				OutputDebugStringA(mallocStr);
-#else
+#else  /* _WIN32 */
 				DEBUG_TRACE("%s", mallocStr);
-#endif
+#endif  /* _WIN32 */
 				*(size_t *)data = newsize;
 				data = (void *)(((char *)data) + sizeof(size_t));
 			} else {
 #if defined(_WIN32)
 				OutputDebugStringA("MEM: realloc failed\n");
-#else
+#else  /* _WIN32 */
 				DEBUG_TRACE("%s", "MEM: realloc failed\n");
-#endif
+#endif  /* _WIN32 */
 				return _realloc;
 			}
 		} else {
-			data = mg_malloc_ex(newsize, file, line);
+			data = XX_httplib_malloc_ex(newsize, file, line);
 		}
 	} else {
 		data = 0;
@@ -495,18 +498,18 @@ static void * mg_realloc_ex(void *memory, size_t newsize, const char *file, unsi
 	return data;
 }
 
-#define mg_malloc(a) mg_malloc_ex(a, __FILE__, __LINE__)
+#define XX_httplib_malloc(a) XX_httplib_malloc_ex(a, __FILE__, __LINE__)
 #define mg_calloc(a, b) mg_calloc_ex(a, b, __FILE__, __LINE__)
 #define mg_realloc(a, b) mg_realloc_ex(a, b, __FILE__, __LINE__)
 #define mg_free(a) mg_free_ex(a, __FILE__, __LINE__)
 
-#else
+#else  /* MEMORY_DEBUGGING */
 
-static __inline void * mg_malloc(size_t a) {
+__inline void * XX_httplib_malloc( size_t a ) {
 
 	return malloc(a);
 
-}  /* mg_malloc */
+}  /* XX_httplib_malloc */
 
 static __inline void * mg_calloc(size_t a, size_t b) {
 
@@ -526,7 +529,7 @@ static __inline void mg_free(void *a) {
 
 }  /* mg_free */
 
-#endif
+#endif  /* MEMORY_DEBUGGING */
 
 
 static void mg_vsnprintf(const struct mg_connection *conn, int *truncated, char *buf, size_t buflen, const char *fmt, va_list ap);
@@ -553,7 +556,7 @@ static void mg_snprintf(const struct mg_connection *conn, int *truncated, char *
 #ifdef vsnprintf
 #undef vsnprintf
 #endif
-#define malloc DO_NOT_USE_THIS_FUNCTION__USE_mg_malloc
+#define malloc DO_NOT_USE_THIS_FUNCTION__USE_httplib_malloc
 #define calloc DO_NOT_USE_THIS_FUNCTION__USE_mg_calloc
 #define realloc DO_NOT_USE_THIS_FUNCTION__USE_mg_realloc
 #define free DO_NOT_USE_THIS_FUNCTION__USE_mg_free
@@ -902,7 +905,7 @@ struct posix_event {
 
 static void * event_create(void) {
 
-	struct posix_event *ret = mg_malloc(sizeof(struct posix_event));
+	struct posix_event *ret = XX_httplib_malloc(sizeof(struct posix_event));
 	if ( ret == NULL ) return NULL;
 
 	if (0 != pthread_mutex_init(&(ret->mutex), NULL)) {
@@ -1123,7 +1126,7 @@ static char * mg_strndup(const char *ptr, size_t len) {
 
 	char *p;
 
-	if ((p = (char *)mg_malloc(len + 1)) != NULL) {
+	if ((p = (char *)XX_httplib_malloc(len + 1)) != NULL) {
 		mg_strlcpy(p, ptr, len + 1);
 	}
 
@@ -2253,7 +2256,7 @@ static DIR * mg_opendir(const struct mg_connection *conn, const char *name) {
 
 	if (name == NULL) {
 		SetLastError(ERROR_BAD_ARGUMENTS);
-	} else if ((dir = (DIR *)mg_malloc(sizeof(*dir))) == NULL) {
+	} else if ((dir = (DIR *)XX_httplib_malloc(sizeof(*dir))) == NULL) {
 		SetLastError(ERROR_NOT_ENOUGH_MEMORY);
 	} else {
 		path_to_unicode(conn, name, wpath, ARRAY_SIZE(wpath));
@@ -2385,8 +2388,7 @@ mg_start_thread(mg_thread_func_t f, void *p)
 
 
 /* Start a thread storing the thread context. */
-static int
-mg_start_thread_with_id(unsigned(__stdcall *f)(void *), void *p, pthread_t *threadidptr) {
+int XX_httplib_start_thread_with_id( unsigned(__stdcall *f)(void *), void *p, pthread_t *threadidptr ) {
 
 	uintptr_t uip;
 	HANDLE threadhandle;
@@ -2400,7 +2402,8 @@ mg_start_thread_with_id(unsigned(__stdcall *f)(void *), void *p, pthread_t *thre
 	}
 
 	return result;
-}
+
+}  /* XX_httplib_start_thread_with_id */
 
 
 /* Wait for a thread to finish. */
@@ -3326,7 +3329,7 @@ static int alloc_vprintf2(char **buf, const char *fmt, va_list ap) {
 		}
 
 		size *= 4;
-		*buf = (char *)mg_malloc(size);
+		*buf = (char *)XX_httplib_malloc(size);
 		if (!*buf) {
 			break;
 		}
@@ -3370,7 +3373,7 @@ static int alloc_vprintf(char **out_buf, char *prealloc_buf, size_t prealloc_siz
 	} else if ((size_t)(len) >= prealloc_size) {
 		/* The pre-allocated buffer not large enough. */
 		/* Allocate a new buffer. */
-		*out_buf = (char *)mg_malloc((size_t)(len) + 1);
+		*out_buf = (char *)XX_httplib_malloc((size_t)(len) + 1);
 		if (!*out_buf) {
 			/* Allocation failed. Return -1 as "out of memory" error. */
 			return -1;
@@ -6175,10 +6178,10 @@ prepare_cgi_environment(struct mg_connection *conn,
 	env->conn = conn;
 	env->buflen = CGI_ENVIRONMENT_SIZE;
 	env->bufused = 0;
-	env->buf = (char *)mg_malloc(env->buflen);
+	env->buf = (char *)XX_httplib_malloc(env->buflen);
 	env->varlen = MAX_CGI_ENVIR_VARS;
 	env->varused = 0;
-	env->var = (char **)mg_malloc(env->buflen * sizeof(char *));
+	env->var = (char **)XX_httplib_malloc(env->buflen * sizeof(char *));
 
 	addenv(env, "SERVER_NAME=%s", conn->ctx->config[AUTHENTICATION_DOMAIN]);
 	addenv(env, "SERVER_ROOT=%s", conn->ctx->config[DOCUMENT_ROOT]);
@@ -6471,7 +6474,7 @@ handle_cgi_request(struct mg_connection *conn, const char *prog)
 	 * Do not send anything back to client, until we buffer in all
 	 * HTTP headers. */
 	data_len = 0;
-	buf = (char *)mg_malloc(buflen);
+	buf = (char *)XX_httplib_malloc(buflen);
 	if (buf == NULL) {
 		send_http_error(conn,
 		                500,
@@ -7665,7 +7668,7 @@ read_websocket(struct mg_connection *conn,
 			/* Allocate space to hold websocket payload */
 			data = mem;
 			if (data_len > sizeof(mem)) {
-				data = (char *)mg_malloc(data_len);
+				data = (char *)XX_httplib_malloc(data_len);
 				if (data == NULL) {
 					/* Allocation failed, exit the loop and then close the
 					 * connection */
@@ -7861,7 +7864,7 @@ static void mask_data(const char *in, size_t in_len, uint32_t masking_key, char 
 int mg_websocket_client_write(struct mg_connection *conn, int opcode, const char *data, size_t dataLen) {
 
 	int retval = -1;
-	char *masked_data = (char *)mg_malloc(((dataLen + 7) / 4) * 4);
+	char *masked_data = (char *)XX_httplib_malloc(((dataLen + 7) / 4) * 4);
 	uint32_t masking_key = (uint32_t)get_random();
 
 	if (masked_data == NULL) {
@@ -9505,7 +9508,7 @@ ssl_id_callback(void)
 		if (tls == NULL) {
 			/* SSL called from an unknown thread: Create some thread index.
 			 */
-			tls = (struct mg_workerTLS *)mg_malloc(sizeof(struct mg_workerTLS));
+			tls = (struct mg_workerTLS *)XX_httplib_malloc(sizeof(struct mg_workerTLS));
 			tls->is_master = -2; /* -2 means "3rd party thread" */
 			tls->thread_idx = (unsigned)mg_atomic_inc(&thread_idx_max);
 			pthread_setspecific(sTlsKey, tls);
@@ -9760,7 +9763,7 @@ ssl_get_client_cert_info(struct mg_connection *conn)
 		}
 
 		conn->request_info.client_cert =
-		    (struct client_cert *)mg_malloc(sizeof(struct client_cert));
+		    (struct client_cert *)XX_httplib_malloc(sizeof(struct client_cert));
 		if (conn->request_info.client_cert) {
 			conn->request_info.client_cert->subject = mg_strdup(str_subject);
 			conn->request_info.client_cert->issuer = mg_strdup(str_issuer);
@@ -9873,7 +9876,7 @@ initialize_ssl(struct mg_context *ctx)
 		i = 0;
 	}
 	size = sizeof(pthread_mutex_t) * ((size_t)(i));
-	if ((ssl_mutexes = (pthread_mutex_t *)mg_malloc(size)) == NULL) {
+	if ((ssl_mutexes = (pthread_mutex_t *)XX_httplib_malloc(size)) == NULL) {
 		mg_cry(fc(ctx),
 		       "%s: cannot allocate mutexes: %s",
 		       __func__,
@@ -11053,7 +11056,7 @@ mg_connect_websocket_client(const char *host,
 
 	/* For client connections, mg_context is fake. Since we need to set a
 	 * callback function, we need to create a copy and modify it. */
-	newctx = (struct mg_context *)mg_malloc(sizeof(struct mg_context));
+	newctx = (struct mg_context *)XX_httplib_malloc(sizeof(struct mg_context));
 	memcpy(newctx, conn->ctx, sizeof(struct mg_context));
 	newctx->user_data = user_data;
 	newctx->context_type = 2;       /* client context type */
