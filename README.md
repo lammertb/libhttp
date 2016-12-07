@@ -1,53 +1,34 @@
-![CivetWeb](https://raw.github.com/civetweb/civetweb/master/resources/civetweb_64x64.png "CivetWeb") CivetWeb
-=======
+# Libhttp
 
-**The official home of CivetWeb is [https://github.com/civetweb/civetweb](https://github.com/civetweb/civetweb)**
-
-
-Continuous integration for Linux and OSX ([Travis CI](https://travis-ci.org/civetweb/civetweb)):
-
-[![Travis Build Status](https://travis-ci.org/civetweb/civetweb.svg?branch=master)](https://travis-ci.org/civetweb/civetweb)
-
-Continuous integration for Windows ([AppVeyor](https://ci.appveyor.com/project/civetweb/civetweb)):
-
-[![Appveyor Build Status](https://ci.appveyor.com/api/projects/status/github/civetweb/civetweb?svg=true)](https://ci.appveyor.com/project/civetweb/civetweb/branch/master)
-
-Test coverage check ([coveralls](https://coveralls.io/github/civetweb/civetweb)) (currently in a setup phase):
-
-[![Coverage Status](https://coveralls.io/repos/github/civetweb/civetweb/badge.svg?branch=master)](https://coveralls.io/github/civetweb/civetweb?branch=master)
-
-Static source code analysis ([Coverity](https://scan.coverity.com/projects/5784)): 
-
-[![Coverity Scan Build Status](https://scan.coverity.com/projects/5784/badge.svg)](https://scan.coverity.com/projects/5784)
-
-
-
+**The official home of libhttp is [www.libhttp.org](http://www.libhttp.org)**
 
 Project Mission
 -----------------
 
 Project mission is to provide easy to use, powerful, C/C++ embeddable web
-server with optional CGI, SSL and Lua support.
-CivetWeb has a MIT license so you can innovate without restrictions.
+server with optional CGI, SSL and Lua support. Libhttp has a MIT license so you can innovate without restrictions.
 
-CivetWeb can be used by developers as a library, to add web server functionality to an existing application.
+Libhttp can be used by developers as a library, to add web server functionality to an existing application.
 It can also be used by end users as a stand-alone web server. It is available as single executable, no installation is required.
+
+Libhttp is a fork of the Mongoose (MIT)/Civetweb family of http server libraries with the focus on event
+driven efficient communication and good documentation.
 
 
 Where to find the official version?
 -----------------------------------
 
-End users can download CivetWeb at SourceForge
-[https://sourceforge.net/projects/civetweb/](https://sourceforge.net/projects/civetweb/)
+End users can download Libhttp at Github
+<!-- [https://sourceforge.net/projects/civetweb/](https://sourceforge.net/projects/civetweb/) -->
 
-Developers can contribute to CivetWeb via GitHub
-[https://github.com/civetweb/civetweb](https://github.com/civetweb/civetweb)
+Developers can contribute to Libhttp via GitHub
+[https://github.com/lammertb/libhttp](https://github.com/lammertb/libhttp)
 
 Trouble tickets should be filed on GitHub
-[https://github.com/civetweb/civetweb/issues](https://github.com/civetweb/civetweb/issues)
+[https://github.com/lammertb/libhttp/issues](https://github.com/lammertb/libhttp/issues)
 
-Discussion/support group and announcements are at Google Groups
-[https://groups.google.com/d/forum/civetweb](https://groups.google.com/d/forum/civetweb)
+<!-- Discussion/support group and announcements are at Google Groups
+[https://groups.google.com/d/forum/civetweb](https://groups.google.com/d/forum/civetweb) -->
 
 
 Quick start documentation
