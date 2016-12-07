@@ -830,8 +830,6 @@ void *			XX_httplib_worker_thread( void *thread_func_param );
 extern pthread_mutexattr_t	XX_httplib_pthread_mutex_attr;
 #endif /* _WIN32 */
 
-#else  /* _WIN32 */
-
 #if defined(MEMORY_DEBUGGING)
 void			XX_httplib_free_ex( void *memory, const char *file, unsigned line );
 void *			XX_httplib_malloc_ex( size_t size, const char *file, unsigned line );
