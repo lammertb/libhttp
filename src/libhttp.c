@@ -331,29 +331,6 @@ static int stat(const char *name, struct stat *st) {
 
 #endif /* defined(_WIN32_WCE) */
 
-static void DEBUG_TRACE_FUNC(const char *func, unsigned line, PRINTF_FORMAT_STRING(const char *fmt), ...) PRINTF_ARGS(3, 4); 
-
-static void DEBUG_TRACE_FUNC(const char *func, unsigned line, const char *fmt, ...) {
-
-	va_list args;
-	flockfile(stdout);
-	printf("*** %lu.%p.%s.%u: ", (unsigned long)time(NULL), (void *)pthread_self(), func, line);
-	va_start(args, fmt);
-	vprintf(fmt, args);
-	va_end(args);
-	putchar('\n');
-	fflush(stdout);
-	funlockfile(stdout);
-
-}  /* DEBUG_TRACE_FUNC */
-
-#define DEBUG_TRACE(fmt, ...)                                                  \
-	DEBUG_TRACE_FUNC(__func__, __LINE__, fmt, __VA_ARGS__)
-
-#else
-#define DEBUG_TRACE(fmt, ...)                                                  \
-	do {                                                                       \
-	} while (0)
 #endif /* DEBUG */
 #endif /* DEBUG_TRACE */
 
@@ -375,33 +352,19 @@ void *XX_httplib_malloc_ex( size_t size, const char *file, unsigned line ) {
 		memory = (void *)(((char *)data) + sizeof(size_t));
 	}
 
-	sprintf(mallocStr,
-	        "MEM: %p %5lu alloc   %7lu %4lu --- %s:%u\n",
-	        memory,
-	        (unsigned long)size,
-	        mg_memory_debug_totalMemUsed,
-	        mg_memory_debug_blockCount,
-	        file,
-	        line);
-#if defined(_WIN32)
-	OutputDebugStringA(mallocStr);
-#else  /* _WIN32 */
-	DEBUG_TRACE("%s", mallocStr);
-#endif  /* _WIN32 */
-
 	return memory;
 
 }  /* XX_httplib_malloc_ex */
 
 
-static void * mg_calloc_ex( size_t count, size_t size, const char *file, unsigned line ) {
+void *XX_httplib_calloc_ex( size_t count, size_t size, const char *file, unsigned line ) {
 
 	void *data = XX_httplib_malloc_ex(size * count, file, line);
 	if ( data != NULL ) memset( data, 0, size * count );
 
 	return data;
 
-}  /* mg_calloc_ex */
+}  /* XX_httplib_calloc_ex */
 
 
 void XX_httplib_free_ex( void *memory, const char *file, unsigned line ) {
@@ -414,19 +377,6 @@ void XX_httplib_free_ex( void *memory, const char *file, unsigned line ) {
 		size = *(size_t *)data;
 		mg_memory_debug_totalMemUsed -= size;
 		mg_memory_debug_blockCount--;
-		sprintf(mallocStr,
-		        "MEM: %p %5lu free    %7lu %4lu --- %s:%u\n",
-		        memory,
-		        (unsigned long)size,
-		        mg_memory_debug_totalMemUsed,
-		        mg_memory_debug_blockCount,
-		        file,
-		        line);
-#if defined(_WIN32)
-		OutputDebugStringA(mallocStr);
-#else  /* _WIN32 */
-		DEBUG_TRACE("%s", mallocStr);
-#endif  /* _WIN32 */
 
 		free(data);
 	}
@@ -449,41 +399,10 @@ static void * mg_realloc_ex(void *memory, size_t newsize, const char *file, unsi
 			if (_realloc) {
 				data = _realloc;
 				mg_memory_debug_totalMemUsed -= oldsize;
-				sprintf(mallocStr,
-				        "MEM: %p %5lu r-free  %7lu %4lu --- %s:%u\n",
-				        memory,
-				        (unsigned long)oldsize,
-				        mg_memory_debug_totalMemUsed,
-				        mg_memory_debug_blockCount,
-				        file,
-				        line);
-#if defined(_WIN32)
-				OutputDebugStringA(mallocStr);
-#else  /* _WIN32 */
-				DEBUG_TRACE("%s", mallocStr);
-#endif  /* _WIN32 */
 				mg_memory_debug_totalMemUsed += newsize;
-				sprintf(mallocStr,
-				        "MEM: %p %5lu r-alloc %7lu %4lu --- %s:%u\n",
-				        memory,
-				        (unsigned long)newsize,
-				        mg_memory_debug_totalMemUsed,
-				        mg_memory_debug_blockCount,
-				        file,
-				        line);
-#if defined(_WIN32)
-				OutputDebugStringA(mallocStr);
-#else  /* _WIN32 */
-				DEBUG_TRACE("%s", mallocStr);
-#endif  /* _WIN32 */
 				*(size_t *)data = newsize;
 				data = (void *)(((char *)data) + sizeof(size_t));
 			} else {
-#if defined(_WIN32)
-				OutputDebugStringA("MEM: realloc failed\n");
-#else  /* _WIN32 */
-				DEBUG_TRACE("%s", "MEM: realloc failed\n");
-#endif  /* _WIN32 */
 				return _realloc;
 			}
 		} else {
@@ -497,7 +416,6 @@ static void * mg_realloc_ex(void *memory, size_t newsize, const char *file, unsi
 	return data;
 }
 
-#define mg_calloc(a, b) mg_calloc_ex(a, b, __FILE__, __LINE__)
 #define mg_realloc(a, b) mg_realloc_ex(a, b, __FILE__, __LINE__)
 
 #else  /* MEMORY_DEBUGGING */
@@ -508,11 +426,11 @@ __inline void * XX_httplib_malloc( size_t a ) {
 
 }  /* XX_httplib_malloc */
 
-static __inline void * mg_calloc(size_t a, size_t b) {
+__inline void *XX_httplib_calloc( size_t a, size_t b ) {
 
 	return calloc(a, b);
 
-}  /* mg_calloc */
+}  /* XX_httplib_calloc */
 
 static __inline void * mg_realloc(void *a, size_t b) {
 
@@ -554,7 +472,7 @@ static void mg_snprintf(const struct mg_connection *conn, int *truncated, char *
 #undef vsnprintf
 #endif
 #define malloc DO_NOT_USE_THIS_FUNCTION__USE_httplib_malloc
-#define calloc DO_NOT_USE_THIS_FUNCTION__USE_mg_calloc
+#define calloc DO_NOT_USE_THIS_FUNCTION__USE_httplib_calloc
 #define realloc DO_NOT_USE_THIS_FUNCTION__USE_mg_realloc
 #define free DO_NOT_USE_THIS_FUNCTION__USE_httplib_free
 #define snprintf DO_NOT_USE_THIS_FUNCTION__USE_mg_snprintf
@@ -672,7 +590,7 @@ struct file {
 
 
 /* Config option name, config types, default value */
-static struct mg_option config_options[] = {
+struct mg_option XX_httplib_config_options[] = {
     {"cgi_pattern", CONFIG_TYPE_EXT_PATTERN, "**.cgi$|**.pl$|**.php$"},
     {"cgi_environment", CONFIG_TYPE_STRING, NULL},
     {"put_delete_auth_file", CONFIG_TYPE_FILE, NULL},
@@ -746,29 +664,20 @@ static struct mg_option config_options[] = {
 
     {NULL, CONFIG_TYPE_UNKNOWN, NULL}};
 
-/* Check if the config_options and the corresponding enum have compatible
+/* Check if the XX_httplib_config_options and the corresponding enum have compatible
  * sizes. */
-mg_static_assert((sizeof(config_options) / sizeof(config_options[0]))
+mg_static_assert((sizeof(XX_httplib_config_options) / sizeof(XX_httplib_config_options[0]))
                      == (NUM_OPTIONS + 1),
-                 "config_options and enum not sync");
+                 "XX_httplib_config_options and enum not sync");
 
 enum { REQUEST_HANDLER, WEBSOCKET_HANDLER, AUTH_HANDLER };
 
 
 
 pthread_key_t XX_httplib_sTlsKey; /* Thread local storage index */
-static int sTlsInit = 0;
+int XX_httplib_sTlsInit = 0;
 int XX_httplib_thread_idx_max = 0;
 
-
-struct mg_workerTLS {
-	int is_master;
-	unsigned long thread_idx;
-#if defined(_WIN32)
-	HANDLE pthread_cond_helper_mutex;
-	struct mg_workerTLS *next_waiting_thread;
-#endif
-};
 
 /* Directory entry */
 struct de {
@@ -1006,7 +915,7 @@ mg_set_thread_name(const char *threadName)
 
 const struct mg_option * mg_get_valid_options(void) {
 
-	return config_options;
+	return XX_httplib_config_options;
 
 }  /* mg_get_valid_options */
 
@@ -1202,8 +1111,8 @@ int XX_httplib_get_option_index( const char *name ) {
 
 	int i;
 
-	for (i = 0; config_options[i].name != NULL; i++) {
-		if (strcmp(config_options[i].name, name) == 0) {
+	for (i = 0; XX_httplib_config_options[i].name != NULL; i++) {
+		if (strcmp(XX_httplib_config_options[i].name, name) == 0) {
 			return i;
 		}
 	}
@@ -1808,12 +1717,10 @@ static void send_http_error(struct mg_connection *conn, int status, const char *
 				mg_vsnprintf(conn, NULL, buf, sizeof(buf), fmt, ap);
 				va_end(ap);
 				mg_write(conn, buf, strlen(buf));
-				DEBUG_TRACE("Error %i - [%s]", status, buf);
 			}
 
 		} else {
 			/* No body allowed. Close the connection. */
-			DEBUG_TRACE("Error %i", status);
 		}
 	}
 }
@@ -2413,7 +2320,6 @@ static int mg_join_thread(pthread_t threadid) {
 	result = -1;
 	dwevent = WaitForSingleObject(threadid, INFINITE);
 	if (dwevent == WAIT_FAILED) {
-		DEBUG_TRACE("WaitForSingleObject() failed, error %d", ERRNO);
 	} else {
 		if (dwevent == WAIT_OBJECT_0) {
 			CloseHandle(threadid);
@@ -2562,7 +2468,6 @@ static pid_t spawn_process(struct mg_connection *conn, const char *prog, char *e
 		goto spawn_cleanup;
 	}
 
-	DEBUG_TRACE("Running [%s]", cmdline);
 	if (CreateProcessA(NULL, cmdline, NULL, NULL, TRUE, CREATE_NEW_PROCESS_GROUP, envblk, NULL, &si, &pi) == 0) {
 		mg_cry(
 		    conn, "%s: CreateProcess(%s): %ld", __func__, cmdline, (long)ERRNO);
@@ -2827,7 +2732,6 @@ static int push(struct mg_context *ctx, FILE *fp, SOCKET sock, SSL *ssl, const c
 				           || (err == SSL_ERROR_WANT_WRITE)) {
 					n = 0;
 				} else {
-					DEBUG_TRACE("SSL_write() failed, error %d", err);
 					return -1;
 				}
 			} else {
@@ -2862,7 +2766,6 @@ static int push(struct mg_context *ctx, FILE *fp, SOCKET sock, SSL *ssl, const c
 		}
 		if (n < 0) {
 			/* socket error - check errno */
-			DEBUG_TRACE("send() failed, error %d", err);
 
 			/* TODO: error handling depending on the error code.
 			 * These codes are different between Windows and Linux.
@@ -2963,7 +2866,6 @@ static int pull(FILE *fp, struct mg_connection *conn, char *buf, int len, double
 				           || (err == SSL_ERROR_WANT_WRITE)) {
 					nread = 0;
 				} else {
-					DEBUG_TRACE("SSL_read() failed, error %d", err);
 					return -1;
 				}
 			} else {
@@ -2998,7 +2900,6 @@ static int pull(FILE *fp, struct mg_connection *conn, char *buf, int len, double
 			} else if (err == WSAETIMEDOUT) {
 				/* timeout is handled by the while loop  */
 			} else {
-				DEBUG_TRACE("recv() failed, error %d", err);
 				return -1;
 			}
 #else
@@ -3019,7 +2920,6 @@ static int pull(FILE *fp, struct mg_connection *conn, char *buf, int len, double
 				 * (see signal(7)).
 				 * => stay in the while loop */
 			} else {
-				DEBUG_TRACE("recv() failed, error %d", err);
 				return -1;
 			}
 #endif
@@ -5613,7 +5513,6 @@ put_dir(struct mg_connection *conn, const char *path)
 		buf[len] = '\0';
 
 		/* Try to create intermediate directory */
-		DEBUG_TRACE("mkdir(%s)", buf);
 		if (!mg_stat(conn, buf, &file) && mg_mkdir(conn, buf, 0755) != 0) {
 			/* path does not exixt and can not be created */
 			res = -2;
@@ -8313,7 +8212,7 @@ mg_set_handler_type(struct mg_context *ctx,
 	}
 
 	tmp_rh =
-	    (struct mg_handler_info *)mg_calloc(sizeof(struct mg_handler_info), 1);
+	    (struct mg_handler_info *)XX_httplib_calloc(sizeof(struct mg_handler_info), 1);
 	if (tmp_rh == NULL) {
 		mg_unlock_context(ctx);
 		mg_cry( XX_httplib_fc(ctx), "%s", "Cannot create new request handler struct, OOM");
@@ -8551,7 +8450,6 @@ handle_request(struct mg_connection *conn)
 
 		/* step 1. completed, the url is known now */
 		uri_len = (int)strlen(ri->local_uri);
-		DEBUG_TRACE("URL: %s", ri->local_uri);
 
 		/* 3. if this ip has limited speed, set it for this connection */
 		conn->throttle = set_throttle(conn->ctx->config[THROTTLE],
@@ -10373,7 +10271,7 @@ mg_connect_client_impl(const struct mg_client_options *client_options,
 	                    &sa)) {
 		;
 	} else if ((conn = (struct mg_connection *)
-	                mg_calloc(1, sizeof(*conn) + MAX_REQUEST_SIZE)) == NULL) {
+	                XX_httplib_calloc(1, sizeof(*conn) + MAX_REQUEST_SIZE)) == NULL) {
 		mg_snprintf(NULL,
 		            NULL, /* No truncation check for ebuf */
 		            ebuf,
@@ -10933,8 +10831,6 @@ websocket_client_thread(void *data)
 
 	read_websocket(cdata->conn, cdata->data_handler, cdata->callback_data);
 
-	DEBUG_TRACE("%s", "Websocket client thread exited\n");
-
 	if (cdata->close_handler != NULL) {
 		cdata->close_handler(cdata->conn, cdata->callback_data);
 	}
@@ -11013,7 +10909,6 @@ mg_connect_websocket_client(const char *host,
 			            error_buffer_size,
 			            "Unexpected server reply");
 		}
-		DEBUG_TRACE("Websocket client connect error: %s\r\n", error_buffer);
 		if (conn != NULL) {
 			XX_httplib_free(conn);
 			conn = NULL;
@@ -11029,10 +10924,10 @@ mg_connect_websocket_client(const char *host,
 	newctx->context_type = 2;       /* client context type */
 	newctx->cfg_worker_threads = 1; /* one worker thread will be created */
 	newctx->workerthreadids =
-	    (pthread_t *)mg_calloc(newctx->cfg_worker_threads, sizeof(pthread_t));
+	    (pthread_t *)XX_httplib_calloc(newctx->cfg_worker_threads, sizeof(pthread_t));
 	conn->ctx = newctx;
 	thread_data = (struct websocket_client_thread_data *)
-	    mg_calloc(sizeof(struct websocket_client_thread_data), 1);
+	    XX_httplib_calloc(sizeof(struct websocket_client_thread_data), 1);
 	thread_data->conn = conn;
 	thread_data->data_handler = data_func;
 	thread_data->close_handler = close_func;
@@ -11049,8 +10944,6 @@ mg_connect_websocket_client(const char *host,
 		XX_httplib_free((void *)newctx);
 		XX_httplib_free((void *)conn);
 		conn = NULL;
-		DEBUG_TRACE("%s",
-		            "Websocket client connect thread could not be started\r\n");
 	}
 #else
 	/* Appease "unused parameter" warnings */
@@ -11250,7 +11143,6 @@ consume_socket(struct mg_context *ctx, struct socket *sp, int thread_index)
 	(void)thread_index;
 
 	(void)pthread_mutex_lock(&ctx->thread_mutex);
-	DEBUG_TRACE("%s", "going idle");
 
 	/* If the queue is empty, wait. We're idle at this point. */
 	while (ctx->sq_head == ctx->sq_tail && ctx->stop_flag == 0) {
@@ -11262,8 +11154,6 @@ consume_socket(struct mg_context *ctx, struct socket *sp, int thread_index)
 		/* Copy socket from the queue and increment tail */
 		*sp = ctx->queue[ctx->sq_tail % QUEUE_SIZE(ctx)];
 		ctx->sq_tail++;
-
-		DEBUG_TRACE("grabbed socket %d, going busy", sp ? sp->sock : -1);
 
 		/* Wrap pointers if needed */
 		while (ctx->sq_tail > QUEUE_SIZE(ctx)) {
@@ -11300,7 +11190,6 @@ produce_socket(struct mg_context *ctx, const struct socket *sp)
 		/* Copy socket to the queue and increment head */
 		ctx->queue[ctx->sq_head % QUEUE_SIZE(ctx)] = *sp;
 		ctx->sq_head++;
-		DEBUG_TRACE("queued socket %d", sp ? sp->sock : -1);
 	}
 
 	(void)pthread_cond_signal(&ctx->sq_full);
@@ -11310,15 +11199,10 @@ produce_socket(struct mg_context *ctx, const struct socket *sp)
 #endif /* ALTERNATIVE_QUEUE */
 
 
-struct worker_thread_args {
-	struct mg_context *ctx;
-	int index;
-};
 
 
-static void *
-worker_thread_run(struct worker_thread_args *thread_args)
-{
+static void * worker_thread_run( struct worker_thread_args *thread_args ) {
+
 	struct mg_context *ctx = thread_args->ctx;
 	struct mg_connection *conn;
 	struct mg_workerTLS tls;
@@ -11337,7 +11221,7 @@ worker_thread_run(struct worker_thread_args *thread_args)
 	}
 
 	conn =
-	    (struct mg_connection *)mg_calloc(1, sizeof(*conn) + MAX_REQUEST_SIZE);
+	    (struct mg_connection *)XX_httplib_calloc(1, sizeof(*conn) + MAX_REQUEST_SIZE);
 	if (conn == NULL) {
 		mg_cry( XX_httplib_fc(ctx), "%s", "Cannot create new connection struct, OOM");
 	} else {
@@ -11424,7 +11308,6 @@ worker_thread_run(struct worker_thread_args *thread_args)
 	pthread_mutex_destroy(&conn->mutex);
 	XX_httplib_free(conn);
 
-	DEBUG_TRACE("%s", "exiting");
 	return NULL;
 }
 
@@ -11478,7 +11361,6 @@ accept_new_connection(const struct socket *listener, struct mg_context *ctx)
 		so.sock = INVALID_SOCKET;
 	} else {
 		/* Put so socket structure into the queue */
-		DEBUG_TRACE("Accepted socket %d", (int)so.sock);
 		set_close_on_exec(so.sock, XX_httplib_fc(ctx));
 		so.is_ssl = listener->is_ssl;
 		so.ssl_redir = listener->ssl_redir;
@@ -11595,7 +11477,6 @@ master_thread_run(void *thread_func_param)
 	}
 
 	/* Here stop_flag is 1 - Initiate shutdown. */
-	DEBUG_TRACE("%s", "stopping workers");
 
 	/* Stop signal received: somebody called mg_stop. Quit. */
 	close_all_listening_sockets(ctx);
@@ -11629,7 +11510,6 @@ master_thread_run(void *thread_func_param)
 		uninitialize_ssl(ctx);
 	}
 #endif
-	DEBUG_TRACE("%s", "exiting");
 
 #if defined(_WIN32)
 	CloseHandle(tls.pthread_cond_helper_mutex);

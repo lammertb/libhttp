@@ -656,6 +656,16 @@ struct ssl_func {
 #endif  /* NO_SSL_DL */
 #endif  /* NO_SSL */
 
+struct mg_workerTLS {
+	int is_master;
+	unsigned long thread_idx;
+#if defined(_WIN32)
+	HANDLE pthread_cond_helper_mutex;
+	struct mg_workerTLS *next_waiting_thread;
+#endif
+};
+
+
 /* Describes listening socket, or socket which was accept()-ed by the master
  * thread and queued for future handling by the worker thread. */
 struct socket {
@@ -794,7 +804,10 @@ struct mg_connection {
 	int thread_index;			/* Thread index within ctx								*/
 };
 
-
+struct worker_thread_args {
+	struct mg_context *ctx;
+	int index;
+};
 
 /*
  * Functions local to the server. These functions all begin with XX_httplib to
@@ -831,14 +844,19 @@ extern pthread_mutexattr_t	XX_httplib_pthread_mutex_attr;
 #endif /* _WIN32 */
 
 #if defined(MEMORY_DEBUGGING)
+void *			XX_httplib_calloc_ex( size_t count, size_t size, const char *file, unsigned line );
 void			XX_httplib_free_ex( void *memory, const char *file, unsigned line );
 void *			XX_httplib_malloc_ex( size_t size, const char *file, unsigned line );
+#define			XX_httplib_calloc(a, b) XX_httplib_calloc_ex(a, b, __FILE__, __LINE__)
 #define			XX_httplib_free(a) XX_httplib_free_ex(a, __FILE__, __LINE__)
 #define			XX_httplib_malloc(a) XX_httplib_malloc_ex(a, __FILE__, __LINE__)
 #else  /* MEMORY_DEBUGGING */
+__inline void *		XX_httplib_calloc( size_t a, size_t b );
 __inline void		XX_httplib_free( void *a );
 __inline void *		XX_httplib_malloc( size_t a );
 #endif  /* MEMORY_DEBUGGING */
 
+extern struct mg_option	XX_httplib_config_options[];
+extern int		XX_httplib_sTlsInit;
 extern pthread_key_t	XX_httplib_sTlsKey;
 extern int		XX_httplib_thread_idx_max;
