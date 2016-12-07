@@ -648,16 +648,6 @@ static struct ssl_func crypto_sw[] = {{"CRYPTO_num_locks", NULL},
 static const char *month_names[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 #endif /* !NO_CACHING */
 
-/* Unified socket address. For IPv6 support, add IPv6 address structure in the
- * union u. */
-union usa {
-	struct sockaddr sa;
-	struct sockaddr_in sin;
-#if defined(USE_IPV6)
-	struct sockaddr_in6 sin6;
-#endif
-};
-
 /* Describes a string (chunk of memory). */
 struct vec {
 	const char *ptr;
