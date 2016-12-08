@@ -8974,30 +8974,3 @@ int XX_httplib_set_acl_option(struct mg_context *ctx) {
 	return XX_httplib_check_acl(ctx, (uint32_t)0x7f000001UL) != -1;
 
 }  /* XX_httplib_set_acl_option */
-
-
-void XX_httplib_reset_per_request_attributes( struct mg_connection *conn ) {
-
-	if ( conn == NULL ) return;
-
-	conn->path_info                   = NULL;
-	conn->num_bytes_sent              = 0;
-	conn->consumed_content            = 0;
-	conn->status_code                 = -1;
-	conn->is_chunked                  = 0;
-	conn->must_close                  = 0;
-	conn->request_len                 = 0;
-	conn->throttle                    = 0;
-	conn->request_info.content_length = -1;
-	conn->request_info.remote_user    = NULL;
-	conn->request_info.request_method = NULL;
-	conn->request_info.request_uri    = NULL;
-	conn->request_info.local_uri      = NULL;
-	conn->request_info.uri            = NULL; /* TODO: cleanup uri, local_uri and request_uri */
-	conn->request_info.http_version   = NULL;
-	conn->request_info.num_headers    = 0;
-	conn->data_len                    = 0;
-	conn->chunk_remainder             = 0;
-	conn->internal_error              = 0;
-
-}  /* XX_httplib_reset_per_request_attributes */
