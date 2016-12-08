@@ -9041,14 +9041,3 @@ int XX_httplib_set_sock_timeout( SOCKET sock, int milliseconds ) {
 	return r0 || r1 || r2;
 
 }  /* XX_httplib_set_sock_timeout */
-
-
-int XX_httplib_set_tcp_nodelay( SOCKET sock, int nodelay_on ) {
-
-	if (setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, (SOCK_OPT_TYPE)&nodelay_on, sizeof(nodelay_on)) != 0) { /* Error */
-		return 1;
-	}
-	/* OK */
-	return 0;
-
-}  /* XX_httplib_set_tcp_nodelay */

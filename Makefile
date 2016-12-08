@@ -45,6 +45,7 @@ LIB_SOURCES =	src/libhttp.c					\
 		src/httplib_accept_new_connection.c		\
 		src/httplib_check_feature.c			\
 		src/httplib_close_connection.c			\
+		src/httplib_close_socket_gracefully.c		\
 		src/httplib_connect_client.c			\
 		src/httplib_connect_websocket_client.c		\
 		src/httplib_consume_socket.c			\
@@ -59,6 +60,7 @@ LIB_SOURCES =	src/libhttp.c					\
 		src/httplib_master_thread.c			\
 		src/httplib_process_new_connection.c		\
 		src/httplib_produce_socket.c			\
+		src/httplib_set_tcp_nodelay.c			\
 		src/httplib_start.c				\
 		src/httplib_stop.c				\
 		src/httplib_version.c				\
