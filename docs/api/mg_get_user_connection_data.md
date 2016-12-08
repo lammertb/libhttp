@@ -20,4 +20,5 @@ The function `mg_get_user_connection_data()` returns the user data associated wi
 
 ### See Also
 
+* [`mg_get_user_data();`](mg_get_user_data.md)
 * [`mg_set_user_connection_data();`](mg_set_user_connection_data.md)
