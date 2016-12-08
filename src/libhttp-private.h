@@ -845,6 +845,7 @@ void			XX_httplib_reset_per_request_attributes( struct mg_connection *conn );
 void			XX_httplib_send_http_error( struct mg_connection *, int, PRINTF_FORMAT_STRING(const char *fmt), ... ) PRINTF_ARGS(3, 4); 
 int			XX_httplib_set_acl_option( struct mg_context *ctx );
 int			XX_httplib_set_gpass_option( struct mg_context *ctx );
+int			XX_httplib_set_non_blocking_mode( SOCKET sock );
 int			XX_httplib_set_ports_option( struct mg_context *ctx );
 int			XX_httplib_set_sock_timeout( SOCKET sock, int milliseconds );
 int			XX_httplib_set_ssl_option( struct mg_context *ctx );

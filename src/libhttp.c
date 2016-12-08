@@ -2388,12 +2388,12 @@ spawn_cleanup:
 #endif /* !NO_CGI */
 
 
-static int set_non_blocking_mode(SOCKET sock) {
+int XX_httplib_set_non_blocking_mode( SOCKET sock ) {
 
 	unsigned long on = 1;
 	return ioctlsocket(sock, (long)FIONBIO, &on);
 
-}  /* set_non_blocking_mode */
+}  /* XX_httplib_set_non_blocking_mode */
 
 #else
 
@@ -2545,7 +2545,7 @@ static pid_t spawn_process(struct mg_connection *conn, const char *prog, char *e
 #endif /* !NO_CGI */
 
 
-static int set_non_blocking_mode(SOCKET sock) {
+int XX_httplib_set_non_blocking_mode( SOCKET sock ) {
 
 	int flags;
 
@@ -2553,7 +2553,9 @@ static int set_non_blocking_mode(SOCKET sock) {
 	fcntl(sock, F_SETFL, flags | O_NONBLOCK);
 
 	return 0;
-}
+
+}  /* XX_httplib_set_non_blocking_mode */
+
 #endif /* _WIN32 */
 /* End of initial operating system specific define block. */
 
@@ -9050,58 +9052,3 @@ int XX_httplib_set_tcp_nodelay( SOCKET sock, int nodelay_on ) {
 	return 0;
 
 }  /* XX_httplib_set_tcp_nodelay */
-
-
-void XX_httplib_close_socket_gracefully( struct mg_connection *conn ) {
-
-#if defined(_WIN32)
-	char buf[MG_BUF_LEN];
-	int n;
-#endif
-	struct linger linger;
-	int error_code = 0;
-	socklen_t opt_len = sizeof(error_code);
-
-	if (!conn) { return; }
-
-	/* Set linger option to avoid socket hanging out after close. This
-	 * prevent ephemeral port exhaust problem under high QPS. */
-	linger.l_onoff = 1;
-	linger.l_linger = 1;
-
-	getsockopt(
-	    conn->client.sock, SOL_SOCKET, SO_ERROR, (char *)&error_code, &opt_len);
-
-	if (error_code == ECONNRESET) {
-		/* Socket already closed by client/peer, close socket without linger */
-	} else {
-		if (setsockopt(conn->client.sock,
-		               SOL_SOCKET,
-		               SO_LINGER,
-		               (char *)&linger,
-		               sizeof(linger)) != 0) {
-			mg_cry(conn, "%s: setsockopt(SOL_SOCKET SO_LINGER) failed: %s", __func__, strerror(ERRNO));
-		}
-	}
-
-	/* Send FIN to the client */
-	shutdown(conn->client.sock, SHUTDOWN_WR);
-	set_non_blocking_mode(conn->client.sock);
-
-#if defined(_WIN32)
-	/* Read and discard pending incoming data. If we do not do that and
-	 * close
-	 * the socket, the data in the send buffer may be discarded. This
-	 * behaviour is seen on Windows, when client keeps sending data
-	 * when server decides to close the connection; then when client
-	 * does recv() it gets no data back. */
-	do {
-		n = pull( NULL, conn, buf, sizeof(buf), 1E-10 /* TODO: allow 0 as timeout */);
-	} while (n > 0);
-#endif
-
-	/* Now we know that our FIN is ACK-ed, safe to close */
-	closesocket(conn->client.sock);
-	conn->client.sock = INVALID_SOCKET;
-
-}  /* XX_httplib_close_socket_gracefully */
