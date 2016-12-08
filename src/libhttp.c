@@ -517,7 +517,7 @@ struct ssl_func XX_httplib_ssl_sw[] = {{"SSL_free", NULL},
 
 /* Similar array as XX_httplib_ssl_sw. These functions could be located in different
  * lib. */
-static struct ssl_func crypto_sw[] = {{"CRYPTO_num_locks", NULL},
+struct ssl_func XX_httplib_crypto_sw[] = {{"CRYPTO_num_locks", NULL},
                                       {"CRYPTO_set_locking_callback", NULL},
                                       {"CRYPTO_set_id_callback", NULL},
                                       {"ERR_get_error", NULL},
@@ -8716,7 +8716,7 @@ static int initialize_ssl(struct mg_context *ctx) {
 
 #if !defined(NO_SSL_DL)
 	if (!cryptolib_dll_handle) {
-		cryptolib_dll_handle = load_dll(ctx, CRYPTO_LIB, crypto_sw);
+		cryptolib_dll_handle = load_dll(ctx, CRYPTO_LIB, XX_httplib_crypto_sw);
 		if (!cryptolib_dll_handle) return 0;
 	}
 #endif /* NO_SSL_DL */
@@ -9052,7 +9052,7 @@ int XX_httplib_set_tcp_nodelay( SOCKET sock, int nodelay_on ) {
 }  /* XX_httplib_set_tcp_nodelay */
 
 
-static void close_socket_gracefully(struct mg_connection *conn) {
+void XX_httplib_close_socket_gracefully( struct mg_connection *conn ) {
 
 #if defined(_WIN32)
 	char buf[MG_BUF_LEN];
@@ -9103,76 +9103,5 @@ static void close_socket_gracefully(struct mg_connection *conn) {
 	/* Now we know that our FIN is ACK-ed, safe to close */
 	closesocket(conn->client.sock);
 	conn->client.sock = INVALID_SOCKET;
-}
 
-
-void XX_httplib_close_connection( struct mg_connection *conn ) {
-
-	if (!conn || !conn->ctx) return;
-
-	/* call the connection_close callback if assigned */
-	if ((conn->ctx->callbacks.connection_close != NULL)
-	    && (conn->ctx->context_type == 1)) {
-		conn->ctx->callbacks.connection_close(conn);
-	}
-
-	mg_lock_connection(conn);
-
-	conn->must_close = 1;
-
-#ifndef NO_SSL
-	if (conn->ssl != NULL) {
-		/* Run SSL_shutdown twice to ensure completly close SSL connection
-		 */
-		SSL_shutdown(conn->ssl);
-		SSL_free(conn->ssl);
-		/* Avoid CRYPTO_cleanup_all_ex_data(); See discussion:
-		 * https://wiki.openssl.org/index.php/Talk:Library_Initialization */
-		ERR_remove_state(0);
-		conn->ssl = NULL;
-	}
-#endif
-	if (conn->client.sock != INVALID_SOCKET) {
-		close_socket_gracefully(conn);
-		conn->client.sock = INVALID_SOCKET;
-	}
-
-	mg_unlock_connection(conn);
-
-}  /* XX_httplib_close_connection */
-
-
-void mg_close_connection(struct mg_connection *conn) {
-
-	struct mg_context *client_ctx = NULL;
-	unsigned int i;
-
-	if (conn == NULL) {
-		return;
-	}
-
-	if (conn->ctx->context_type == 2) {
-		client_ctx = conn->ctx;
-		/* client context: loops must end */
-		conn->ctx->stop_flag = 1;
-	}
-
-#ifndef NO_SSL
-	if (conn->client_ssl_ctx != NULL) {
-		SSL_CTX_free((SSL_CTX *)conn->client_ssl_ctx);
-	}
-#endif
-	XX_httplib_close_connection(conn);
-	if (client_ctx != NULL) {
-		/* join worker thread and free context */
-		for (i = 0; i < client_ctx->cfg_worker_threads; i++) {
-			if (client_ctx->workerthreadids[i] != 0) {
-				XX_httplib_join_thread(client_ctx->workerthreadids[i]);
-			}
-		}
-		XX_httplib_free(client_ctx->workerthreadids);
-		XX_httplib_free(client_ctx);
-		pthread_mutex_destroy(&conn->mutex);
-		XX_httplib_free(conn);
-	}
-}
+}  /* XX_httplib_close_socket_gracefully */

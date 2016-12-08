@@ -614,36 +614,36 @@ struct ssl_func {
 #define X509_get_notAfter(x) ((x)->cert_info->validity->notAfter)
 
 
-#define CRYPTO_num_locks (*(int (*)(void))crypto_sw[0].ptr)
+#define CRYPTO_num_locks (*(int (*)(void))XX_httplib_crypto_sw[0].ptr)
 #define CRYPTO_set_locking_callback                                            \
-	(*(void (*)(void (*)(int, int, const char *, int)))crypto_sw[1].ptr)
+	(*(void (*)(void (*)(int, int, const char *, int)))XX_httplib_crypto_sw[1].ptr)
 #define CRYPTO_set_id_callback                                                 \
-	(*(void (*)(unsigned long (*)(void)))crypto_sw[2].ptr)
-#define ERR_get_error (*(unsigned long (*)(void))crypto_sw[3].ptr)
-#define ERR_error_string (*(char *(*)(unsigned long, char *))crypto_sw[4].ptr)
-#define ERR_remove_state (*(void (*)(unsigned long))crypto_sw[5].ptr)
-#define ERR_free_strings (*(void (*)(void))crypto_sw[6].ptr)
-#define ENGINE_cleanup (*(void (*)(void))crypto_sw[7].ptr)
-#define CONF_modules_unload (*(void (*)(int))crypto_sw[8].ptr)
-#define CRYPTO_cleanup_all_ex_data (*(void (*)(void))crypto_sw[9].ptr)
-#define EVP_cleanup (*(void (*)(void))crypto_sw[10].ptr)
-#define X509_free (*(void (*)(X509 *))crypto_sw[11].ptr)
-#define X509_get_subject_name (*(X509_NAME * (*)(X509 *))crypto_sw[12].ptr)
-#define X509_get_issuer_name (*(X509_NAME * (*)(X509 *))crypto_sw[13].ptr)
+	(*(void (*)(unsigned long (*)(void)))XX_httplib_crypto_sw[2].ptr)
+#define ERR_get_error (*(unsigned long (*)(void))XX_httplib_crypto_sw[3].ptr)
+#define ERR_error_string (*(char *(*)(unsigned long, char *))XX_httplib_crypto_sw[4].ptr)
+#define ERR_remove_state (*(void (*)(unsigned long))XX_httplib_crypto_sw[5].ptr)
+#define ERR_free_strings (*(void (*)(void))XX_httplib_crypto_sw[6].ptr)
+#define ENGINE_cleanup (*(void (*)(void))XX_httplib_crypto_sw[7].ptr)
+#define CONF_modules_unload (*(void (*)(int))XX_httplib_crypto_sw[8].ptr)
+#define CRYPTO_cleanup_all_ex_data (*(void (*)(void))XX_httplib_crypto_sw[9].ptr)
+#define EVP_cleanup (*(void (*)(void))XX_httplib_crypto_sw[10].ptr)
+#define X509_free (*(void (*)(X509 *))XX_httplib_crypto_sw[11].ptr)
+#define X509_get_subject_name (*(X509_NAME * (*)(X509 *))XX_httplib_crypto_sw[12].ptr)
+#define X509_get_issuer_name (*(X509_NAME * (*)(X509 *))XX_httplib_crypto_sw[13].ptr)
 #define X509_NAME_oneline                                                      \
-	(*(char *(*)(X509_NAME *, char *, int))crypto_sw[14].ptr)
-#define X509_get_serialNumber (*(ASN1_INTEGER * (*)(X509 *))crypto_sw[15].ptr)
+	(*(char *(*)(X509_NAME *, char *, int))XX_httplib_crypto_sw[14].ptr)
+#define X509_get_serialNumber (*(ASN1_INTEGER * (*)(X509 *))XX_httplib_crypto_sw[15].ptr)
 #define i2c_ASN1_INTEGER                                                       \
-	(*(int (*)(ASN1_INTEGER *, unsigned char **))crypto_sw[16].ptr)
+	(*(int (*)(ASN1_INTEGER *, unsigned char **))XX_httplib_crypto_sw[16].ptr)
 #define EVP_get_digestbyname                                                   \
-	(*(const EVP_MD *(*)(const char *))crypto_sw[17].ptr)
+	(*(const EVP_MD *(*)(const char *))XX_httplib_crypto_sw[17].ptr)
 #define ASN1_digest                                                            \
 	(*(int (*)(int (*)(),                                                      \
 	           const EVP_MD *,                                                 \
 	           char *,                                                         \
 	           unsigned char *,                                                \
-	           unsigned int *))crypto_sw[18].ptr)
-#define i2d_X509 (*(int (*)(X509 *, unsigned char **))crypto_sw[19].ptr)
+	           unsigned int *))XX_httplib_crypto_sw[18].ptr)
+#define i2d_X509 (*(int (*)(X509 *, unsigned char **))XX_httplib_crypto_sw[19].ptr)
 
 #endif  /* NO_SSL_DL */
 #endif  /* NO_SSL */
@@ -819,6 +819,7 @@ int			XX_httplib_atomic_inc( volatile int *addr );
 int			XX_httplib_check_acl( struct mg_context *ctx, uint32_t remote_ip );
 void			XX_httplib_close_all_listening_sockets( struct mg_context *ctx );
 void			XX_httplib_close_connection( struct mg_connection *conn );
+void			XX_httplib_close_socket_gracefully( struct mg_connection *conn );
 int			XX_httplib_connect_socket( struct mg_context *ctx, const char *host, int port, int use_ssl, char *ebuf, size_t ebuf_len, SOCKET *sock, union usa *sa );
 int			XX_httplib_consume_socket( struct mg_context *ctx, struct socket *sp, int thread_index );
 void			XX_httplib_set_close_on_exec( SOCKET sock, struct mg_connection *conn );
@@ -894,6 +895,7 @@ void *			XX_httplib_malloc( size_t a );
 
 extern const struct uriprot_tp	XX_httplib_abs_uri_protocols[];
 extern struct mg_option		XX_httplib_config_options[];
+extern struct ssl_func		XX_httplib_crypto_sw[];
 extern struct ssl_func		XX_httplib_ssl_sw[];
 extern int			XX_httplib_sTlsInit;
 extern pthread_key_t		XX_httplib_sTlsKey;
