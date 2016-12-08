@@ -21,5 +21,5 @@ HTTP and HTTPS clients can send request headers to the server to provide details
 
 ### See Also
 
+* [`struct mg_header;`](mg_header.md)
 * [`mg_get_cookie();`](mg_get_cookie.md)
-* [`mg_header();`](mg_header.md)
