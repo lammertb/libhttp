@@ -8967,10 +8967,3 @@ int XX_httplib_set_gpass_option( struct mg_context *ctx ) {
 	return 0;
 
 }  /* XX_httplib_set_gpass_option */
-
-
-int XX_httplib_set_acl_option(struct mg_context *ctx) {
-
-	return XX_httplib_check_acl(ctx, (uint32_t)0x7f000001UL) != -1;
-
-}  /* XX_httplib_set_acl_option */

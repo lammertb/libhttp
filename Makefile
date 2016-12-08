@@ -61,6 +61,7 @@ LIB_SOURCES =	src/libhttp.c					\
 		src/httplib_process_new_connection.c		\
 		src/httplib_produce_socket.c			\
 		src/httplib_reset_per_request_attributes.c	\
+		src/httplib_set_acl_option.c			\
 		src/httplib_set_sock_timeout.c			\
 		src/httplib_set_tcp_nodelay.c			\
 		src/httplib_start.c				\
