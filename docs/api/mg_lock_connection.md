@@ -5,6 +5,7 @@
 ### Parameters
 
 | Parameter | Type | Description |
+| :--- | :--- | :--- |
 |**`conn`**|`struct mg_connection *`|The connection to retrieve a lock|
 
 ### Return Value
