@@ -653,6 +653,14 @@ static int is_websocket_protocol(const struct mg_connection *conn);
 #endif
 
 
+
+const struct uriprot_tp XX_httplib_abs_uri_protocols[] = {{"http://", 7, 80},
+                         {"https://", 8, 443},
+                         {"ws://", 5, 80},
+                         {"wss://", 6, 443},
+                         {NULL, 0, 0}};
+
+
 int XX_httplib_atomic_inc( volatile int *addr ) {
 
 	int ret;
@@ -4295,17 +4303,17 @@ static int mg_inet_pton(int af, const char *src, void *dst, size_t dstlen) {
 }
 
 
-static int
-connect_socket(struct mg_context *ctx /* may be NULL */,
-               const char *host,
-               int port,
-               int use_ssl,
-               char *ebuf,
-               size_t ebuf_len,
-               SOCKET *sock /* output: socket, must not be NULL */,
-               union usa *sa /* output: socket address, must not be NULL  */
-               )
-{
+
+/*
+ * int XX_httplib_connect_socket();
+ *
+ * The function XX_httplib_connect_socket() starts a connection over a socket.
+ * The context structure may be NULL. The output socket and the socket address
+ * may not be null for this function to succeed.
+ */
+
+int XX_httplib_connect_socket( struct mg_context *ctx, const char *host, int port, int use_ssl, char *ebuf, size_t ebuf_len, SOCKET *sock, union usa *sa ) {
+
 	int ip_ver = 0;
 	*sock = INVALID_SOCKET;
 	memset(sa, 0, sizeof(*sa));
@@ -4388,7 +4396,8 @@ connect_socket(struct mg_context *ctx /* may be NULL */,
 	closesocket(*sock);
 	*sock = INVALID_SOCKET;
 	return 0;
-}
+
+}  /* XX_httplib_connect_socket */
 
 
 int mg_url_encode(const char *src, char *dst, size_t dst_len) {
@@ -8420,7 +8429,6 @@ ssl_id_callback(void)
 }
 
 
-static int ssl_use_pem_file(struct mg_context *ctx, const char *pem);
 static const char *ssl_error(void);
 
 
@@ -8469,7 +8477,7 @@ static int refresh_trust( struct mg_connection *conn ) {
 		}
 
 		if (1 == XX_httplib_atomic_inc(p_reload_lock)) {
-			if (ssl_use_pem_file(conn->ctx, pem) == 0) return 0;
+			if (XX_httplib_ssl_use_pem_file(conn->ctx, pem) == 0) return 0;
 			*p_reload_lock = 0;
 		}
 	}
@@ -8737,7 +8745,7 @@ static int initialize_ssl(struct mg_context *ctx) {
 }
 
 
-static int ssl_use_pem_file(struct mg_context *ctx, const char *pem) {
+int XX_httplib_ssl_use_pem_file( struct mg_context *ctx, const char *pem ) {
 
 	if (SSL_CTX_use_certificate_file(ctx->ssl_ctx, pem, 1) == 0) {
 		mg_cry( XX_httplib_fc(ctx), "%s: cannot open certificate file %s: %s", __func__, pem, ssl_error());
@@ -8760,7 +8768,8 @@ static int ssl_use_pem_file(struct mg_context *ctx, const char *pem) {
 		return 0;
 	}
 	return 1;
-}
+
+}  /* XX_httplib_ssl_use_pem_file */
 
 
 static long ssl_get_protocol( int version_id ) {
@@ -8858,7 +8867,7 @@ int XX_httplib_set_ssl_option( struct mg_context *ctx ) {
 	SSL_CTX_set_session_id_context(ctx->ssl_ctx, (const unsigned char *)&ssl_context_id, sizeof(ssl_context_id));
 
 	if (pem != NULL) {
-		if (!ssl_use_pem_file(ctx, pem)) return 0;
+		if (!XX_httplib_ssl_use_pem_file(ctx, pem)) return 0;
 	}
 
 	should_verify_peer =
@@ -9167,120 +9176,3 @@ void mg_close_connection(struct mg_connection *conn) {
 		XX_httplib_free(conn);
 	}
 }
-
-
-static struct mg_connection * mg_connect_client_impl(const struct mg_client_options *client_options, int use_ssl, char *ebuf, size_t ebuf_len) {
-
-	static struct mg_context fake_ctx;
-	struct mg_connection *conn = NULL;
-	SOCKET sock;
-	union usa sa;
-
-	if (!connect_socket(&fake_ctx, client_options->host, client_options->port, use_ssl, ebuf, ebuf_len, &sock, &sa)) {
-		;
-	} else if ((conn = (struct mg_connection *)
-	                XX_httplib_calloc(1, sizeof(*conn) + MAX_REQUEST_SIZE)) == NULL) {
-		XX_httplib_snprintf(NULL, NULL, ebuf, ebuf_len, "calloc(): %s", strerror(ERRNO));
-		closesocket(sock);
-#ifndef NO_SSL
-	} else if (use_ssl && (conn->client_ssl_ctx = SSL_CTX_new(SSLv23_client_method())) == NULL) {
-
-		XX_httplib_snprintf(NULL, NULL, ebuf, ebuf_len, "SSL_CTX_new error");
-		closesocket(sock);
-		XX_httplib_free(conn);
-		conn = NULL;
-#endif /* NO_SSL */
-
-	} else {
-
-#ifdef USE_IPV6
-		socklen_t len = (sa.sa.sa_family == AF_INET)
-		                    ? sizeof(conn->client.rsa.sin)
-		                    : sizeof(conn->client.rsa.sin6);
-		struct sockaddr *psa =
-		    (sa.sa.sa_family == AF_INET)
-		        ? (struct sockaddr *)&(conn->client.rsa.sin)
-		        : (struct sockaddr *)&(conn->client.rsa.sin6);
-#else
-		socklen_t len = sizeof(conn->client.rsa.sin);
-		struct sockaddr *psa = (struct sockaddr *)&(conn->client.rsa.sin);
-#endif
-
-		conn->buf_size = MAX_REQUEST_SIZE;
-		conn->buf = (char *)(conn + 1);
-		conn->ctx = &fake_ctx;
-		conn->client.sock = sock;
-		conn->client.lsa = sa;
-
-		if (getsockname(sock, psa, &len) != 0) {
-			mg_cry(conn, "%s: getsockname() failed: %s", __func__, strerror(ERRNO));
-		}
-
-		conn->client.is_ssl = use_ssl ? 1 : 0;
-		(void)pthread_mutex_init(&conn->mutex, &XX_httplib_pthread_mutex_attr);
-
-#ifndef NO_SSL
-		if (use_ssl) {
-			fake_ctx.ssl_ctx = conn->client_ssl_ctx;
-
-			/* TODO: Check ssl_verify_peer and ssl_ca_path here.
-			 * SSL_CTX_set_verify call is needed to switch off server
-			 * certificate checking, which is off by default in OpenSSL and
-			 * on in yaSSL. */
-			/* TODO: SSL_CTX_set_verify(conn->client_ssl_ctx,
-			 * SSL_VERIFY_PEER, verify_ssl_server); */
-
-			if (client_options->client_cert) {
-				if (!ssl_use_pem_file(&fake_ctx, client_options->client_cert)) {
-					XX_httplib_snprintf(NULL, NULL, ebuf, ebuf_len, "Can not use SSL client certificate");
-					SSL_CTX_free(conn->client_ssl_ctx);
-					closesocket(sock);
-					XX_httplib_free(conn);
-					conn = NULL;
-				}
-			}
-
-			if (client_options->server_cert) {
-				SSL_CTX_load_verify_locations(conn->client_ssl_ctx, client_options->server_cert, NULL);
-				SSL_CTX_set_verify(conn->client_ssl_ctx, SSL_VERIFY_PEER, NULL);
-			} else {
-				SSL_CTX_set_verify(conn->client_ssl_ctx, SSL_VERIFY_NONE, NULL);
-			}
-
-			if (!XX_httplib_sslize(conn, conn->client_ssl_ctx, SSL_connect)) {
-				XX_httplib_snprintf(NULL, NULL, ebuf, ebuf_len, "SSL connection error");
-				SSL_CTX_free(conn->client_ssl_ctx);
-				closesocket(sock);
-				XX_httplib_free(conn);
-				conn = NULL;
-			}
-		}
-#endif
-	}
-
-	return conn;
-}
-
-
-CIVETWEB_API struct mg_connection * mg_connect_client_secure(const struct mg_client_options *client_options, char *error_buffer, size_t error_buffer_size) {
-
-	return mg_connect_client_impl(client_options, 1, error_buffer, error_buffer_size);
-}
-
-
-struct mg_connection * mg_connect_client(const char *host, int port, int use_ssl, char *error_buffer, size_t error_buffer_size) {
-
-	struct mg_client_options opts;
-	memset(&opts, 0, sizeof(opts));
-	opts.host = host;
-	opts.port = port;
-
-	return mg_connect_client_impl(&opts, use_ssl, error_buffer, error_buffer_size);
-}
-
-
-const struct uriprot_tp XX_httplib_abs_uri_protocols[] = {{"http://", 7, 80},
-                         {"https://", 8, 443},
-                         {"ws://", 5, 80},
-                         {"wss://", 6, 443},
-                         {NULL, 0, 0}};

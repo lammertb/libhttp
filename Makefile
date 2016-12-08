@@ -44,6 +44,7 @@ BUILD_DIRS = $(BUILD_DIR) $(BUILD_DIR)/src $(BUILD_DIR)/resources
 LIB_SOURCES =	src/libhttp.c					\
 		src/httplib_accept_new_connection.c		\
 		src/httplib_check_feature.c			\
+		src/httplib_connect_client.c			\
 		src/httplib_connect_websocket_client.c		\
 		src/httplib_consume_socket.c			\
 		src/httplib_download.c				\
