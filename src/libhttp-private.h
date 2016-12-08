@@ -296,7 +296,6 @@ struct timespec {
 static int pthread_mutex_lock(pthread_mutex_t *);
 static int pthread_mutex_unlock(pthread_mutex_t *);
 static void path_to_unicode(const struct mg_connection *conn, const char *path, wchar_t *wbuf, size_t wbuf_len);
-struct file;
 static const char *mg_fgets(char *buf, size_t size, struct file *filep, char **p);
 
 
@@ -801,12 +800,22 @@ struct websocket_client_thread_data {
 	void *callback_data;
 };
 
-
 struct uriprot_tp {
 	const char *proto;
 	size_t proto_len;
 	unsigned default_port;
 };
+
+struct file {
+	uint64_t size;
+	time_t last_modified;
+	FILE *fp;
+	const char *membuf; /* Non-NULL if file data is in memory */
+	int is_directory;
+	int gzipped; /* set to 1 if the content is gzipped in which case we need a content-encoding: gzip header */
+};
+
+#define STRUCT_FILE_INITIALIZER    { (uint64_t)0, (time_t)0, (FILE *)NULL, (const char *)NULL, 0, 0 } 
 
 /*
  * Functions local to the server. These functions all begin with XX_httplib to
@@ -858,6 +867,7 @@ void			XX_httplib_sockaddr_to_string(char *buf, size_t len, const union usa *usa
 void			XX_httplib_ssl_get_client_cert_info( struct mg_connection *conn );
 int			XX_httplib_ssl_use_pem_file( struct mg_context *ctx, const char *pem );
 int			XX_httplib_sslize( struct mg_connection *conn, SSL_CTX *s, int (*func)(SSL *) );
+int			XX_httplib_stat( struct mg_connection *conn, const char *path, struct file *filep );
 char *			XX_httplib_strdup( const char *str );
 void			XX_httplib_tls_dtor( void *key );
 void			XX_httplib_uninitialize_ssl( struct mg_context *ctx );

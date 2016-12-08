@@ -552,21 +552,6 @@ struct vec {
 	size_t len;
 };
 
-struct file {
-	uint64_t size;
-	time_t last_modified;
-	FILE *fp;
-	const char *membuf; /* Non-NULL if file data is in memory */
-	int is_directory;
-	int gzipped; /* set to 1 if the content is gzipped
-	              * in which case we need a content-encoding: gzip header */
-};
-
-#define STRUCT_FILE_INITIALIZER                                                \
-	{                                                                          \
-		(uint64_t)0, (time_t)0, (FILE *)NULL, (const char *)NULL, 0, 0         \
-	}
-
 
 
 /* Config option name, config types, default value */
@@ -892,7 +877,7 @@ static int is_file_in_memory(const struct mg_connection *conn, const char *path,
 		filep->membuf = conn->ctx->callbacks.open_file(conn, path, &size);
 		if (filep->membuf != NULL) {
 			/* NOTE: override filep->size only on success. Otherwise, it might
-			 * break constructs like if (!mg_stat() || !mg_fopen()) ... */
+			 * break constructs like if (!XX_httplib_stat() || !mg_fopen()) ... */
 			filep->size = size;
 		}
 	}
@@ -922,7 +907,7 @@ static int mg_fopen(const struct mg_connection *conn, const char *path, const ch
 
 	if (!filep) return 0; 
 
-	/* TODO (high): mg_fopen should only open a file, while mg_stat should
+	/* TODO (high): mg_fopen should only open a file, while XX_httplib_stat should
 	 * only get the file status. They should not work on different members of
 	 * the same structure (bad cohesion). */
 	memset(filep, 0, sizeof(*filep));
@@ -1539,8 +1524,6 @@ static int send_static_cache_header(struct mg_connection *conn) {
 
 static void handle_file_based_request(struct mg_connection *conn, const char *path, struct file *filep);
 
-static int mg_stat(struct mg_connection *conn, const char *path, struct file *filep);
-
 void XX_httplib_send_http_error( struct mg_connection *conn, int status, const char *fmt, ... ) {
 
 	char buf[MG_BUF_LEN];
@@ -1593,7 +1576,7 @@ void XX_httplib_send_http_error( struct mg_connection *conn, int status, const c
 						     i++)
 							buf[len + i - 1] = tstr[i];
 						buf[len + i - 1] = 0;
-						if (mg_stat(conn, buf, &error_page_file)) {
+						if (XX_httplib_stat(conn, buf, &error_page_file)) {
 							page_handler_found = 1;
 							break;
 						}
@@ -1975,7 +1958,7 @@ static int path_cannot_disclose_cgi(const char *path) {
 }
 
 
-static int mg_stat(struct mg_connection *conn, const char *path, struct file *filep) {
+int XX_httplib_stat( struct mg_connection *conn, const char *path, struct file *filep ) {
 
 	wchar_t wbuf[PATH_MAX];
 	WIN32_FILE_ATTRIBUTE_DATA info;
@@ -2029,7 +2012,8 @@ static int mg_stat(struct mg_connection *conn, const char *path, struct file *fi
 	}
 
 	return 0;
-}
+
+}  /* XX_httplib_stat */
 
 
 static int mg_remove(const struct mg_connection *conn, const char *path) {
@@ -2397,7 +2381,7 @@ int XX_httplib_set_non_blocking_mode( SOCKET sock ) {
 
 #else
 
-static int mg_stat(struct mg_connection *conn, const char *path, struct file *filep) {
+int XX_httplib_stat( struct mg_connection *conn, const char *path, struct file *filep ) {
 
 	struct stat st;
 	if (!filep) return 0;
@@ -2415,7 +2399,7 @@ static int mg_stat(struct mg_connection *conn, const char *path, struct file *fi
 
 	return 0;
 
-}  /* mg_stat */
+}  /* XX_httplib_stat */
 
 /* conn may be NULL */
 void XX_httplib_set_close_on_exec( SOCKET fd, struct mg_connection *conn ) {
@@ -3404,7 +3388,7 @@ interpret_uri(struct mg_connection *conn,   /* in: request (must be valid) */
 
 	/* Local file path and name, corresponding to requested URI
 	 * is now stored in "filename" variable. */
-	if (mg_stat(conn, filename, filep)) {
+	if (XX_httplib_stat(conn, filename, filep)) {
 #if !defined(NO_CGI)
 		/* File exists. Check if it is a script type. */
 		if (0
@@ -3445,7 +3429,7 @@ interpret_uri(struct mg_connection *conn,   /* in: request (must be valid) */
 				goto interpret_cleanup;
 			}
 
-			if (mg_stat(conn, gz_path, filep)) {
+			if (XX_httplib_stat(conn, gz_path, filep)) {
 				if (filep) {
 					filep->gzipped = 1;
 					*is_found = 1;
@@ -3467,7 +3451,7 @@ interpret_uri(struct mg_connection *conn,   /* in: request (must be valid) */
 			                     strlen(conn->ctx->config[CGI_EXTENSIONS]),
 			                     filename) > 0
 #endif
-			     ) && mg_stat(conn, filename, filep)) {
+			     ) && XX_httplib_stat(conn, filename, filep)) {
 				/* Shift PATH_INFO block one character right, e.g.
 				 * "/x.cgi/foo/bar\x00" => "/x.cgi\x00/foo/bar\x00"
 				 * conn->path_info is pointing to the local variable "path"
@@ -3825,9 +3809,9 @@ static void open_auth_file(struct mg_connection *conn, const char *path, struct 
 #endif
 			}
 			/* Important: using local struct file to test path for is_directory
-			 * flag. If filep is used, mg_stat() makes it appear as if auth file
+			 * flag. If filep is used, XX_httplib_stat() makes it appear as if auth file
 			 * was opened. */
-		} else if (mg_stat(conn, path, &file) && file.is_directory) {
+		} else if (XX_httplib_stat(conn, path, &file) && file.is_directory) {
 			XX_httplib_snprintf(conn, &truncated, name, sizeof(name), "%s/%s", path, PASSWORDS_FILE_NAME);
 
 			if (truncated || !mg_fopen(conn, name, "r", filep)) {
@@ -4543,7 +4527,7 @@ static int scan_directory(struct mg_connection *conn, const char *dir, void *dat
 
 			/* If we don't memset stat structure to zero, mtime will have
 			 * garbage and strftime() will segfault later on in
-			 * print_dir_entry(). memset is required only if mg_stat()
+			 * print_dir_entry(). memset is required only if XX_httplib_stat()
 			 * fails. For more details, see
 			 * http://code.google.com/p/mongoose/issues/detail?id=79 */
 			memset(&de.file, 0, sizeof(de.file));
@@ -4553,8 +4537,8 @@ static int scan_directory(struct mg_connection *conn, const char *dir, void *dat
 				continue;
 			}
 
-			if (!mg_stat(conn, path, &de.file)) {
-				mg_cry(conn, "%s: mg_stat(%s) failed: %s", __func__, path, strerror(ERRNO));
+			if (!XX_httplib_stat(conn, path, &de.file)) {
+				mg_cry(conn, "%s: XX_httplib_stat(%s) failed: %s", __func__, path, strerror(ERRNO));
 			}
 			de.file_name = dp->d_name;
 			cb(&de, data);
@@ -4589,7 +4573,7 @@ static int remove_directory(struct mg_connection *conn, const char *dir) {
 
 			/* If we don't memset stat structure to zero, mtime will have
 			 * garbage and strftime() will segfault later on in
-			 * print_dir_entry(). memset is required only if mg_stat()
+			 * print_dir_entry(). memset is required only if XX_httplib_stat()
 			 * fails. For more details, see
 			 * http://code.google.com/p/mongoose/issues/detail?id=79 */
 			memset(&de.file, 0, sizeof(de.file));
@@ -4600,8 +4584,8 @@ static int remove_directory(struct mg_connection *conn, const char *dir) {
 				continue;
 			}
 
-			if (!mg_stat(conn, path, &de.file)) {
-				mg_cry(conn, "%s: mg_stat(%s) failed: %s", __func__, path, strerror(ERRNO));
+			if (!XX_httplib_stat(conn, path, &de.file)) {
+				mg_cry(conn, "%s: XX_httplib_stat(%s) failed: %s", __func__, path, strerror(ERRNO));
 				ok = 0;
 			}
 			if (de.file.membuf == NULL) {
@@ -5011,7 +4995,7 @@ void mg_send_mime_file(struct mg_connection *conn, const char *path, const char 
 void mg_send_mime_file2(struct mg_connection *conn, const char *path, const char *mime_type, const char *additional_headers) {
 
 	struct file file = STRUCT_FILE_INITIALIZER;
-	if (mg_stat(conn, path, &file)) {
+	if (XX_httplib_stat(conn, path, &file)) {
 		if (file.is_directory) {
 			if (!conn) {
 				return;
@@ -5053,7 +5037,7 @@ static int put_dir(struct mg_connection *conn, const char *path) {
 		buf[len] = '\0';
 
 		/* Try to create intermediate directory */
-		if (!mg_stat(conn, buf, &file) && mg_mkdir(conn, buf, 0755) != 0) {
+		if (!XX_httplib_stat(conn, buf, &file) && mg_mkdir(conn, buf, 0755) != 0) {
 			/* path does not exixt and can not be created */
 			res = -2;
 			break;
@@ -5338,7 +5322,7 @@ static int substitute_index_file(struct mg_connection *conn, char *path, size_t 
 			mg_strlcpy(path + n + 1, filename_vec.ptr, filename_vec.len + 1);
 
 			/* Does it exist? */
-			if (mg_stat(conn, path, &file)) {
+			if (XX_httplib_stat(conn, path, &file)) {
 				/* Yes it does, break the loop */
 				*filep = file;
 				found = 1;
@@ -5896,8 +5880,8 @@ static void mkcol(struct mg_connection *conn, const char *path) {
 	/* TODO (mid): Check the XX_httplib_send_http_error situations in this function */
 
 	memset(&de.file, 0, sizeof(de.file));
-	if (!mg_stat(conn, path, &de.file)) {
-		mg_cry(conn, "%s: mg_stat(%s) failed: %s", __func__, path, strerror(ERRNO));
+	if (!XX_httplib_stat(conn, path, &de.file)) {
+		mg_cry(conn, "%s: XX_httplib_stat(%s) failed: %s", __func__, path, strerror(ERRNO));
 	}
 
 	if (de.file.last_modified) {
@@ -5952,7 +5936,7 @@ static void put_file(struct mg_connection *conn, const char *path) {
 
 	if (conn == NULL) return;
 
-	if (mg_stat(conn, path, &file)) {
+	if (XX_httplib_stat(conn, path, &file)) {
 		/* File already exists */
 		conn->status_code = 200;
 
@@ -6057,8 +6041,8 @@ static void delete_file(struct mg_connection *conn, const char *path) {
 
 	struct de de;
 	memset(&de.file, 0, sizeof(de.file));
-	if (!mg_stat(conn, path, &de.file)) {
-		/* mg_stat returns 0 if the file does not exist */
+	if (!XX_httplib_stat(conn, path, &de.file)) {
+		/* XX_httplib_stat returns 0 if the file does not exist */
 		XX_httplib_send_http_error(conn, 404, "Error: Cannot delete file\nFile %s not found", path);
 		return;
 	}
@@ -8950,20 +8934,3 @@ void XX_httplib_uninitialize_ssl( struct mg_context *ctx ) {
 	}
 }
 #endif /* !NO_SSL */
-
-
-int XX_httplib_set_gpass_option( struct mg_context *ctx ) {
-
-	if ( ctx != NULL ) {
-
-		struct file file = STRUCT_FILE_INITIALIZER;
-		const char *path = ctx->config[GLOBAL_PASSWORDS_FILE];
-		if (path != NULL && !mg_stat( XX_httplib_fc(ctx), path, &file)) {
-			mg_cry( XX_httplib_fc(ctx), "Cannot open %s: %s", path, strerror(ERRNO));
-			return 0;
-		}
-		return 1;
-	}
-	return 0;
-
-}  /* XX_httplib_set_gpass_option */
