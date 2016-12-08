@@ -20,4 +20,5 @@ The function `mg_get_user_data()` returns the user data associated with a LibHTT
 
 ### See Also
 
+* [`mg_get_user_connection_data();`](mg_get_user_connection_data.md)
 * [`mg_start();`](mg_start.md)
