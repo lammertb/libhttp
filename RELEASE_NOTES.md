@@ -1,6 +1,6 @@
 Release Notes v2.0 (work in progress)
 ===
-### Objectives: *Clean up source code, proper documentation, restructure embedding API*
+### Objectives: *Clean up source code, Proper documentation, Restructure embedding API*
 
 Changes
 -------
@@ -14,7 +14,7 @@ Changes
 - Removed deprecated function `mg_upload();`
 - Removed deprecated function `mg_get_valid_option_names();`
 - Removed all build scripts except the script for `make`
-
+- Added website [`www.libhttp.org`](http://www.libhttp.org)
 
 Release Notes v1.9 (will never be released as LibHTTP)
 ===
@@ -29,7 +29,6 @@ Changes
 - Fix mg_get_cookie to ignore substrings
 - Fix bug in timer logic (for Lua Websockets)
 - Updated version number
-- Added website [`www.libhttp.org`](http://www.libhttp.org)
 
 Release Notes v1.8 (as Civetweb)
 ===
