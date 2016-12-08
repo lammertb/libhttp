@@ -60,6 +60,7 @@ LIB_SOURCES =	src/libhttp.c					\
 		src/httplib_master_thread.c			\
 		src/httplib_process_new_connection.c		\
 		src/httplib_produce_socket.c			\
+		src/httplib_set_sock_timeout.c			\
 		src/httplib_set_tcp_nodelay.c			\
 		src/httplib_start.c				\
 		src/httplib_stop.c				\
