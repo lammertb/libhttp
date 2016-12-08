@@ -24,5 +24,4 @@ The function returns the number of items in the list, or a negative value if an 
 
 ### See Also
 
-* [~~`mg_get_ports();`~~](mg_get_ports.md)
 * [`struct mg_server_ports;`](mg_server_ports.md)
