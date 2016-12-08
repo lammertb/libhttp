@@ -67,6 +67,7 @@ LIB_SOURCES =	src/libhttp.c					\
 		src/httplib_set_tcp_nodelay.c			\
 		src/httplib_start.c				\
 		src/httplib_stop.c				\
+		src/httplib_uninitialize_ssl.c			\
 		src/httplib_version.c				\
 		src/httplib_websocket_client_thread.c		\
 		src/httplib_worker_thread.c

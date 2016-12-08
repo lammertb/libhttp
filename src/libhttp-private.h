@@ -906,7 +906,9 @@ void *			XX_httplib_malloc( size_t a );
 
 extern const struct uriprot_tp	XX_httplib_abs_uri_protocols[];
 extern struct mg_option		XX_httplib_config_options[];
+extern int			XX_httplib_cryptolib_users;
 extern struct ssl_func		XX_httplib_crypto_sw[];
+extern pthread_mutex_t *	XX_httplib_ssl_mutexes;
 extern struct ssl_func		XX_httplib_ssl_sw[];
 extern int			XX_httplib_sTlsInit;
 extern pthread_key_t		XX_httplib_sTlsKey;

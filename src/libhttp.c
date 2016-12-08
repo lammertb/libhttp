@@ -8474,7 +8474,7 @@ static int refresh_trust( struct mg_connection *conn ) {
 }
 
 
-static pthread_mutex_t *ssl_mutexes;
+pthread_mutex_t *XX_httplib_ssl_mutexes;
 
 
 int XX_httplib_sslize( struct mg_connection *conn, SSL_CTX *s, int (*func)(SSL *) ) {
@@ -8639,9 +8639,9 @@ static void ssl_locking_callback(int mode, int mutex_num, const char *file, int 
 
 	if (mode & 1) {
 		/* 1 is CRYPTO_LOCK */
-		(void)pthread_mutex_lock(&ssl_mutexes[mutex_num]);
+		(void)pthread_mutex_lock(&XX_httplib_ssl_mutexes[mutex_num]);
 	} else {
-		(void)pthread_mutex_unlock(&ssl_mutexes[mutex_num]);
+		(void)pthread_mutex_unlock(&XX_httplib_ssl_mutexes[mutex_num]);
 	}
 }
 
@@ -8689,9 +8689,9 @@ static void *cryptolib_dll_handle; /* Store the crypto library handle. */
 
 
 #if defined(SSL_ALREADY_INITIALIZED)
-static int cryptolib_users = 1; /* Reference counter for crypto library. */
+int XX_httplib_cryptolib_users = 1; /* Reference counter for crypto library. */
 #else
-static int cryptolib_users = 0; /* Reference counter for crypto library. */
+int XX_httplib_cryptolib_users = 0; /* Reference counter for crypto library. */
 #endif
 
 
@@ -8707,7 +8707,7 @@ static int initialize_ssl(struct mg_context *ctx) {
 	}
 #endif /* NO_SSL_DL */
 
-	if (XX_httplib_atomic_inc(&cryptolib_users) > 1) return 1;
+	if (XX_httplib_atomic_inc(&XX_httplib_cryptolib_users) > 1) return 1;
 
 	/* Initialize locking callbacks, needed for thread safety.
 	 * http://www.openssl.org/support/faq.html#PROG1
@@ -8715,13 +8715,13 @@ static int initialize_ssl(struct mg_context *ctx) {
 	i = CRYPTO_num_locks();
 	if (i < 0) i = 0;
 	size = sizeof(pthread_mutex_t) * ((size_t)(i));
-	if ((ssl_mutexes = (pthread_mutex_t *)XX_httplib_malloc(size)) == NULL) {
+	if ((XX_httplib_ssl_mutexes = (pthread_mutex_t *)XX_httplib_malloc(size)) == NULL) {
 		mg_cry( XX_httplib_fc(ctx), "%s: cannot allocate mutexes: %s", __func__, ssl_error());
 		return 0;
 	}
 
 	for (i = 0; i < CRYPTO_num_locks(); i++) {
-		pthread_mutex_init(&ssl_mutexes[i], &XX_httplib_pthread_mutex_attr);
+		pthread_mutex_init(&XX_httplib_ssl_mutexes[i], &XX_httplib_pthread_mutex_attr);
 	}
 
 	CRYPTO_set_locking_callback(&ssl_locking_callback);
@@ -8905,32 +8905,4 @@ int XX_httplib_set_ssl_option( struct mg_context *ctx ) {
 
 }  /* XX_httplib_set_ssl_option */
 
-
-void XX_httplib_uninitialize_ssl( struct mg_context *ctx ) {
-
-	int i;
-	(void)ctx;
-
-	if (XX_httplib_atomic_dec(&cryptolib_users) == 0) {
-
-		/* Shutdown according to
-		 * https://wiki.openssl.org/index.php/Library_Initialization#Cleanup
-		 * http://stackoverflow.com/questions/29845527/how-to-properly-uninitialize-openssl
-		 */
-		CRYPTO_set_locking_callback(NULL);
-		CRYPTO_set_id_callback(NULL);
-		ENGINE_cleanup();
-		CONF_modules_unload(1);
-		ERR_free_strings();
-		EVP_cleanup();
-		CRYPTO_cleanup_all_ex_data();
-		ERR_remove_state(0);
-
-		for (i = 0; i < CRYPTO_num_locks(); i++) {
-			pthread_mutex_destroy(&ssl_mutexes[i]);
-		}
-		XX_httplib_free(ssl_mutexes);
-		ssl_mutexes = NULL;
-	}
-}
 #endif /* !NO_SSL */
