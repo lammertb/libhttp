@@ -52,6 +52,7 @@ LIB_SOURCES =	src/libhttp.c					\
 		src/httplib_get_response.c			\
 		src/httplib_get_response_code_text.c		\
 		src/httplib_get_system_name.c			\
+		src/httplib_get_uri_type.c			\
 		src/httplib_getreq.c				\
 		src/httplib_master_thread.c			\
 		src/httplib_process_new_connection.c		\
