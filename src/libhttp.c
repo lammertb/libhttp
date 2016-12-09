@@ -464,9 +464,6 @@ static void mg_vsnprintf(const struct mg_connection *conn, int *truncated, char 
 #define vsnprintf DO_NOT_USE_THIS_FUNCTION__USE_mg_vsnprintf
 #endif
 
-#define MD5_STATIC static
-#include "md5.inl"
-
 /* Darwin prior to 7.0 and Win32 do not have socklen_t */
 #ifdef NO_SOCKLEN_T
 typedef int socklen_t;
@@ -8415,7 +8412,6 @@ ssl_id_callback(void)
 }
 
 
-static const char *ssl_error(void);
 
 
 static int refresh_trust( struct mg_connection *conn ) {
@@ -8457,7 +8453,7 @@ static int refresh_trust( struct mg_connection *conn ) {
 				       "either ssl_ca_path or ssl_ca_file. Is any of them "
 				       "present in "
 				       "the .conf file?",
-				       ssl_error());
+				       XX_httplib_ssl_error());
 				return 0;
 			}
 		}
@@ -8546,12 +8542,13 @@ int XX_httplib_sslize( struct mg_connection *conn, SSL_CTX *s, int (*func)(SSL *
 
 
 /* Return OpenSSL error message (from CRYPTO lib) */
-static const char * ssl_error(void) {
+const char * XX_httplib_ssl_error(void) {
 
 	unsigned long err;
 	err = ERR_get_error();
 	return ((err == 0) ? "" : ERR_error_string(err, NULL));
-}
+
+}  /* XX_httplib_ssl_error */
 
 
 static int hexdump2string(void *mem, int memlen, char *buf, int buflen) {
@@ -8647,7 +8644,7 @@ static void ssl_locking_callback(int mode, int mutex_num, const char *file, int 
 
 
 #if !defined(NO_SSL_DL)
-static void * load_dll(struct mg_context *ctx, const char *dll_name, struct ssl_func *sw) {
+void *XX_httplib_load_dll( struct mg_context *ctx, const char *dll_name, struct ssl_func *sw ) {
 
 	union {
 		void *p;
@@ -8679,10 +8676,10 @@ static void * load_dll(struct mg_context *ctx, const char *dll_name, struct ssl_
 	}
 
 	return dll_handle;
-}
+
+}  /* XX_httplib_load_dll */
 
 
-static void *ssllib_dll_handle;    /* Store the ssl library handle. */
 static void *cryptolib_dll_handle; /* Store the crypto library handle. */
 
 #endif /* NO_SSL_DL */
@@ -8695,14 +8692,14 @@ int XX_httplib_cryptolib_users = 0; /* Reference counter for crypto library. */
 #endif
 
 
-static int initialize_ssl(struct mg_context *ctx) {
+int XX_httplib_initialize_ssl( struct mg_context *ctx ) {
 
 	int i;
 	size_t size;
 
 #if !defined(NO_SSL_DL)
 	if (!cryptolib_dll_handle) {
-		cryptolib_dll_handle = load_dll(ctx, CRYPTO_LIB, XX_httplib_crypto_sw);
+		cryptolib_dll_handle = XX_httplib_load_dll(ctx, CRYPTO_LIB, XX_httplib_crypto_sw);
 		if (!cryptolib_dll_handle) return 0;
 	}
 #endif /* NO_SSL_DL */
@@ -8716,7 +8713,7 @@ static int initialize_ssl(struct mg_context *ctx) {
 	if (i < 0) i = 0;
 	size = sizeof(pthread_mutex_t) * ((size_t)(i));
 	if ((XX_httplib_ssl_mutexes = (pthread_mutex_t *)XX_httplib_malloc(size)) == NULL) {
-		mg_cry( XX_httplib_fc(ctx), "%s: cannot allocate mutexes: %s", __func__, ssl_error());
+		mg_cry( XX_httplib_fc(ctx), "%s: cannot allocate mutexes: %s", __func__, XX_httplib_ssl_error());
 		return 0;
 	}
 
@@ -8728,19 +8725,20 @@ static int initialize_ssl(struct mg_context *ctx) {
 	CRYPTO_set_id_callback(&ssl_id_callback);
 
 	return 1;
-}
+
+}  /* XX_httplib_initialize_ssl */
 
 
 int XX_httplib_ssl_use_pem_file( struct mg_context *ctx, const char *pem ) {
 
 	if (SSL_CTX_use_certificate_file(ctx->ssl_ctx, pem, 1) == 0) {
-		mg_cry( XX_httplib_fc(ctx), "%s: cannot open certificate file %s: %s", __func__, pem, ssl_error());
+		mg_cry( XX_httplib_fc(ctx), "%s: cannot open certificate file %s: %s", __func__, pem, XX_httplib_ssl_error());
 		return 0;
 	}
 
 	/* could use SSL_CTX_set_default_passwd_cb_userdata */
 	if (SSL_CTX_use_PrivateKey_file(ctx->ssl_ctx, pem, 1) == 0) {
-		mg_cry( XX_httplib_fc(ctx), "%s: cannot open private key file %s: %s", __func__, pem, ssl_error());
+		mg_cry( XX_httplib_fc(ctx), "%s: cannot open private key file %s: %s", __func__, pem, XX_httplib_ssl_error());
 		return 0;
 	}
 
@@ -8750,7 +8748,7 @@ int XX_httplib_ssl_use_pem_file( struct mg_context *ctx, const char *pem ) {
 	}
 
 	if (SSL_CTX_use_certificate_chain_file(ctx->ssl_ctx, pem) == 0) {
-		mg_cry( XX_httplib_fc(ctx), "%s: cannot use certificate chain file %s: %s", __func__, pem, ssl_error());
+		mg_cry( XX_httplib_fc(ctx), "%s: cannot use certificate chain file %s: %s", __func__, pem, XX_httplib_ssl_error());
 		return 0;
 	}
 	return 1;
@@ -8758,7 +8756,7 @@ int XX_httplib_ssl_use_pem_file( struct mg_context *ctx, const char *pem ) {
 }  /* XX_httplib_ssl_use_pem_file */
 
 
-static long ssl_get_protocol( int version_id ) {
+long XX_httplib_ssl_get_protocol( int version_id ) {
 
 	long ret = SSL_OP_ALL;
 
@@ -8768,141 +8766,7 @@ static long ssl_get_protocol( int version_id ) {
 	if (version_id > 3) ret |= SSL_OP_NO_TLSv1_1;
 
 	return ret;
-}
 
-
-/* Dynamically load SSL library. Set up ctx->ssl_ctx pointer. */
-int XX_httplib_set_ssl_option( struct mg_context *ctx ) {
-
-	const char *pem;
-	int callback_ret;
-	int should_verify_peer;
-	const char *ca_path;
-	const char *ca_file;
-	int use_default_verify_paths;
-	int verify_depth;
-	time_t now_rt = time(NULL);
-	struct timespec now_mt;
-	md5_byte_t ssl_context_id[16];
-	md5_state_t md5state;
-	int protocol_ver;
-
-	/* If PEM file is not specified and the init_ssl callback
-	 * is not specified, skip SSL initialization. */
-	if (!ctx) {
-		return 0;
-	}
-	if ((pem = ctx->config[SSL_CERTIFICATE]) == NULL
-	    && ctx->callbacks.init_ssl == NULL) {
-		return 1;
-	}
-
-	if (!initialize_ssl(ctx)) return 0;
-
-#if !defined(NO_SSL_DL)
-	if (!ssllib_dll_handle) {
-		ssllib_dll_handle = load_dll(ctx, SSL_LIB, XX_httplib_ssl_sw);
-		if (!ssllib_dll_handle) return 0;
-	}
-#endif /* NO_SSL_DL */
-
-	/* Initialize SSL library */
-	SSL_library_init();
-	SSL_load_error_strings();
-
-	if ((ctx->ssl_ctx = SSL_CTX_new(SSLv23_server_method())) == NULL) {
-		mg_cry( XX_httplib_fc(ctx), "SSL_CTX_new (server) error: %s", ssl_error());
-		return 0;
-	}
-
-	SSL_CTX_clear_options(ctx->ssl_ctx, SSL_OP_NO_SSLv2 | SSL_OP_NO_SSLv3 | SSL_OP_NO_TLSv1 | SSL_OP_NO_TLSv1_1);
-	protocol_ver = atoi(ctx->config[SSL_PROTOCOL_VERSION]);
-	SSL_CTX_set_options(ctx->ssl_ctx, ssl_get_protocol(protocol_ver));
-	SSL_CTX_set_options(ctx->ssl_ctx, SSL_OP_SINGLE_DH_USE);
-	SSL_CTX_set_options(ctx->ssl_ctx, SSL_OP_CIPHER_SERVER_PREFERENCE);
-	SSL_CTX_set_ecdh_auto(ctx->ssl_ctx, 1);
-
-	/* If a callback has been specified, call it. */
-	callback_ret = (ctx->callbacks.init_ssl == NULL) ? 0 : (ctx->callbacks.init_ssl(ctx->ssl_ctx, ctx->user_data));
-
-	/* If callback returns 0, LibHTTP sets up the SSL certificate.
-	 * If it returns 1, LibHTTP assumes the calback already did this.
-	 * If it returns -1, initializing ssl fails. */
-	if (callback_ret < 0) {
-		mg_cry( XX_httplib_fc(ctx), "SSL callback returned error: %i", callback_ret);
-		return 0;
-	}
-	if (callback_ret > 0) {
-		if (pem != NULL) {
-			SSL_CTX_use_certificate_chain_file(ctx->ssl_ctx, pem);
-		}
-		return 1;
-	}
-
-	/* Use some UID as session context ID. */
-	md5_init(&md5state);
-	md5_append(&md5state, (const md5_byte_t *)&now_rt, sizeof(now_rt));
-	clock_gettime(CLOCK_MONOTONIC, &now_mt);
-	md5_append(&md5state, (const md5_byte_t *)&now_mt, sizeof(now_mt));
-	md5_append(&md5state,
-	           (const md5_byte_t *)ctx->config[LISTENING_PORTS],
-	           strlen(ctx->config[LISTENING_PORTS]));
-	md5_append(&md5state, (const md5_byte_t *)ctx, sizeof(*ctx));
-	md5_finish(&md5state, ssl_context_id);
-
-	SSL_CTX_set_session_id_context(ctx->ssl_ctx, (const unsigned char *)&ssl_context_id, sizeof(ssl_context_id));
-
-	if (pem != NULL) {
-		if (!XX_httplib_ssl_use_pem_file(ctx, pem)) return 0;
-	}
-
-	should_verify_peer =
-	    (ctx->config[SSL_DO_VERIFY_PEER] != NULL)
-	    && (mg_strcasecmp(ctx->config[SSL_DO_VERIFY_PEER], "yes") == 0);
-
-	use_default_verify_paths =
-	    (ctx->config[SSL_DEFAULT_VERIFY_PATHS] != NULL)
-	    && (mg_strcasecmp(ctx->config[SSL_DEFAULT_VERIFY_PATHS], "yes") == 0);
-
-	if (should_verify_peer) {
-		ca_path = ctx->config[SSL_CA_PATH];
-		ca_file = ctx->config[SSL_CA_FILE];
-		if (SSL_CTX_load_verify_locations(ctx->ssl_ctx, ca_file, ca_path)
-		    != 1) {
-			mg_cry( XX_httplib_fc(ctx),
-			       "SSL_CTX_load_verify_locations error: %s "
-			       "ssl_verify_peer requires setting "
-			       "either ssl_ca_path or ssl_ca_file. Is any of them "
-			       "present in "
-			       "the .conf file?",
-			       ssl_error());
-			return 0;
-		}
-
-		SSL_CTX_set_verify(ctx->ssl_ctx,
-		                   SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT,
-		                   NULL);
-
-		if (use_default_verify_paths
-		    && SSL_CTX_set_default_verify_paths(ctx->ssl_ctx) != 1) {
-			mg_cry( XX_httplib_fc(ctx), "SSL_CTX_set_default_verify_paths error: %s", ssl_error());
-			return 0;
-		}
-
-		if (ctx->config[SSL_VERIFY_DEPTH]) {
-			verify_depth = atoi(ctx->config[SSL_VERIFY_DEPTH]);
-			SSL_CTX_set_verify_depth(ctx->ssl_ctx, verify_depth);
-		}
-	}
-
-	if (ctx->config[SSL_CIPHER_LIST] != NULL) {
-		if (SSL_CTX_set_cipher_list(ctx->ssl_ctx, ctx->config[SSL_CIPHER_LIST]) != 1) {
-			mg_cry( XX_httplib_fc(ctx), "SSL_CTX_set_cipher_list error: %s", ssl_error());
-		}
-	}
-
-	return 1;
-
-}  /* XX_httplib_set_ssl_option */
+}  /* XX_httplib_ssl_get_protocol */
 
 #endif /* !NO_SSL */

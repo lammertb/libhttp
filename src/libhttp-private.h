@@ -842,8 +842,10 @@ void			XX_httplib_get_system_name( char **sysName );
 int			XX_httplib_get_uri_type( const char *uri );
 int			XX_httplib_getreq( struct mg_connection *conn, char *ebuf, size_t ebuf_len, int *err );
 void			XX_httplib_handle_request( struct mg_connection *conn );
+int			XX_httplib_initialize_ssl( struct mg_context *ctx );
 int			XX_httplib_is_valid_port( unsigned long port );
 int			XX_httplib_join_thread( pthread_t threadid );
+void *			XX_httplib_load_dll( struct mg_context *ctx, const char *dll_name, struct ssl_func *sw );
 void			XX_httplib_log_access( const struct mg_connection *conn );
 int			XX_httplib_parse_http_message( char *buf, int len, struct mg_request_info *ri );
 void			XX_httplib_process_new_connection( struct mg_connection *conn );
@@ -863,8 +865,10 @@ void			XX_httplib_set_thread_name( const char *name );
 int			XX_httplib_set_uid_option( struct mg_context *ctx );
 int			XX_httplib_should_keep_alive( const struct mg_connection *conn );
 void			XX_httplib_snprintf( const struct mg_connection *conn, int *truncated, char *buf, size_t buflen, PRINTF_FORMAT_STRING(const char *fmt), ... ) PRINTF_ARGS(5, 6);
-void			XX_httplib_sockaddr_to_string(char *buf, size_t len, const union usa *usa);
+void			XX_httplib_sockaddr_to_string(char *buf, size_t len, const union usa *usa );
+const char *		XX_httplib_ssl_error( void );
 void			XX_httplib_ssl_get_client_cert_info( struct mg_connection *conn );
+long			XX_httplib_ssl_get_protocol( int version_id );
 int			XX_httplib_ssl_use_pem_file( struct mg_context *ctx, const char *pem );
 int			XX_httplib_sslize( struct mg_connection *conn, SSL_CTX *s, int (*func)(SSL *) );
 int			XX_httplib_stat( struct mg_connection *conn, const char *path, struct file *filep );
@@ -872,6 +876,21 @@ char *			XX_httplib_strdup( const char *str );
 void			XX_httplib_tls_dtor( void *key );
 void			XX_httplib_uninitialize_ssl( struct mg_context *ctx );
 int			XX_httplib_vprintf( struct mg_connection *conn, const char *fmt, va_list ap );
+
+
+
+typedef unsigned char md5_byte_t; /* 8-bit byte */
+typedef unsigned int md5_word_t;  /* 32-bit word */
+
+typedef struct md5_state_s {
+	md5_word_t count[2]; /* message length in bits, lsw first */
+	md5_word_t abcd[4];  /* digest buffer */
+	md5_byte_t buf[64];  /* accumulate block */
+} md5_state_t;
+
+void			md5_init( md5_state_t *pms );
+void			md5_append( md5_state_t *pms, const md5_byte_t *data, size_t nbytes );
+void			md5_finish( md5_state_t *pms, md5_byte_t digest[16] );
 
 
 

@@ -63,6 +63,7 @@ LIB_SOURCES =	src/libhttp.c					\
 		src/httplib_reset_per_request_attributes.c	\
 		src/httplib_set_acl_option.c			\
 		src/httplib_set_gpass_option.c			\
+		src/httplib_set_ssl_option.c			\
 		src/httplib_set_sock_timeout.c			\
 		src/httplib_set_tcp_nodelay.c			\
 		src/httplib_start.c				\
@@ -70,7 +71,8 @@ LIB_SOURCES =	src/libhttp.c					\
 		src/httplib_uninitialize_ssl.c			\
 		src/httplib_version.c				\
 		src/httplib_websocket_client_thread.c		\
-		src/httplib_worker_thread.c
+		src/httplib_worker_thread.c			\
+		src/md5.c
 LIB_INLINE  = src/mod_lua.inl src/md5.inl
 APP_SOURCES = src/main.c
 WINDOWS_RESOURCES = resources/res.rc
