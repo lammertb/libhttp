@@ -8755,18 +8755,4 @@ int XX_httplib_ssl_use_pem_file( struct mg_context *ctx, const char *pem ) {
 
 }  /* XX_httplib_ssl_use_pem_file */
 
-
-long XX_httplib_ssl_get_protocol( int version_id ) {
-
-	long ret = SSL_OP_ALL;
-
-	if (version_id > 0) ret |= SSL_OP_NO_SSLv2;
-	if (version_id > 1) ret |= SSL_OP_NO_SSLv3;
-	if (version_id > 2) ret |= SSL_OP_NO_TLSv1;
-	if (version_id > 3) ret |= SSL_OP_NO_TLSv1_1;
-
-	return ret;
-
-}  /* XX_httplib_ssl_get_protocol */
-
 #endif /* !NO_SSL */
