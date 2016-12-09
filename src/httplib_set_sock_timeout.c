@@ -37,7 +37,9 @@
 
 int XX_httplib_set_sock_timeout( SOCKET sock, int milliseconds ) {
 
-	int r0 = 0, r1, r2;
+	int r0 = 0;
+	int r1;
+	int r2;
 
 #ifdef _WIN32
 	/* Windows specific */

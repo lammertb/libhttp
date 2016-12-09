@@ -43,10 +43,10 @@ void XX_httplib_get_system_name( char **sysName ) {
 	*sysName = XX_httplib_strdup( "WinCE" );
 #else
 	char name[128];
-	DWORD dwVersion = 0;
+	DWORD dwVersion      = 0;
 	DWORD dwMajorVersion = 0;
 	DWORD dwMinorVersion = 0;
-	DWORD dwBuild = 0;
+	DWORD dwBuild        = 0;
 
 #ifdef _MSC_VER
 #pragma warning(push)

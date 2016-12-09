@@ -36,33 +36,32 @@
 
 int mg_get_response( struct mg_connection *conn, char *ebuf, size_t ebuf_len, int timeout ) {
 
-	if (conn) {
-		/* Implementation of API function for HTTP clients */
-		int err, ret;
-		struct mg_context *octx = conn->ctx;
-		struct mg_context rctx = *(conn->ctx);
-		char txt[32]; /* will not overflow */
+	if ( conn == NULL ) return -1;
 
-		if (timeout >= 0) {
-			XX_httplib_snprintf(conn, NULL, txt, sizeof(txt), "%i", timeout);
-			rctx.config[REQUEST_TIMEOUT] = txt;
-			XX_httplib_set_sock_timeout(conn->client.sock, timeout);
-		} else {
-			rctx.config[REQUEST_TIMEOUT] = NULL;
-		}
+	/* Implementation of API function for HTTP clients */
+	int err, ret;
+	struct mg_context *octx = conn->ctx;
+	struct mg_context rctx = *(conn->ctx);
+	char txt[32]; /* will not overflow */
 
-		conn->ctx = &rctx;
-		ret = XX_httplib_getreq(conn, ebuf, ebuf_len, &err);
-		conn->ctx = octx;
-
-		/* TODO: 1) uri is deprecated;
-		 *       2) here, ri.uri is the http response code */
-		conn->request_info.uri = conn->request_info.request_uri;
-
-		/* TODO (mid): Define proper return values - maybe return length?
-		 * For the first test use <0 for error and >0 for OK */
-		return (ret == 0) ? -1 : +1;
+	if (timeout >= 0) {
+		XX_httplib_snprintf(conn, NULL, txt, sizeof(txt), "%i", timeout);
+		rctx.config[REQUEST_TIMEOUT] = txt;
+		XX_httplib_set_sock_timeout(conn->client.sock, timeout);
+	} else {
+		rctx.config[REQUEST_TIMEOUT] = NULL;
 	}
-	return -1;
+
+	conn->ctx = &rctx;
+	ret = XX_httplib_getreq(conn, ebuf, ebuf_len, &err);
+	conn->ctx = octx;
+
+	/* TODO: 1) uri is deprecated;
+	 *       2) here, ri.uri is the http response code */
+	conn->request_info.uri = conn->request_info.request_uri;
+
+	/* TODO (mid): Define proper return values - maybe return length?
+	 * For the first test use <0 for error and >0 for OK */
+	return (ret == 0) ? -1 : +1;
 
 }  /* mg_get_response */

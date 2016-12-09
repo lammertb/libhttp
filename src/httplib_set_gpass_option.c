@@ -38,16 +38,16 @@
 
 int XX_httplib_set_gpass_option( struct mg_context *ctx ) {
 
-	if ( ctx != NULL ) {
+	if ( ctx == NULL ) return 0;
 
-		struct file file = STRUCT_FILE_INITIALIZER;
-		const char *path = ctx->config[GLOBAL_PASSWORDS_FILE];
-		if (path != NULL && !XX_httplib_stat( XX_httplib_fc(ctx), path, &file)) {
-			mg_cry( XX_httplib_fc(ctx), "Cannot open %s: %s", path, strerror(ERRNO));
-			return 0;
-		}
-		return 1;
+	struct file file = STRUCT_FILE_INITIALIZER;
+	const char *path = ctx->config[GLOBAL_PASSWORDS_FILE];
+
+	if (path != NULL && !XX_httplib_stat( XX_httplib_fc(ctx), path, &file)) {
+
+		mg_cry( XX_httplib_fc(ctx), "Cannot open %s: %s", path, strerror(ERRNO));
+		return 0;
 	}
-	return 0;
+	return 1;
 
 }  /* XX_httplib_set_gpass_option */

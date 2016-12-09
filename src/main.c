@@ -166,14 +166,13 @@ signal_handler(int sig_num)
 }
 
 
-static NO_RETURN void
-die(const char *fmt, ...)
-{
+static NO_RETURN void die(const char *fmt, ...) {
+
 	va_list ap;
 	char msg[200] = "";
 
 	va_start(ap, fmt);
-	(void)vsnprintf(msg, sizeof(msg) - 1, fmt, ap);
+	vsnprintf(msg, sizeof(msg) - 1, fmt, ap);
 	msg[sizeof(msg) - 1] = 0;
 	va_end(ap);
 
@@ -203,9 +202,8 @@ show_server_name(void)
 }
 
 
-static NO_RETURN void
-show_usage_and_exit(const char *exeName)
-{
+static NO_RETURN void show_usage_and_exit(const char *exeName) {
+
 	const struct mg_option *options;
 	int i;
 
@@ -262,30 +260,21 @@ static const char *config_file_top_comment =
     "# To make a change, remove leading '#', modify option's value,\n"
     "# save this file and then restart LibHTTP.\n\n";
 
-static const char *
-get_url_to_first_open_port(const struct mg_context *ctx)
-{
+static const char * get_url_to_first_open_port(const struct mg_context *ctx) {
+
 	static char url[100];
 	const char *open_ports = mg_get_option(ctx, "listening_ports");
-	int a, b, c, d, port, n;
+	int a;
+	int b;
+	int c;
+	int d;
+	int port;
+	int n;
 
-	if (sscanf(open_ports, "%d.%d.%d.%d:%d%n", &a, &b, &c, &d, &port, &n)
-	    == 5) {
-		snprintf(url,
-		         sizeof(url),
-		         "%s://%d.%d.%d.%d:%d",
-		         open_ports[n] == 's' ? "https" : "http",
-		         a,
-		         b,
-		         c,
-		         d,
-		         port);
+	if (sscanf(open_ports, "%d.%d.%d.%d:%d%n", &a, &b, &c, &d, &port, &n) == 5) {
+		snprintf(url, sizeof(url), "%s://%d.%d.%d.%d:%d", open_ports[n] == 's' ? "https" : "http", a, b, c, d, port);
 	} else if (sscanf(open_ports, "%d%n", &port, &n) == 1) {
-		snprintf(url,
-		         sizeof(url),
-		         "%s://localhost:%d",
-		         open_ports[n] == 's' ? "https" : "http",
-		         port);
+		snprintf(url, sizeof(url), "%s://localhost:%d", open_ports[n] == 's' ? "https" : "http", port);
 	} else {
 		snprintf(url, sizeof(url), "%s", "http://localhost:8080");
 	}
@@ -295,9 +284,8 @@ get_url_to_first_open_port(const struct mg_context *ctx)
 
 
 #ifdef ENABLE_CREATE_CONFIG_FILE
-static void
-create_config_file(const struct mg_context *ctx, const char *path)
-{
+static void create_config_file(const struct mg_context *ctx, const char *path) {
+
 	const struct mg_option *options;
 	const char *value;
 	FILE *fp;
@@ -320,9 +308,8 @@ create_config_file(const struct mg_context *ctx, const char *path)
 #endif  /* GUI */
 
 
-static char *
-sdup(const char *str)
-{
+static char * sdup(const char *str) {
+
 	size_t len;
 	char *p;
 
@@ -334,9 +321,8 @@ sdup(const char *str)
 }
 
 
-static const char *
-get_option(char **options, const char *option_name)
-{
+static const char * get_option(char **options, const char *option_name) {
+
 	int i = 0;
 	const char *opt_value = NULL;
 
@@ -358,10 +344,10 @@ get_option(char **options, const char *option_name)
 }
 
 
-static int
-set_option(char **options, const char *name, const char *value)
-{
-	int i, type;
+static int set_option(char **options, const char *name, const char *value) {
+
+	int i;
+	int type;
 	const struct mg_option *default_options = mg_get_valid_options();
 
 	for (i = 0; main_config_options[i].name != NULL; i++) {
@@ -437,12 +423,13 @@ set_option(char **options, const char *name, const char *value)
 }
 
 
-static int
-read_config_file(const char *config_file, char **options)
-{
+static int read_config_file(const char *config_file, char **options) {
+
 	char line[MAX_CONF_FILE_LINE_SIZE], *p;
 	FILE *fp = NULL;
-	size_t i, j, line_no = 0;
+	size_t i;
+	size_t j;
+	size_t line_no = 0;
 
 	/* Open the config file */
 	fp = fopen(config_file, "r");
@@ -509,9 +496,8 @@ read_config_file(const char *config_file, char **options)
 }
 
 
-static void
-process_command_line_arguments(int argc, char *argv[], char **options)
-{
+static void process_command_line_arguments(int argc, char *argv[], char **options) {
+
 	char *p;
 	size_t i, cmd_line_opts_start = 1;
 #ifdef CONFIG_FILE2
@@ -534,13 +520,7 @@ process_command_line_arguments(int argc, char *argv[], char **options)
 	} else {
 		/* No config file set. Path to exe found in arg[0].
 		 * Use default file name next to the executable. */
-		snprintf(g_config_file_name,
-		         sizeof(g_config_file_name) - 1,
-		         "%.*s%c%s",
-		         (int)(p - argv[0]),
-		         argv[0],
-		         DIRSEP,
-		         CONFIG_FILE);
+		snprintf(g_config_file_name, sizeof(g_config_file_name) - 1, "%.*s%c%s", (int)(p - argv[0]), argv[0], DIRSEP, CONFIG_FILE);
 	}
 	g_config_file_name[sizeof(g_config_file_name) - 1] = 0;
 
@@ -592,9 +572,8 @@ process_command_line_arguments(int argc, char *argv[], char **options)
 }
 
 
-static void
-init_server_name(int argc, const char *argv[])
-{
+static void init_server_name(int argc, const char *argv[]) {
+
 	int i;
 	assert(sizeof(main_config_options) / sizeof(main_config_options[0])
 	       == NUM_MAIN_OPTIONS + 1);
@@ -623,9 +602,8 @@ init_server_name(int argc, const char *argv[])
 }
 
 
-static int
-log_message(const struct mg_connection *conn, const char *message)
-{
+static int log_message(const struct mg_connection *conn, const char *message) {
+
 	const struct mg_context *ctx = mg_get_context(conn);
 	struct tuser_data *ud = (struct tuser_data *)mg_get_user_data(ctx);
 
@@ -639,9 +617,8 @@ log_message(const struct mg_connection *conn, const char *message)
 }
 
 
-static int
-is_path_absolute(const char *path)
-{
+static int is_path_absolute(const char *path) {
+
 #ifdef _WIN32
 	return path != NULL
 	       && ((path[0] == '\\' && path[1] == '\\') || /* UNC path, e.g.
@@ -654,9 +631,8 @@ is_path_absolute(const char *path)
 }
 
 
-static void
-verify_existence(char **options, const char *option_name, int must_be_dir)
-{
+static void verify_existence(char **options, const char *option_name, int must_be_dir) {
+
 	struct stat st;
 	const char *path = get_option(options, option_name);
 
@@ -668,12 +644,7 @@ verify_existence(char **options, const char *option_name, int must_be_dir)
 	if (path) {
 		memset( wbuf,  0, sizeof(wbuf)  );
 		memset( mbbuf, 0, sizeof(mbbuf) );
-		len = MultiByteToWideChar(CP_UTF8,
-		                          0,
-		                          path,
-		                          -1,
-		                          wbuf,
-		                          (int)sizeof(wbuf) / sizeof(wbuf[0]) - 1);
+		len = MultiByteToWideChar(CP_UTF8, 0, path, -1, wbuf, (int)sizeof(wbuf) / sizeof(wbuf[0]) - 1);
 		wcstombs(mbbuf, wbuf, sizeof(mbbuf) - 1);
 		path = mbbuf;
 		(void)len;
@@ -691,12 +662,10 @@ verify_existence(char **options, const char *option_name, int must_be_dir)
 }
 
 
-static void
-set_absolute_path(char *options[],
-                  const char *option_name,
-                  const char *path_to_libhttp_exe)
-{
-	char path[PATH_MAX] = "", absolute[PATH_MAX] = "";
+static void set_absolute_path(char *options[], const char *option_name, const char *path_to_libhttp_exe) {
+
+	char path[PATH_MAX] = "";
+	char absolute[PATH_MAX] = "";
 	const char *option_value;
 	const char *p;
 
@@ -712,11 +681,7 @@ set_absolute_path(char *options[],
 		if ((p = strrchr(path_to_libhttp_exe, DIRSEP)) == NULL) {
 			IGNORE_UNUSED_RESULT(getcwd(path, sizeof(path)));
 		} else {
-			snprintf(path,
-			         sizeof(path) - 1,
-			         "%.*s",
-			         (int)(p - path_to_libhttp_exe),
-			         path_to_libhttp_exe);
+			snprintf(path, sizeof(path) - 1, "%.*s", (int)(p - path_to_libhttp_exe), path_to_libhttp_exe);
 			path[sizeof(path) - 1] = 0;
 		}
 
@@ -737,9 +702,8 @@ set_absolute_path(char *options[],
 #endif  /* __MINGW32__  ||  __MINGW64__ */
 
 
-static void
-start_libhttp(int argc, char *argv[])
-{
+static void start_libhttp(int argc, char *argv[]) {
+
 	struct mg_callbacks callbacks;
 	char *options[2 * MAX_OPTIONS + 1];
 	int i;
@@ -750,7 +714,7 @@ start_libhttp(int argc, char *argv[])
 	if (argc > 1 && !strcmp(argv[1], "-I")) {
 		const char *version = mg_version();
 #if defined(_WIN32)
-		DWORD dwVersion = 0;
+		DWORD dwVersion      = 0;
 		DWORD dwMajorVersion = 0;
 		DWORD dwMinorVersion = 0;
 		SYSTEM_INFO si;
@@ -923,9 +887,8 @@ start_libhttp(int argc, char *argv[])
 }
 
 
-static void
-stop_libhttp(void)
-{
+static void stop_libhttp(void) {
+
 	mg_stop(g_ctx);
 	free(g_user_data.first_message);
 	g_user_data.first_message = NULL;
@@ -975,9 +938,8 @@ static const char *service_magic_argument = "--";
 static NOTIFYICONDATA TrayIcon;
 
 
-static void WINAPI
-ControlHandler(DWORD code)
-{
+static void WINAPI ControlHandler(DWORD code) {
+
 	if (code == SERVICE_CONTROL_STOP || code == SERVICE_CONTROL_SHUTDOWN) {
 		ss.dwWin32ExitCode = 0;
 		ss.dwCurrentState = SERVICE_STOPPED;
@@ -986,9 +948,8 @@ ControlHandler(DWORD code)
 }
 
 
-static void WINAPI
-ServiceMain(void)
-{
+static void WINAPI ServiceMain(void) {
+
 	ss.dwServiceType = SERVICE_WIN32;
 	ss.dwCurrentState = SERVICE_RUNNING;
 	ss.dwControlsAccepted = SERVICE_ACCEPT_STOP | SERVICE_ACCEPT_SHUTDOWN;
@@ -1007,9 +968,8 @@ ServiceMain(void)
 }
 
 
-static void
-show_error(void)
-{
+static void show_error(void) {
+
 	char buf[256];
 	FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
 	              NULL,
@@ -1022,9 +982,8 @@ show_error(void)
 }
 
 
-static void *
-align(void *ptr, uintptr_t alig)
-{
+static void * align(void *ptr, uintptr_t alig) {
+
 	uintptr_t ul = (uintptr_t)ptr;
 	ul += alig;
 	ul &= ~alig;
@@ -1032,13 +991,13 @@ align(void *ptr, uintptr_t alig)
 }
 
 
-static void
-save_config(HWND hDlg, FILE *fp)
-{
+static void save_config(HWND hDlg, FILE *fp) {
+
 	char value[2000] = "";
 	const char *default_value;
 	const struct mg_option *options;
-	int i, id;
+	int i;
+	int id;
 
 	fprintf(fp, "%s", config_file_top_comment);
 	options = mg_get_valid_options();
@@ -1063,12 +1022,12 @@ save_config(HWND hDlg, FILE *fp)
 }
 
 
-static INT_PTR CALLBACK
-SettingsDlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
-{
+static INT_PTR CALLBACK SettingsDlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam) {
+
 	FILE *fp;
 	int i, j;
-	const char *name, *value;
+	const char *name;
+	const char *value;
 	const struct mg_option *default_options = mg_get_valid_options();
 	char *file_options[MAX_OPTIONS * 2 + 1] = {0};
 	char *title;
@@ -1273,9 +1232,8 @@ InputDlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lP)
 }
 
 
-static void
-suggest_passwd(char *passwd)
-{
+static void suggest_passwd(char *passwd) {
+
 	unsigned u;
 	char *p;
 	union {
@@ -1309,12 +1267,8 @@ static void add_control(unsigned char **mem,
                         const char *caption);
 
 
-static int
-get_password(const char *user,
-             const char *realm,
-             char *passwd,
-             unsigned passwd_len)
-{
+static int get_password(const char *user, const char *realm, char *passwd, unsigned passwd_len) {
+
 #define HEIGHT (15)
 #define WIDTH (280)
 #define LABEL_WIDTH (90)
@@ -1331,8 +1285,7 @@ get_password(const char *user,
 		wchar_t caption[1];
 		WORD fontsiz;
 		wchar_t fontface[7];
-	} dialog_header = {{WS_CAPTION | WS_POPUP | WS_SYSMENU | WS_VISIBLE
-	                        | DS_SETFONT | WS_DLGFRAME,
+	} dialog_header = {{WS_CAPTION | WS_POPUP | WS_SYSMENU | WS_VISIBLE | DS_SETFONT | WS_DLGFRAME,
 	                    WS_EX_TOOLWINDOW,
 	                    0,
 	                    200,
@@ -1366,94 +1319,20 @@ get_password(const char *user,
 	p = mem + sizeof(dialog_header);
 
 	y = HEIGHT;
-	add_control(&p,
-	            dia,
-	            0x82,
-	            ID_STATIC,
-	            WS_VISIBLE | WS_CHILD,
-	            10,
-	            y,
-	            LABEL_WIDTH,
-	            HEIGHT,
-	            "User:");
-	add_control(&p,
-	            dia,
-	            0x81,
-	            ID_CONTROLS + 1,
-	            WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL
-	                | WS_DISABLED,
-	            15 + LABEL_WIDTH,
-	            y,
-	            WIDTH - LABEL_WIDTH - 25,
-	            HEIGHT,
-	            user);
+	add_control(&p, dia, 0x82, ID_STATIC, WS_VISIBLE | WS_CHILD, 10, y, LABEL_WIDTH, HEIGHT, "User:");
+	add_control(&p, dia, 0x81, ID_CONTROLS + 1, WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | WS_DISABLED, 15 + LABEL_WIDTH, y, WIDTH - LABEL_WIDTH - 25, HEIGHT, user);
 
 	y += HEIGHT;
-	add_control(&p,
-	            dia,
-	            0x82,
-	            ID_STATIC,
-	            WS_VISIBLE | WS_CHILD,
-	            10,
-	            y,
-	            LABEL_WIDTH,
-	            HEIGHT,
-	            "Realm:");
-	add_control(&p,
-	            dia,
-	            0x81,
-	            ID_CONTROLS + 2,
-	            WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL
-	                | WS_DISABLED,
-	            15 + LABEL_WIDTH,
-	            y,
-	            WIDTH - LABEL_WIDTH - 25,
-	            HEIGHT,
-	            realm);
+	add_control(&p, dia, 0x82, ID_STATIC, WS_VISIBLE | WS_CHILD, 10, y, LABEL_WIDTH, HEIGHT, "Realm:");
+	add_control(&p, dia, 0x81, ID_CONTROLS + 2, WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | WS_DISABLED, 15 + LABEL_WIDTH, y, WIDTH - LABEL_WIDTH - 25, HEIGHT, realm);
 
 	y += HEIGHT;
-	add_control(&p,
-	            dia,
-	            0x82,
-	            ID_STATIC,
-	            WS_VISIBLE | WS_CHILD,
-	            10,
-	            y,
-	            LABEL_WIDTH,
-	            HEIGHT,
-	            "Password:");
-	add_control(&p,
-	            dia,
-	            0x81,
-	            ID_INPUT_LINE,
-	            WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | WS_TABSTOP,
-	            15 + LABEL_WIDTH,
-	            y,
-	            WIDTH - LABEL_WIDTH - 25,
-	            HEIGHT,
-	            "");
+	add_control(&p, dia, 0x82, ID_STATIC, WS_VISIBLE | WS_CHILD, 10, y, LABEL_WIDTH, HEIGHT, "Password:");
+	add_control(&p, dia, 0x81, ID_INPUT_LINE, WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | WS_TABSTOP, 15 + LABEL_WIDTH, y, WIDTH - LABEL_WIDTH - 25, HEIGHT, "");
 
 	y += (WORD)(HEIGHT * 2);
-	add_control(&p,
-	            dia,
-	            0x80,
-	            IDOK,
-	            WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | WS_TABSTOP,
-	            80,
-	            y,
-	            55,
-	            12,
-	            "Ok");
-	add_control(&p,
-	            dia,
-	            0x80,
-	            IDCANCEL,
-	            WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | WS_TABSTOP,
-	            140,
-	            y,
-	            55,
-	            12,
-	            "Cancel");
+	add_control(&p, dia, 0x80, IDOK, WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | WS_TABSTOP, 80, y, 55, 12, "Ok");
+	add_control(&p, dia, 0x80, IDCANCEL, WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | WS_TABSTOP, 140, y, 55, 12, "Cancel");
 
 	assert((intptr_t)p - (intptr_t)mem < (intptr_t)sizeof(mem));
 
@@ -1605,8 +1484,7 @@ show_settings_dialog()
 		wchar_t caption[1];
 		WORD fontsiz;
 		wchar_t fontface[7];
-	} dialog_header = {{WS_CAPTION | WS_POPUP | WS_SYSMENU | WS_VISIBLE
-	                        | DS_SETFONT | WS_DLGFRAME,
+	} dialog_header = {{WS_CAPTION | WS_POPUP | WS_SYSMENU | WS_VISIBLE | DS_SETFONT | WS_DLGFRAME,
 	                    WS_EX_TOOLWINDOW,
 	                    0,
 	                    200,
@@ -1647,107 +1525,26 @@ show_settings_dialog()
 			style |= WS_BORDER | ES_AUTOHSCROLL;
 			width -= 20;
 			cl = 0x81;
-			add_control(&p,
-			            dia,
-			            0x80,
-			            ID_CONTROLS + i + ID_FILE_BUTTONS_DELTA,
-			            WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON,
-			            x + width + LABEL_WIDTH + 5,
-			            y,
-			            15,
-			            12,
-			            "...");
+			add_control(&p, dia, 0x80, ID_CONTROLS + i + ID_FILE_BUTTONS_DELTA, WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON, x + width + LABEL_WIDTH + 5, y, 15, 12, "...");
 		} else {
 			cl = 0x81;
 			style |= WS_BORDER | ES_AUTOHSCROLL;
 		}
-		add_control(&p,
-		            dia,
-		            0x82,
-		            ID_STATIC,
-		            WS_VISIBLE | WS_CHILD,
-		            x,
-		            y,
-		            LABEL_WIDTH,
-		            HEIGHT,
-		            options[i].name);
-		add_control(&p,
-		            dia,
-		            cl,
-		            ID_CONTROLS + i,
-		            style,
-		            x + LABEL_WIDTH,
-		            y,
-		            width,
-		            12,
-		            "");
+		add_control(&p, dia, 0x82, ID_STATIC, WS_VISIBLE | WS_CHILD, x, y, LABEL_WIDTH, HEIGHT, options[i].name);
+		add_control(&p, dia, cl, ID_CONTROLS + i, style, x + LABEL_WIDTH, y, width, 12, "");
 		nelems++;
 
 		assert(((intptr_t)p - (intptr_t)mem) < (intptr_t)sizeof(mem));
 	}
 
 	y = (((nelems + 1) / 2 + 1) * HEIGHT + 5);
-	add_control(&p,
-	            dia,
-	            0x80,
-	            ID_GROUP,
-	            WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-	            5,
-	            5,
-	            WIDTH - 10,
-	            y,
-	            " Settings ");
+	add_control(&p, dia, 0x80, ID_GROUP, WS_CHILD | WS_VISIBLE | BS_GROUPBOX, 5, 5, WIDTH - 10, y, " Settings ");
 	y += 10;
-	add_control(&p,
-	            dia,
-	            0x80,
-	            ID_SAVE,
-	            WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | WS_TABSTOP,
-	            WIDTH - 70,
-	            y,
-	            65,
-	            12,
-	            "Save Settings");
-	add_control(&p,
-	            dia,
-	            0x80,
-	            ID_RESET_DEFAULTS,
-	            WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | WS_TABSTOP,
-	            WIDTH - 140,
-	            y,
-	            65,
-	            12,
-	            "Reset to defaults");
-	add_control(&p,
-	            dia,
-	            0x80,
-	            ID_RESET_FILE,
-	            WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | WS_TABSTOP,
-	            WIDTH - 210,
-	            y,
-	            65,
-	            12,
-	            "Reload from file");
-	add_control(&p,
-	            dia,
-	            0x80,
-	            ID_RESET_ACTIVE,
-	            WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | WS_TABSTOP,
-	            WIDTH - 280,
-	            y,
-	            65,
-	            12,
-	            "Reload active");
-	add_control(&p,
-	            dia,
-	            0x82,
-	            ID_STATIC,
-	            WS_CHILD | WS_VISIBLE | WS_DISABLED,
-	            5,
-	            y,
-	            100,
-	            12,
-	            g_server_base_name);
+	add_control(&p, dia, 0x80, ID_SAVE, WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | WS_TABSTOP, WIDTH - 70, y, 65, 12, "Save Settings");
+	add_control(&p, dia, 0x80, ID_RESET_DEFAULTS, WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | WS_TABSTOP, WIDTH - 140, y, 65, 12, "Reset to defaults");
+	add_control(&p, dia, 0x80, ID_RESET_FILE, WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | WS_TABSTOP, WIDTH - 210, y, 65, 12, "Reload from file");
+	add_control(&p, dia, 0x80, ID_RESET_ACTIVE, WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | WS_TABSTOP, WIDTH - 280, y, 65, 12, "Reload active");
+	add_control(&p, dia, 0x82, ID_STATIC, WS_CHILD | WS_VISIBLE | WS_DISABLED, 5, y, 100, 12, g_server_base_name);
 
 	assert(((intptr_t)p - (intptr_t)mem) < (intptr_t)sizeof(mem));
 
@@ -1846,48 +1643,10 @@ change_password_file()
 			u[255] = 0;
 			d[255] = 0;
 			y = (nelems + 1) * HEIGHT + 5;
-			add_control(&p,
-			            dia,
-			            0x80,
-			            ID_CONTROLS + nelems + ID_FILE_BUTTONS_DELTA * 3,
-			            WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | WS_TABSTOP,
-			            10,
-			            y,
-			            65,
-			            12,
-			            "Modify password");
-			add_control(&p,
-			            dia,
-			            0x80,
-			            ID_CONTROLS + nelems + ID_FILE_BUTTONS_DELTA * 2,
-			            WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | WS_TABSTOP,
-			            80,
-			            y,
-			            55,
-			            12,
-			            "Remove user");
-			add_control(&p,
-			            dia,
-			            0x81,
-			            ID_CONTROLS + nelems + ID_FILE_BUTTONS_DELTA,
-			            WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL
-			                | WS_DISABLED,
-			            245,
-			            y,
-			            60,
-			            12,
-			            d);
-			add_control(&p,
-			            dia,
-			            0x81,
-			            ID_CONTROLS + nelems,
-			            WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL
-			                | WS_DISABLED,
-			            140,
-			            y,
-			            100,
-			            12,
-			            u);
+			add_control(&p, dia, 0x80, ID_CONTROLS + nelems + ID_FILE_BUTTONS_DELTA * 3, WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | WS_TABSTOP, 10, y, 65, 12, "Modify password");
+			add_control(&p, dia, 0x80, ID_CONTROLS + nelems + ID_FILE_BUTTONS_DELTA * 2, WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | WS_TABSTOP, 80, y, 55, 12, "Remove user");
+			add_control(&p, dia, 0x81, ID_CONTROLS + nelems + ID_FILE_BUTTONS_DELTA, WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | WS_DISABLED, 245, y, 60, 12, d);
+			add_control(&p, dia, 0x81, ID_CONTROLS + nelems, WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | WS_DISABLED, 140, y, 100, 12, u);
 
 			nelems++;
 			assert(((intptr_t)p - (intptr_t)mem) < (intptr_t)sizeof(mem));
@@ -1895,62 +1654,15 @@ change_password_file()
 		fclose(f);
 
 		y = (nelems + 1) * HEIGHT + 10;
-		add_control(&p,
-		            dia,
-		            0x80,
-		            ID_ADD_USER,
-		            WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | WS_TABSTOP,
-		            80,
-		            y,
-		            55,
-		            12,
-		            "Add user");
-		add_control(&p,
-		            dia,
-		            0x81,
-		            ID_ADD_USER_NAME,
-		            WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL
-		                | WS_TABSTOP,
-		            140,
-		            y,
-		            100,
-		            12,
-		            "");
-		add_control(&p,
-		            dia,
-		            0x81,
-		            ID_ADD_USER_REALM,
-		            WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL
-		                | WS_TABSTOP,
-		            245,
-		            y,
-		            60,
-		            12,
-		            domain);
+		add_control(&p, dia, 0x80, ID_ADD_USER, WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON | WS_TABSTOP, 80, y, 55, 12, "Add user");
+		add_control(&p, dia, 0x81, ID_ADD_USER_NAME, WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | WS_TABSTOP, 140, y, 100, 12, "");
+		add_control(&p, dia, 0x81, ID_ADD_USER_REALM, WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL | WS_TABSTOP, 245, y, 60, 12, domain);
 
 		y = (nelems + 2) * HEIGHT + 10;
-		add_control(&p,
-		            dia,
-		            0x80,
-		            ID_GROUP,
-		            WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-		            5,
-		            5,
-		            WIDTH - 10,
-		            y,
-		            " Users ");
+		add_control(&p, dia, 0x80, ID_GROUP, WS_CHILD | WS_VISIBLE | BS_GROUPBOX, 5, 5, WIDTH - 10, y, " Users ");
 
 		y += HEIGHT;
-		add_control(&p,
-		            dia,
-		            0x82,
-		            ID_STATIC,
-		            WS_CHILD | WS_VISIBLE | WS_DISABLED,
-		            5,
-		            y,
-		            100,
-		            12,
-		            g_server_base_name);
+		add_control(&p, dia, 0x82, ID_STATIC, WS_CHILD | WS_VISIBLE | WS_DISABLED, 5, y, 100, 12, g_server_base_name);
 
 		assert(((intptr_t)p - (intptr_t)mem) < (intptr_t)sizeof(mem));
 
@@ -1978,11 +1690,7 @@ manage_service(int action)
 
 	descr.lpDescription = (LPSTR)g_server_name;
 
-	if ((hSCM = OpenSCManager(NULL,
-	                          NULL,
-	                          action == ID_INSTALL_SERVICE ? GENERIC_WRITE
-	                                                       : GENERIC_READ))
-	    == NULL) {
+	if ((hSCM = OpenSCManager(NULL, NULL, action == ID_INSTALL_SERVICE ? GENERIC_WRITE : GENERIC_READ)) == NULL) {
 		success = 0;
 		show_error();
 	} else if (action == ID_INSTALL_SERVICE) {
@@ -2009,13 +1717,10 @@ manage_service(int action)
 			show_error();
 		}
 	} else if (action == ID_REMOVE_SERVICE) {
-		if ((hService = OpenService(hSCM, service_name, DELETE)) == NULL
-		    || !DeleteService(hService)) {
+		if ((hService = OpenService(hSCM, service_name, DELETE)) == NULL || !DeleteService(hService)) {
 			show_error();
 		}
-	} else if ((hService =
-	                OpenService(hSCM, service_name, SERVICE_QUERY_STATUS))
-	           == NULL) {
+	} else if ((hService = OpenService(hSCM, service_name, SERVICE_QUERY_STATUS)) == NULL) {
 		success = 0;
 	}
 
@@ -2078,12 +1783,7 @@ WindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			break;
 		case ID_CONNECT:
 			fprintf(stdout, "[%s]\n", get_url_to_first_open_port(g_ctx));
-			ShellExecute(NULL,
-			             "open",
-			             get_url_to_first_open_port(g_ctx),
-			             NULL,
-			             NULL,
-			             SW_SHOW);
+			ShellExecute(NULL, "open", get_url_to_first_open_port(g_ctx), NULL, NULL, SW_SHOW);
 			break;
 		}
 		break;
@@ -2106,14 +1806,8 @@ WindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			         service_installed ? "" : "not");
 			buf[sizeof(buf) - 1] = 0;
 			AppendMenu(hMenu, MF_STRING | MF_GRAYED, ID_SEPARATOR, buf);
-			AppendMenu(hMenu,
-			           MF_STRING | (service_installed ? MF_GRAYED : 0),
-			           ID_INSTALL_SERVICE,
-			           "Install service");
-			AppendMenu(hMenu,
-			           MF_STRING | (!service_installed ? MF_GRAYED : 0),
-			           ID_REMOVE_SERVICE,
-			           "Deinstall service");
+			AppendMenu(hMenu, MF_STRING | (service_installed ? MF_GRAYED : 0), ID_INSTALL_SERVICE, "Install service");
+			AppendMenu(hMenu, MF_STRING | (!service_installed ? MF_GRAYED : 0), ID_REMOVE_SERVICE, "Deinstall service");
 			AppendMenu(hMenu, MF_SEPARATOR, ID_SEPARATOR, "");
 			AppendMenu(hMenu, MF_STRING, ID_CONNECT, "Start browser");
 			AppendMenu(hMenu, MF_STRING, ID_SETTINGS, "Edit settings");
@@ -2156,10 +1850,7 @@ MakeConsole(void)
 			if (!AllocConsole()) {
 				err = GetLastError();
 				if (err == ERROR_ACCESS_DENIED) {
-					MessageBox(NULL,
-					           "Insufficient rights to create a console window",
-					           "Error",
-					           MB_ICONERROR);
+					MessageBox(NULL, "Insufficient rights to create a console window", "Error", MB_ICONERROR);
 				}
 			}
 			AttachConsole(GetCurrentProcessId());
@@ -2272,29 +1963,14 @@ WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR cmdline, int show)
 	cls.lpszClassName = g_server_base_name;
 
 	RegisterClass(&cls);
-	hWnd = CreateWindow(cls.lpszClassName,
-	                    g_server_name,
-	                    WS_OVERLAPPEDWINDOW,
-	                    0,
-	                    0,
-	                    0,
-	                    0,
-	                    NULL,
-	                    NULL,
-	                    NULL,
-	                    NULL);
+	hWnd = CreateWindow(cls.lpszClassName, g_server_name, WS_OVERLAPPEDWINDOW, 0, 0, 0, 0, NULL, NULL, NULL, NULL);
 	ShowWindow(hWnd, SW_HIDE);
 
 	if (g_icon_name) {
 		hIcon =
 		    LoadImage(NULL, g_icon_name, IMAGE_ICON, 16, 16, LR_LOADFROMFILE);
 	} else {
-		hIcon = LoadImage(GetModuleHandle(NULL),
-		                  MAKEINTRESOURCE(ID_ICON),
-		                  IMAGE_ICON,
-		                  16,
-		                  16,
-		                  0);
+		hIcon = LoadImage(GetModuleHandle(NULL), MAKEINTRESOURCE(ID_ICON), IMAGE_ICON, 16, 16, 0);
 	}
 
 	TrayIcon.cbSize = sizeof(TrayIcon);

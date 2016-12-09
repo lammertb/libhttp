@@ -44,17 +44,16 @@
 int XX_httplib_get_uri_type( const char *uri ) {
 
 	int i;
-	char *hostend, *portbegin, *portend;
+	char *hostend;
+	char *portbegin;
+	char *portend;
 	unsigned long port;
 
 	/* According to the HTTP standard
 	 * http://www.w3.org/Protocols/rfc2616/rfc2616-sec5.html#sec5.1.2
 	 * URI can be an asterisk (*) or should start with slash (relative uri),
 	 * or it should start with the protocol (absolute uri). */
-	if (uri[0] == '*' && uri[1] == '\0') {
-		/* asterisk */
-		return 1;
-	}
+	if (uri[0] == '*' && uri[1] == '\0') return 1;
 
 	/* Valid URIs according to RFC 3986
 	 * (https://www.ietf.org/rfc/rfc3986.txt)
@@ -100,23 +99,15 @@ int XX_httplib_get_uri_type( const char *uri ) {
 	 * addressing the current server. So LibHTTP can also be used
 	 * as a proxy server. */
 	for (i = 0; XX_httplib_abs_uri_protocols[i].proto != NULL; i++) {
-		if (mg_strncasecmp(uri,
-		                   XX_httplib_abs_uri_protocols[i].proto,
-		                   XX_httplib_abs_uri_protocols[i].proto_len) == 0) {
+		if (mg_strncasecmp(uri, XX_httplib_abs_uri_protocols[i].proto, XX_httplib_abs_uri_protocols[i].proto_len) == 0) { 
 
 			hostend = strchr(uri + XX_httplib_abs_uri_protocols[i].proto_len, '/');
-			if (!hostend) {
-				return 0;
-			}
+			if (!hostend) return 0;
 			portbegin = strchr(uri + XX_httplib_abs_uri_protocols[i].proto_len, ':');
-			if (!portbegin) {
-				return 3;
-			}
+			if (!portbegin) return 3;
 
 			port = strtoul(portbegin + 1, &portend, 10);
-			if ((portend != hostend) || !port || !XX_httplib_is_valid_port(port)) {
-				return 0;
-			}
+			if ((portend != hostend) || !port || !XX_httplib_is_valid_port(port)) return 0;
 
 			return 4;
 		}
