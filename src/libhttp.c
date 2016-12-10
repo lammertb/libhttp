@@ -255,7 +255,7 @@ static struct tm * gmtime(const time_t *ptime) {
 
 static size_t strftime( char *dst, size_t dst_size, const char *fmt, const struct tm *tm ) {
 
-	/* TODO */ //(void)XX_httplib__snprintf(NULL, dst, dst_size, "implement strftime()
+	/* TODO */ //(void)XX_httplib_snprintf(NULL, dst, dst_size, "implement strftime()
 	// for WinCE");
 	return 0;
 }
@@ -1415,7 +1415,7 @@ static int header_has_option(const char *header, const char *option) {
 }
 
 /* Perform case-insensitive match of string against pattern */
-static int match_prefix(const char *pattern, size_t pattern_len, const char *str) {
+int XX_httplib_match_prefix(const char *pattern, size_t pattern_len, const char *str) {
 
 	const char *or_str;
 	size_t i;
@@ -1424,11 +1424,8 @@ static int match_prefix(const char *pattern, size_t pattern_len, const char *str
 	int res;
 
 	if ((or_str = (const char *)memchr(pattern, '|', pattern_len)) != NULL) {
-		res = match_prefix(pattern, (size_t)(or_str - pattern), str);
-		return (res > 0) ? res : match_prefix(or_str + 1,
-		                                      (size_t)((pattern + pattern_len)
-		                                               - (or_str + 1)),
-		                                      str);
+		res = XX_httplib_match_prefix(pattern, (size_t)(or_str - pattern), str);
+		return (res > 0) ? res : XX_httplib_match_prefix(or_str + 1, (size_t)((pattern + pattern_len) - (or_str + 1)), str);
 	}
 
 	for (i = 0, j = 0; i < pattern_len; i++, j++) {
@@ -1446,7 +1443,7 @@ static int match_prefix(const char *pattern, size_t pattern_len, const char *str
 			}
 			if (i == pattern_len) return j + len;
 			do {
-				res = match_prefix(pattern + i, pattern_len - i, str + j + len);
+				res = XX_httplib_match_prefix(pattern + i, pattern_len - i, str + j + len);
 			} while (res == -1 && len-- > 0);
 			return (res == -1) ? -1 : j + res + len;
 		} else if (lowercase(&pattern[i]) != lowercase(&str[j])) {
@@ -1454,7 +1451,8 @@ static int match_prefix(const char *pattern, size_t pattern_len, const char *str
 		}
 	}
 	return j;
-}
+
+}  /* XX_httplib_match_prefix */
 
 
 /* HTTP 1.1 assumes keep alive if "Connection:" header is not set
@@ -3413,7 +3411,7 @@ interpret_uri(struct mg_connection *conn,   /* in: request (must be valid) */
 
 	rewrite = conn->ctx->config[REWRITE];
 	while ((rewrite = XX_httplib_next_option(rewrite, &a, &b)) != NULL) {
-		if ((match_len = match_prefix(a.ptr, a.len, uri)) > 0) {
+		if ((match_len = XX_httplib_match_prefix(a.ptr, a.len, uri)) > 0) {
 			XX_httplib_snprintf(conn, &truncated, filename, filename_buf_len - 1, "%.*s%s", (int)b.len, b.ptr, uri + match_len);
 			break;
 		}
@@ -3428,7 +3426,7 @@ interpret_uri(struct mg_connection *conn,   /* in: request (must be valid) */
 		/* File exists. Check if it is a script type. */
 		if (0
 #if !defined(NO_CGI)
-		    || match_prefix(conn->ctx->config[CGI_EXTENSIONS],
+		    || XX_httplib_match_prefix(conn->ctx->config[CGI_EXTENSIONS],
 		                    strlen(conn->ctx->config[CGI_EXTENSIONS]),
 		                    filename) > 0
 #endif
@@ -3482,7 +3480,7 @@ interpret_uri(struct mg_connection *conn,   /* in: request (must be valid) */
 			*p = '\0';
 			if ((0
 #if !defined(NO_CGI)
-			     || match_prefix(conn->ctx->config[CGI_EXTENSIONS],
+			     || XX_httplib_match_prefix(conn->ctx->config[CGI_EXTENSIONS],
 			                     strlen(conn->ctx->config[CGI_EXTENSIONS]),
 			                     filename) > 0
 #endif
@@ -4544,9 +4542,9 @@ static int must_hide_file(struct mg_connection *conn, const char *path) {
 	if (conn && conn->ctx) {
 		const char *pw_pattern = "**" PASSWORDS_FILE_NAME "$";
 		const char *pattern = conn->ctx->config[HIDE_FILES];
-		return match_prefix(pw_pattern, strlen(pw_pattern), path) > 0
+		return XX_httplib_match_prefix(pw_pattern, strlen(pw_pattern), path) > 0
 		       || (pattern != NULL
-		           && match_prefix(pattern, strlen(pattern), path) > 0);
+		           && XX_httplib_match_prefix(pattern, strlen(pattern), path) > 0);
 	}
 	return 0;
 }
@@ -4883,7 +4881,7 @@ static void fclose_on_exec(struct file *filep, struct mg_connection *conn) {
 }
 
 
-static void handle_static_file_request(struct mg_connection *conn, const char *path, struct file *filep, const char *mime_type, const char *additional_headers) {
+void XX_httplib_handle_static_file_request( struct mg_connection *conn, const char *path, struct file *filep, const char *mime_type, const char *additional_headers ) {
 
 	char date[64];
 	char lm[64];
@@ -5012,11 +5010,12 @@ static void handle_static_file_request(struct mg_connection *conn, const char *p
 
 	if (strcmp(conn->request_info.request_method, "HEAD") != 0) send_file_data(conn, filep, r1, cl);
 	XX_httplib_fclose(filep);
-}
+
+}  /* XX_handle_static_file_request */
 
 
 #if !defined(NO_CACHING)
-static void handle_not_modified_static_file_request(struct mg_connection *conn, struct file *filep) {
+void XX_httplib_handle_not_modified_static_file_request( struct mg_connection *conn, struct file *filep ) {
 
 	char date[64];
 	char lm[64];
@@ -5035,7 +5034,9 @@ static void handle_not_modified_static_file_request(struct mg_connection *conn, 
 	mg_printf(conn, "HTTP/1.1 %d %s\r\n" "Date: %s\r\n", conn->status_code, mg_get_response_code_text(conn, conn->status_code), date);
 	send_static_cache_header(conn);
 	mg_printf(conn, "Last-Modified: %s\r\n" "Etag: %s\r\n" "Connection: %s\r\n" "\r\n", lm, etag, suggest_connection_header(conn));
-}
+
+}  /* XX_httplib_handle_not_modified_static_file_request */
+
 #endif
 
 
@@ -5064,7 +5065,7 @@ void mg_send_mime_file2( struct mg_connection *conn, const char *path, const cha
 				XX_httplib_send_http_error(conn, 403, "%s", "Error: Directory listing denied");
 			}
 		} else {
-			handle_static_file_request( conn, path, &file, mime_type, additional_headers);
+			XX_httplib_handle_static_file_request( conn, path, &file, mime_type, additional_headers);
 		}
 	} else XX_httplib_send_http_error(conn, 404, "%s", "Error: File not found");
 }
@@ -5405,7 +5406,7 @@ static int substitute_index_file(struct mg_connection *conn, char *path, size_t 
 
 #if !defined(NO_CACHING)
 /* Return True if we should reply 304 Not Modified. */
-static int is_not_modified(const struct mg_connection *conn, const struct file *filep) {
+int XX_httplib_is_not_modified( const struct mg_connection *conn, const struct file *filep ) {
 
 	char etag[64];
 	const char *ims = mg_get_header(conn, "If-Modified-Since");
@@ -5414,7 +5415,9 @@ static int is_not_modified(const struct mg_connection *conn, const struct file *
 	construct_etag(etag, sizeof(etag), filep);
 	if (!filep) return 0;
 	return (inm != NULL && !mg_strcasecmp(etag, inm)) || (ims != NULL && (filep->last_modified <= parse_date_string(ims)));
-}
+
+}  /* XX_httplib_is_not_modified */
+
 #endif /* !NO_CACHING */
 
 
@@ -5708,7 +5711,7 @@ static void prepare_cgi_environment( struct mg_connection *conn, const char *pro
 }
 
 
-static void handle_cgi_request(struct mg_connection *conn, const char *prog) {
+void XX_httplib_handle_cgi_request( struct mg_connection *conn, const char *prog ) {
 
 	char *buf;
 	size_t buflen;
@@ -5930,7 +5933,9 @@ done:
 	if ( err != NULL ) fclose( err ); else if ( fderr[0] != -1 ) close( fderr[0] );
 
 	if ( buf != NULL ) XX_httplib_free( buf );
-}
+
+}  /* XX_httplib_handle_cgi_request */
+
 #endif /* !NO_CGI */
 
 
@@ -6194,9 +6199,8 @@ static void do_ssi_include(struct mg_connection *conn, const char *ssi, char *ta
 		mg_cry(conn, "Cannot open SSI #include: [%s]: fopen(%s): %s", tag, path, strerror(ERRNO));
 	} else {
 		fclose_on_exec(&file, conn);
-		if (match_prefix(conn->ctx->config[SSI_EXTENSIONS],
-		                 strlen(conn->ctx->config[SSI_EXTENSIONS]),
-		                 path) > 0) {
+		if (XX_httplib_match_prefix(conn->ctx->config[SSI_EXTENSIONS], strlen(conn->ctx->config[SSI_EXTENSIONS]), path) > 0) {
+
 			send_ssi_file(conn, path, &file, include_level + 1);
 		} else {
 			send_file_data(conn, &file, 0, INT64_MAX);
@@ -6305,7 +6309,7 @@ static void send_ssi_file(struct mg_connection *conn, const char *path, struct f
 }
 
 
-static void handle_ssi_file_request(struct mg_connection *conn, const char *path, struct file *filep) {
+void XX_httplib_handle_ssi_file_request( struct mg_connection *conn, const char *path, struct file *filep ) {
 
 	char date[64];
 	time_t curtime;
@@ -6351,7 +6355,8 @@ static void handle_ssi_file_request(struct mg_connection *conn, const char *path
 		send_ssi_file(conn, path, filep, 0);
 		XX_httplib_fclose(filep);
 	}
-}
+
+}  /* XX_httplib_handle_ssi_file_request */
 
 
 #if !defined(NO_FILES)
@@ -7209,7 +7214,7 @@ static int set_throttle(const char *spec, uint32_t remote_ip, const char *uri) {
 			if ((remote_ip & mask) == net) {
 				throttle = (int)v;
 			}
-		} else if (match_prefix(vec.ptr, vec.len, uri) > 0) throttle = (int)v;
+		} else if (XX_httplib_match_prefix(vec.ptr, vec.len, uri) > 0) throttle = (int)v;
 	}
 
 	return throttle;
@@ -7510,7 +7515,7 @@ static int get_request_handler(struct mg_connection *conn,
 		for (tmp_rh = conn->ctx->handlers; tmp_rh != NULL;
 		     tmp_rh = tmp_rh->next) {
 			if (tmp_rh->handler_type == handler_type) {
-				if (match_prefix(tmp_rh->uri, tmp_rh->uri_len, uri) > 0) {
+				if (XX_httplib_match_prefix(tmp_rh->uri, tmp_rh->uri_len, uri) > 0) {
 					if (handler_type == WEBSOCKET_HANDLER) {
 						*connect_handler = tmp_rh->connect_handler;
 						*ready_handler   = tmp_rh->ready_handler;
@@ -7889,25 +7894,3 @@ void XX_httplib_handle_request( struct mg_connection *conn ) {
 	return;
 
 }  /* XX_httplib_handle_request */
-
-
-void XX_httplib_handle_file_based_request( struct mg_connection *conn, const char *path, struct file *file ) {
-
-	if ( conn == NULL  ||  conn->ctx == NULL ) return;
-
-	if (0) {
-#if !defined(NO_CGI)
-	} else if (match_prefix(conn->ctx->config[CGI_EXTENSIONS], strlen(conn->ctx->config[CGI_EXTENSIONS]), path) > 0) {
-		/* CGI scripts may support all HTTP methods */
-		handle_cgi_request(conn, path);
-#endif /* !NO_CGI */
-	} else if (match_prefix(conn->ctx->config[SSI_EXTENSIONS], strlen(conn->ctx->config[SSI_EXTENSIONS]), path) > 0) {
-		handle_ssi_file_request(conn, path, file);
-#if !defined(NO_CACHING)
-	} else if ((!conn->in_error_handler) && is_not_modified(conn, file)) {
-		/* Send 304 "Not Modified" - this must not send any body data */
-		handle_not_modified_static_file_request(conn, file);
-#endif /* !NO_CACHING */
-	} else handle_static_file_request(conn, path, file, NULL, NULL);
-
-}  /* XX_httplib_handle_file_based_request */
