@@ -922,6 +922,7 @@ void			XX_httplib_ssl_locking_callback( int mode, int mutex_num, const char *fil
 int			XX_httplib_ssl_use_pem_file( struct mg_context *ctx, const char *pem );
 int			XX_httplib_sslize( struct mg_connection *conn, SSL_CTX *s, int (*func)(SSL *) );
 int			XX_httplib_stat( struct mg_connection *conn, const char *path, struct file *filep );
+const char *		XX_httplib_strcasestr( const char *big_str, const char *small_str );
 char *			XX_httplib_strdup( const char *str );
 void			XX_httplib_strlcpy( register char *dst, register const char *src, size_t n );
 int			XX_httplib_substitute_index_file( struct mg_connection *conn, char *path, size_t path_len, struct file *filep );

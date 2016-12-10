@@ -981,7 +981,7 @@ char * XX_httplib_strdup( const char *str ) {
 }
 
 
-static const char * mg_strcasestr(const char *big_str, const char *small_str) {
+const char * XX_httplib_strcasestr( const char *big_str, const char *small_str ) {
 
 	size_t i;
 	size_t big_len = strlen(big_str);
@@ -994,7 +994,9 @@ static const char * mg_strcasestr(const char *big_str, const char *small_str) {
 	}
 
 	return NULL;
-}
+
+}  /* XX_httplib_strcasestr */
+
 
 
 /* Return null terminated string of given maximum length.
@@ -3279,7 +3281,7 @@ int mg_get_cookie(const char *cookie_header, const char *var_name, char *dst, si
 
 	name_len = (int)strlen(var_name);
 	end = s + strlen(s);
-	for (; (s = mg_strcasestr(s, var_name)) != NULL; s += name_len) {
+	for (; (s = XX_httplib_strcasestr(s, var_name)) != NULL; s += name_len) {
 		if (s[name_len] == '=') {
 			/* HCP24: now check is it a substring or a full cookie name */
 			if ((s == cookie_header) || (s[-1] == ' ')) {
@@ -7143,43 +7145,3 @@ void XX_httplib_handle_websocket_request( struct mg_connection *conn, const char
 }  /* XX_httplib_handle_websocket_request */
 
 #endif /* !USE_WEBSOCKET */
-
-
-int XX_httplib_is_websocket_protocol( const struct mg_connection *conn ) {
-
-#if defined(USE_WEBSOCKET)
-	const char *upgrade;
-	const char *connection;
-
-	/* A websocket protocoll has the following HTTP headers:
-	 *
-	 * Connection: Upgrade
-	 * Upgrade: Websocket
-	 */
-
-	upgrade = mg_get_header(conn, "Upgrade");
-	if (upgrade == NULL) return 0; /* fail early, don't waste time checking other header * fields */
-
-	if (!mg_strcasestr(upgrade, "websocket")) return 0;
-
-	connection = mg_get_header(conn, "Connection");
-	if (connection == NULL) return 0;
-
-	if (!mg_strcasestr(connection, "upgrade")) return 0;
-
-	/* The headers "Host", "Sec-WebSocket-Key", "Sec-WebSocket-Protocol" and
-	 * "Sec-WebSocket-Version" are also required.
-	 * Don't check them here, since even an unsupported websocket protocol
-	 * request still IS a websocket request (in contrast to a standard HTTP
-	 * request). It will fail later in handle_websocket_request.
-	 */
-
-	return 1;
-
-#else  /* defined(USE_WEBSOCKET) */
-
-	return 0;
-
-#endif  /* defined(USE_WEBSOCKET) */
-
-}  /* XX_httplib_is_websocket_protocol */

@@ -66,6 +66,7 @@ LIB_SOURCES =	src/libhttp.c					\
 		src/httplib_handle_form_request.c		\
 		src/httplib_handle_request.c			\
 		src/httplib_initialize_ssl.c			\
+		src/httplib_is_websocket_protocol.c		\
 		src/httplib_load_dll.c				\
 		src/httplib_log_access.c			\
 		src/httplib_master_thread.c			\
