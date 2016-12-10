@@ -5061,34 +5061,3 @@ void XX_httplib_handle_not_modified_static_file_request( struct mg_connection *c
 }  /* XX_httplib_handle_not_modified_static_file_request */
 
 #endif
-
-
-void mg_send_file(struct mg_connection *conn, const char *path) {
-
-	mg_send_mime_file( conn, path, NULL );
-}
-
-
-void mg_send_mime_file(struct mg_connection *conn, const char *path, const char *mime_type) {
-
-	mg_send_mime_file2( conn, path, mime_type, NULL );
-}
-
-
-void mg_send_mime_file2( struct mg_connection *conn, const char *path, const char *mime_type, const char *additional_headers ) {
-
-	struct file file = STRUCT_FILE_INITIALIZER;
-
-	if (XX_httplib_stat(conn, path, &file)) {
-		if (file.is_directory) {
-			if (!conn) return;
-			if (!mg_strcasecmp(conn->ctx->config[ENABLE_DIRECTORY_LISTING], "yes")) {
-				XX_httplib_handle_directory_request(conn, path);
-			} else {
-				XX_httplib_send_http_error(conn, 403, "%s", "Error: Directory listing denied");
-			}
-		} else {
-			XX_httplib_handle_static_file_request( conn, path, &file, mime_type, additional_headers);
-		}
-	} else XX_httplib_send_http_error(conn, 404, "%s", "Error: File not found");
-}
