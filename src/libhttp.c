@@ -5250,32 +5250,3 @@ int XX_httplib_parse_http_headers( char **buf, struct mg_request_info *ri ) {
 	return ri->num_headers;
 
 }  /* XX_httplib_parse_http_headers */
-
-
-int XX_httplib_is_valid_http_method( const char *method ) {
-
-	return !strcmp(method, "GET")        /* HTTP (RFC 2616) */
-	       || !strcmp(method, "POST")    /* HTTP (RFC 2616) */
-	       || !strcmp(method, "HEAD")    /* HTTP (RFC 2616) */
-	       || !strcmp(method, "PUT")     /* HTTP (RFC 2616) */
-	       || !strcmp(method, "DELETE")  /* HTTP (RFC 2616) */
-	       || !strcmp(method, "OPTIONS") /* HTTP (RFC 2616) */
-	       /* TRACE method (RFC 2616) is not supported for security reasons */
-	       || !strcmp(method, "CONNECT") /* HTTP (RFC 2616) */
-
-	       || !strcmp(method, "PROPFIND") /* WEBDAV (RFC 2518) */
-	       || !strcmp(method, "MKCOL")    /* WEBDAV (RFC 2518) */
-
-	       /* Unsupported WEBDAV Methods: */
-	       /* PROPPATCH, COPY, MOVE, LOCK, UNLOCK (RFC 2518) */
-	       /* + 11 methods from RFC 3253 */
-	       /* ORDERPATCH (RFC 3648) */
-	       /* ACL (RFC 3744) */
-	       /* SEARCH (RFC 5323) */
-	       /* + MicroSoft extensions
-	        * https://msdn.microsoft.com/en-us/library/aa142917.aspx */
-
-	       /* PATCH method only allowed for CGI/Lua/LSP and callbacks. */
-	       || !strcmp(method, "PATCH"); /* PATCH method (RFC 5789) */
-
-}  /* XX_httplib_is_valid_http_method */
