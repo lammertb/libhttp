@@ -7428,12 +7428,5 @@ void XX_httplib_set_handler_type( struct mg_context *ctx, const char *uri, int h
 void mg_set_request_handler(struct mg_context *ctx, const char *uri, mg_request_handler handler, void *cbdata) {
 
 	XX_httplib_set_handler_type(ctx, uri, REQUEST_HANDLER, handler == NULL, handler, NULL, NULL, NULL, NULL, NULL, cbdata);
-}
 
-
-void mg_set_websocket_handler( struct mg_context *ctx, const char *uri, mg_websocket_connect_handler connect_handler, mg_websocket_ready_handler ready_handler, mg_websocket_data_handler data_handler, mg_websocket_close_handler close_handler, void *cbdata ) {
-
-	int is_delete_request = (connect_handler == NULL) && (ready_handler == NULL) && (data_handler == NULL) && (close_handler == NULL);
-	XX_httplib_set_handler_type(ctx, uri, WEBSOCKET_HANDLER, is_delete_request, NULL, connect_handler, ready_handler, data_handler, close_handler, NULL, cbdata);
-
-}  /* mg_set_websocket_handler */
+}  /* mg_set_request_handler */
