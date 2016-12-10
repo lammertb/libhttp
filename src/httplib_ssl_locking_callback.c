@@ -28,6 +28,11 @@
 
 
 
+#if !defined(NO_SSL)
+
+pthread_mutex_t *XX_httplib_ssl_mutexes;
+
+
 
 /*
  * void XX_httplib_ssl_locking_callback( int mode, int mutex_num, const char *file, int line );
@@ -35,8 +40,6 @@
  * The function XX_httplib_ssl_locking_callback() is used for locking and
  * unlocking mutexes from the SSL routines.
  */
-
-#if !defined(NO_SSL)
 
 void XX_httplib_ssl_locking_callback( int mode, int mutex_num, const char *file, int line ) {
 

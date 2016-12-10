@@ -8381,7 +8381,7 @@ unsigned long XX_httplib_ssl_id_callback( void ) {
 
 #ifdef _WIN32
 	return GetCurrentThreadId();
-#else
+#else  /* _WIN32 */
 
 #ifdef __clang__
 #pragma clang diagnostic push
@@ -8391,7 +8391,7 @@ unsigned long XX_httplib_ssl_id_callback( void ) {
  * Unfortunately the C standard does not define a way to check this at
  * compile time, since the #if preprocessor conditions can not use the sizeof
  * operator as an argument. */
-#endif
+#endif /* __clang__ */
 
 	if (sizeof(pthread_t) > sizeof(unsigned long)) {
 		/* This is the problematic case for CRYPTO_set_id_callback:
@@ -8418,70 +8418,10 @@ unsigned long XX_httplib_ssl_id_callback( void ) {
 
 #ifdef __clang__
 #pragma clang diagnostic pop
-#endif
+#endif  /* __clang */
 
-#endif
+#endif  /* _WIN32 */
+
 }  /* XX_httplib_ssl_id_callback */
-
-
-
-
-int XX_httplib_refresh_trust( struct mg_connection *conn ) {
-
-	static int reload_lock = 0;
-	static long int data_check = 0;
-	volatile int *p_reload_lock = (volatile int *)&reload_lock;
-
-	struct stat cert_buf;
-	long int t;
-	char *pem;
-	int should_verify_peer;
-
-	if ((pem = conn->ctx->config[SSL_CERTIFICATE]) == NULL
-	    && conn->ctx->callbacks.init_ssl == NULL) {
-		return 0;
-	}
-
-	t = data_check;
-	if (stat(pem, &cert_buf) != -1) t = (long int)cert_buf.st_mtime;
-
-	if (data_check != t) {
-		data_check = t;
-
-		should_verify_peer =
-		    (conn->ctx->config[SSL_DO_VERIFY_PEER] != NULL)
-		    && (mg_strcasecmp(conn->ctx->config[SSL_DO_VERIFY_PEER], "yes")
-		        == 0);
-
-		if (should_verify_peer) {
-			char *ca_path = conn->ctx->config[SSL_CA_PATH];
-			char *ca_file = conn->ctx->config[SSL_CA_FILE];
-			if (SSL_CTX_load_verify_locations(conn->ctx->ssl_ctx, ca_file, ca_path) != 1) {
-
-				mg_cry( XX_httplib_fc(conn->ctx),
-				       "SSL_CTX_load_verify_locations error: %s "
-				       "ssl_verify_peer requires setting "
-				       "either ssl_ca_path or ssl_ca_file. Is any of them "
-				       "present in "
-				       "the .conf file?",
-				       XX_httplib_ssl_error());
-				return 0;
-			}
-		}
-
-		if (1 == XX_httplib_atomic_inc(p_reload_lock)) {
-			if (XX_httplib_ssl_use_pem_file(conn->ctx, pem) == 0) return 0;
-			*p_reload_lock = 0;
-		}
-	}
-	/* lock while cert is reloading */
-	while (*p_reload_lock) sleep(1);
-
-	return 1;
-
-}  /* XX_httplib_refresh_trust */
-
-
-pthread_mutex_t *XX_httplib_ssl_mutexes;
 
 #endif /* !NO_SSL */

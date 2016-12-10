@@ -62,6 +62,7 @@ LIB_SOURCES =	src/libhttp.c					\
 		src/httplib_master_thread.c			\
 		src/httplib_process_new_connection.c		\
 		src/httplib_produce_socket.c			\
+		src/httplib_refresh_trust.c			\
 		src/httplib_reset_per_request_attributes.c	\
 		src/httplib_set_acl_option.c			\
 		src/httplib_set_gpass_option.c			\
