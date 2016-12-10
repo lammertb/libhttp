@@ -92,6 +92,7 @@ LIB_SOURCES =	src/libhttp.c					\
 		src/httplib_read_websocket.c			\
 		src/httplib_redirect_to_https_port.c		\
 		src/httplib_refresh_trust.c			\
+		src/httplib_remove_bad_file.c			\
 		src/httplib_reset_per_request_attributes.c	\
 		src/httplib_send_options.c			\
 		src/httplib_send_websocket_handshake.c		\
