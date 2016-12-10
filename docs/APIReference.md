@@ -1,7 +1,7 @@
-# Libhttp API Reference
+# LibHTTP API Reference
 
-Libhttp is often used as HTTP and HTTPS library inside a larger application.
-A C API is available to integrate the Libhttp functionality in a larger
+LibHTTP is often used as HTTP and HTTPS library inside a larger application.
+A C API is available to integrate the LibHTTP functionality in a larger
 codebase. A C++ wrapper is also available, although it is not guaranteed
 that all functionality available through the C API can also be accessed
 from C++. This document describes the public C API. Basic usage examples of
