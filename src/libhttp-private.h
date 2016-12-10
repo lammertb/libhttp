@@ -942,6 +942,7 @@ void			XX_httplib_process_new_connection( struct mg_connection *conn );
 void			XX_httplib_produce_socket( struct mg_context *ctx, const struct socket *sp );
 int			XX_httplib_pull( FILE *fp, struct mg_connection *conn, char *buf, int len, double timeout );
 int			XX_httplib_pull_all( FILE *fp, struct mg_connection *conn, char *buf, int len );
+int64_t			XX_httplib_push_all( struct mg_context *ctx, FILE *fp, SOCKET sock, SSL *ssl, const char *buf, int64_t len );
 int			XX_httplib_put_dir( struct mg_connection *conn, const char *path );
 void			XX_httplib_put_file( struct mg_connection *conn, const char *path );
 int			XX_httplib_read_request( FILE *fp, struct mg_connection *conn, char *buf, int bufsiz, int *nread );
