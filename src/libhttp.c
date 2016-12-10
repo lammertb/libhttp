@@ -6483,15 +6483,3 @@ void XX_httplib_handle_propfind( struct mg_connection *conn, const char *path, s
 
 }  /* XX_httplib_handle_propfind */
 #endif
-
-void mg_lock_connection( struct mg_connection *conn ) {
-
-	if ( conn != NULL ) pthread_mutex_lock( & conn->mutex );
-
-}  /* mg_lock_connection */
-
-void mg_unlock_connection( struct mg_connection *conn ) {
-
-	if ( conn != NULL ) pthread_mutex_unlock( & conn->mutex );
-
-}  /* mg_unlock_connection */
