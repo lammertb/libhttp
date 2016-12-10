@@ -657,6 +657,14 @@ struct mg_workerTLS {
 };
 
 
+#define PASSWORDS_FILE_NAME ".htpasswd"
+#define CGI_ENVIRONMENT_SIZE (4096)
+#define MAX_CGI_ENVIR_VARS (256)
+#define MG_BUF_LEN (8192)
+
+mg_static_assert(MAX_REQUEST_SIZE >= 256, "request size length must be a positive number");
+
+
 /* Describes listening socket, or socket which was accept()-ed by the master
  * thread and queued for future handling by the worker thread. */
 struct socket {
@@ -864,6 +872,7 @@ void			XX_httplib_delete_file( struct mg_connection *conn, const char *path );
 void			XX_httplib_discard_unread_request_data( struct mg_connection *conn );
 struct mg_connection *	XX_httplib_fc( struct mg_context *ctx );
 void			XX_httplib_fclose( struct file *filep );
+void			XX_httplib_fclose_on_exec( struct file *filep, struct mg_connection *conn );
 int			XX_httplib_fopen( const struct mg_connection *conn, const char *path, const char *mode, struct file *filep );
 void			XX_httplib_free_context( struct mg_context *ctx );
 int			XX_httplib_get_first_ssl_listener_index( const struct mg_context *ctx );
@@ -917,7 +926,9 @@ void			XX_httplib_remove_double_dots_and_double_slashes( char *s );
 void			XX_httplib_reset_per_request_attributes( struct mg_connection *conn );
 int			XX_httplib_scan_directory( struct mg_connection *conn, const char *dir, void *data, void (*cb)(struct de *, void *) );
 void			XX_httplib_send_authorization_request( struct mg_connection *conn );
-void			XX_httplib_send_http_error( struct mg_connection *, int, PRINTF_FORMAT_STRING(const char *fmt), ... ) PRINTF_ARGS(3, 4); 
+void			XX_httplib_send_file_data( struct mg_connection *conn, struct file *filep, int64_t offset, int64_t len );
+void			XX_httplib_send_http_error( struct mg_connection *, int, PRINTF_FORMAT_STRING(const char *fmt), ... ) PRINTF_ARGS(3, 4);
+int			XX_httplib_send_no_cache_header( struct mg_connection *conn );
 void			XX_httplib_send_options( struct mg_connection *conn );
 int			XX_httplib_send_static_cache_header( struct mg_connection *conn );
 int			XX_httplib_send_websocket_handshake( struct mg_connection *conn, const char *websock_key );
