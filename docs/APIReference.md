@@ -11,7 +11,7 @@ the API can be found in [Embedding.md](Embedding.md).
 
 | Macro | Description |
 | :--- | :--- |
-| **`CIVETWEB_VERSION`** | The current version of the website as a string with the major and minor version number seperated with a dot. For version 1.9, this string will for example have the value "1.9" |
+| **`LIBHTTP_VERSION`** | The current version of the website as a string with the major and minor version number seperated with a dot. For version 1.9, this string will for example have the value "1.9" |
 
 ## Structures
 
