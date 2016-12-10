@@ -8328,32 +8328,3 @@ int XX_httplib_check_acl( struct mg_context *ctx, uint32_t remote_ip ) {
 	return -1;
 
 }  /* XX_httplib_check_acl */
-
-
-#if !defined(_WIN32)
-
-int XX_httplib_set_uid_option( struct mg_context *ctx ) {
-
-	struct passwd *pw;
-
-	if ( ctx != NULL ) {
-
-		const char *uid = ctx->config[RUN_AS_USER];
-		int success = 0;
-
-		if (uid == NULL) success = 1;
-		else {
-			if      ( (pw = getpwnam(uid)) == NULL ) mg_cry( XX_httplib_fc(ctx), "%s: unknown user [%s]", __func__, uid                  );
-			else if ( setgid(pw->pw_gid)   == -1   ) mg_cry( XX_httplib_fc(ctx), "%s: setgid(%s): %s",    __func__, uid, strerror(errno) );
-			else if ( setgroups(0, NULL)           ) mg_cry( XX_httplib_fc(ctx), "%s: setgroups(): %s",   __func__,      strerror(errno) );
-			else if ( setuid(pw->pw_uid)   == -1   ) mg_cry( XX_httplib_fc(ctx), "%s: setuid(%s): %s",    __func__, uid, strerror(errno) );
-			else success = 1;
-		}
-
-		return success;
-	}
-	return 0;
-
-}  /* XX_httplib_set_uid_option */
-
-#endif /* !_WIN32 */
