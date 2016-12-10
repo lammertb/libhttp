@@ -69,6 +69,7 @@ LIB_SOURCES =	src/libhttp.c					\
 		src/httplib_load_dll.c				\
 		src/httplib_log_access.c			\
 		src/httplib_master_thread.c			\
+		src/httplib_parse_net.c				\
 		src/httplib_process_new_connection.c		\
 		src/httplib_produce_socket.c			\
 		src/httplib_redirect_to_https_port.c		\
