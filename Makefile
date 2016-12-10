@@ -73,6 +73,7 @@ LIB_SOURCES =	src/libhttp.c					\
 		src/httplib_set_acl_option.c			\
 		src/httplib_set_auth_handler.c			\
 		src/httplib_set_gpass_option.c			\
+		src/httplib_set_handler_type.c			\
 		src/httplib_set_ports_option.c			\
 		src/httplib_set_request_handler.c		\
 		src/httplib_set_ssl_option.c			\
