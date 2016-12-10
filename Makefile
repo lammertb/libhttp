@@ -45,6 +45,7 @@ LIB_SOURCES =	src/libhttp.c					\
 		src/httplib_accept_new_connection.c		\
 		src/httplib_check_acl.c				\
 		src/httplib_check_feature.c			\
+		src/httplib_close_all_listening_sockets.c	\
 		src/httplib_close_connection.c			\
 		src/httplib_close_socket_gracefully.c		\
 		src/httplib_connect_client.c			\

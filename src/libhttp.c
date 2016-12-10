@@ -1533,8 +1533,6 @@ static int send_static_cache_header(struct mg_connection *conn) {
 }
 
 
-static void handle_file_based_request(struct mg_connection *conn, const char *path, struct file *filep);
-
 void XX_httplib_send_http_error( struct mg_connection *conn, int status, const char *fmt, ... ) {
 
 	char buf[MG_BUF_LEN];
@@ -1603,7 +1601,7 @@ void XX_httplib_send_http_error( struct mg_connection *conn, int status, const c
 
 			if (page_handler_found) {
 				conn->in_error_handler = 1;
-				handle_file_based_request(conn, buf, &error_page_file);
+				XX_httplib_handle_file_based_request(conn, buf, &error_page_file);
 				conn->in_error_handler = 0;
 				return;
 			}
@@ -7789,7 +7787,7 @@ void XX_httplib_handle_request( struct mg_connection *conn ) {
 
 		/* 10. File is handled by a script. */
 		if (is_script_resource) {
-			handle_file_based_request(conn, path, &file);
+			XX_httplib_handle_file_based_request(conn, path, &file);
 			return;
 		}
 
@@ -7878,7 +7876,7 @@ void XX_httplib_handle_request( struct mg_connection *conn ) {
 			}
 		}
 
-		handle_file_based_request(conn, path, &file);
+		XX_httplib_handle_file_based_request(conn, path, &file);
 #endif /* !defined(NO_FILES) */
 
 #if 0
@@ -7893,7 +7891,7 @@ void XX_httplib_handle_request( struct mg_connection *conn ) {
 }  /* XX_httplib_handle_request */
 
 
-static void handle_file_based_request(struct mg_connection *conn, const char *path, struct file *file) {
+void XX_httplib_handle_file_based_request( struct mg_connection *conn, const char *path, struct file *file ) {
 
 	if ( conn == NULL  ||  conn->ctx == NULL ) return;
 
@@ -7911,22 +7909,5 @@ static void handle_file_based_request(struct mg_connection *conn, const char *pa
 		handle_not_modified_static_file_request(conn, file);
 #endif /* !NO_CACHING */
 	} else handle_static_file_request(conn, path, file, NULL, NULL);
-}
 
-
-void XX_httplib_close_all_listening_sockets( struct mg_context *ctx ) {
-
-	unsigned int i;
-
-	if ( ctx == NULL ) return;
-
-	for (i = 0; i < ctx->num_listening_sockets; i++) {
-		closesocket(ctx->listening_sockets[i].sock);
-		ctx->listening_sockets[i].sock = INVALID_SOCKET;
-	}
-	XX_httplib_free(ctx->listening_sockets);
-	ctx->listening_sockets = NULL;
-	XX_httplib_free(ctx->listening_socket_fds);
-	ctx->listening_socket_fds = NULL;
-
-}  /* XX_close_all_listening_sockets */
+}  /* XX_httplib_handle_file_based_request */

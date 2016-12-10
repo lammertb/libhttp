@@ -850,6 +850,7 @@ const char *		XX_httplib_get_rel_url_at_current_server( const char *uri, const s
 void			XX_httplib_get_system_name( char **sysName );
 int			XX_httplib_get_uri_type( const char *uri );
 int			XX_httplib_getreq( struct mg_connection *conn, char *ebuf, size_t ebuf_len, int *err );
+void			XX_httplib_handle_file_based_request( struct mg_connection *conn, const char *path, struct file *filep );
 void			XX_httplib_handle_request( struct mg_connection *conn );
 int			XX_httplib_initialize_ssl( struct mg_context *ctx );
 int			XX_httplib_is_valid_port( unsigned long port );
