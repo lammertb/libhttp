@@ -5036,28 +5036,3 @@ void XX_httplib_handle_static_file_request( struct mg_connection *conn, const ch
 
 }  /* XX_handle_static_file_request */
 
-
-#if !defined(NO_CACHING)
-void XX_httplib_handle_not_modified_static_file_request( struct mg_connection *conn, struct file *filep ) {
-
-	char date[64];
-	char lm[64];
-	char etag[64];
-	time_t curtime;
-
-	if (conn == NULL || filep == NULL) return;
-
-	curtime = time( NULL );
-
-	conn->status_code = 304;
-	XX_httplib_gmt_time_string(date, sizeof(date), &curtime);
-	XX_httplib_gmt_time_string(lm, sizeof(lm), &filep->last_modified);
-	XX_httplib_construct_etag(etag, sizeof(etag), filep);
-
-	mg_printf(conn, "HTTP/1.1 %d %s\r\n" "Date: %s\r\n", conn->status_code, mg_get_response_code_text(conn, conn->status_code), date);
-	XX_httplib_send_static_cache_header(conn);
-	mg_printf(conn, "Last-Modified: %s\r\n" "Etag: %s\r\n" "Connection: %s\r\n" "\r\n", lm, etag, XX_httplib_suggest_connection_header(conn));
-
-}  /* XX_httplib_handle_not_modified_static_file_request */
-
-#endif
