@@ -932,10 +932,11 @@ void XX_httplib_strlcpy( register char *dst, register const char *src, size_t n 
 }  /* XX_httplib_strlcpy */
 
 
-static int lowercase(const char *s) {
+int XX_httplib_lowercase(const char *s) {
 
 	return tolower(*(const unsigned char *)s);
-}
+
+}  /* XX_httplib_lowercase */
 
 
 int mg_strncasecmp(const char *s1, const char *s2, size_t len) {
@@ -944,7 +945,7 @@ int mg_strncasecmp(const char *s1, const char *s2, size_t len) {
 
 	if (len > 0) {
 		do {
-			diff = lowercase(s1++) - lowercase(s2++);
+			diff = XX_httplib_lowercase(s1++) - XX_httplib_lowercase(s2++);
 		} while (diff == 0 && s1[-1] != '\0' && --len > 0);
 	}
 
@@ -957,7 +958,7 @@ int mg_strcasecmp(const char *s1, const char *s2) {
 	int diff;
 
 	do {
-		diff = lowercase(s1++) - lowercase(s2++);
+		diff = XX_httplib_lowercase(s1++) - XX_httplib_lowercase(s2++);
 	} while (diff == 0 && s1[-1] != '\0');
 
 	return diff;
@@ -1439,7 +1440,7 @@ int XX_httplib_match_prefix(const char *pattern, size_t pattern_len, const char 
 				res = XX_httplib_match_prefix(pattern + i, pattern_len - i, str + j + len);
 			} while (res == -1 && len-- > 0);
 			return (res == -1) ? -1 : j + res + len;
-		} else if (lowercase(&pattern[i]) != lowercase(&str[j])) {
+		} else if (XX_httplib_lowercase(&pattern[i]) != XX_httplib_lowercase(&str[j])) {
 			return -1;
 		}
 	}
@@ -7213,33 +7214,3 @@ int XX_httplib_parse_net( const char *spec, uint32_t *net, uint32_t *mask ) {
 	return len;
 
 }  /* XX_httplib_parse_net */
-
-
-int XX_httplib_set_throttle( const char *spec, uint32_t remote_ip, const char *uri ) {
-
-	int throttle = 0;
-	struct vec vec, val;
-	uint32_t net, mask;
-	char mult;
-	double v;
-
-	while ((spec = XX_httplib_next_option(spec, &vec, &val)) != NULL) {
-		mult = ',';
-		if ((val.ptr == NULL) || (sscanf(val.ptr, "%lf%c", &v, &mult) < 1)
-		    || (v < 0) || ((lowercase(&mult) != 'k')
-		                   && (lowercase(&mult) != 'm') && (mult != ','))) {
-			continue;
-		}
-		v *= (lowercase(&mult) == 'k') ? 1024 : ((lowercase(&mult) == 'm') ? 1048576 : 1);
-		if (vec.len == 1 && vec.ptr[0] == '*') {
-			throttle = (int)v;
-		} else if (XX_httplib_parse_net(vec.ptr, &net, &mask) > 0) {
-			if ((remote_ip & mask) == net) {
-				throttle = (int)v;
-			}
-		} else if (XX_httplib_match_prefix(vec.ptr, vec.len, uri) > 0) throttle = (int)v;
-	}
-
-	return throttle;
-
-}  /* XX_httplib_set_throttle */

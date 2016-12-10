@@ -877,6 +877,7 @@ int			XX_httplib_is_websocket_protocol( const struct mg_connection *conn );
 int			XX_httplib_join_thread( pthread_t threadid );
 void *			XX_httplib_load_dll( struct mg_context *ctx, const char *dll_name, struct ssl_func *sw );
 void			XX_httplib_log_access( const struct mg_connection *conn );
+int			XX_httplib_lowercase( const char *s );
 int			XX_httplib_match_prefix(const char *pattern, size_t pattern_len, const char *str);
 void			XX_httplib_mkcol( struct mg_connection *conn, const char *path );
 int			XX_httplib_must_hide_file( struct mg_connection *conn, const char *path );
