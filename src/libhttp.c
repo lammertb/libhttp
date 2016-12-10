@@ -8426,7 +8426,7 @@ unsigned long XX_httplib_ssl_id_callback( void ) {
 
 
 
-static int refresh_trust( struct mg_connection *conn ) {
+int XX_httplib_refresh_trust( struct mg_connection *conn ) {
 
 	static int reload_lock = 0;
 	static long int data_check = 0;
@@ -8478,83 +8478,10 @@ static int refresh_trust( struct mg_connection *conn ) {
 	while (*p_reload_lock) sleep(1);
 
 	return 1;
-}
+
+}  /* XX_httplib_refresh_trust */
 
 
 pthread_mutex_t *XX_httplib_ssl_mutexes;
-
-
-int XX_httplib_sslize( struct mg_connection *conn, SSL_CTX *s, int (*func)(SSL *) ) {
-
-	int ret;
-	int err;
-	int short_trust;
-	unsigned i;
-
-	if ( conn == NULL ) return 0;
-
-	short_trust = (conn->ctx->config[SSL_SHORT_TRUST] != NULL) && (mg_strcasecmp(conn->ctx->config[SSL_SHORT_TRUST], "yes") == 0);
-
-	if (short_trust) {
-		int trust_ret = refresh_trust(conn);
-		if (!trust_ret) return trust_ret;
-	}
-
-	conn->ssl = SSL_new(s);
-	if (conn->ssl == NULL) return 0;
-
-	ret = SSL_set_fd(conn->ssl, conn->client.sock);
-	if (ret != 1) {
-		err = SSL_get_error(conn->ssl, ret);
-		(void)err; /* TODO: set some error message */
-		SSL_free(conn->ssl);
-		conn->ssl = NULL;
-		/* Avoid CRYPTO_cleanup_all_ex_data(); See discussion:
-		 * https://wiki.openssl.org/index.php/Talk:Library_Initialization */
-		ERR_remove_state(0);
-		return 0;
-	}
-
-	/* SSL functions may fail and require to be called again:
-	 * see https://www.openssl.org/docs/manmaster/ssl/SSL_get_error.html
-	 * Here "func" could be SSL_connect or SSL_accept. */
-	for (i = 0; i <= 16; i *= 2) {
-		ret = func(conn->ssl);
-		if (ret != 1) {
-			err = SSL_get_error(conn->ssl, ret);
-			if ((err == SSL_ERROR_WANT_CONNECT)
-			    || (err == SSL_ERROR_WANT_ACCEPT)) {
-				/* Retry */
-				mg_sleep(i);
-
-			} else break; /* This is an error. TODO: set some error message */
-
-		}
-		else break;  /* Success */
-	}
-
-	if (ret != 1) {
-		SSL_free(conn->ssl);
-		conn->ssl = NULL;
-		/* Avoid CRYPTO_cleanup_all_ex_data(); See discussion:
-		 * https://wiki.openssl.org/index.php/Talk:Library_Initialization */
-		ERR_remove_state(0);
-		return 0;
-	}
-
-	return 1;
-
-}  /* XX_httplib_sslize */
-
-
-/* Return OpenSSL error message (from CRYPTO lib) */
-const char * XX_httplib_ssl_error(void) {
-
-	unsigned long err;
-
-	err = ERR_get_error();
-	return ((err == 0) ? "" : ERR_error_string(err, NULL));
-
-}  /* XX_httplib_ssl_error */
 
 #endif /* !NO_SSL */

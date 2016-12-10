@@ -852,6 +852,7 @@ void			XX_httplib_process_new_connection( struct mg_connection *conn );
 void			XX_httplib_produce_socket( struct mg_context *ctx, const struct socket *sp );
 int			XX_httplib_read_request( FILE *fp, struct mg_connection *conn, char *buf, int bufsiz, int *nread );
 void			XX_httplib_read_websocket( struct mg_connection *conn, mg_websocket_data_handler ws_data_handler, void *callback_data );
+int			XX_httplib_refresh_trust( struct mg_connection *conn );
 void			XX_httplib_reset_per_request_attributes( struct mg_connection *conn );
 void			XX_httplib_send_http_error( struct mg_connection *, int, PRINTF_FORMAT_STRING(const char *fmt), ... ) PRINTF_ARGS(3, 4); 
 int			XX_httplib_set_acl_option( struct mg_context *ctx );
