@@ -878,6 +878,7 @@ void			SHA1Init( SHA1_CTX *context );
 void			SHA1Update( SHA1_CTX *context, const unsigned char *data, uint32_t len );
 
 void			XX_httplib_accept_new_connection( const struct socket *listener, struct mg_context *ctx );
+void			XX_httplib_addenv( struct cgi_environment *env, PRINTF_FORMAT_STRING(const char *fmt), ... ) PRINTF_ARGS(2, 3); 
 int			XX_httplib_atomic_dec( volatile int *addr );
 int			XX_httplib_atomic_inc( volatile int *addr );
 void			XX_httplib_base64_encode( const unsigned char *src, int src_len, char *dst );

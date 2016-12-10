@@ -5528,11 +5528,10 @@ int XX_httplib_forward_body_data( struct mg_connection *conn, FILE *fp, SOCKET s
 #if !defined(NO_CGI)
 
 
-static void addenv(struct cgi_environment *env, PRINTF_FORMAT_STRING(const char *fmt), ...) PRINTF_ARGS(2, 3); 
 
 /* Append VARIABLE=VALUE\0 string to the buffer, and add a respective
  * pointer into the vars array. Assumes env != NULL and fmt != NULL. */
-static void addenv(struct cgi_environment *env, const char *fmt, ...) {
+void XX_httplib_addenv( struct cgi_environment *env, const char *fmt, ... ) {
 
 	size_t n;
 	size_t space;
@@ -5592,125 +5591,5 @@ static void addenv(struct cgi_environment *env, const char *fmt, ...) {
 	env->var[env->varused] = added;
 	env->varused++;
 }
-
-
-void XX_httplib_prepare_cgi_environment( struct mg_connection *conn, const char *prog, struct cgi_environment *env ) {
-
-	const char *s;
-	struct vec var_vec;
-	char *p;
-	char src_addr[IP_ADDR_STR_LEN];
-	char http_var_name[128];
-	int i;
-	int truncated;
-
-	if ( conn == NULL  ||  prog == NULL  ||  env == NULL ) return;
-
-	env->conn    = conn;
-	env->buflen  = CGI_ENVIRONMENT_SIZE;
-	env->bufused = 0;
-	env->buf     = (char *)XX_httplib_malloc(env->buflen);
-	env->varlen  = MAX_CGI_ENVIR_VARS;
-	env->varused = 0;
-	env->var     = (char **)XX_httplib_malloc(env->buflen * sizeof(char *));
-
-	addenv( env, "SERVER_NAME=%s",                   conn->ctx->config[AUTHENTICATION_DOMAIN] );
-	addenv( env, "SERVER_ROOT=%s",                   conn->ctx->config[DOCUMENT_ROOT]         );
-	addenv( env, "DOCUMENT_ROOT=%s",                 conn->ctx->config[DOCUMENT_ROOT]         );
-	addenv( env, "SERVER_SOFTWARE=%s/%s", "LibHTTP", mg_version()                             );
-
-	/* Prepare the environment block */
-	addenv( env, "%s", "GATEWAY_INTERFACE=CGI/1.1" );
-	addenv( env, "%s", "SERVER_PROTOCOL=HTTP/1.1"  );
-	addenv( env, "%s", "REDIRECT_STATUS=200"       ); /* For PHP */
-
-#if defined(USE_IPV6)
-	if (conn->client.lsa.sa.sa_family == AF_INET6) {
-		addenv(env, "SERVER_PORT=%d", ntohs(conn->client.lsa.sin6.sin6_port));
-	} else
-#endif
-	{
-		addenv(env, "SERVER_PORT=%d", ntohs(conn->client.lsa.sin.sin_port));
-	}
-
-	XX_httplib_sockaddr_to_string(src_addr, sizeof(src_addr), &conn->client.rsa);
-
-	addenv( env, "REMOTE_ADDR=%s",    src_addr                          );
-	addenv( env, "REQUEST_METHOD=%s", conn->request_info.request_method );
-	addenv( env, "REMOTE_PORT=%d",    conn->request_info.remote_port    );
-	addenv( env, "REQUEST_URI=%s",    conn->request_info.request_uri    );
-	addenv( env, "LOCAL_URI=%s",      conn->request_info.local_uri      );
-
-	/* SCRIPT_NAME */
-	addenv(env,
-	       "SCRIPT_NAME=%.*s",
-	       (int)strlen(conn->request_info.local_uri)
-	           - ((conn->path_info == NULL) ? 0 : (int)strlen(conn->path_info)),
-	       conn->request_info.local_uri);
-
-	addenv(env, "SCRIPT_FILENAME=%s", prog);
-
-	if ( conn->path_info == NULL ) addenv( env, "PATH_TRANSLATED=%s",   conn->ctx->config[DOCUMENT_ROOT]                  );
-	else                           addenv( env, "PATH_TRANSLATED=%s%s", conn->ctx->config[DOCUMENT_ROOT], conn->path_info );
-
-	addenv(env, "HTTPS=%s", (conn->ssl == NULL) ? "off" : "on");
-
-	if ( (s = mg_get_header( conn, "Content-Type" ) )   != NULL ) addenv( env, "CONTENT_TYPE=%s",   s                               );
-	if ( conn->request_info.query_string                != NULL ) addenv( env, "QUERY_STRING=%s",   conn->request_info.query_string );
-	if ( (s = mg_get_header( conn, "Content-Length" ) ) != NULL ) addenv( env, "CONTENT_LENGTH=%s", s                               );
-	if ( (s = getenv( "PATH" ))                         != NULL ) addenv( env, "PATH=%s",           s                               );
-	if ( conn->path_info                                != NULL ) addenv( env, "PATH_INFO=%s",      conn->path_info                 );
-
-	if (conn->status_code > 0) {
-		/* CGI error handler should show the status code */
-		addenv(env, "STATUS=%d", conn->status_code);
-	}
-
-#if defined(_WIN32)
-	if ( (s = getenv( "COMSPEC"           )) != NULL ) addenv( env, "COMSPEC=%s",           s );
-	if ( (s = getenv( "SYSTEMROOT"        )) != NULL ) addenv( env, "SYSTEMROOT=%s",        s );
-	if ( (s = getenv( "SystemDrive"       )) != NULL ) addenv( env, "SystemDrive=%s",       s );
-	if ( (s = getenv( "ProgramFiles"      )) != NULL ) addenv( env, "ProgramFiles=%s",      s );
-	if ( (s = getenv( "ProgramFiles(x86)" )) != NULL ) addenv( env, "ProgramFiles(x86)=%s", s );
-#else
-	if ( (s = getenv("LD_LIBRARY_PATH"    )) != NULL ) addenv( env, "LD_LIBRARY_PATH=%s",   s );
-#endif /* _WIN32 */
-
-	if ( (s = getenv("PERLLIB"            )) != NULL ) addenv( env, "PERLLIB=%s",           s );
-
-	if (conn->request_info.remote_user != NULL) {
-		addenv(env, "REMOTE_USER=%s", conn->request_info.remote_user);
-		addenv(env, "%s", "AUTH_TYPE=Digest");
-	}
-
-	/* Add all headers as HTTP_* variables */
-	for (i = 0; i < conn->request_info.num_headers; i++) {
-
-		XX_httplib_snprintf(conn, &truncated, http_var_name, sizeof(http_var_name), "HTTP_%s", conn->request_info.http_headers[i].name);
-
-		if (truncated) {
-			mg_cry(conn, "%s: HTTP header variable too long [%s]", __func__, conn->request_info.http_headers[i].name);
-			continue;
-		}
-
-		/* Convert variable name into uppercase, and change - to _ */
-		for (p = http_var_name; *p != '\0'; p++) {
-			if (*p == '-') *p = '_';
-			*p = (char)toupper(*(unsigned char *)p);
-		}
-
-		addenv(env, "%s=%s", http_var_name, conn->request_info.http_headers[i].value);
-	}
-
-	/* Add user-specified variables */
-	s = conn->ctx->config[CGI_ENVIRONMENT];
-	while ((s = XX_httplib_next_option(s, &var_vec, NULL)) != NULL) {
-		addenv(env, "%.*s", (int)var_vec.len, var_vec.ptr);
-	}
-
-	env->var[env->varused] = NULL;
-	env->buf[env->bufused] = '\0';
-
-}  /* XX_httplib_prepare_cgi_environment */
 
 #endif /* !NO_CGI */
