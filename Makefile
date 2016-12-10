@@ -68,6 +68,7 @@ LIB_SOURCES =	src/libhttp.c					\
 		src/httplib_reset_per_request_attributes.c	\
 		src/httplib_set_acl_option.c			\
 		src/httplib_set_gpass_option.c			\
+		src/httplib_set_ports_option.c			\
 		src/httplib_set_ssl_option.c			\
 		src/httplib_set_sock_timeout.c			\
 		src/httplib_set_tcp_nodelay.c			\
