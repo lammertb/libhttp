@@ -922,6 +922,7 @@ void			XX_httplib_read_websocket( struct mg_connection *conn, mg_websocket_data_
 void			XX_httplib_redirect_to_https_port( struct mg_connection *conn, int ssl_index );
 int			XX_httplib_refresh_trust( struct mg_connection *conn );
 void			XX_httplib_remove_bad_file( const struct mg_connection *conn, const char *path );
+int			XX_httplib_remove_directory( struct mg_connection *conn, const char *dir );
 void			XX_httplib_remove_double_dots_and_double_slashes( char *s );
 void			XX_httplib_reset_per_request_attributes( struct mg_connection *conn );
 int			XX_httplib_scan_directory( struct mg_connection *conn, const char *dir, void *data, void (*cb)(struct de *, void *) );
