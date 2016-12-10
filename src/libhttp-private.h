@@ -993,6 +993,7 @@ const char *		XX_httplib_suggest_connection_header( const struct mg_connection *
 void			XX_httplib_tls_dtor( void *key );
 void			XX_httplib_uninitialize_ssl( struct mg_context *ctx );
 int			XX_httplib_vprintf( struct mg_connection *conn, const char *fmt, va_list ap );
+void			XX_httplib_vsnprintf( const struct mg_connection *conn, int *truncated, char *buf, size_t buflen, const char *fmt, va_list ap );
 int			XX_httplib_websocket_write_exec( struct mg_connection *conn, int opcode, const char *data, size_t dataLen, uint32_t masking_key );
 
 

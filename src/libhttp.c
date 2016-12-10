@@ -426,7 +426,6 @@ void XX_httplib_free( void *a ) {
 #endif  /* MEMORY_DEBUGGING */
 
 
-static void mg_vsnprintf(const struct mg_connection *conn, int *truncated, char *buf, size_t buflen, const char *fmt, va_list ap);
 
 /* This following lines are just meant as a reminder to use the mg-functions
  * for memory management */
@@ -455,7 +454,7 @@ static void mg_vsnprintf(const struct mg_connection *conn, int *truncated, char 
 #define snprintf DO_NOT_USE_THIS_FUNCTION__USE_httplib_snprintf
 #ifdef _WIN32 /* vsnprintf must not be used in any system, * \ \ \             \
                * but this define only works well for Windows. */
-#define vsnprintf DO_NOT_USE_THIS_FUNCTION__USE_mg_vsnprintf
+#define vsnprintf DO_NOT_USE_THIS_FUNCTION__USE_httplib_vsnprintf
 #endif
 
 /* Darwin prior to 7.0 and Win32 do not have socklen_t */
@@ -987,7 +986,7 @@ const char * XX_httplib_strcasestr( const char *big_str, const char *small_str )
 
 /* Return null terminated string of given maximum length.
  * Report errors if length is exceeded. */
-static void mg_vsnprintf(const struct mg_connection *conn, int *truncated, char *buf, size_t buflen, const char *fmt, va_list ap) {
+void XX_httplib_vsnprintf( const struct mg_connection *conn, int *truncated, char *buf, size_t buflen, const char *fmt, va_list ap ) {
 
 	int n;
 	int ok;
@@ -1016,7 +1015,8 @@ static void mg_vsnprintf(const struct mg_connection *conn, int *truncated, char 
 		n = (int)buflen - 1;
 	}
 	buf[n] = '\0';
-}
+
+}  /* XX_httplib_vsnprintf */
 
 
 void XX_httplib_snprintf( const struct mg_connection *conn, int *truncated, char *buf, size_t buflen, const char *fmt, ... ) {
@@ -1024,7 +1024,7 @@ void XX_httplib_snprintf( const struct mg_connection *conn, int *truncated, char
 	va_list ap;
 
 	va_start(ap, fmt);
-	mg_vsnprintf(conn, truncated, buf, buflen, fmt, ap);
+	XX_httplib_vsnprintf(conn, truncated, buf, buflen, fmt, ap);
 	va_end(ap);
 }
 
@@ -1611,7 +1611,7 @@ void XX_httplib_send_http_error( struct mg_connection *conn, int status, const c
 
 			if (fmt != NULL) {
 				va_start(ap, fmt);
-				mg_vsnprintf(conn, NULL, buf, sizeof(buf), fmt, ap);
+				XX_httplib_vsnprintf(conn, NULL, buf, sizeof(buf), fmt, ap);
 				va_end(ap);
 				mg_write(conn, buf, strlen(buf));
 			}
@@ -5524,72 +5524,3 @@ int XX_httplib_forward_body_data( struct mg_connection *conn, FILE *fp, SOCKET s
 
 }  /* XX_httplib_forward_body_data */
 #endif
-
-#if !defined(NO_CGI)
-
-
-
-/* Append VARIABLE=VALUE\0 string to the buffer, and add a respective
- * pointer into the vars array. Assumes env != NULL and fmt != NULL. */
-void XX_httplib_addenv( struct cgi_environment *env, const char *fmt, ... ) {
-
-	size_t n;
-	size_t space;
-	int truncated;
-	char *added;
-	va_list ap;
-
-	/* Calculate how much space is left in the buffer */
-	space = (env->buflen - env->bufused);
-
-	/* Calculate an estimate for the required space */
-	n = strlen(fmt) + 2 + 128;
-
-	do {
-		if (space <= n) {
-			/* Allocate new buffer */
-			n = env->buflen + CGI_ENVIRONMENT_SIZE;
-			added = (char *)XX_httplib_realloc(env->buf, n);
-			if (!added) {
-				/* Out of memory */
-				mg_cry(env->conn, "%s: Cannot allocate memory for CGI variable [%s]", __func__, fmt);
-				return;
-			}
-			env->buf = added;
-			env->buflen = n;
-			space = (env->buflen - env->bufused);
-		}
-
-		/* Make a pointer to the free space int the buffer */
-		added = env->buf + env->bufused;
-
-		/* Copy VARIABLE=VALUE\0 string into the free space */
-		va_start(ap, fmt);
-		mg_vsnprintf(env->conn, &truncated, added, (size_t)space, fmt, ap);
-		va_end(ap);
-
-		/* Do not add truncated strings to the environment */
-		if (truncated) {
-			/* Reallocate the buffer */
-			space = 0;
-			n = 1;
-		}
-	} while (truncated);
-
-	/* Calculate number of bytes added to the environment */
-	n = strlen(added) + 1;
-	env->bufused += n;
-
-	/* Now update the variable index */
-	space = (env->varlen - env->varused);
-	if (space < 2) {
-		mg_cry(env->conn, "%s: Cannot register CGI variable [%s]", __func__, fmt);
-		return;
-	}
-
-	/* Append a pointer to the added string into the envp array */
-	env->var[env->varused] = added;
-	env->varused++;
-}
-
-#endif /* !NO_CGI */
