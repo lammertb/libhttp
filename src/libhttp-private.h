@@ -825,6 +825,14 @@ struct vec {
 
 enum { REQUEST_HANDLER, WEBSOCKET_HANDLER, AUTH_HANDLER };
 
+/* Directory entry */
+struct de {
+	struct mg_connection *conn;
+	char *file_name;
+	struct file file;
+};
+
+
 
 /*
  * Functions local to the server. These functions all begin with XX_httplib to
@@ -907,9 +915,11 @@ int			XX_httplib_refresh_trust( struct mg_connection *conn );
 void			XX_httplib_remove_bad_file( const struct mg_connection *conn, const char *path );
 void			XX_httplib_remove_double_dots_and_double_slashes( char *s );
 void			XX_httplib_reset_per_request_attributes( struct mg_connection *conn );
+int			XX_httplib_scan_directory( struct mg_connection *conn, const char *dir, void *data, void (*cb)(struct de *, void *) );
 void			XX_httplib_send_authorization_request( struct mg_connection *conn );
 void			XX_httplib_send_http_error( struct mg_connection *, int, PRINTF_FORMAT_STRING(const char *fmt), ... ) PRINTF_ARGS(3, 4); 
 void			XX_httplib_send_options( struct mg_connection *conn );
+int			XX_httplib_send_static_cache_header( struct mg_connection *conn );
 int			XX_httplib_send_websocket_handshake( struct mg_connection *conn, const char *websock_key );
 int			XX_httplib_set_acl_option( struct mg_context *ctx );
 void			XX_httplib_set_close_on_exec( SOCKET sock, struct mg_connection *conn );

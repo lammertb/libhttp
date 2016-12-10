@@ -613,13 +613,6 @@ int XX_httplib_sTlsInit = 0;
 int XX_httplib_thread_idx_max = 0;
 
 
-/* Directory entry */
-struct de {
-	struct mg_connection *conn;
-	char *file_name;
-	struct file file;
-};
-
 
 
 
@@ -1500,7 +1493,7 @@ static int send_no_cache_header(struct mg_connection *conn) {
 }
 
 
-static int send_static_cache_header(struct mg_connection *conn) {
+int XX_httplib_send_static_cache_header(struct mg_connection *conn) {
 
 #if !defined(NO_CACHING)
 	/* Read the server config to check how long a file may be cached.
@@ -1526,7 +1519,8 @@ static int send_static_cache_header(struct mg_connection *conn) {
 #else  /* NO_CACHING */
 	return send_no_cache_header(conn);
 #endif /* !NO_CACHING */
-}
+
+}  /* XX_httplib_send_static_cache_header */
 
 
 void XX_httplib_send_http_error( struct mg_connection *conn, int status, const char *fmt, ... ) {
@@ -4565,7 +4559,7 @@ int XX_httplib_must_hide_file( struct mg_connection *conn, const char *path ) {
 
 
 
-static int scan_directory(struct mg_connection *conn, const char *dir, void *data, void (*cb)(struct de *, void *)) {
+int XX_httplib_scan_directory( struct mg_connection *conn, const char *dir, void *data, void (*cb)(struct de *, void *) ) {
 
 	char path[PATH_MAX];
 	struct dirent *dp;
@@ -4605,7 +4599,8 @@ static int scan_directory(struct mg_connection *conn, const char *dir, void *dat
 		(void)mg_closedir(dirp);
 	}
 	return 1;
-}
+
+}  /* XX_httplib_scan_directory */
 
 
 #if !defined(NO_FILES)
@@ -4714,7 +4709,7 @@ void XX_httplib_handle_directory_request( struct mg_connection *conn, const char
 	char date[64];
 	time_t curtime = time(NULL);
 
-	if (!scan_directory(conn, dir, &data, dir_scan_callback)) {
+	if (!XX_httplib_scan_directory(conn, dir, &data, dir_scan_callback)) {
 		XX_httplib_send_http_error(conn, 500, "Error: Cannot open directory\nopendir(%s): %s", dir, strerror(ERRNO));
 		return;
 	}
@@ -4727,7 +4722,7 @@ void XX_httplib_handle_directory_request( struct mg_connection *conn, const char
 
 	conn->must_close = 1;
 	mg_printf(conn, "HTTP/1.1 200 OK\r\n");
-	send_static_cache_header(conn);
+	XX_httplib_send_static_cache_header(conn);
 	mg_printf(conn, "Date: %s\r\n" "Connection: close\r\n" "Content-Type: text/html; charset=utf-8\r\n\r\n", date);
 
 	conn->num_bytes_sent +=
@@ -4998,9 +4993,9 @@ void XX_httplib_handle_static_file_request( struct mg_connection *conn, const ch
 	XX_httplib_gmt_time_string(lm, sizeof(lm), &filep->last_modified);
 	construct_etag(etag, sizeof(etag), filep);
 
-	(void)mg_printf(conn, "HTTP/1.1 %d %s\r\n" "%s%s%s" "Date: %s\r\n", conn->status_code, msg, cors1, cors2, cors3, date);
-	send_static_cache_header(conn);
-	(void)mg_printf(conn,
+	mg_printf(conn, "HTTP/1.1 %d %s\r\n" "%s%s%s" "Date: %s\r\n", conn->status_code, msg, cors1, cors2, cors3, date);
+	XX_httplib_send_static_cache_header(conn);
+	mg_printf(conn,
 	                "Last-Modified: %s\r\n"
 	                "Etag: %s\r\n"
 	                "Content-Type: %.*s\r\n"
@@ -5048,7 +5043,7 @@ void XX_httplib_handle_not_modified_static_file_request( struct mg_connection *c
 	construct_etag(etag, sizeof(etag), filep);
 
 	mg_printf(conn, "HTTP/1.1 %d %s\r\n" "Date: %s\r\n", conn->status_code, mg_get_response_code_text(conn, conn->status_code), date);
-	send_static_cache_header(conn);
+	XX_httplib_send_static_cache_header(conn);
 	mg_printf(conn, "Last-Modified: %s\r\n" "Etag: %s\r\n" "Connection: %s\r\n" "\r\n", lm, etag, XX_httplib_suggest_connection_header(conn));
 
 }  /* XX_httplib_handle_not_modified_static_file_request */
@@ -5996,7 +5991,7 @@ void XX_httplib_mkcol( struct mg_connection *conn, const char *path ) {
 		conn->status_code = 201;
 		XX_httplib_gmt_time_string(date, sizeof(date), &curtime);
 		mg_printf(conn, "HTTP/1.1 %d Created\r\n" "Date: %s\r\n", conn->status_code, date);
-		send_static_cache_header(conn);
+		XX_httplib_send_static_cache_header(conn);
 		mg_printf(conn, "Content-Length: 0\r\n" "Connection: %s\r\n\r\n", XX_httplib_suggest_connection_header(conn));
 	}
 	
@@ -6404,82 +6399,4 @@ void XX_httplib_send_options( struct mg_connection *conn ) {
 
 }  /* XX_httplib_send_options */
 
-
-/* Writes PROPFIND properties for a collection element */
-static void print_props( struct mg_connection *conn, const char *uri, struct file *filep ) {
-
-	char mtime[64];
-
-	if ( conn == NULL  ||  uri == NULL  ||  filep == NULL ) return;
-
-	XX_httplib_gmt_time_string(mtime, sizeof(mtime), &filep->last_modified);
-	conn->num_bytes_sent +=
-	    mg_printf(conn,
-	              "<d:response>"
-	              "<d:href>%s</d:href>"
-	              "<d:propstat>"
-	              "<d:prop>"
-	              "<d:resourcetype>%s</d:resourcetype>"
-	              "<d:getcontentlength>%" INT64_FMT "</d:getcontentlength>"
-	              "<d:getlastmodified>%s</d:getlastmodified>"
-	              "</d:prop>"
-	              "<d:status>HTTP/1.1 200 OK</d:status>"
-	              "</d:propstat>"
-	              "</d:response>\n",
-	              uri,
-	              filep->is_directory ? "<d:collection/>" : "",
-	              filep->size,
-	              mtime);
-}
-
-
-static void print_dav_dir_entry(struct de *de, void *data) {
-
-	char href[PATH_MAX];
-	char href_encoded[PATH_MAX * 3 /* worst case */];
-	int truncated;
-
-	struct mg_connection *conn = (struct mg_connection *)data;
-	if (!de || !conn) return;
-
-	XX_httplib_snprintf(conn, &truncated, href, sizeof(href), "%s%s", conn->request_info.local_uri, de->file_name);
-
-	if (!truncated) {
-		mg_url_encode(href, href_encoded, PATH_MAX * 3);
-		print_props(conn, href_encoded, &de->file);
-	}
-}
-
-
-void XX_httplib_handle_propfind( struct mg_connection *conn, const char *path, struct file *filep ) {
-
-	const char *depth = mg_get_header(conn, "Depth");
-	char date[64];
-	time_t curtime = time(NULL);
-
-	XX_httplib_gmt_time_string(date, sizeof(date), &curtime);
-
-	if (!conn || !path || !filep || !conn->ctx) return;
-
-	conn->must_close = 1;
-	conn->status_code = 207;
-	mg_printf(conn, "HTTP/1.1 207 Multi-Status\r\n" "Date: %s\r\n", date);
-	send_static_cache_header(conn);
-	mg_printf(conn, "Connection: %s\r\n" "Content-Type: text/xml; charset=utf-8\r\n\r\n", XX_httplib_suggest_connection_header(conn));
-
-	conn->num_bytes_sent += mg_printf(conn, "<?xml version=\"1.0\" encoding=\"utf-8\"?>" "<d:multistatus xmlns:d='DAV:'>\n");
-
-	/* Print properties for the requested resource itself */
-	print_props(conn, conn->request_info.local_uri, filep);
-
-	/* If it is a directory, print directory entries too if Depth is not 0 */
-	if (filep && filep->is_directory
-	    && !mg_strcasecmp(conn->ctx->config[ENABLE_DIRECTORY_LISTING], "yes")
-	    && (depth == NULL || strcmp(depth, "0") != 0)) {
-		scan_directory(conn, path, conn, &print_dav_dir_entry);
-	}
-
-	conn->num_bytes_sent += mg_printf(conn, "%s\n", "</d:multistatus>");
-
-}  /* XX_httplib_handle_propfind */
 #endif
