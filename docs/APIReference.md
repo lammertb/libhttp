@@ -1,7 +1,7 @@
-# Libhttp API Reference
+# LibHTTP API Reference
 
-Libhttp is often used as HTTP and HTTPS library inside a larger application.
-A C API is available to integrate the Libhttp functionality in a larger
+LibHTTP is often used as HTTP and HTTPS library inside a larger application.
+A C API is available to integrate the LibHTTP functionality in a larger
 codebase. A C++ wrapper is also available, although it is not guaranteed
 that all functionality available through the C API can also be accessed
 from C++. This document describes the public C API. Basic usage examples of
@@ -11,7 +11,7 @@ the API can be found in [Embedding.md](Embedding.md).
 
 | Macro | Description |
 | :--- | :--- |
-| **`CIVETWEB_VERSION`** | The current version of the website as a string with the major and minor version number seperated with a dot. For version 1.9, this string will for example have the value "1.9" |
+| **`LIBHTTP_VERSION`** | The current version of the website as a string with the major and minor version number seperated with a dot. For version 1.9, this string will for example have the value "1.9" |
 
 ## Structures
 
