@@ -7243,12 +7243,3 @@ int XX_httplib_set_throttle( const char *spec, uint32_t remote_ip, const char *u
 	return throttle;
 
 }  /* XX_httplib_set_throttle */
-
-
-uint32_t XX_httplib_get_remote_ip( const struct mg_connection *conn ) {
-
-	if ( conn == NULL ) return 0;
-
-	return ntohl(*(const uint32_t *)&conn->client.rsa.sin.sin_addr);
-
-}  /* XX_httplib_get_remote_ip */
