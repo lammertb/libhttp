@@ -75,6 +75,7 @@ LIB_SOURCES =	src/libhttp.c					\
 		src/httplib_lock_unlock_context.c		\
 		src/httplib_log_access.c			\
 		src/httplib_master_thread.c			\
+		src/httplib_mkcol.c				\
 		src/httplib_parse_net.c				\
 		src/httplib_process_new_connection.c		\
 		src/httplib_produce_socket.c			\
