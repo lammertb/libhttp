@@ -63,6 +63,7 @@ LIB_SOURCES =	src/libhttp.c					\
 		src/httplib_get_system_name.c			\
 		src/httplib_get_uri_type.c			\
 		src/httplib_getreq.c				\
+		src/httplib_handle_cgi_request.c		\
 		src/httplib_handle_file_based_request.c		\
 		src/httplib_handle_form_request.c		\
 		src/httplib_handle_propfind.c			\

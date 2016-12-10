@@ -840,6 +840,26 @@ struct de {
 	struct file file;
 };
 
+/* This structure helps to create an environment for the spawned CGI program.
+ * Environment is an array of "VARIABLE=VALUE\0" ASCIIZ strings,
+ * last element must be NULL.
+ * However, on Windows there is a requirement that all these VARIABLE=VALUE\0
+ * strings must reside in a contiguous buffer. The end of the buffer is
+ * marked by two '\0' characters.
+ * We satisfy both worlds: we create an envp array (which is vars), all
+ * entries are actually pointers inside buf. */
+struct cgi_environment {
+	struct mg_connection *conn;
+	/* Data block */
+	char *buf;      /* Environment buffer */
+	size_t buflen;  /* Space available in buf */
+	size_t bufused; /* Space taken in buf */
+	                /* Index block */
+	char **var;     /* char **envp */
+	size_t varlen;  /* Number of variables available in var */
+	size_t varused; /* Number of variables stored in var */
+};
+
 
 
 /*
@@ -896,6 +916,7 @@ void			XX_httplib_handle_request( struct mg_connection *conn );
 void			XX_httplib_handle_ssi_file_request( struct mg_connection *conn, const char *path, struct file *filep );
 void			XX_httplib_handle_static_file_request( struct mg_connection *conn, const char *path, struct file *filep, const char *mime_type, const char *additional_headers );
 void			XX_httplib_handle_websocket_request( struct mg_connection *conn, const char *path, int is_callback_resource, mg_websocket_connect_handler ws_connect_handler, mg_websocket_ready_handler ws_ready_handler, mg_websocket_data_handler ws_data_handler, mg_websocket_close_handler ws_close_handler, void *cbData );
+int			XX_httplib_header_has_option( const char *header, const char *option );
 int			XX_httplib_initialize_ssl( struct mg_context *ctx );
 void XX_httplib_interpret_uri( struct mg_connection *conn, char *filename, size_t filename_buf_len, struct file *filep, int *is_found, int *is_script_resource, int *is_websocket_request, int *is_put_or_delete_request );
 int			XX_httplib_is_authorized_for_put( struct mg_connection *conn );
@@ -915,9 +936,11 @@ int			XX_httplib_parse_http_headers( char **buf, struct mg_request_info *ri );
 int			XX_httplib_parse_http_message( char *buf, int len, struct mg_request_info *ri );
 int			XX_httplib_parse_net( const char *spec, uint32_t *net, uint32_t *mask );
 int			XX_httplib_parse_range_header( const char *header, int64_t *a, int64_t *b );
+void			XX_httplib_prepare_cgi_environment( struct mg_connection *conn, const char *prog, struct cgi_environment *env );
 void			XX_httplib_process_new_connection( struct mg_connection *conn );
 void			XX_httplib_produce_socket( struct mg_context *ctx, const struct socket *sp );
 int			XX_httplib_pull( FILE *fp, struct mg_connection *conn, char *buf, int len, double timeout );
+int			XX_httplib_pull_all( FILE *fp, struct mg_connection *conn, char *buf, int len );
 int			XX_httplib_put_dir( struct mg_connection *conn, const char *path );
 void			XX_httplib_put_file( struct mg_connection *conn, const char *path );
 int			XX_httplib_read_request( FILE *fp, struct mg_connection *conn, char *buf, int bufsiz, int *nread );
@@ -952,6 +975,7 @@ int			XX_httplib_should_decode_url( const struct mg_connection *conn );
 int			XX_httplib_should_keep_alive( const struct mg_connection *conn );
 void			XX_httplib_snprintf( const struct mg_connection *conn, int *truncated, char *buf, size_t buflen, PRINTF_FORMAT_STRING(const char *fmt), ... ) PRINTF_ARGS(5, 6);
 void			XX_httplib_sockaddr_to_string(char *buf, size_t len, const union usa *usa );
+pid_t			XX_httplib_spawn_process( struct mg_connection *conn, const char *prog, char *envblk, char *envp[], int fdin[2], int fdout[2], int fderr[2], const char *dir );
 const char *		XX_httplib_ssl_error( void );
 void			XX_httplib_ssl_get_client_cert_info( struct mg_connection *conn );
 long			XX_httplib_ssl_get_protocol( int version_id );

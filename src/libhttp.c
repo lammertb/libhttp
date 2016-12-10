@@ -1381,7 +1381,7 @@ reparse:
 /* A helper function for checking if a comma separated list of values contains
  * the given option (case insensitvely).
  * 'header' can be NULL, in which case false is returned. */
-static int header_has_option(const char *header, const char *option) {
+int XX_httplib_header_has_option( const char *header, const char *option ) {
 
 	struct vec opt_vec;
 	struct vec eq_vec;
@@ -1394,7 +1394,9 @@ static int header_has_option(const char *header, const char *option) {
 	}
 
 	return 0;
-}
+
+}  /* XX_httplib_header_has_option */
+
 
 /* Perform case-insensitive match of string against pattern */
 int XX_httplib_match_prefix(const char *pattern, size_t pattern_len, const char *str) {
@@ -1447,7 +1449,7 @@ int XX_httplib_should_keep_alive( const struct mg_connection *conn ) {
 		const char *header = mg_get_header(conn, "Connection");
 		if (conn->must_close || conn->internal_error || conn->status_code == 401
 		    || mg_strcasecmp(conn->ctx->config[ENABLE_KEEP_ALIVE], "yes") != 0
-		    || (header != NULL && !header_has_option(header, "keep-alive"))
+		    || (header != NULL && !XX_httplib_header_has_option(header, "keep-alive"))
 		    || (header == NULL && http_version
 		        && 0 != strcmp(http_version, "1.1"))) {
 			return 0;
@@ -2284,7 +2286,7 @@ static void trim_trailing_whitespaces( char *s ) {
 }  /* trim_trailing_whitespaces */
 
 
-static pid_t spawn_process(struct mg_connection *conn, const char *prog, char *envblk, char *envp[], int fdin[2], int fdout[2], int fderr[2], const char *dir) {
+pid_t XX_httplib_spawn_process( struct mg_connection *conn, const char *prog, char *envblk, char *envp[], int fdin[2], int fdout[2], int fderr[2], const char *dir ) {
 
 	HANDLE me;
 	char *p;
@@ -2375,10 +2377,12 @@ spawn_cleanup:
 	CloseHandle(si.hStdError);
 	CloseHandle(si.hStdInput);
 
-	if (pi.hThread != NULL) (void)CloseHandle(pi.hThread);
+	if (pi.hThread != NULL) CloseHandle(pi.hThread);
 
 	return (pid_t)pi.hProcess;
-}
+
+}  /* XX_httplib_spawn_process */
+
 #endif /* !NO_CGI */
 
 
@@ -2478,7 +2482,7 @@ int XX_httplib_join_thread( pthread_t threadid ) {
 
 
 #ifndef NO_CGI
-static pid_t spawn_process(struct mg_connection *conn, const char *prog, char *envblk, char *envp[], int fdin[2], int fdout[2], int fderr[2], const char *dir) {
+pid_t XX_httplib_spawn_process( struct mg_connection *conn, const char *prog, char *envblk, char *envp[], int fdin[2], int fdout[2], int fderr[2], const char *dir ) {
 
 	pid_t pid;
 	const char *interp;
@@ -2529,7 +2533,9 @@ static pid_t spawn_process(struct mg_connection *conn, const char *prog, char *e
 	}
 
 	return pid;
-}
+
+}  /* XX_httplib_spawn_process */
+
 #endif /* !NO_CGI */
 
 
@@ -2800,7 +2806,7 @@ int XX_httplib_pull( FILE *fp, struct mg_connection *conn, char *buf, int len, d
 }  /* XX_httplib_pull */
 
 
-static int pull_all(FILE *fp, struct mg_connection *conn, char *buf, int len) {
+int XX_httplib_pull_all( FILE *fp, struct mg_connection *conn, char *buf, int len ) {
 
 	int n;
 	int nread = 0;
@@ -2827,7 +2833,8 @@ static int pull_all(FILE *fp, struct mg_connection *conn, char *buf, int len) {
 	}
 
 	return nread;
-}
+
+}  /* XX_httplib_pull_all */
 
 
 void XX_httplib_discard_unread_request_data( struct mg_connection *conn ) {
@@ -2913,7 +2920,7 @@ static int mg_read_inner(struct mg_connection *conn, void *buf, size_t len) {
 		/* We have returned all buffered data. Read new data from the remote
 		 * socket.
 		 */
-		if ((n = pull_all(NULL, conn, (char *)buf, (int)len64)) >= 0) {
+		if ((n = XX_httplib_pull_all(NULL, conn, (char *)buf, (int)len64)) >= 0) {
 			nread += n;
 		} else {
 			nread = ((nread > 0) ? nread : n);
@@ -5519,25 +5526,6 @@ int XX_httplib_forward_body_data( struct mg_connection *conn, FILE *fp, SOCKET s
 #endif
 
 #if !defined(NO_CGI)
-/* This structure helps to create an environment for the spawned CGI program.
- * Environment is an array of "VARIABLE=VALUE\0" ASCIIZ strings,
- * last element must be NULL.
- * However, on Windows there is a requirement that all these VARIABLE=VALUE\0
- * strings must reside in a contiguous buffer. The end of the buffer is
- * marked by two '\0' characters.
- * We satisfy both worlds: we create an envp array (which is vars), all
- * entries are actually pointers inside buf. */
-struct cgi_environment {
-	struct mg_connection *conn;
-	/* Data block */
-	char *buf;      /* Environment buffer */
-	size_t buflen;  /* Space available in buf */
-	size_t bufused; /* Space taken in buf */
-	                /* Index block */
-	char **var;     /* char **envp */
-	size_t varlen;  /* Number of variables available in var */
-	size_t varused; /* Number of variables stored in var */
-};
 
 
 static void addenv(struct cgi_environment *env, PRINTF_FORMAT_STRING(const char *fmt), ...) PRINTF_ARGS(2, 3); 
@@ -5606,7 +5594,7 @@ static void addenv(struct cgi_environment *env, const char *fmt, ...) {
 }
 
 
-static void prepare_cgi_environment( struct mg_connection *conn, const char *prog, struct cgi_environment *env ) {
+void XX_httplib_prepare_cgi_environment( struct mg_connection *conn, const char *prog, struct cgi_environment *env ) {
 
 	const char *s;
 	struct vec var_vec;
@@ -5722,232 +5710,7 @@ static void prepare_cgi_environment( struct mg_connection *conn, const char *pro
 
 	env->var[env->varused] = NULL;
 	env->buf[env->bufused] = '\0';
-}
 
-
-void XX_httplib_handle_cgi_request( struct mg_connection *conn, const char *prog ) {
-
-	char *buf;
-	size_t buflen;
-	int headers_len;
-	int data_len;
-	int i;
-	int truncated;
-	int fdin[2]  = {-1, -1};
-	int fdout[2] = {-1, -1};
-	int fderr[2] = {-1, -1};
-	const char *status;
-	const char *status_text;
-	const char *connection_state;
-	char *pbuf;
-	char dir[PATH_MAX];
-	char *p;
-	struct mg_request_info ri;
-	struct cgi_environment blk;
-	FILE *in;
-	FILE *out;
-	FILE *err;
-	struct file fout = STRUCT_FILE_INITIALIZER;
-	pid_t pid = (pid_t)-1;
-
-	if (conn == NULL) return;
-
-	in  = NULL;
-	out = NULL;
-	err = NULL;
-
-	buf    = NULL;
-	buflen = 16384;
-	prepare_cgi_environment(conn, prog, &blk);
-
-	/* CGI must be executed in its own directory. 'dir' must point to the
-	 * directory containing executable program, 'p' must point to the
-	 * executable program name relative to 'dir'. */
-	XX_httplib_snprintf(conn, &truncated, dir, sizeof(dir), "%s", prog);
-
-	if (truncated) {
-		mg_cry(conn, "Error: CGI program \"%s\": Path too long", prog);
-		XX_httplib_send_http_error(conn, 500, "Error: %s", "CGI path too long");
-		goto done;
-	}
-
-	if ((p = strrchr(dir, '/')) != NULL) {
-		*p++ = '\0';
-	} else {
-		dir[0] = '.', dir[1] = '\0';
-		p = (char *)prog;
-	}
-
-	if (pipe(fdin) != 0 || pipe(fdout) != 0 || pipe(fderr) != 0) {
-		status = strerror(ERRNO);
-		mg_cry(conn, "Error: CGI program \"%s\": Can not create CGI pipes: %s", prog, status);
-		XX_httplib_send_http_error(conn, 500, "Error: Cannot create CGI pipe: %s", status);
-		goto done;
-	}
-
-	pid = spawn_process(conn, p, blk.buf, blk.var, fdin, fdout, fderr, dir);
-
-	if (pid == (pid_t)-1) {
-		status = strerror(ERRNO);
-		mg_cry(conn, "Error: CGI program \"%s\": Can not spawn CGI process: %s", prog, status);
-		XX_httplib_send_http_error(conn, 500, "Error: Cannot spawn CGI process [%s]: %s", prog, status);
-		goto done;
-	}
-
-	/* Make sure child closes all pipe descriptors. It must dup them to 0,1 */
-	XX_httplib_set_close_on_exec( (SOCKET)fdin[0],  conn );  /* stdin read */
-	XX_httplib_set_close_on_exec( (SOCKET)fdout[1], conn ); /* stdout write */
-	XX_httplib_set_close_on_exec( (SOCKET)fderr[1], conn ); /* stderr write */
-	XX_httplib_set_close_on_exec( (SOCKET)fdin[1],  conn );  /* stdin write */
-	XX_httplib_set_close_on_exec( (SOCKET)fdout[0], conn ); /* stdout read */
-	XX_httplib_set_close_on_exec( (SOCKET)fderr[0], conn ); /* stderr read */
-
-	/* Parent closes only one side of the pipes.
-	 * If we don't mark them as closed, close() attempt before
-	 * return from this function throws an exception on Windows.
-	 * Windows does not like when closed descriptor is closed again. */
-	close( fdin[0]  );
-	close( fdout[1] );
-	close( fderr[1] );
-
-	fdin[0]  = -1;
-	fdout[1] = -1;
-	fderr[1] = -1;
-
-	if ((in = fdopen(fdin[1], "wb")) == NULL) {
-		status = strerror(ERRNO);
-		mg_cry(conn, "Error: CGI program \"%s\": Can not open stdin: %s", prog, status);
-		XX_httplib_send_http_error(conn, 500, "Error: CGI can not open fdin\nfopen: %s", status);
-		goto done;
-	}
-
-	if ((out = fdopen(fdout[0], "rb")) == NULL) {
-		status = strerror(ERRNO);
-		mg_cry(conn, "Error: CGI program \"%s\": Can not open stdout: %s", prog, status);
-		XX_httplib_send_http_error(conn, 500, "Error: CGI can not open fdout\nfopen: %s", status);
-		goto done;
-	}
-
-	if ((err = fdopen(fderr[0], "rb")) == NULL) {
-		status = strerror(ERRNO);
-		mg_cry(conn, "Error: CGI program \"%s\": Can not open stderr: %s", prog, status);
-		XX_httplib_send_http_error(conn, 500, "Error: CGI can not open fdout\nfopen: %s", status);
-		goto done;
-	}
-
-	setbuf( in,  NULL );
-	setbuf( out, NULL );
-	setbuf( err, NULL );
-	fout.fp = out;
-
-	if ((conn->request_info.content_length > 0) || conn->is_chunked) {
-		/* This is a POST/PUT request, or another request with body data. */
-		if (!XX_httplib_forward_body_data(conn, in, INVALID_SOCKET, NULL)) {
-			/* Error sending the body data */
-			mg_cry(conn, "Error: CGI program \"%s\": Forward body data failed", prog);
-			goto done;
-		}
-	}
-
-	/* Close so child gets an EOF. */
-	fclose(in);
-	in = NULL;
-	fdin[1] = -1;
-
-	/* Now read CGI reply into a buffer. We need to set correct
-	 * status code, thus we need to see all HTTP headers first.
-	 * Do not send anything back to client, until we buffer in all
-	 * HTTP headers. */
-	data_len = 0;
-	buf = (char *)XX_httplib_malloc(buflen);
-	if (buf == NULL) {
-		XX_httplib_send_http_error(conn, 500, "Error: Not enough memory for CGI buffer (%u bytes)", (unsigned int)buflen);
-		mg_cry(conn, "Error: CGI program \"%s\": Not enough memory for buffer (%u " "bytes)", prog, (unsigned int)buflen);
-		goto done;
-	}
-	headers_len = XX_httplib_read_request(out, conn, buf, (int)buflen, &data_len);
-	if (headers_len <= 0) {
-
-		/* Could not parse the CGI response. Check if some error message on
-		 * stderr. */
-		i = pull_all(err, conn, buf, (int)buflen);
-		if (i > 0) {
-			mg_cry(conn, "Error: CGI program \"%s\" sent error " "message: [%.*s]", prog, i, buf);
-			XX_httplib_send_http_error(conn, 500, "Error: CGI program \"%s\" sent error " "message: [%.*s]", prog, i, buf);
-		} else {
-			mg_cry(conn, "Error: CGI program sent malformed or too big " "(>%u bytes) HTTP headers: [%.*s]", (unsigned)buflen, data_len, buf);
-
-			XX_httplib_send_http_error(conn,
-			                500,
-			                "Error: CGI program sent malformed or too big "
-			                "(>%u bytes) HTTP headers: [%.*s]",
-			                (unsigned)buflen,
-			                data_len,
-			                buf);
-		}
-
-		goto done;
-	}
-	pbuf = buf;
-	buf[headers_len - 1] = '\0';
-	XX_httplib_parse_http_headers(&pbuf, &ri);
-
-	/* Make up and send the status line */
-	status_text = "OK";
-	if ((status = XX_httplib_get_header(&ri, "Status")) != NULL) {
-		conn->status_code = atoi(status);
-		status_text = status;
-		while (isdigit(*(const unsigned char *)status_text)
-		       || *status_text == ' ') {
-			status_text++;
-		}
-	} else if (XX_httplib_get_header(&ri, "Location") != NULL) {
-		conn->status_code = 302;
-	} else {
-		conn->status_code = 200;
-	}
-	connection_state = XX_httplib_get_header(&ri, "Connection");
-	if (!header_has_option(connection_state, "keep-alive")) {
-		conn->must_close = 1;
-	}
-	mg_printf(conn, "HTTP/1.1 %d %s\r\n", conn->status_code, status_text);
-
-	/* Send headers */
-	for (i = 0; i < ri.num_headers; i++) {
-		mg_printf(conn, "%s: %s\r\n", ri.http_headers[i].name, ri.http_headers[i].value);
-	}
-	mg_write(conn, "\r\n", 2);
-
-	/* Send chunk of data that may have been read after the headers */
-	conn->num_bytes_sent +=
-	    mg_write(conn, buf + headers_len, (size_t)(data_len - headers_len));
-
-	/* Read the rest of CGI output and send to the client */
-	XX_httplib_send_file_data(conn, &fout, 0, INT64_MAX);
-
-done:
-	XX_httplib_free(blk.var);
-	XX_httplib_free(blk.buf);
-
-	if (pid != (pid_t)-1) {
-		kill(pid, SIGKILL);
-#if !defined(_WIN32)
-		{
-			int st;
-			while (waitpid(pid, &st, 0) != -1)
-				; /* clean zombies */
-		}
-#endif
-	}
-	if ( fdin[0]  != -1 ) close( fdin[0]  );
-	if ( fdout[1] != -1 ) close( fdout[1] );
-
-	if ( in  != NULL ) fclose( in  ); else if ( fdin[1]  != -1 ) close( fdin[1]  );
-	if ( out != NULL ) fclose( out ); else if ( fdout[0] != -1 ) close( fdout[0] );
-	if ( err != NULL ) fclose( err ); else if ( fderr[0] != -1 ) close( fderr[0] );
-
-	if ( buf != NULL ) XX_httplib_free( buf );
-
-}  /* XX_httplib_handle_cgi_request */
+}  /* XX_httplib_prepare_cgi_environment */
 
 #endif /* !NO_CGI */
