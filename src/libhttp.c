@@ -8219,7 +8219,7 @@ int XX_httplib_set_ports_option( struct mg_context *ctx ) {
 }  /* XX_httplib_set_ports_option */
 
 
-static const char * header_val(const struct mg_connection *conn, const char *header) {
+static const char *header_val(const struct mg_connection *conn, const char *header) {
 
 	const char *header_value;
 
@@ -8556,84 +8556,5 @@ const char * XX_httplib_ssl_error(void) {
 	return ((err == 0) ? "" : ERR_error_string(err, NULL));
 
 }  /* XX_httplib_ssl_error */
-
-
-static int hexdump2string(void *mem, int memlen, char *buf, int buflen) {
-
-	int i;
-	const char hexdigit[] = "0123456789abcdef";
-
-	if (memlen <= 0 || buflen <= 0) return 0;
-	if (buflen < (3 * memlen)) return 0;
-
-	for (i = 0; i < memlen; i++) {
-		if (i > 0) buf[3*i - 1] = ' ';
-		buf[3*i    ] = hexdigit[(((uint8_t *)mem)[i] >> 4) & 0xF];
-		buf[3*i + 1] = hexdigit[ ((uint8_t *)mem)[i]       & 0xF];
-	}
-	buf[3 * memlen - 1] = 0;
-
-	return 1;
-}
-
-
-void XX_httplib_ssl_get_client_cert_info( struct mg_connection *conn ) {
-
-	X509 *cert = SSL_get_peer_certificate(conn->ssl);
-
-	if ( cert == NULL ) return;
-
-	char str_subject[1024];
-	char str_issuer[1024];
-	char str_serial[1024];
-	char str_finger[1024];
-	unsigned char buf[256];
-	int len;
-	unsigned int ulen;
-
-	/* Handle to algorithm used for fingerprint */
-	const EVP_MD *digest = EVP_get_digestbyname("sha1");
-
-	/* Get Subject and issuer */
-	X509_NAME *subj = X509_get_subject_name(cert);
-	X509_NAME *iss = X509_get_issuer_name(cert);
-
-	/* Get serial number */
-	ASN1_INTEGER *serial = X509_get_serialNumber(cert);
-
-	/* Translate subject and issuer to a string */
-	X509_NAME_oneline( subj, str_subject, (int)sizeof(str_subject) );
-	X509_NAME_oneline( iss,  str_issuer,  (int)sizeof(str_issuer)  );
-
-	/* Translate serial number to a hex string */
-	len = i2c_ASN1_INTEGER(serial, NULL);
-	if ((len > 0) && ((unsigned)len < (unsigned)sizeof(buf))) {
-		unsigned char *pbuf = buf;
-		int len2 = i2c_ASN1_INTEGER(serial, &pbuf);
-		if (!hexdump2string(
-		        buf, len2, str_serial, (int)sizeof(str_serial))) {
-			*str_serial = 0;
-		}
-	} else *str_serial = 0;
-
-	/* Calculate SHA1 fingerprint and store as a hex string */
-	ulen = 0;
-	ASN1_digest((int (*)())i2d_X509, digest, (char *)cert, buf, &ulen);
-	if (!hexdump2string( buf, (int)ulen, str_finger, (int)sizeof(str_finger))) *str_finger = 0;
-
-	conn->request_info.client_cert =
-	    (struct client_cert *)XX_httplib_malloc(sizeof(struct client_cert));
-	if (conn->request_info.client_cert) {
-		conn->request_info.client_cert->subject = XX_httplib_strdup( str_subject );
-		conn->request_info.client_cert->issuer  = XX_httplib_strdup( str_issuer  );
-		conn->request_info.client_cert->serial  = XX_httplib_strdup( str_serial  );
-		conn->request_info.client_cert->finger  = XX_httplib_strdup( str_finger  );
-	} else {
-		/* TODO: write some OOM message */
-	}
-
-	X509_free(cert);
-
-}  /* XX_httplib_ssl_get_client_cert_info */
 
 #endif /* !NO_SSL */

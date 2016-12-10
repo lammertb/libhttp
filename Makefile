@@ -68,6 +68,7 @@ LIB_SOURCES =	src/libhttp.c					\
 		src/httplib_set_ssl_option.c			\
 		src/httplib_set_sock_timeout.c			\
 		src/httplib_set_tcp_nodelay.c			\
+		src/httplib_ssl_get_client_cert_info.c		\
 		src/httplib_ssl_get_protocol.c			\
 		src/httplib_ssl_locking_callback.c		\
 		src/httplib_ssl_use_pem_file.c			\
