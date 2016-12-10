@@ -72,6 +72,7 @@ LIB_SOURCES =	src/libhttp.c					\
 		src/httplib_ssl_error.c				\
 		src/httplib_ssl_get_client_cert_info.c		\
 		src/httplib_ssl_get_protocol.c			\
+		src/httplib_ssl_id_callback.c			\
 		src/httplib_ssl_locking_callback.c		\
 		src/httplib_ssl_use_pem_file.c			\
 		src/httplib_sslize.c				\
