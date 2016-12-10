@@ -831,9 +831,20 @@ enum { REQUEST_HANDLER, WEBSOCKET_HANDLER, AUTH_HANDLER };
  * indicate that these are private functions.
  */
 
+typedef struct {
+	uint32_t state[5];
+	uint32_t count[2];
+	unsigned char buffer[64];
+} SHA1_CTX;
+
+void			SHA1Final( unsigned char digest[20], SHA1_CTX *context );
+void			SHA1Init( SHA1_CTX *context );
+void			SHA1Update( SHA1_CTX *context, const unsigned char *data, uint32_t len );
+
 void			XX_httplib_accept_new_connection( const struct socket *listener, struct mg_context *ctx );
 int			XX_httplib_atomic_dec( volatile int *addr );
 int			XX_httplib_atomic_inc( volatile int *addr );
+void			XX_httplib_base64_encode( const unsigned char *src, int src_len, char *dst );
 int			XX_httplib_check_acl( struct mg_context *ctx, uint32_t remote_ip );
 int			XX_httplib_check_authorization( struct mg_connection *conn, const char *path );
 void			XX_httplib_close_all_listening_sockets( struct mg_context *ctx );

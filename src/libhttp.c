@@ -3308,7 +3308,7 @@ int mg_get_cookie(const char *cookie_header, const char *var_name, char *dst, si
 
 
 #if defined(USE_WEBSOCKET)
-static void base64_encode(const unsigned char *src, int src_len, char *dst) {
+void XX_httplib_base64_encode( const unsigned char *src, int src_len, char *dst ) {
 
 	static const char *b64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 	int i;
@@ -3331,7 +3331,8 @@ static void base64_encode(const unsigned char *src, int src_len, char *dst) {
 	}
 	while (j % 4 != 0) dst[j++] = '=';
 	dst[j++] = '\0';
-}
+
+}  /* XX_httplib_base64_encode */
 #endif
 
 
@@ -6571,12 +6572,6 @@ static uint32_t blk0(union char64long16 *block, int i) {
 	w = rol(w, 30);
 
 
-typedef struct {
-	uint32_t state[5];
-	uint32_t count[2];
-	unsigned char buffer[64];
-} SHA1_CTX;
-
 
 static void SHA1Transform(uint32_t state[5], const unsigned char buffer[64]) {
 
@@ -6687,7 +6682,7 @@ static void SHA1Transform(uint32_t state[5], const unsigned char buffer[64]) {
 }
 
 
-static void SHA1Init(SHA1_CTX *context) {
+void SHA1Init( SHA1_CTX *context ) {
 
 	context->state[0] = 0x67452301;
 	context->state[1] = 0xEFCDAB89;
@@ -6695,10 +6690,11 @@ static void SHA1Init(SHA1_CTX *context) {
 	context->state[3] = 0x10325476;
 	context->state[4] = 0xC3D2E1F0;
 	context->count[0] = context->count[1] = 0;
-}
+
+}  /* SHA1Init */
 
 
-static void SHA1Update(SHA1_CTX *context, const unsigned char *data, uint32_t len) {
+void SHA1Update(SHA1_CTX *context, const unsigned char *data, uint32_t len) {
 
 	uint32_t i;
 	uint32_t j;
@@ -6718,10 +6714,11 @@ static void SHA1Update(SHA1_CTX *context, const unsigned char *data, uint32_t le
 	else i = 0;
 
 	memcpy(&context->buffer[j], &data[i], len - i);
-}
+
+}  /* SHA1Update */
 
 
-static void SHA1Final(unsigned char digest[20], SHA1_CTX *context) {
+void SHA1Final( unsigned char digest[20], SHA1_CTX *context ) {
 
 	unsigned i;
 	unsigned char finalcount[8];
@@ -6742,66 +6739,9 @@ static void SHA1Final(unsigned char digest[20], SHA1_CTX *context) {
 	}
 	memset(context, '\0', sizeof(*context));
 	memset(&finalcount, '\0', sizeof(finalcount));
-}
+
+}  /* SHA1Final */
+
 /* END OF SHA1 CODE */
-
-
-int XX_httplib_send_websocket_handshake( struct mg_connection *conn, const char *websock_key ) {
-
-	static const char *magic = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
-	const char *protocol = NULL;
-	char buf[100];
-	char sha[20];
-	char b64_sha[sizeof(sha) * 2];
-	SHA1_CTX sha_ctx;
-	int truncated;
-
-	/* Calculate Sec-WebSocket-Accept reply from Sec-WebSocket-Key. */
-	XX_httplib_snprintf(conn, &truncated, buf, sizeof(buf), "%s%s", websock_key, magic);
-	if (truncated) {
-		conn->must_close = 1;
-		return 0;
-	}
-
-	SHA1Init(&sha_ctx);
-	SHA1Update(&sha_ctx, (unsigned char *)buf, (uint32_t)strlen(buf));
-	SHA1Final((unsigned char *)sha, &sha_ctx);
-	base64_encode((unsigned char *)sha, sizeof(sha), b64_sha);
-	mg_printf(conn,
-	          "HTTP/1.1 101 Switching Protocols\r\n"
-	          "Upgrade: websocket\r\n"
-	          "Connection: Upgrade\r\n"
-	          "Sec-WebSocket-Accept: %s\r\n",
-	          b64_sha);
-	protocol = mg_get_header(conn, "Sec-WebSocket-Protocol");
-	if (protocol) {
-		/* The protocol is a comma seperated list of names. */
-		/* The server must only return one value from this list. */
-		/* First check if it is a list or just a single value. */
-		const char *sep = strchr(protocol, ',');
-		if (sep == NULL) {
-			/* Just a single protocol -> accept it. */
-			mg_printf(conn, "Sec-WebSocket-Protocol: %s\r\n\r\n", protocol);
-		} else {
-			/* Multiple protocols -> accept the first one. */
-			/* This is just a quick fix if the client offers multiple
-			 * protocols. In order to get the behavior intended by
-			 * RFC 6455 (https://tools.ietf.org/rfc/rfc6455.txt), it is
-			 * required to have a list of websocket subprotocols accepted
-			 * by the server. Then the server must either select a subprotocol
-			 * supported by client and server, or the server has to abort the
-			 * handshake by not returning a Sec-Websocket-Protocol header if
-			 * no subprotocol is acceptable.
-			 */
-			mg_printf(conn, "Sec-WebSocket-Protocol: %.*s\r\n\r\n", (int)(sep - protocol), protocol);
-		}
-		/* TODO: Real subprotocol negotiation instead of just taking the first
-		 * websocket subprotocol suggested by the client. */
-	}
-	else mg_printf(conn, "%s", "\r\n");
-
-	return 1;
-
-}  /* XX_httplib_send_websocket_handshake */
 
 #endif /* !USE_WEBSOCKET */
