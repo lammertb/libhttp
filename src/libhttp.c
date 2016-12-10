@@ -6507,7 +6507,3 @@ void mg_unlock_context( struct mg_context *ctx ) {
 	if ( ctx != NULL ) pthread_mutex_unlock( & ctx->nonce_mutex );
 
 }  /* mg_unlock_context */
-
-#if defined(USE_TIMERS)
-#include "timer.inl"
-#endif /* USE_TIMERS */

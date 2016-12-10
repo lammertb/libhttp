@@ -1,3 +1,30 @@
+/* 
+ * Copyright (c) 2016 Lammert Bies
+ * Copyright (c) 2013-2016 the Civetweb developers
+ * Copyright (c) 2004-2013 Sergey Lyubka
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
+
+
+#if defined(USE_TIMERS)
 
 #if !defined(MAX_TIMERS)
 #define MAX_TIMERS MAX_WORKER_THREADS
@@ -19,22 +46,15 @@ struct ttimers {
 	unsigned timer_count;             /* Current size of timer list */
 };
 
-static int
-timer_add(struct mg_context *ctx,
-          double next_time,
-          double period,
-          int is_relative,
-          taction action,
-          void *arg)
-{
-	unsigned u, v;
+static int timer_add( struct mg_context *ctx, double next_time, double period, int is_relative, taction action, void *arg ) {
+
+	unsigned u;
+	unsigned v;
 	int error = 0;
 	struct timespec now;
 	double dt; /* double time */
 
-	if (ctx->stop_flag) {
-		return 0;
-	}
+	if (ctx->stop_flag) return 0;
 
 	clock_gettime(CLOCK_MONOTONIC, &now);
 	dt = (double)now.tv_sec;
@@ -51,11 +71,8 @@ timer_add(struct mg_context *ctx,
 	 *        The first callback will be so fast as possible  (now)
 	 *        but the next callback on period
 	*/
-	if (is_relative) {
-		next_time += dt;
-	} else if (next_time < dt) {
-		next_time = dt;
-	}
+	if      ( is_relative    ) next_time += dt;
+	else if ( next_time < dt ) next_time  = dt;
 
 	pthread_mutex_lock(&ctx->timers->mutex);
 	if (ctx->timers->timer_count == MAX_TIMERS) {
@@ -78,11 +95,11 @@ timer_add(struct mg_context *ctx,
 	}
 	pthread_mutex_unlock(&ctx->timers->mutex);
 	return error;
-}
 
-static void
-timer_thread_run(void *thread_func_param)
-{
+}  /* timer_add */
+
+static void timer_thread_run( void *thread_func_param ) {
+
 	struct mg_context *ctx = (struct mg_context *)thread_func_param;
 	struct timespec now;
 	double d;
@@ -103,7 +120,9 @@ timer_thread_run(void *thread_func_param)
 	       == EINTR) { /*nop*/
 		;
 	}
-#else
+
+#else  /* HAVE_CLOCK_NANOSLEEP */
+
 	clock_gettime(CLOCK_MONOTONIC, &now);
 	d = (double)now.tv_sec + (double)now.tv_nsec * 1.0E-9;
 	while (ctx->stop_flag == 0) {
@@ -127,41 +146,48 @@ timer_thread_run(void *thread_func_param)
 		clock_gettime(CLOCK_MONOTONIC, &now);
 		d = (double)now.tv_sec + (double)now.tv_nsec * 1.0E-9;
 	}
-#endif
-}
+
+#endif  /* HAVE_CLOCK_NANOSLEEP */
+
+}  /* timer_thread_run */
 
 #ifdef _WIN32
-static unsigned __stdcall timer_thread(void *thread_func_param)
-{
-	timer_thread_run(thread_func_param);
+static unsigned __stdcall timer_thread( void *thread_func_param ) {
+
+	timer_thread_run( thread_func_param );
 	return 0;
-}
+
+}  /* timer_thread */
+
 #else
-static void *
-timer_thread(void *thread_func_param)
-{
-	timer_thread_run(thread_func_param);
+static void * timer_thread( void *thread_func_param ) {
+
+	timer_thread_run( thread_func_param );
 	return NULL;
-}
+
+}  /* timer_thread */
+
 #endif /* _WIN32 */
 
-static int
-timers_init(struct mg_context *ctx)
-{
+static int timers_init( struct mg_context *ctx ) {
+
 	ctx->timers = (struct ttimers *)mg_calloc(sizeof(struct ttimers), 1);
-	(void)pthread_mutex_init(&ctx->timers->mutex, NULL);
+	pthread_mutex_init(&ctx->timers->mutex, NULL);
 
 	/* Start timer thread */
 	mg_start_thread_with_id(timer_thread, ctx, &ctx->timers->threadid);
 
 	return 0;
-}
 
-static void
-timers_exit(struct mg_context *ctx)
-{
+}  /* timers_init */
+
+static void timers_exit( struct mg_context *ctx ) {
+
 	if (ctx->timers) {
 		(void)pthread_mutex_destroy(&ctx->timers->mutex);
 		mg_free(ctx->timers);
 	}
-}
+
+}  /* timers_exit */
+
+#endif
