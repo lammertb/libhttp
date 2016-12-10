@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2016 Lammert Bies
+ * Copyright (c) 2016 Lammert Bies
  * Copyright (c) 2013-2016 the Civetweb developers
  * Copyright (c) 2004-2013 Sergey Lyubka
  *
