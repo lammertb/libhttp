@@ -6864,8 +6864,7 @@ void XX_httplib_read_websocket( struct mg_connection *conn, mg_websocket_data_ha
 				memcpy(data, buf + header_len, len);
 				error = 0;
 				while (len < data_len) {
-					n = pull(
-					    NULL, conn, data + len, (int)(data_len - len), timeout);
+					n = pull( NULL, conn, data + len, (int)(data_len - len), timeout);
 					if (n <= 0) {
 						error = 1;
 						break;
@@ -8647,46 +8646,5 @@ void XX_httplib_ssl_locking_callback( int mode, int mutex_num, const char *file,
 	else            pthread_mutex_unlock( & XX_httplib_ssl_mutexes[mutex_num] );
 
 }  /* XX_httplib_ssl_locking_callback */
-
-
-#if !defined(NO_SSL_DL)
-void *XX_httplib_load_dll( struct mg_context *ctx, const char *dll_name, struct ssl_func *sw ) {
-
-	union {
-		void *p;
-		void (*fp)(void);
-	} u;
-	void *dll_handle;
-	struct ssl_func *fp;
-
-	if ((dll_handle = dlopen(dll_name, RTLD_LAZY)) == NULL) {
-		mg_cry( XX_httplib_fc(ctx), "%s: cannot load %s", __func__, dll_name);
-		return NULL;
-	}
-
-	for (fp = sw; fp->name != NULL; fp++) {
-#ifdef _WIN32
-		/* GetProcAddress() returns pointer to function */
-		u.fp = (void (*)(void))dlsym(dll_handle, fp->name);
-#else
-		/* dlsym() on UNIX returns void *. ISO C forbids casts of data
-		 * pointers to function pointers. We need to use a union to make a
-		 * cast. */
-		u.p = dlsym(dll_handle, fp->name);
-#endif /* _WIN32 */
-		if (u.fp == NULL) {
-			mg_cry( XX_httplib_fc(ctx), "%s: %s: cannot find %s", __func__, dll_name, fp->name);
-			dlclose(dll_handle);
-			return NULL;
-		} else fp->ptr = u.fp;
-	}
-
-	return dll_handle;
-
-}  /* XX_httplib_load_dll */
-
-
-
-#endif /* NO_SSL_DL */
 
 #endif /* !NO_SSL */
