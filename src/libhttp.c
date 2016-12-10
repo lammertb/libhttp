@@ -6162,8 +6162,7 @@ void XX_httplib_delete_file( struct mg_connection *conn, const char *path ) {
 #endif /* !NO_FILES */
 
 
-static void
-send_ssi_file(struct mg_connection *, const char *, struct file *, int);
+static void send_ssi_file(struct mg_connection *, const char *, struct file *, int);
 
 
 static void do_ssi_include(struct mg_connection *conn, const char *ssi, char *tag, int include_level) {
@@ -6174,7 +6173,7 @@ static void do_ssi_include(struct mg_connection *conn, const char *ssi, char *ta
 	size_t len;
 	int truncated = 0;
 
-	if (conn == NULL) return;
+	if ( conn == NULL ) return;
 
 	/* sscanf() is safe here, since send_ssi_file() also uses buffer
 	 * of size MG_BUF_LEN to get the tag. So strlen(tag) is
@@ -6371,32 +6370,3 @@ void XX_httplib_handle_ssi_file_request( struct mg_connection *conn, const char 
 	}
 
 }  /* XX_httplib_handle_ssi_file_request */
-
-
-#if !defined(NO_FILES)
-void XX_httplib_send_options( struct mg_connection *conn ) {
-
-	char date[64];
-	time_t curtime;
-
-	if ( conn == NULL ) return;
-
-	curtime           = time( NULL );
-	conn->status_code = 200;
-	conn->must_close  = 1;
-	XX_httplib_gmt_time_string( date, sizeof(date), &curtime );
-
-	mg_printf(conn,
-	          "HTTP/1.1 200 OK\r\n"
-	          "Date: %s\r\n"
-	          /* TODO: "Cache-Control" (?) */
-	          "Connection: %s\r\n"
-	          "Allow: GET, POST, HEAD, CONNECT, PUT, DELETE, OPTIONS, "
-	          "PROPFIND, MKCOL\r\n"
-	          "DAV: 1\r\n\r\n",
-	          date,
-	          XX_httplib_suggest_connection_header(conn));
-
-}  /* XX_httplib_send_options */
-
-#endif
