@@ -869,6 +869,8 @@ void			XX_httplib_sockaddr_to_string(char *buf, size_t len, const union usa *usa
 const char *		XX_httplib_ssl_error( void );
 void			XX_httplib_ssl_get_client_cert_info( struct mg_connection *conn );
 long			XX_httplib_ssl_get_protocol( int version_id );
+unsigned long		XX_httplib_ssl_id_callback( void );
+void			XX_httplib_ssl_locking_callback( int mode, int mutex_num, const char *file, int line );
 int			XX_httplib_ssl_use_pem_file( struct mg_context *ctx, const char *pem );
 int			XX_httplib_sslize( struct mg_connection *conn, SSL_CTX *s, int (*func)(SSL *) );
 int			XX_httplib_stat( struct mg_connection *conn, const char *path, struct file *filep );

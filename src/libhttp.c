@@ -8378,9 +8378,8 @@ void XX_httplib_tls_dtor( void *key ) {
 #if !defined(NO_SSL)
 
 /* Must be set if sizeof(pthread_t) > sizeof(unsigned long) */
-static unsigned long
-ssl_id_callback(void)
-{
+unsigned long XX_httplib_ssl_id_callback( void ) {
+
 #ifdef _WIN32
 	return GetCurrentThreadId();
 #else
@@ -8423,7 +8422,7 @@ ssl_id_callback(void)
 #endif
 
 #endif
-}
+}  /* XX_httplib_ssl_id_callback */
 
 
 
@@ -8639,18 +8638,15 @@ void XX_httplib_ssl_get_client_cert_info( struct mg_connection *conn ) {
 }  /* XX_httplib_ssl_get_client_cert_info */
 
 
-static void ssl_locking_callback( int mode, int mutex_num, const char *file, int line ) {
+void XX_httplib_ssl_locking_callback( int mode, int mutex_num, const char *file, int line ) {
 
 	(void)line;
 	(void)file;
 
-	if (mode & 1) {
-		/* 1 is CRYPTO_LOCK */
-		(void)pthread_mutex_lock(&XX_httplib_ssl_mutexes[mutex_num]);
-	} else {
-		(void)pthread_mutex_unlock(&XX_httplib_ssl_mutexes[mutex_num]);
-	}
-}
+	if ( mode & 1 ) pthread_mutex_lock(   & XX_httplib_ssl_mutexes[mutex_num] );
+	else            pthread_mutex_unlock( & XX_httplib_ssl_mutexes[mutex_num] );
+
+}  /* XX_httplib_ssl_locking_callback */
 
 
 #if !defined(NO_SSL_DL)
@@ -8690,52 +8686,7 @@ void *XX_httplib_load_dll( struct mg_context *ctx, const char *dll_name, struct 
 }  /* XX_httplib_load_dll */
 
 
-static void *cryptolib_dll_handle; /* Store the crypto library handle. */
 
 #endif /* NO_SSL_DL */
-
-
-#if defined(SSL_ALREADY_INITIALIZED)
-int XX_httplib_cryptolib_users = 1; /* Reference counter for crypto library. */
-#else
-int XX_httplib_cryptolib_users = 0; /* Reference counter for crypto library. */
-#endif
-
-
-int XX_httplib_initialize_ssl( struct mg_context *ctx ) {
-
-	int i;
-	size_t size;
-
-#if !defined(NO_SSL_DL)
-	if (!cryptolib_dll_handle) {
-		cryptolib_dll_handle = XX_httplib_load_dll(ctx, CRYPTO_LIB, XX_httplib_crypto_sw);
-		if (!cryptolib_dll_handle) return 0;
-	}
-#endif /* NO_SSL_DL */
-
-	if (XX_httplib_atomic_inc(&XX_httplib_cryptolib_users) > 1) return 1;
-
-	/* Initialize locking callbacks, needed for thread safety.
-	 * http://www.openssl.org/support/faq.html#PROG1
-	 */
-	i = CRYPTO_num_locks();
-	if (i < 0) i = 0;
-	size = sizeof(pthread_mutex_t) * ((size_t)(i));
-	if ((XX_httplib_ssl_mutexes = (pthread_mutex_t *)XX_httplib_malloc(size)) == NULL) {
-		mg_cry( XX_httplib_fc(ctx), "%s: cannot allocate mutexes: %s", __func__, XX_httplib_ssl_error());
-		return 0;
-	}
-
-	for (i = 0; i < CRYPTO_num_locks(); i++) {
-		pthread_mutex_init(&XX_httplib_ssl_mutexes[i], &XX_httplib_pthread_mutex_attr);
-	}
-
-	CRYPTO_set_locking_callback(&ssl_locking_callback);
-	CRYPTO_set_id_callback(&ssl_id_callback);
-
-	return 1;
-
-}  /* XX_httplib_initialize_ssl */
 
 #endif /* !NO_SSL */
