@@ -840,6 +840,8 @@ int			XX_httplib_connect_socket( struct mg_context *ctx, const char *host, int p
 int			XX_httplib_consume_socket( struct mg_context *ctx, struct socket *sp, int thread_index );
 void			XX_httplib_set_close_on_exec( SOCKET sock, struct mg_connection *conn );
 struct mg_connection *	XX_httplib_fc( struct mg_context *ctx );
+void			XX_httplib_fclose( struct file *filep );
+int			XX_httplib_fopen( const struct mg_connection *conn, const char *path, const char *mode, struct file *filep );
 void			XX_httplib_free_context( struct mg_context *ctx );
 const char *		XX_httplib_get_header( const struct mg_request_info *ri, const char *name );
 int			XX_httplib_get_option_index( const char *name );
@@ -885,6 +887,7 @@ int			XX_httplib_ssl_use_pem_file( struct mg_context *ctx, const char *pem );
 int			XX_httplib_sslize( struct mg_connection *conn, SSL_CTX *s, int (*func)(SSL *) );
 int			XX_httplib_stat( struct mg_connection *conn, const char *path, struct file *filep );
 char *			XX_httplib_strdup( const char *str );
+void			XX_httplib_strlcpy( register char *dst, register const char *src, size_t n );
 void			XX_httplib_tls_dtor( void *key );
 void			XX_httplib_uninitialize_ssl( struct mg_context *ctx );
 int			XX_httplib_vprintf( struct mg_connection *conn, const char *fmt, va_list ap );

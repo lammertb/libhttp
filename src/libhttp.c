@@ -871,7 +871,7 @@ static int is_file_in_memory(const struct mg_connection *conn, const char *path,
 		filep->membuf = conn->ctx->callbacks.open_file(conn, path, &size);
 		if (filep->membuf != NULL) {
 			/* NOTE: override filep->size only on success. Otherwise, it might
-			 * break constructs like if (!XX_httplib_stat() || !mg_fopen()) ... */
+			 * break constructs like if (!XX_httplib_stat() || !XX_httplib_fopen()) ... */
 			filep->size = size;
 		}
 	}
@@ -890,18 +890,18 @@ static bool is_file_opened( const struct file *filep ) {
 }  /* is_file_opened */
 
 
-/* mg_fopen will open a file either in memory or on the disk.
+/* XX_httplib_fopen will open a file either in memory or on the disk.
  * The input parameter path is a string in UTF-8 encoding.
  * The input parameter mode is the same as for fopen.
  * Either fp or membuf will be set in the output struct filep.
  * The function returns 1 on success, 0 on error. */
-static int mg_fopen(const struct mg_connection *conn, const char *path, const char *mode, struct file *filep) {
+int XX_httplib_fopen( const struct mg_connection *conn, const char *path, const char *mode, struct file *filep ) {
 
 	struct stat st;
 
 	if (!filep) return 0; 
 
-	/* TODO (high): mg_fopen should only open a file, while XX_httplib_stat should
+	/* TODO (high): XX_httplib_fopen should only open a file, while XX_httplib_stat should
 	 * only get the file status. They should not work on different members of
 	 * the same structure (bad cohesion). */
 	memset(filep, 0, sizeof(*filep));
@@ -921,20 +921,24 @@ static int mg_fopen(const struct mg_connection *conn, const char *path, const ch
 	}
 
 	return is_file_opened(filep);
-}
+
+}  /* XX_httplib_fopen */
 
 
-static void mg_fclose(struct file *filep) {
 
-	if (filep != NULL && filep->fp != NULL) { fclose(filep->fp); }
-}
+void XX_httplib_fclose( struct file *filep ) {
+
+	if (filep != NULL && filep->fp != NULL) fclose(filep->fp);
+
+}  /* XX_httplib_fclose */
 
 
-static void mg_strlcpy(register char *dst, register const char *src, size_t n) {
+void XX_httplib_strlcpy( register char *dst, register const char *src, size_t n ) {
 
 	for (; *src != '\0' && n > 1; n--) { *dst++ = *src++; }
 	*dst = '\0';
-}
+
+}  /* XX_httplib_strlcpy */
 
 
 static int lowercase(const char *s) {
@@ -973,7 +977,7 @@ static char * mg_strndup(const char *ptr, size_t len) {
 
 	char *p;
 
-	if ((p = (char *)XX_httplib_malloc(len + 1)) != NULL) mg_strlcpy(p, ptr, len + 1);
+	if ((p = (char *)XX_httplib_malloc(len + 1)) != NULL) XX_httplib_strlcpy(p, ptr, len + 1);
 
 	return p;
 }
@@ -1158,7 +1162,7 @@ static void gmt_time_string(char *buf, size_t buf_len, time_t *t) {
 	if (tm != NULL) {
 		strftime(buf, buf_len, "%a, %d %b %Y %H:%M:%S GMT", tm);
 	} else {
-		mg_strlcpy(buf, "Thu, 01 Jan 1970 00:00:00 GMT", buf_len);
+		XX_httplib_strlcpy(buf, "Thu, 01 Jan 1970 00:00:00 GMT", buf_len);
 		buf[buf_len - 1] = '\0';
 	}
 }
@@ -1198,7 +1202,7 @@ void mg_cry(const struct mg_connection *conn, const char *fmt, ...) {
 	    || (conn->ctx->callbacks.log_message(conn, buf) == 0)) {
 
 		if (conn->ctx->config[ERROR_LOG_FILE] != NULL) {
-			if (mg_fopen(conn, conn->ctx->config[ERROR_LOG_FILE], "a+", &fi)
+			if (XX_httplib_fopen(conn, conn->ctx->config[ERROR_LOG_FILE], "a+", &fi)
 			    == 0) {
 				fi.fp = NULL;
 			}
@@ -1225,7 +1229,7 @@ void mg_cry(const struct mg_connection *conn, const char *fmt, ...) {
 			fputc('\n', fi.fp);
 			fflush(fi.fp);
 			funlockfile(fi.fp);
-			mg_fclose(&fi);
+			XX_httplib_fclose(&fi);
 		}
 	}
 }
@@ -1915,7 +1919,7 @@ static void path_to_unicode(const struct mg_connection *conn, const char *path, 
 	DWORD err;
 	int (*fcompare)(const wchar_t *, const wchar_t *) = mg_wcscasecmp;
 
-	mg_strlcpy(buf, path, sizeof(buf));
+	XX_httplib_strlcpy(buf, path, sizeof(buf));
 	change_slashes_to_backslashes(buf);
 
 	/* Convert to Unicode and back. If doubly-converted string does not
@@ -1991,7 +1995,7 @@ int XX_httplib_stat( struct mg_connection *conn, const char *path, struct file *
 		 * memset */
 		filep->last_modified = time(NULL);
 		/* last_modified = now ... assumes the file may change during runtime,
-		 * so every mg_fopen call may return different data */
+		 * so every XX_httplib_fopen call may return different data */
 		/* last_modified = conn->ctx.start_time;
 		 * May be used it the data does not change during runtime. This allows
 		 * browser caching. Since we do not know, we have to assume the file
@@ -2346,10 +2350,10 @@ static pid_t spawn_process(struct mg_connection *conn, const char *prog, char *e
 			goto spawn_cleanup;
 		}
 
-		if (mg_fopen(conn, cmdline, "r", &file)) {
+		if (XX_httplib_fopen(conn, cmdline, "r", &file)) {
 			p = (char *)file.membuf;
 			mg_fgets(buf, sizeof(buf), &file, &p);
-			mg_fclose(&file);
+			XX_httplib_fclose(&file);
 			buf[sizeof(buf) - 1] = '\0';
 		}
 
@@ -3298,7 +3302,7 @@ int mg_get_cookie(const char *cookie_header, const char *var_name, char *dst, si
 				}
 				if ((size_t)(p - s) < dst_size) {
 					len = (int)(p - s);
-					mg_strlcpy(dst, s, (size_t)len + 1);
+					XX_httplib_strlcpy(dst, s, (size_t)len + 1);
 				} else len = -3;
 				break;
 			}
@@ -3849,7 +3853,7 @@ static void open_auth_file(struct mg_connection *conn, const char *path, struct 
 
 	if (gpass != NULL) {
 		/* Use global passwords file */
-		if (!mg_fopen(conn, gpass, "r", filep)) {
+		if (!XX_httplib_fopen(conn, gpass, "r", filep)) {
 #ifdef DEBUG
 			mg_cry(conn, "fopen(%s): %s", gpass, strerror(ERRNO));
 #endif
@@ -3860,7 +3864,7 @@ static void open_auth_file(struct mg_connection *conn, const char *path, struct 
 	} else if (XX_httplib_stat(conn, path, &file) && file.is_directory) {
 		XX_httplib_snprintf(conn, &truncated, name, sizeof(name), "%s/%s", path, PASSWORDS_FILE_NAME);
 
-		if (truncated || !mg_fopen(conn, name, "r", filep)) {
+		if (truncated || !XX_httplib_fopen(conn, name, "r", filep)) {
 #ifdef DEBUG
 			mg_cry(conn, "fopen(%s): %s", name, strerror(ERRNO));
 #endif
@@ -3872,7 +3876,7 @@ static void open_auth_file(struct mg_connection *conn, const char *path, struct 
 		}
 		XX_httplib_snprintf(conn, &truncated, name, sizeof(name), "%.*s/%s", (int)(e - p), p, PASSWORDS_FILE_NAME);
 
-		if (truncated || !mg_fopen(conn, name, "r", filep)) {
+		if (truncated || !XX_httplib_fopen(conn, name, "r", filep)) {
 #ifdef DEBUG
 			mg_cry(conn, "fopen(%s): %s", name, strerror(ERRNO));
 #endif
@@ -3908,7 +3912,7 @@ static int parse_auth_header(struct mg_connection *conn, char *buf, size_t buf_s
 	if ((auth_header = mg_get_header(conn, "Authorization")) == NULL || mg_strncasecmp(auth_header, "Digest ", 7) != 0) return 0;
 
 	/* Make modifiable copy of the auth header */
-	mg_strlcpy(buf, auth_header + 7, buf_size);
+	XX_httplib_strlcpy(buf, auth_header + 7, buf_size);
 	s = buf;
 
 	/* Parse authorization header */
@@ -4052,9 +4056,9 @@ static int read_auth_file(struct file *filep, struct read_auth_file_struct *work
 				/* :# is a comment */
 				continue;
 			} else if (!strncmp(workdata->f_user + 1, "include=", 8)) {
-				if (mg_fopen(workdata->conn, workdata->f_user + 9, "r", &fp)) {
+				if (XX_httplib_fopen(workdata->conn, workdata->f_user + 9, "r", &fp)) {
 					is_authorized = read_auth_file(&fp, workdata);
-					mg_fclose(&fp);
+					XX_httplib_fclose(&fp);
 				} else {
 					mg_cry(workdata->conn, "%s: cannot open authorization file: %s", __func__, workdata->buf);
 				}
@@ -4135,7 +4139,7 @@ static int check_authorization(struct mg_connection *conn, const char *path) {
 		if (!memcmp(conn->request_info.local_uri, uri_vec.ptr, uri_vec.len)) {
 			XX_httplib_snprintf(conn, &truncated, fname, sizeof(fname), "%.*s", (int)filename_vec.len, filename_vec.ptr);
 
-			if (truncated || !mg_fopen(conn, fname, "r", &file)) {
+			if (truncated || !XX_httplib_fopen(conn, fname, "r", &file)) {
 				mg_cry(conn, "%s: cannot open %s: %s", __func__, fname, strerror(errno));
 			}
 			break;
@@ -4146,7 +4150,7 @@ static int check_authorization(struct mg_connection *conn, const char *path) {
 
 	if (is_file_opened(&file)) {
 		authorized = authorize(conn, &file);
-		mg_fclose(&file);
+		XX_httplib_fclose(&file);
 	}
 
 	return authorized;
@@ -4199,9 +4203,9 @@ static int is_authorized_for_put(struct mg_connection *conn) {
 		const char *passfile = conn->ctx->config[PUT_DELETE_PASSWORDS_FILE];
 		int ret = 0;
 
-		if (passfile != NULL && mg_fopen(conn, passfile, "r", &file)) {
+		if (passfile != NULL && XX_httplib_fopen(conn, passfile, "r", &file)) {
 			ret = authorize(conn, &file);
-			mg_fclose(&file);
+			XX_httplib_fclose(&file);
 		}
 
 		return ret;
@@ -4492,7 +4496,7 @@ static void print_dir_entry(struct de *de) {
 	if (tm != NULL) {
 		strftime(mod, sizeof(mod), "%d-%b-%Y %H:%M", tm);
 	} else {
-		mg_strlcpy(mod, "01-Jan-1970 00:00", sizeof(mod));
+		XX_httplib_strlcpy(mod, "01-Jan-1970 00:00", sizeof(mod));
 		mod[sizeof(mod) - 1] = '\0';
 	}
 	mg_url_encode(de->file_name, href, sizeof(href));
@@ -4932,7 +4936,7 @@ static void handle_static_file_request(struct mg_connection *conn, const char *p
 		encoding = "Content-Encoding: gzip\r\n";
 	}
 
-	if (!mg_fopen(conn, path, "rb", filep)) {
+	if (!XX_httplib_fopen(conn, path, "rb", filep)) {
 		XX_httplib_send_http_error(conn, 500, "Error: Cannot open file\nfopen(%s): %s", path, strerror(ERRNO));
 		return;
 	}
@@ -4947,7 +4951,7 @@ static void handle_static_file_request(struct mg_connection *conn, const char *p
 		/* actually, range requests don't play well with a pre-gzipped
 		 * file (since the range is specified in the uncompressed space) */
 		if (filep->gzipped) {
-			XX_httplib_send_http_error( conn, 501, "%s", "Error: Range requests in gzipped files are not supported"); mg_fclose(filep);
+			XX_httplib_send_http_error( conn, 501, "%s", "Error: Range requests in gzipped files are not supported"); XX_httplib_fclose(filep);
 			return;
 		}
 		conn->status_code = 206;
@@ -5010,7 +5014,7 @@ static void handle_static_file_request(struct mg_connection *conn, const char *p
 	} else mg_printf(conn, "\r\n");
 
 	if (strcmp(conn->request_info.request_method, "HEAD") != 0) send_file_data(conn, filep, r1, cl);
-	mg_fclose(filep);
+	XX_httplib_fclose(filep);
 }
 
 
@@ -5141,20 +5145,20 @@ long long mg_store_body( struct mg_connection *conn, const char *path ) {
 		return 0;
 	}
 
-	if (mg_fopen(conn, path, "w", &fi) == 0) return -12;
+	if (XX_httplib_fopen(conn, path, "w", &fi) == 0) return -12;
 
 	ret = mg_read(conn, buf, sizeof(buf));
 	while (ret > 0) {
 		n = (int)fwrite(buf, 1, (size_t)ret, fi.fp);
 		if (n != ret) {
-			mg_fclose(&fi);
+			XX_httplib_fclose(&fi);
 			remove_bad_file(conn, path);
 			return -13;
 		}
 		ret = mg_read(conn, buf, sizeof(buf));
 	}
 
-	/* TODO: mg_fclose should return an error,
+	/* TODO: XX_httplib_fclose should return an error,
 	 * and every caller should check and handle it. */
 	if (fclose(fi.fp) != 0) {
 		remove_bad_file(conn, path);
@@ -5381,7 +5385,7 @@ static int substitute_index_file(struct mg_connection *conn, char *path, size_t 
 			if (filename_vec.len > path_len - (n + 2)) continue;
 
 			/* Prepare full path to the index file */
-			mg_strlcpy(path + n + 1, filename_vec.ptr, filename_vec.len + 1);
+			XX_httplib_strlcpy(path + n + 1, filename_vec.ptr, filename_vec.len + 1);
 
 			/* Does it exist? */
 			if (XX_httplib_stat(conn, path, &file)) {
@@ -6060,8 +6064,8 @@ static void put_file(struct mg_connection *conn, const char *path) {
 	}
 
 	/* A file should be created or overwritten. */
-	if (!mg_fopen(conn, path, "wb+", &file) || file.fp == NULL) {
-		mg_fclose(&file);
+	if (!XX_httplib_fopen(conn, path, "wb+", &file) || file.fp == NULL) {
+		XX_httplib_fclose(&file);
 		XX_httplib_send_http_error(conn, 500, "Error: Can not create file\nfopen(%s): %s", path, strerror(ERRNO));
 		return;
 	}
@@ -6078,7 +6082,7 @@ static void put_file(struct mg_connection *conn, const char *path) {
 		/* forward_body_data failed.
 		 * The error code has already been sent to the client,
 		 * and conn->status_code is already set. */
-		mg_fclose(&file);
+		XX_httplib_fclose(&file);
 		return;
 	}
 
@@ -6087,7 +6091,7 @@ static void put_file(struct mg_connection *conn, const char *path) {
 	send_no_cache_header(conn);
 	mg_printf(conn, "Date: %s\r\n" "Content-Length: 0\r\n" "Connection: %s\r\n\r\n", date, suggest_connection_header(conn));
 
-	mg_fclose(&file);
+	XX_httplib_fclose(&file);
 }
 
 
@@ -6189,7 +6193,7 @@ static void do_ssi_include(struct mg_connection *conn, const char *ssi, char *ta
 		return;
 	}
 
-	if (!mg_fopen(conn, path, "rb", &file)) {
+	if (!XX_httplib_fopen(conn, path, "rb", &file)) {
 		mg_cry(conn, "Cannot open SSI #include: [%s]: fopen(%s): %s", tag, path, strerror(ERRNO));
 	} else {
 		fclose_on_exec(&file, conn);
@@ -6200,7 +6204,7 @@ static void do_ssi_include(struct mg_connection *conn, const char *ssi, char *ta
 		} else {
 			send_file_data(conn, &file, 0, INT64_MAX);
 		}
-		mg_fclose(&file);
+		XX_httplib_fclose(&file);
 	}
 }
 
@@ -6327,7 +6331,7 @@ static void handle_ssi_file_request(struct mg_connection *conn, const char *path
 		cors3 = "";
 	}
 
-	if (!mg_fopen(conn, path, "rb", filep)) {
+	if (!XX_httplib_fopen(conn, path, "rb", filep)) {
 		/* File exists (precondition for calling this function),
 		 * but can not be opened by the server. */
 		XX_httplib_send_http_error(conn, 500, "Error: Cannot read file\nfopen(%s): %s", path, strerror(ERRNO));
@@ -6348,7 +6352,7 @@ static void handle_ssi_file_request(struct mg_connection *conn, const char *path
 		          date,
 		          suggest_connection_header(conn));
 		send_ssi_file(conn, path, filep, 0);
-		mg_fclose(filep);
+		XX_httplib_fclose(filep);
 	}
 }
 
@@ -7254,7 +7258,7 @@ static void redirect_to_https_port(struct mg_connection *conn, int ssl_index) {
 	if (host_header != NULL) {
 		char *pos;
 
-		mg_strlcpy(host, host_header, hostlen);
+		XX_httplib_strlcpy(host, host_header, hostlen);
 		host[hostlen - 1] = '\0';
 		pos = strchr(host, ':');
 		if (pos != NULL) *pos = '\0';
@@ -8048,9 +8052,7 @@ int XX_httplib_set_ports_option( struct mg_context *ctx ) {
 	int portsTotal = 0;
 	int portsOk = 0;
 
-	if (!ctx) {
-		return 0;
-	}
+	if ( ctx == NULL ) return 0;
 
 	memset(&so, 0, sizeof(so));
 	memset(&usa, 0, sizeof(usa));
@@ -8221,80 +8223,3 @@ int XX_httplib_set_ports_option( struct mg_context *ctx ) {
 	return portsOk;
 
 }  /* XX_httplib_set_ports_option */
-
-
-static const char *header_val(const struct mg_connection *conn, const char *header) {
-
-	const char *header_value;
-
-	if ((header_value = mg_get_header(conn, header)) == NULL) return "-";
-	else                                                      return header_value;
-}
-
-
-void XX_httplib_log_access( const struct mg_connection *conn ) {
-
-	const struct mg_request_info *ri;
-	struct file fi;
-	char date[64];
-	char src_addr[IP_ADDR_STR_LEN];
-	struct tm *tm;
-
-	const char *referer;
-	const char *user_agent;
-
-	char buf[4096];
-
-	if (!conn || !conn->ctx) return;
-
-	if (conn->ctx->config[ACCESS_LOG_FILE] != NULL) {
-		if (mg_fopen(conn, conn->ctx->config[ACCESS_LOG_FILE], "a+", &fi) == 0) fi.fp = NULL;
-	} else fi.fp = NULL;
-
-	/* Log is written to a file and/or a callback. If both are not set,
-	 * executing the rest of the function is pointless. */
-	if ((fi.fp == NULL) && (conn->ctx->callbacks.log_access == NULL)) return;
-
-	tm = localtime(&conn->conn_birth_time);
-	if (tm != NULL) {
-		strftime(date, sizeof(date), "%d/%b/%Y:%H:%M:%S %z", tm);
-	} else {
-		mg_strlcpy(date, "01/Jan/1970:00:00:00 +0000", sizeof(date));
-		date[sizeof(date) - 1] = '\0';
-	}
-
-	ri = &conn->request_info;
-
-	XX_httplib_sockaddr_to_string(src_addr, sizeof(src_addr), &conn->client.rsa);
-	referer = header_val(conn, "Referer");
-	user_agent = header_val(conn, "User-Agent");
-
-	XX_httplib_snprintf(conn,
-	            NULL, /* Ignore truncation in access log */
-	            buf,
-	            sizeof(buf),
-	            "%s - %s [%s] \"%s %s%s%s HTTP/%s\" %d %" INT64_FMT " %s %s",
-	            src_addr,
-	            (ri->remote_user == NULL) ? "-" : ri->remote_user,
-	            date,
-	            ri->request_method ? ri->request_method : "-",
-	            ri->request_uri ? ri->request_uri : "-",
-	            ri->query_string ? "?" : "",
-	            ri->query_string ? ri->query_string : "",
-	            ri->http_version,
-	            conn->status_code,
-	            conn->num_bytes_sent,
-	            referer,
-	            user_agent);
-
-	if (conn->ctx->callbacks.log_access) conn->ctx->callbacks.log_access(conn, buf);
-
-	if (fi.fp) {
-		flockfile(fi.fp);
-		fprintf(fi.fp, "%s\n", buf);
-		fflush(fi.fp);
-		funlockfile(fi.fp);
-		mg_fclose(&fi);
-	}
-
-}  /* XX_httplib_log_access */

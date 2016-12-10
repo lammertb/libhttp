@@ -60,6 +60,7 @@ LIB_SOURCES =	src/libhttp.c					\
 		src/httplib_getreq.c				\
 		src/httplib_initialize_ssl.c			\
 		src/httplib_load_dll.c				\
+		src/httplib_log_access.c			\
 		src/httplib_master_thread.c			\
 		src/httplib_process_new_connection.c		\
 		src/httplib_produce_socket.c			\

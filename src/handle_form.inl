@@ -20,35 +20,27 @@
  */
 
 
-static int
-url_encoded_field_found(const struct mg_connection *conn,
+static int url_encoded_field_found(const struct mg_connection *conn,
                         const char *key,
                         size_t key_len,
                         const char *filename,
                         size_t filename_len,
                         char *path,
                         size_t path_len,
-                        struct mg_form_data_handler *fdh)
-{
+                        struct mg_form_data_handler *fdh) {
+
 	char key_dec[1024];
 	char filename_dec[1024];
 	int key_dec_len;
 	int filename_dec_len;
 	int ret;
 
-	key_dec_len =
-	    mg_url_decode(key, (int)key_len, key_dec, (int)sizeof(key_dec), 1);
+	key_dec_len = mg_url_decode(key, (int)key_len, key_dec, (int)sizeof(key_dec), 1);
 
-	if (((size_t)key_dec_len >= (size_t)sizeof(key_dec)) || (key_dec_len < 0)) {
-		return FORM_FIELD_STORAGE_SKIP;
-	}
+	if (((size_t)key_dec_len >= (size_t)sizeof(key_dec)) || (key_dec_len < 0)) return FORM_FIELD_STORAGE_SKIP;
 
 	if (filename) {
-		filename_dec_len = mg_url_decode(filename,
-		                                 (int)filename_len,
-		                                 filename_dec,
-		                                 (int)sizeof(filename_dec),
-		                                 1);
+		filename_dec_len = mg_url_decode(filename, (int)filename_len, filename_dec, (int)sizeof(filename_dec), 1);
 
 		if (((size_t)filename_dec_len >= (size_t)sizeof(filename_dec))
 		    || (filename_dec_len < 0)) {
@@ -56,9 +48,8 @@ url_encoded_field_found(const struct mg_connection *conn,
 			mg_cry(conn, "%s: Cannot decode filename", __func__);
 			return FORM_FIELD_STORAGE_SKIP;
 		}
-	} else {
-		filename_dec[0] = 0;
-	}
+
+	} else filename_dec[0] = 0;
 
 	ret =
 	    fdh->field_found(key_dec, filename_dec, path, path_len, fdh->user_data);
@@ -80,14 +71,13 @@ url_encoded_field_found(const struct mg_connection *conn,
 }
 
 
-static int
-url_encoded_field_get(const struct mg_connection *conn,
+static int url_encoded_field_get(const struct mg_connection *conn,
                       const char *key,
                       size_t key_len,
                       const char *value,
                       size_t value_len,
-                      struct mg_form_data_handler *fdh)
-{
+                      struct mg_form_data_handler *fdh) {
+
 	char key_dec[1024];
 
 	char *value_dec = XX_httplib_malloc(value_len + 1);
@@ -95,23 +85,15 @@ url_encoded_field_get(const struct mg_connection *conn,
 
 	if (!value_dec) {
 		/* Log error message and stop parsing the form data. */
-		mg_cry(conn,
-		       "%s: Not enough memory (required: %lu)",
-		       __func__,
-		       (unsigned long)(value_len + 1));
+		mg_cry(conn, "%s: Not enough memory (required: %lu)", __func__, (unsigned long)(value_len + 1));
 		return FORM_FIELD_STORAGE_ABORT;
 	}
 
 	mg_url_decode(key, (int)key_len, key_dec, (int)sizeof(key_dec), 1);
 
-	value_dec_len =
-	    mg_url_decode(value, (int)value_len, value_dec, (int)value_len + 1, 1);
+	value_dec_len = mg_url_decode(value, (int)value_len, value_dec, (int)value_len + 1, 1);
 
-	ret = fdh->field_get(key_dec,
-	                     value_dec,
-	                     (size_t)value_dec_len,
-	                     fdh->user_data);
-
+	ret = fdh->field_get(key_dec, value_dec, (size_t)value_dec_len, fdh->user_data); 
 	XX_httplib_free(value_dec);
 
 	return ret;
@@ -124,8 +106,8 @@ unencoded_field_get(const struct mg_connection *conn,
                     size_t key_len,
                     const char *value,
                     size_t value_len,
-                    struct mg_form_data_handler *fdh)
-{
+                    struct mg_form_data_handler *fdh) {
+
 	char key_dec[1024];
 	(void)conn;
 
@@ -135,12 +117,8 @@ unencoded_field_get(const struct mg_connection *conn,
 }
 
 
-static int
-field_stored(const struct mg_connection *conn,
-             const char *path,
-             long long file_size,
-             struct mg_form_data_handler *fdh)
-{
+static int field_stored(const struct mg_connection *conn, const char *path, long long file_size, struct mg_form_data_handler *fdh) {
+
 	/* Equivalent to "upload" callback of "mg_upload". */
 
 	(void)conn; /* we do not need mg_cry here, so conn is currently unused */
@@ -149,12 +127,8 @@ field_stored(const struct mg_connection *conn,
 }
 
 
-static const char *
-search_boundary(const char *buf,
-                size_t buf_len,
-                const char *boundary,
-                size_t boundary_len)
-{
+static const char * search_boundary(const char *buf, size_t buf_len, const char *boundary, size_t boundary_len) {
+
 	/* We must do a binary search here, not a string search, since the buffer
 	 * may contain '\x00' bytes, if binary data is transferred. */
 	int clen = (int)buf_len - (int)boundary_len - 4;
@@ -171,10 +145,8 @@ search_boundary(const char *buf,
 }
 
 
-int
-mg_handle_form_request(struct mg_connection *conn,
-                       struct mg_form_data_handler *fdh)
-{
+int mg_handle_form_request(struct mg_connection *conn, struct mg_form_data_handler *fdh) {
+
 	const char *content_type;
 	char path[512];
 	char buf[1024];
@@ -186,8 +158,7 @@ mg_handle_form_request(struct mg_connection *conn,
 	int64_t file_size = 0; /* init here, to a avoid a false positive
 	                         "uninitialized variable used" warning */
 
-	int has_body_data =
-	    (conn->request_info.content_length > 0) || (conn->is_chunked);
+	int has_body_data = (conn->request_info.content_length > 0) || (conn->is_chunked);
 
 	/* There are three ways to encode data from a HTML form:
 	 * 1) method: GET (default)
@@ -243,14 +214,7 @@ mg_handle_form_request(struct mg_connection *conn,
 			 */
 			memset(path, 0, sizeof(path));
 			field_count++;
-			field_storage = url_encoded_field_found(conn,
-			                                        data,
-			                                        (size_t)keylen,
-			                                        NULL,
-			                                        0,
-			                                        path,
-			                                        sizeof(path) - 1,
-			                                        fdh);
+			field_storage = url_encoded_field_found(conn, data, (size_t)keylen, NULL, 0, path, sizeof(path) - 1, fdh);
 
 			val++;
 			next = strchr(val, '&');
@@ -269,18 +233,13 @@ mg_handle_form_request(struct mg_connection *conn,
 			}
 			if (field_storage == FORM_FIELD_STORAGE_STORE) {
 				/* Store the content to a file */
-				if (mg_fopen(conn, path, "wb", &fstore) == 0) {
-					fstore.fp = NULL;
-				}
+				if (XX_httplib_fopen(conn, path, "wb", &fstore) == 0) fstore.fp = NULL;
 				file_size = 0;
 				if (fstore.fp != NULL) {
 					size_t n =
 					    (size_t)fwrite(val, 1, (size_t)vallen, fstore.fp);
 					if ((n != (size_t)vallen) || (ferror(fstore.fp))) {
-						mg_cry(conn,
-						       "%s: Cannot write file %s",
-						       __func__,
-						       path);
+						mg_cry(conn, "%s: Cannot write file %s", __func__, path);
 						fclose(fstore.fp);
 						fstore.fp = NULL;
 						remove_bad_file(conn, path);
@@ -293,18 +252,13 @@ mg_handle_form_request(struct mg_connection *conn,
 							/* stored successfully */
 							field_stored(conn, path, file_size, fdh);
 						} else {
-							mg_cry(conn,
-							       "%s: Error saving file %s",
-							       __func__,
-							       path);
+							mg_cry(conn, "%s: Error saving file %s", __func__, path);
 							remove_bad_file(conn, path);
 						}
 						fstore.fp = NULL;
 					}
 
-				} else {
-					mg_cry(conn, "%s: Cannot create file %s", __func__, path);
-				}
+				} else mg_cry(conn, "%s: Cannot create file %s", __func__, path);
 			}
 
 			/* if (field_storage == FORM_FIELD_STORAGE_READ) { */
@@ -320,8 +274,7 @@ mg_handle_form_request(struct mg_connection *conn,
 			 */
 			/* } */
 
-			if ((field_storage & FORM_FIELD_STORAGE_ABORT)
-			    == FORM_FIELD_STORAGE_ABORT) {
+			if ((field_storage & FORM_FIELD_STORAGE_ABORT) == FORM_FIELD_STORAGE_ABORT) {
 				/* Stop parsing the request */
 				break;
 			}
@@ -373,9 +326,7 @@ mg_handle_form_request(struct mg_connection *conn,
 				}
 				buf_fill += r;
 				buf[buf_fill] = 0;
-				if (buf_fill < 1) {
-					break;
-				}
+				if (buf_fill < 1) break;
 			}
 
 			val = strchr(buf, '=');
@@ -389,14 +340,7 @@ mg_handle_form_request(struct mg_connection *conn,
 			/* Call callback */
 			memset(path, 0, sizeof(path));
 			field_count++;
-			field_storage = url_encoded_field_found(conn,
-			                                        buf,
-			                                        (size_t)keylen,
-			                                        NULL,
-			                                        0,
-			                                        path,
-			                                        sizeof(path) - 1,
-			                                        fdh);
+			field_storage = url_encoded_field_found(conn, buf, (size_t)keylen, NULL, 0, path, sizeof(path) - 1, fdh);
 
 			if ((field_storage & FORM_FIELD_STORAGE_ABORT)
 			    == FORM_FIELD_STORAGE_ABORT) {
@@ -405,13 +349,9 @@ mg_handle_form_request(struct mg_connection *conn,
 			}
 
 			if (field_storage == FORM_FIELD_STORAGE_STORE) {
-				if (mg_fopen(conn, path, "wb", &fstore) == 0) {
-					fstore.fp = NULL;
-				}
+				if (XX_httplib_fopen(conn, path, "wb", &fstore) == 0) fstore.fp = NULL;
 				file_size = 0;
-				if (!fstore.fp) {
-					mg_cry(conn, "%s: Cannot create file %s", __func__, path);
-				}
+				if (!fstore.fp) mg_cry(conn, "%s: Cannot create file %s", __func__, path);
 			}
 
 			get_block = 0;
@@ -447,13 +387,9 @@ mg_handle_form_request(struct mg_connection *conn,
 					get_block++;
 				}
 				if (fstore.fp) {
-					size_t n =
-					    (size_t)fwrite(val, 1, (size_t)vallen, fstore.fp);
+					size_t n = (size_t)fwrite(val, 1, (size_t)vallen, fstore.fp);
 					if ((n != (size_t)vallen) || (ferror(fstore.fp))) {
-						mg_cry(conn,
-						       "%s: Cannot write file %s",
-						       __func__,
-						       path);
+						mg_cry(conn, "%s: Cannot write file %s", __func__, path);
 						fclose(fstore.fp);
 						fstore.fp = NULL;
 						remove_bad_file(conn, path);
@@ -463,9 +399,7 @@ mg_handle_form_request(struct mg_connection *conn,
 
 				if (!end_of_key_value_pair_found) {
 					used = next - buf;
-					memmove(buf,
-					        buf + (size_t)used,
-					        sizeof(buf) - (size_t)used);
+					memmove(buf, buf + (size_t)used, sizeof(buf) - (size_t)used);
 					buf_fill -= (int)used;
 					if ((size_t)buf_fill < (sizeof(buf) - 1)) {
 
@@ -485,9 +419,7 @@ mg_handle_form_request(struct mg_connection *conn,
 						}
 						buf_fill += r;
 						buf[buf_fill] = 0;
-						if (buf_fill < 1) {
-							break;
-						}
+						if (buf_fill < 1) break;
 						val = buf;
 					}
 				}
@@ -523,7 +455,12 @@ mg_handle_form_request(struct mg_connection *conn,
 		size_t bl;
 		ptrdiff_t used;
 		struct mg_request_info part_header;
-		char *hbuf, *hend, *fbeg, *fend, *nbeg, *nend;
+		char *hbuf;
+		char *hend;
+		char *fbeg;
+		char *fend;
+		char *nbeg;
+		char *nend;
 		const char *content_disp;
 		const char *next;
 
@@ -531,9 +468,7 @@ mg_handle_form_request(struct mg_connection *conn,
 
 		/* Skip all spaces between MULTIPART/FORM-DATA; and BOUNDARY= */
 		bl = 20;
-		while (content_type[bl] == ' ') {
-			bl++;
-		}
+		while (content_type[bl] == ' ') bl++;
 
 		/* There has to be a BOUNDARY definition in the Content-Type header */
 		if (mg_strncasecmp(content_type + bl, "BOUNDARY=", 9)) {
@@ -560,9 +495,7 @@ mg_handle_form_request(struct mg_connection *conn,
 			size_t towrite, n;
 			int get_block;
 
-			r = mg_read(conn,
-			            buf + (size_t)buf_fill,
-			            sizeof(buf) - 1 - (size_t)buf_fill);
+			r = mg_read(conn, buf + (size_t)buf_fill, sizeof(buf) - 1 - (size_t)buf_fill);
 			if (r < 0) {
 				/* read error */
 				return -1;
@@ -648,38 +581,22 @@ mg_handle_form_request(struct mg_connection *conn,
 				/* TODO: check Content-Type */
 				/* Content-Type: application/octet-stream */
 
-			} else {
-				fend = fbeg;
-			}
+			} else fend = fbeg;
 
 			memset(path, 0, sizeof(path));
 			field_count++;
-			field_storage = url_encoded_field_found(conn,
-			                                        nbeg,
-			                                        (size_t)(nend - nbeg),
-			                                        fbeg,
-			                                        (size_t)(fend - fbeg),
-			                                        path,
-			                                        sizeof(path) - 1,
-			                                        fdh);
+			field_storage = url_encoded_field_found(conn, nbeg, (size_t)(nend - nbeg), fbeg, (size_t)(fend - fbeg), path, sizeof(path) - 1, fdh);
 
 			/* If the boundary is already in the buffer, get the address,
 			 * otherwise next will be NULL. */
-			next = search_boundary(hbuf,
-			                       (size_t)((buf - hbuf) + buf_fill),
-			                       boundary,
-			                       bl);
+			next = search_boundary(hbuf, (size_t)((buf - hbuf) + buf_fill), boundary, bl);
 
 			if (field_storage == FORM_FIELD_STORAGE_STORE) {
 				/* Store the content to a file */
-				if (mg_fopen(conn, path, "wb", &fstore) == 0) {
-					fstore.fp = NULL;
-				}
+				if (XX_httplib_fopen(conn, path, "wb", &fstore) == 0) fstore.fp = NULL;
 				file_size = 0;
 
-				if (!fstore.fp) {
-					mg_cry(conn, "%s: Cannot create file %s", __func__, path);
-				}
+				if (!fstore.fp) mg_cry(conn, "%s: Cannot create file %s", __func__, path);
 			}
 
 			get_block = 0;
@@ -710,10 +627,7 @@ mg_handle_form_request(struct mg_connection *conn,
 						/* Store the content of the buffer. */
 						n = (size_t)fwrite(hend, 1, towrite, fstore.fp);
 						if ((n != towrite) || (ferror(fstore.fp))) {
-							mg_cry(conn,
-							       "%s: Cannot write file %s",
-							       __func__,
-							       path);
+							mg_cry(conn, "%s: Cannot write file %s", __func__, path);
 							fclose(fstore.fp);
 							fstore.fp = NULL;
 							remove_bad_file(conn, path);
@@ -727,9 +641,7 @@ mg_handle_form_request(struct mg_connection *conn,
 				hend = buf;
 
 				/* Read new data */
-				r = mg_read(conn,
-				            buf + (size_t)buf_fill,
-				            sizeof(buf) - 1 - (size_t)buf_fill);
+				r = mg_read(conn, buf + (size_t)buf_fill, sizeof(buf) - 1 - (size_t)buf_fill);
 				if (r < 0) {
 					/* read error */
 					return -1;
@@ -763,10 +675,7 @@ mg_handle_form_request(struct mg_connection *conn,
 				if (fstore.fp) {
 					n = (size_t)fwrite(hend, 1, towrite, fstore.fp);
 					if ((n != towrite) || (ferror(fstore.fp))) {
-						mg_cry(conn,
-						       "%s: Cannot write file %s",
-						       __func__,
-						       path);
+						mg_cry(conn, "%s: Cannot write file %s", __func__, path);
 						fclose(fstore.fp);
 						fstore.fp = NULL;
 						remove_bad_file(conn, path);
@@ -783,10 +692,7 @@ mg_handle_form_request(struct mg_connection *conn,
 						/* stored successfully */
 						field_stored(conn, path, file_size, fdh);
 					} else {
-						mg_cry(conn,
-						       "%s: Error saving file %s",
-						       __func__,
-						       path);
+						mg_cry(conn, "%s: Error saving file %s", __func__, path);
 						remove_bad_file(conn, path);
 					}
 					fstore.fp = NULL;
