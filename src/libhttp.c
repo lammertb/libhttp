@@ -7312,18 +7312,8 @@ void XX_httplib_redirect_to_https_port( struct mg_connection *conn, int ssl_inde
 }  /* XX_httplib_redirect_to_https_port */
 
 
-static void mg_set_handler_type(struct mg_context *ctx,
-                    const char *uri,
-                    int handler_type,
-                    int is_delete_request,
-                    mg_request_handler handler,
-                    mg_websocket_connect_handler connect_handler,
-                    mg_websocket_ready_handler ready_handler,
-                    mg_websocket_data_handler data_handler,
-                    mg_websocket_close_handler close_handler,
-                    mg_authorization_handler auth_handler,
-                    void *cbdata)
-{
+void XX_httplib_set_handler_type( struct mg_context *ctx, const char *uri, int handler_type, int is_delete_request, mg_request_handler handler, mg_websocket_connect_handler connect_handler, mg_websocket_ready_handler ready_handler, mg_websocket_data_handler data_handler, mg_websocket_close_handler close_handler, mg_authorization_handler auth_handler, void *cbdata ) {
+
 	struct mg_handler_info *tmp_rh, **lastref;
 	size_t urilen = strlen(uri);
 
@@ -7431,39 +7421,19 @@ static void mg_set_handler_type(struct mg_context *ctx,
 
 	*lastref = tmp_rh;
 	mg_unlock_context(ctx);
-}
+
+}  /* XX_httplib_set_handler_type */
 
 
 void mg_set_request_handler(struct mg_context *ctx, const char *uri, mg_request_handler handler, void *cbdata) {
 
-	mg_set_handler_type(ctx, uri, REQUEST_HANDLER, handler == NULL, handler, NULL, NULL, NULL, NULL, NULL, cbdata);
+	XX_httplib_set_handler_type(ctx, uri, REQUEST_HANDLER, handler == NULL, handler, NULL, NULL, NULL, NULL, NULL, cbdata);
 }
 
 
-void mg_set_websocket_handler(struct mg_context *ctx,
-                         const char *uri,
-                         mg_websocket_connect_handler connect_handler,
-                         mg_websocket_ready_handler ready_handler,
-                         mg_websocket_data_handler data_handler,
-                         mg_websocket_close_handler close_handler,
-                         void *cbdata)
-{
+void mg_set_websocket_handler( struct mg_context *ctx, const char *uri, mg_websocket_connect_handler connect_handler, mg_websocket_ready_handler ready_handler, mg_websocket_data_handler data_handler, mg_websocket_close_handler close_handler, void *cbdata ) {
+
 	int is_delete_request = (connect_handler == NULL) && (ready_handler == NULL) && (data_handler == NULL) && (close_handler == NULL);
-	mg_set_handler_type(ctx,
-	                    uri,
-	                    WEBSOCKET_HANDLER,
-	                    is_delete_request,
-	                    NULL,
-	                    connect_handler,
-	                    ready_handler,
-	                    data_handler,
-	                    close_handler,
-	                    NULL,
-	                    cbdata);
-}
+	XX_httplib_set_handler_type(ctx, uri, WEBSOCKET_HANDLER, is_delete_request, NULL, connect_handler, ready_handler, data_handler, close_handler, NULL, cbdata);
 
-
-void mg_set_auth_handler(struct mg_context *ctx, const char *uri, mg_request_handler handler, void *cbdata) {
-
-	mg_set_handler_type(ctx, uri, AUTH_HANDLER, handler == NULL, NULL, NULL, NULL, NULL, NULL, handler, cbdata);
-}
+}  /* mg_set_websocket_handler */

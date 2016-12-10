@@ -898,6 +898,7 @@ void			XX_httplib_send_options( struct mg_connection *conn );
 int			XX_httplib_set_acl_option( struct mg_context *ctx );
 void			XX_httplib_set_close_on_exec( SOCKET sock, struct mg_connection *conn );
 int			XX_httplib_set_gpass_option( struct mg_context *ctx );
+void			XX_httplib_set_handler_type( struct mg_context *ctx, const char *uri, int handler_type, int is_delete_request, mg_request_handler handler, mg_websocket_connect_handler connect_handler, mg_websocket_ready_handler ready_handler, mg_websocket_data_handler data_handler, mg_websocket_close_handler close_handler, mg_authorization_handler auth_handler, void *cbdata );
 int			XX_httplib_set_non_blocking_mode( SOCKET sock );
 int			XX_httplib_set_ports_option( struct mg_context *ctx );
 int			XX_httplib_set_sock_timeout( SOCKET sock, int milliseconds );
