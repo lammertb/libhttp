@@ -80,6 +80,7 @@ LIB_SOURCES =	src/libhttp.c					\
 		src/httplib_log_access.c			\
 		src/httplib_master_thread.c			\
 		src/httplib_mkcol.c				\
+		src/httplib_parse_http_message.c		\
 		src/httplib_parse_net.c				\
 		src/httplib_prepare_cgi_environment.c		\
 		src/httplib_process_new_connection.c		\

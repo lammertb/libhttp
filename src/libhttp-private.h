@@ -927,6 +927,7 @@ void XX_httplib_interpret_uri( struct mg_connection *conn, char *filename, size_
 int			XX_httplib_is_authorized_for_put( struct mg_connection *conn );
 int			XX_httplib_is_not_modified( const struct mg_connection *conn, const struct file *filep );
 int			XX_httplib_is_put_or_delete_method( const struct mg_connection *conn );
+int			XX_httplib_is_valid_http_method( const char *method );
 int			XX_httplib_is_valid_port( unsigned long port );
 int			XX_httplib_is_websocket_protocol( const struct mg_connection *conn );
 int			XX_httplib_join_thread( pthread_t threadid );
@@ -980,6 +981,7 @@ int			XX_httplib_set_throttle( const char *spec, uint32_t remote_ip, const char 
 int			XX_httplib_set_uid_option( struct mg_context *ctx );
 int			XX_httplib_should_decode_url( const struct mg_connection *conn );
 int			XX_httplib_should_keep_alive( const struct mg_connection *conn );
+char *			XX_httplib_skip( char **buf, const char *delimiters );
 void			XX_httplib_snprintf( const struct mg_connection *conn, int *truncated, char *buf, size_t buflen, PRINTF_FORMAT_STRING(const char *fmt), ... ) PRINTF_ARGS(5, 6);
 void			XX_httplib_sockaddr_to_string(char *buf, size_t len, const union usa *usa );
 pid_t			XX_httplib_spawn_process( struct mg_connection *conn, const char *prog, char *envblk, char *envp[], int fdin[2], int fdout[2], int fderr[2], const char *dir );

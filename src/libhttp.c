@@ -1290,10 +1290,11 @@ static char * skip_quoted(char **buf, const char *delimiters, const char *whites
 
 /* Simplified version of skip_quoted without quote char
  * and whitespace == delimiters */
-static char * skip(char **buf, const char *delimiters) {
+char *XX_httplib_skip( char **buf, const char *delimiters ) {
 
-	return skip_quoted(buf, delimiters, delimiters, 0);
-}
+	return skip_quoted( buf, delimiters, delimiters, 0 );
+
+}  /* XX_httplib_skip */
 
 
 /* Return HTTP header value, or NULL if not found. */
@@ -5251,7 +5252,7 @@ int XX_httplib_parse_http_headers( char **buf, struct mg_request_info *ri ) {
 }  /* XX_httplib_parse_http_headers */
 
 
-static int is_valid_http_method(const char *method) {
+int XX_httplib_is_valid_http_method( const char *method ) {
 
 	return !strcmp(method, "GET")        /* HTTP (RFC 2616) */
 	       || !strcmp(method, "POST")    /* HTTP (RFC 2616) */
@@ -5276,62 +5277,5 @@ static int is_valid_http_method(const char *method) {
 
 	       /* PATCH method only allowed for CGI/Lua/LSP and callbacks. */
 	       || !strcmp(method, "PATCH"); /* PATCH method (RFC 5789) */
-}
 
-
-/* Parse HTTP request, fill in mg_request_info structure.
- * This function modifies the buffer by NUL-terminating
- * HTTP request components, header names and header values.
- * Parameters:
- *   buf (in/out): pointer to the HTTP header to parse and split
- *   len (in): length of HTTP header buffer
- *   re (out): parsed header as mg_request_info
- * buf and ri must be valid pointers (not NULL), len>0.
- * Returns <0 on error. */
-int XX_httplib_parse_http_message( char *buf, int len, struct mg_request_info *ri ) {
-
-	int is_request;
-	int request_length;
-	char *start_line;
-
-	request_length = XX_httplib_get_request_len(buf, len);
-
-	if (request_length > 0) {
-		/* Reset attributes. DO NOT TOUCH is_ssl, remote_ip, remote_addr,
-		 * remote_port */
-		ri->remote_user = ri->request_method = ri->request_uri =
-		    ri->http_version = NULL;
-		ri->num_headers = 0;
-
-		buf[request_length - 1] = '\0';
-
-		/* RFC says that all initial whitespaces should be ingored */
-		while (*buf != '\0' && isspace(*(unsigned char *)buf)) {
-			buf++;
-		}
-		start_line = skip(&buf, "\r\n");
-		ri->request_method = skip(&start_line, " ");
-		ri->request_uri = skip(&start_line, " ");
-		ri->http_version = start_line;
-
-		/* HTTP message could be either HTTP request:
-		 * "GET / HTTP/1.0 ..."
-		 * or a HTTP response:
-		 *  "HTTP/1.0 200 OK ..."
-		 * otherwise it is invalid.
-		 */
-		is_request = is_valid_http_method(ri->request_method);
-		if ((is_request && memcmp(ri->http_version, "HTTP/", 5) != 0)
-		    || (!is_request && memcmp(ri->request_method, "HTTP/", 5) != 0)) {
-			/* Not a valid request or response: invalid */
-			return -1;
-		}
-		if (is_request) ri->http_version += 5;
-		if (XX_httplib_parse_http_headers(&buf, ri) < 0) {
-			/* Error while parsing headers */
-			return -1;
-		}
-	}
-	return request_length;
-
-}  /* XX_httplib_parse_http_message */
+}  /* XX_httplib_is_valid_http_method */
