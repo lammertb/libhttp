@@ -7423,10 +7423,3 @@ void XX_httplib_set_handler_type( struct mg_context *ctx, const char *uri, int h
 	mg_unlock_context(ctx);
 
 }  /* XX_httplib_set_handler_type */
-
-
-void mg_set_request_handler(struct mg_context *ctx, const char *uri, mg_request_handler handler, void *cbdata) {
-
-	XX_httplib_set_handler_type(ctx, uri, REQUEST_HANDLER, handler == NULL, handler, NULL, NULL, NULL, NULL, NULL, cbdata);
-
-}  /* mg_set_request_handler */
