@@ -888,6 +888,7 @@ void			XX_httplib_close_all_listening_sockets( struct mg_context *ctx );
 void			XX_httplib_close_connection( struct mg_connection *conn );
 void			XX_httplib_close_socket_gracefully( struct mg_connection *conn );
 int			XX_httplib_connect_socket( struct mg_context *ctx, const char *host, int port, int use_ssl, char *ebuf, size_t ebuf_len, SOCKET *sock, union usa *sa );
+void			XX_httplib_construct_etag( char *buf, size_t buf_len, const struct file *filep );
 int			XX_httplib_consume_socket( struct mg_context *ctx, struct socket *sp, int thread_index );
 void			XX_httplib_delete_file( struct mg_connection *conn, const char *path );
 void			XX_httplib_discard_unread_request_data( struct mg_connection *conn );
@@ -933,6 +934,7 @@ int			XX_httplib_match_prefix(const char *pattern, size_t pattern_len, const cha
 void			XX_httplib_mkcol( struct mg_connection *conn, const char *path );
 int			XX_httplib_must_hide_file( struct mg_connection *conn, const char *path );
 const char *		XX_httplib_next_option( const char *list, struct vec *val, struct vec *eq_val );
+time_t			XX_httplib_parse_date_string( const char *datetime );
 int			XX_httplib_parse_http_headers( char **buf, struct mg_request_info *ri );
 int			XX_httplib_parse_http_message( char *buf, int len, struct mg_request_info *ri );
 int			XX_httplib_parse_net( const char *spec, uint32_t *net, uint32_t *mask );

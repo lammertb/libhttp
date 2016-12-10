@@ -3565,7 +3565,7 @@ static int get_month_index(const char *s) {
 
 
 /* Parse UTC date-time string, and return the corresponding time_t value. */
-static time_t parse_date_string(const char *datetime) {
+time_t XX_httplib_parse_date_string( const char *datetime ) {
 
 	char month_str[32] = {0};
 	int second;
@@ -3596,7 +3596,9 @@ static time_t parse_date_string(const char *datetime) {
 	}
 
 	return result;
-}
+
+}  /* XX_httplib_parse_date_string */
+
 #endif /* !NO_CACHING */
 
 
@@ -4874,12 +4876,13 @@ int XX_httplib_parse_range_header( const char *header, int64_t *a, int64_t *b ) 
 }  /* XX_httplib_parse_range_header */
 
 
-static void construct_etag(char *buf, size_t buf_len, const struct file *filep) {
+void XX_httplib_construct_etag( char *buf, size_t buf_len, const struct file *filep ) {
 
 	if (filep != NULL && buf != NULL) {
 		XX_httplib_snprintf(NULL, NULL, buf, buf_len, "\"%lx.%" INT64_FMT "\"", (unsigned long)filep->last_modified, filep->size);
 	}
-}
+
+}  /* XX_httplib_construct_etag */
 
 
 void XX_httplib_fclose_on_exec( struct file *filep, struct mg_connection *conn ) {
@@ -4997,7 +5000,7 @@ void XX_httplib_handle_static_file_request( struct mg_connection *conn, const ch
 	 * http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.3 */
 	XX_httplib_gmt_time_string(date, sizeof(date), &curtime);
 	XX_httplib_gmt_time_string(lm, sizeof(lm), &filep->last_modified);
-	construct_etag(etag, sizeof(etag), filep);
+	XX_httplib_construct_etag(etag, sizeof(etag), filep);
 
 	mg_printf(conn, "HTTP/1.1 %d %s\r\n" "%s%s%s" "Date: %s\r\n", conn->status_code, msg, cors1, cors2, cors3, date);
 	XX_httplib_send_static_cache_header(conn);
@@ -5046,7 +5049,7 @@ void XX_httplib_handle_not_modified_static_file_request( struct mg_connection *c
 	conn->status_code = 304;
 	XX_httplib_gmt_time_string(date, sizeof(date), &curtime);
 	XX_httplib_gmt_time_string(lm, sizeof(lm), &filep->last_modified);
-	construct_etag(etag, sizeof(etag), filep);
+	XX_httplib_construct_etag(etag, sizeof(etag), filep);
 
 	mg_printf(conn, "HTTP/1.1 %d %s\r\n" "Date: %s\r\n", conn->status_code, mg_get_response_code_text(conn, conn->status_code), date);
 	XX_httplib_send_static_cache_header(conn);
@@ -5422,20 +5425,3 @@ int XX_httplib_substitute_index_file( struct mg_connection *conn, char *path, si
 
 }  /* XX_httplib_substitute_index_file */
 #endif
-
-
-#if !defined(NO_CACHING)
-/* Return True if we should reply 304 Not Modified. */
-int XX_httplib_is_not_modified( const struct mg_connection *conn, const struct file *filep ) {
-
-	char etag[64];
-	const char *ims = mg_get_header( conn, "If-Modified-Since" );
-	const char *inm = mg_get_header( conn, "If-None-Match"     );
-
-	construct_etag(etag, sizeof(etag), filep);
-	if ( filep == NULL ) return 0;
-	return (inm != NULL && !mg_strcasecmp(etag, inm)) || (ims != NULL && (filep->last_modified <= parse_date_string(ims)));
-
-}  /* XX_httplib_is_not_modified */
-
-#endif /* !NO_CACHING */
