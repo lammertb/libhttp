@@ -1150,11 +1150,12 @@ void XX_httplib_gmt_time_string( char *buf, size_t buf_len, time_t *t ) {
 
 
 /* difftime for struct timespec. Return value is in seconds. */
-static double mg_difftimespec(const struct timespec *ts_now, const struct timespec *ts_before) {
+double XX_httplib_difftimespec(const struct timespec *ts_now, const struct timespec *ts_before) {
 
 	return (double)(ts_now->tv_nsec - ts_before->tv_nsec) * 1.0E-9
 	       + (double)(ts_now->tv_sec - ts_before->tv_sec);
-}
+
+}  /* XX_httplib_difftimespec */
 
 
 /* Print error message to the opened error log stream. */
@@ -2665,7 +2666,7 @@ static int push(struct mg_context *ctx, FILE *fp, SOCKET sock, SSL *ssl, const c
 
 		if (timeout > 0) clock_gettime(CLOCK_MONOTONIC, &now);
 
-	} while ((timeout <= 0) || (mg_difftimespec(&now, &start) <= timeout));
+	} while ((timeout <= 0) || (XX_httplib_difftimespec(&now, &start) <= timeout));
 
 	(void)err; /* Avoid unused warning if NO_SSL is set and DEBUG_TRACE is not
 	              used */
@@ -2798,7 +2799,7 @@ int XX_httplib_pull( FILE *fp, struct mg_connection *conn, char *buf, int len, d
 #endif
 		}
 		if (timeout > 0) clock_gettime(CLOCK_MONOTONIC, &now);
-	} while ((timeout <= 0) || (mg_difftimespec(&now, &start) <= timeout));
+	} while ((timeout <= 0) || (XX_httplib_difftimespec(&now, &start) <= timeout));
 
 	/* Timeout occured, but no data available. */
 	return -1;
@@ -3526,7 +3527,7 @@ interpret_cleanup:
  * -1  if request is malformed
  *  0  if request is not yet fully buffered
  * >0  actual request length, including last \r\n\r\n */
-static int get_request_len(const char *buf, int buflen) {
+int XX_httplib_get_request_len( const char *buf, int buflen ) {
 
 	const char *s;
 	const char *e;
@@ -3547,7 +3548,8 @@ static int get_request_len(const char *buf, int buflen) {
 		}
 
 	return len;
-}
+
+}  /* XX_httplib_get_request_len */
 
 
 #if !defined(NO_CACHING)
@@ -5292,7 +5294,7 @@ int XX_httplib_parse_http_message( char *buf, int len, struct mg_request_info *r
 	int request_length;
 	char *start_line;
 
-	request_length = get_request_len(buf, len);
+	request_length = XX_httplib_get_request_len(buf, len);
 
 	if (request_length > 0) {
 		/* Reset attributes. DO NOT TOUCH is_ssl, remote_ip, remote_addr,
@@ -5333,49 +5335,3 @@ int XX_httplib_parse_http_message( char *buf, int len, struct mg_request_info *r
 	return request_length;
 
 }  /* XX_httplib_parse_http_message */
-
-
-/* Keep reading the input (either opened file descriptor fd, or socket sock,
- * or SSL descriptor ssl) into buffer buf, until \r\n\r\n appears in the
- * buffer (which marks the end of HTTP request). Buffer buf may already
- * have some data. The length of the data is stored in nread.
- * Upon every read operation, increase nread by the number of bytes read. */
-int XX_httplib_read_request( FILE *fp, struct mg_connection *conn, char *buf, int bufsiz, int *nread ) {
-
-	int request_len;
-	int n = 0;
-	struct timespec last_action_time;
-	double request_timeout;
-
-	if (!conn) return 0;
-
-	memset(&last_action_time, 0, sizeof(last_action_time));
-
-	if (conn->ctx->config[REQUEST_TIMEOUT]) {
-		/* value of request_timeout is in seconds, config in milliseconds */
-		request_timeout = atof(conn->ctx->config[REQUEST_TIMEOUT]) / 1000.0;
-	} else request_timeout = -1.0;
-
-	request_len = get_request_len(buf, *nread);
-
-	/* first time reading from this connection */
-	clock_gettime(CLOCK_MONOTONIC, &last_action_time);
-
-	while (
-	    (conn->ctx->stop_flag == 0) && (*nread < bufsiz) && (request_len == 0)
-	    && ((mg_difftimespec(&last_action_time, &(conn->req_time))
-	         <= request_timeout) || (request_timeout < 0))
-	    && ((n = XX_httplib_pull(fp, conn, buf + *nread, bufsiz - *nread, request_timeout))
-	        > 0)) {
-		*nread += n;
-		/* assert(*nread <= bufsiz); */
-		if (*nread > bufsiz) {
-			return -2;
-		}
-		request_len = get_request_len(buf, *nread);
-		if (request_timeout > 0.0) clock_gettime(CLOCK_MONOTONIC, &last_action_time);
-	}
-
-	return ((request_len <= 0) && (n <= 0)) ? -1 : request_len;
-
-}  /* XX_httplib_read_request */

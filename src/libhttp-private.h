@@ -891,6 +891,7 @@ int			XX_httplib_connect_socket( struct mg_context *ctx, const char *host, int p
 void			XX_httplib_construct_etag( char *buf, size_t buf_len, const struct file *filep );
 int			XX_httplib_consume_socket( struct mg_context *ctx, struct socket *sp, int thread_index );
 void			XX_httplib_delete_file( struct mg_connection *conn, const char *path );
+double			XX_httplib_difftimespec( const struct timespec *ts_now, const struct timespec *ts_before );
 void			XX_httplib_discard_unread_request_data( struct mg_connection *conn );
 struct mg_connection *	XX_httplib_fc( struct mg_context *ctx );
 void			XX_httplib_fclose( struct file *filep );
@@ -904,7 +905,9 @@ int			XX_httplib_get_option_index( const char *name );
 uint64_t		XX_httplib_get_random( void );
 const char *		XX_httplib_get_rel_url_at_current_server( const char *uri, const struct mg_connection *conn );
 uint32_t		XX_httplib_get_remote_ip( const struct mg_connection *conn );
-int XX_httplib_get_request_handler( struct mg_connection *conn, int handler_type, mg_request_handler *handler, mg_websocket_connect_handler *connect_handler, mg_websocket_ready_handler *ready_handler, mg_websocket_data_handler *data_handler, mg_websocket_close_handler *close_handler, mg_authorization_handler *auth_handler, void **cbdata );
+int			XX_httplib_get_request_handler( struct mg_connection *conn, int handler_type, mg_request_handler *handler, mg_websocket_connect_handler *connect_handler, mg_websocket_ready_handler *ready_handler, mg_websocket_data_handler *data_handler, mg_websocket_close_handler *close_handler, mg_authorization_handler *auth_handler, void **cbdata );
+int			XX_httplib_get_request_len( const char *buf, int buflen );
+
 void			XX_httplib_get_system_name( char **sysName );
 int			XX_httplib_get_uri_type( const char *uri );
 int			XX_httplib_getreq( struct mg_connection *conn, char *ebuf, size_t ebuf_len, int *err );
