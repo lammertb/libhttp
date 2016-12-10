@@ -606,8 +606,6 @@ mg_static_assert((sizeof(XX_httplib_config_options) / sizeof(XX_httplib_config_o
                      == (NUM_OPTIONS + 1),
                  "XX_httplib_config_options and enum not sync");
 
-enum { REQUEST_HANDLER, WEBSOCKET_HANDLER, AUTH_HANDLER };
-
 
 
 pthread_key_t XX_httplib_sTlsKey; /* Thread local storage index */
@@ -622,12 +620,6 @@ struct de {
 	struct file file;
 };
 
-
-#if defined(USE_WEBSOCKET)
-static int is_websocket_protocol(const struct mg_connection *conn);
-#else
-#define is_websocket_protocol(conn) (0)
-#endif
 
 
 
@@ -1153,7 +1145,7 @@ void XX_httplib_sockaddr_to_string(char *buf, size_t len, const union usa *usa) 
 
 /* Convert time_t to a string. According to RFC2616, Sec 14.18, this must be
  * included in all responses other than 100, 101, 5xx. */
-static void gmt_time_string(char *buf, size_t buf_len, time_t *t) {
+void XX_httplib_gmt_time_string( char *buf, size_t buf_len, time_t *t ) {
 
 	struct tm *tm;
 
@@ -1164,7 +1156,8 @@ static void gmt_time_string(char *buf, size_t buf_len, time_t *t) {
 		XX_httplib_strlcpy(buf, "Thu, 01 Jan 1970 00:00:00 GMT", buf_len);
 		buf[buf_len - 1] = '\0';
 	}
-}
+
+}  /* XX_httplib_gmt_time_string */
 
 
 /* difftime for struct timespec. Return value is in seconds. */
@@ -1477,18 +1470,20 @@ int XX_httplib_should_keep_alive( const struct mg_connection *conn ) {
 }  /* XX_httplib_should_keep_alive */
 
 
-static int should_decode_url(const struct mg_connection *conn) {
+int XX_httplib_should_decode_url( const struct mg_connection *conn ) {
 
-	if (!conn || !conn->ctx) { return 0; }
+	if ( conn == NULL  ||  conn->ctx == NULL ) return 0;
 
 	return (mg_strcasecmp(conn->ctx->config[DECODE_URL], "yes") == 0);
-}
+
+}  /* XX_httplib_should_decode_url */
 
 
-static const char * suggest_connection_header(const struct mg_connection *conn) {
+const char * XX_httplib_suggest_connection_header( const struct mg_connection *conn ) {
 
 	return XX_httplib_should_keep_alive(conn) ? "keep-alive" : "close";
-}
+
+}  /* XX_httplib_suggest_connection_header */
 
 
 static int send_no_cache_header(struct mg_connection *conn) {
@@ -1606,7 +1601,7 @@ void XX_httplib_send_http_error( struct mg_connection *conn, int status, const c
 		}
 
 		/* No custom error page. Send default error page. */
-		gmt_time_string(date, sizeof(date), &curtime);
+		XX_httplib_gmt_time_string(date, sizeof(date), &curtime);
 
 		/* Errors 1xx, 204 and 304 MUST NOT send a body */
 		has_body = (status > 199 && status != 204 && status != 304);
@@ -2843,7 +2838,7 @@ static int pull_all(FILE *fp, struct mg_connection *conn, char *buf, int len) {
 }
 
 
-static void discard_unread_request_data(struct mg_connection *conn) {
+void XX_httplib_discard_unread_request_data( struct mg_connection *conn ) {
 
 	char buf[MG_BUF_LEN];
 	size_t to_read;
@@ -2877,7 +2872,8 @@ static void discard_unread_request_data(struct mg_connection *conn) {
 			if (nread <= 0) break;
 		}
 	}
-}
+
+}  /* XX_httplib_discard_unread_request_data */
 
 
 static int mg_read_inner(struct mg_connection *conn, void *buf, size_t len) {
@@ -3335,27 +3331,36 @@ static void base64_encode(const unsigned char *src, int src_len, char *dst) {
 #endif
 
 
-static int is_put_or_delete_method(const struct mg_connection *conn) {
+int XX_httplib_is_put_or_delete_method( const struct mg_connection *conn ) {
 
-	if (conn) {
-		const char *s = conn->request_info.request_method;
-		return s != NULL && (!strcmp(s, "PUT") || !strcmp(s, "DELETE") || !strcmp(s, "MKCOL") || !strcmp(s, "PATCH"));
-	}
-	return 0;
-}
+	if ( conn == NULL ) return 0;
+
+	const char *s = conn->request_info.request_method;
+
+	return s != NULL && (!strcmp(s, "PUT") || !strcmp(s, "DELETE") || !strcmp(s, "MKCOL") || !strcmp(s, "PATCH"));
+
+}  /* X_httplib_is_put_or_delete_method */
 
 
-static void
-interpret_uri(struct mg_connection *conn,   /* in: request (must be valid) */
-              char *filename,               /* out: filename */
-              size_t filename_buf_len,      /* in: size of filename buffer */
-              struct file *filep,           /* out: file structure */
-              int *is_found,                /* out: file is found (directly) */
-              int *is_script_resource,      /* out: handled by a script? */
-              int *is_websocket_request,    /* out: websocket connetion? */
-              int *is_put_or_delete_request /* out: put/delete a file? */
-              )
-{
+
+/*
+ * void XX_httplib_interpret_uri();
+ *
+ * The function XX_httplib_interpret_uri() interprets an URI and decides what
+ * type of request is involved. The function takes the following parameters:
+ *
+ * conn:		in:  The request (must be valid)
+ * filename:		out: Filename
+ * filename_buf_len:	in:  Size of the filename buffer
+ * filep:		out: file structure
+ * is_found:		out: file is found (directly)
+ * is_script_resource:	out: handled by a script?
+ * is_websocket_request:	out: websocket connection?
+ * is_put_or_delete_request:	out: put/delete file?
+ */
+
+void XX_httplib_interpret_uri( struct mg_connection *conn, char *filename, size_t filename_buf_len, struct file *filep, int *is_found, int *is_script_resource, int *is_websocket_request, int *is_put_or_delete_request ) {
+
 /* TODO (high): Restructure this function */
 
 #if !defined(NO_FILES)
@@ -3379,10 +3384,10 @@ interpret_uri(struct mg_connection *conn,   /* in: request (must be valid) */
 	*filename = 0;
 	*is_found = 0;
 	*is_script_resource = 0;
-	*is_put_or_delete_request = is_put_or_delete_method(conn);
+	*is_put_or_delete_request = XX_httplib_is_put_or_delete_method(conn);
 
 #if defined(USE_WEBSOCKET)
-	*is_websocket_request = is_websocket_protocol(conn);
+	*is_websocket_request = XX_httplib_is_websocket_protocol(conn);
 #if !defined(NO_FILES)
 	if (*is_websocket_request && conn->ctx->config[WEBSOCKET_ROOT]) {
 		root = conn->ctx->config[WEBSOCKET_ROOT];
@@ -3513,7 +3518,8 @@ interpret_cleanup:
 	*is_websocket_request = 0;
 	*is_put_or_delete_request = 0;
 #endif /* !defined(NO_FILES) */
-}
+
+}  /* XX_httplib_interpret_uri */
 
 
 /* Check whether full request is buffered. Return:
@@ -3596,7 +3602,7 @@ static time_t parse_date_string(const char *datetime) {
 
 /* Protect against directory disclosure attack by removing '..',
  * excessive '/' and '\' characters */
-static void remove_double_dots_and_double_slashes(char *s) {
+void XX_httplib_remove_double_dots_and_double_slashes( char *s ) {
 
 	char *p = s;
 
@@ -3616,7 +3622,8 @@ static void remove_double_dots_and_double_slashes(char *s) {
 		}
 	}
 	*p = '\0';
-}
+
+}  /* XX_httplib_remove_double_dots_and_double_slashes */
 
 
 static const struct {
@@ -4117,7 +4124,7 @@ static int authorize(struct mg_connection *conn, struct file *filep) {
 
 
 /* Return 1 if request is authorised, 0 otherwise. */
-static int check_authorization(struct mg_connection *conn, const char *path) {
+int XX_httplib_check_authorization( struct mg_connection *conn, const char *path ) {
 
 	char fname[PATH_MAX];
 	struct vec uri_vec;
@@ -4149,10 +4156,11 @@ static int check_authorization(struct mg_connection *conn, const char *path) {
 	}
 
 	return authorized;
-}
+
+}  /* XX_httplib_check_authorization */
 
 
-static void send_authorization_request( struct mg_connection *conn ) {
+void XX_httplib_send_authorization_request( struct mg_connection *conn ) {
 
 	char date[64];
 	time_t curtime;
@@ -4172,7 +4180,7 @@ static void send_authorization_request( struct mg_connection *conn ) {
 	conn->status_code = 401;
 	conn->must_close = 1;
 
-	gmt_time_string(date, sizeof(date), &curtime);
+	XX_httplib_gmt_time_string(date, sizeof(date), &curtime);
 
 	mg_printf(conn, "HTTP/1.1 401 Unauthorized\r\n");
 	send_no_cache_header(conn);
@@ -4183,30 +4191,30 @@ static void send_authorization_request( struct mg_connection *conn ) {
 	          "WWW-Authenticate: Digest qop=\"auth\", realm=\"%s\", "
 	          "nonce=\"%" UINT64_FMT "\"\r\n\r\n",
 	          date,
-	          suggest_connection_header(conn),
+	          XX_httplib_suggest_connection_header(conn),
 	          conn->ctx->config[AUTHENTICATION_DOMAIN],
 	          nonce);
 
-}  /* send_authorization_request */
+}  /* XX_httplib_send_authorization_request */
 
 
 #if !defined(NO_FILES)
-static int is_authorized_for_put(struct mg_connection *conn) {
+int XX_httplib_is_authorized_for_put( struct mg_connection *conn ) {
 
-	if (conn) {
-		struct file file = STRUCT_FILE_INITIALIZER;
-		const char *passfile = conn->ctx->config[PUT_DELETE_PASSWORDS_FILE];
-		int ret = 0;
+	if ( conn == NULL ) return 0;
 
-		if (passfile != NULL && XX_httplib_fopen(conn, passfile, "r", &file)) {
-			ret = authorize(conn, &file);
-			XX_httplib_fclose(&file);
-		}
+	struct file file = STRUCT_FILE_INITIALIZER;
+	const char *passfile = conn->ctx->config[PUT_DELETE_PASSWORDS_FILE];
+	int ret = 0;
 
-		return ret;
+	if (passfile != NULL && XX_httplib_fopen(conn, passfile, "r", &file)) {
+		ret = authorize(conn, &file);
+		XX_httplib_fclose(&file);
 	}
-	return 0;
-}
+
+	return ret;
+
+}  /* XX_httplib_is_authorized_for_put */
 #endif
 
 
@@ -4537,7 +4545,7 @@ static int WINCDECL compare_dir_entries( const void *p1, const void *p2 ) {
 }  /* compare_dir_entries */
 
 
-static int must_hide_file(struct mg_connection *conn, const char *path) {
+int XX_httplib_must_hide_file( struct mg_connection *conn, const char *path ) {
 
 	if (conn && conn->ctx) {
 		const char *pw_pattern = "**" PASSWORDS_FILE_NAME "$";
@@ -4547,7 +4555,9 @@ static int must_hide_file(struct mg_connection *conn, const char *path) {
 		           && XX_httplib_match_prefix(pattern, strlen(pattern), path) > 0);
 	}
 	return 0;
-}
+
+}  /* XX_httplib_must_hide_file */
+
 
 
 static int scan_directory(struct mg_connection *conn, const char *dir, void *data, void (*cb)(struct de *, void *)) {
@@ -4565,7 +4575,7 @@ static int scan_directory(struct mg_connection *conn, const char *dir, void *dat
 
 		while ((dp = mg_readdir(dirp)) != NULL) {
 			/* Do not show current dir and hidden files */
-			if (!strcmp(dp->d_name, ".") || !strcmp(dp->d_name, "..") || must_hide_file(conn, dp->d_name)) continue;
+			if (!strcmp(dp->d_name, ".") || !strcmp(dp->d_name, "..") || XX_httplib_must_hide_file(conn, dp->d_name)) continue;
 
 			XX_httplib_snprintf( conn, &truncated, path, sizeof(path), "%s/%s", dir, dp->d_name);
 
@@ -4691,7 +4701,7 @@ static void dir_scan_callback(struct de *de, void *data) {
 }
 
 
-static void handle_directory_request(struct mg_connection *conn, const char *dir) {
+void XX_httplib_handle_directory_request( struct mg_connection *conn, const char *dir ) {
 
 	unsigned int i;
 	int sort_direction;
@@ -4704,7 +4714,7 @@ static void handle_directory_request(struct mg_connection *conn, const char *dir
 		return;
 	}
 
-	gmt_time_string(date, sizeof(date), &curtime);
+	XX_httplib_gmt_time_string(date, sizeof(date), &curtime);
 
 	if (!conn) return;
 
@@ -4756,7 +4766,8 @@ static void handle_directory_request(struct mg_connection *conn, const char *dir
 
 	conn->num_bytes_sent += mg_printf(conn, "%s", "</table></body></html>");
 	conn->status_code = 200;
-}
+
+}  /* XX_httplib_handle_directory_request */
 
 
 /* Send len bytes from the opened file to the client. */
@@ -4978,8 +4989,8 @@ void XX_httplib_handle_static_file_request( struct mg_connection *conn, const ch
 
 	/* Prepare Etag, Date, Last-Modified headers. Must be in UTC, according to
 	 * http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.3 */
-	gmt_time_string(date, sizeof(date), &curtime);
-	gmt_time_string(lm, sizeof(lm), &filep->last_modified);
+	XX_httplib_gmt_time_string(date, sizeof(date), &curtime);
+	XX_httplib_gmt_time_string(lm, sizeof(lm), &filep->last_modified);
 	construct_etag(etag, sizeof(etag), filep);
 
 	(void)mg_printf(conn, "HTTP/1.1 %d %s\r\n" "%s%s%s" "Date: %s\r\n", conn->status_code, msg, cors1, cors2, cors3, date);
@@ -4997,7 +5008,7 @@ void XX_httplib_handle_static_file_request( struct mg_connection *conn, const ch
 	                (int)mime_vec.len,
 	                mime_vec.ptr,
 	                cl,
-	                suggest_connection_header(conn),
+	                XX_httplib_suggest_connection_header(conn),
 	                range,
 	                encoding);
 
@@ -5027,13 +5038,13 @@ void XX_httplib_handle_not_modified_static_file_request( struct mg_connection *c
 	curtime = time( NULL );
 
 	conn->status_code = 304;
-	gmt_time_string(date, sizeof(date), &curtime);
-	gmt_time_string(lm, sizeof(lm), &filep->last_modified);
+	XX_httplib_gmt_time_string(date, sizeof(date), &curtime);
+	XX_httplib_gmt_time_string(lm, sizeof(lm), &filep->last_modified);
 	construct_etag(etag, sizeof(etag), filep);
 
 	mg_printf(conn, "HTTP/1.1 %d %s\r\n" "Date: %s\r\n", conn->status_code, mg_get_response_code_text(conn, conn->status_code), date);
 	send_static_cache_header(conn);
-	mg_printf(conn, "Last-Modified: %s\r\n" "Etag: %s\r\n" "Connection: %s\r\n" "\r\n", lm, etag, suggest_connection_header(conn));
+	mg_printf(conn, "Last-Modified: %s\r\n" "Etag: %s\r\n" "Connection: %s\r\n" "\r\n", lm, etag, XX_httplib_suggest_connection_header(conn));
 
 }  /* XX_httplib_handle_not_modified_static_file_request */
 
@@ -5060,7 +5071,7 @@ void mg_send_mime_file2( struct mg_connection *conn, const char *path, const cha
 		if (file.is_directory) {
 			if (!conn) return;
 			if (!mg_strcasecmp(conn->ctx->config[ENABLE_DIRECTORY_LISTING], "yes")) {
-				handle_directory_request(conn, path);
+				XX_httplib_handle_directory_request(conn, path);
 			} else {
 				XX_httplib_send_http_error(conn, 403, "%s", "Error: Directory listing denied");
 			}
@@ -5361,46 +5372,46 @@ int XX_httplib_read_request( FILE *fp, struct mg_connection *conn, char *buf, in
 /* For given directory path, substitute it to valid index file.
  * Return 1 if index file has been found, 0 if not found.
  * If the file is found, it's stats is returned in stp. */
-static int substitute_index_file(struct mg_connection *conn, char *path, size_t path_len, struct file *filep) {
+int XX_httplib_substitute_index_file( struct mg_connection *conn, char *path, size_t path_len, struct file *filep ) {
 
-	if (conn && conn->ctx) {
-		const char *list = conn->ctx->config[INDEX_FILES];
-		struct file file = STRUCT_FILE_INITIALIZER;
-		struct vec filename_vec;
-		size_t n = strlen(path);
-		int found = 0;
+	if ( conn == NULL  ||  conn->ctx == NULL ) return 0;
 
-		/* The 'path' given to us points to the directory. Remove all trailing
-		 * directory separator characters from the end of the path, and
-		 * then append single directory separator character. */
-		while (n > 0 && path[n - 1] == '/') n--;
-		path[n] = '/';
+	const char *list = conn->ctx->config[INDEX_FILES];
+	struct file file = STRUCT_FILE_INITIALIZER;
+	struct vec filename_vec;
+	size_t n = strlen(path);
+	int found = 0;
 
-		/* Traverse index files list. For each entry, append it to the given
-		 * path and see if the file exists. If it exists, break the loop */
-		while ((list = XX_httplib_next_option(list, &filename_vec, NULL)) != NULL) {
-			/* Ignore too long entries that may overflow path buffer */
-			if (filename_vec.len > path_len - (n + 2)) continue;
+	/* The 'path' given to us points to the directory. Remove all trailing
+	 * directory separator characters from the end of the path, and
+	 * then append single directory separator character. */
+	while (n > 0 && path[n - 1] == '/') n--;
+	path[n] = '/';
 
-			/* Prepare full path to the index file */
-			XX_httplib_strlcpy(path + n + 1, filename_vec.ptr, filename_vec.len + 1);
+	/* Traverse index files list. For each entry, append it to the given
+	 * path and see if the file exists. If it exists, break the loop */
+	while ((list = XX_httplib_next_option(list, &filename_vec, NULL)) != NULL) {
+		/* Ignore too long entries that may overflow path buffer */
+		if (filename_vec.len > path_len - (n + 2)) continue;
 
-			/* Does it exist? */
-			if (XX_httplib_stat(conn, path, &file)) {
-				/* Yes it does, break the loop */
-				*filep = file;
-				found = 1;
-				break;
-			}
+		/* Prepare full path to the index file */
+		XX_httplib_strlcpy(path + n + 1, filename_vec.ptr, filename_vec.len + 1);
+
+		/* Does it exist? */
+		if (XX_httplib_stat(conn, path, &file)) {
+			/* Yes it does, break the loop */
+			*filep = file;
+			found = 1;
+			break;
 		}
-
-		/* If no index file exists, restore directory path */
-		if (!found) path[n] = '\0';
-
-		return found;
 	}
-	return 0;
-}
+
+	/* If no index file exists, restore directory path */
+	if (!found) path[n] = '\0';
+
+	return found;
+
+}  /* XX_httplib_substitute_index_file */
 #endif
 
 
@@ -5940,7 +5951,7 @@ done:
 
 
 #if !defined(NO_FILES)
-static void mkcol( struct mg_connection *conn, const char *path ) {
+void XX_httplib_mkcol( struct mg_connection *conn, const char *path ) {
 
 	int rc;
 	int body_len;
@@ -5976,10 +5987,10 @@ static void mkcol( struct mg_connection *conn, const char *path ) {
 	if ( rc == 0 ) {
 
 		conn->status_code = 201;
-		gmt_time_string(date, sizeof(date), &curtime);
+		XX_httplib_gmt_time_string(date, sizeof(date), &curtime);
 		mg_printf(conn, "HTTP/1.1 %d Created\r\n" "Date: %s\r\n", conn->status_code, date);
 		send_static_cache_header(conn);
-		mg_printf(conn, "Content-Length: 0\r\n" "Connection: %s\r\n\r\n", suggest_connection_header(conn));
+		mg_printf(conn, "Content-Length: 0\r\n" "Connection: %s\r\n\r\n", XX_httplib_suggest_connection_header(conn));
 	}
 	
 	else if (rc == -1) {
@@ -5989,10 +6000,11 @@ static void mkcol( struct mg_connection *conn, const char *path ) {
 		else if ( errno == ENOENT ) XX_httplib_send_http_error( conn, 409, "Error: mkcol(%s): %s", path, strerror( ERRNO ) );
 		else                        XX_httplib_send_http_error( conn, 500, "fopen(%s): %s",        path, strerror( ERRNO ) );
 	}
-}
+
+}  /* XX_httplib_mkcol */
 
 
-static void put_file(struct mg_connection *conn, const char *path) {
+void XX_httplib_put_file( struct mg_connection *conn, const char *path ) {
 
 	struct file file = STRUCT_FILE_INITIALIZER;
 	const char *range;
@@ -6043,10 +6055,10 @@ static void put_file(struct mg_connection *conn, const char *path) {
 
 	if (rc == 0) {
 		/* put_dir returns 0 if path is a directory */
-		gmt_time_string(date, sizeof(date), &curtime);
+		XX_httplib_gmt_time_string(date, sizeof(date), &curtime);
 		mg_printf(conn, "HTTP/1.1 %d %s\r\n", conn->status_code, mg_get_response_code_text(NULL, conn->status_code));
 		send_no_cache_header(conn);
-		mg_printf(conn, "Date: %s\r\n" "Content-Length: 0\r\n" "Connection: %s\r\n\r\n", date, suggest_connection_header(conn));
+		mg_printf(conn, "Date: %s\r\n" "Content-Length: 0\r\n" "Connection: %s\r\n\r\n", date, XX_httplib_suggest_connection_header(conn));
 
 		/* Request to create a directory has been fulfilled successfully.
 		 * No need to put a file. */
@@ -6088,16 +6100,17 @@ static void put_file(struct mg_connection *conn, const char *path) {
 		return;
 	}
 
-	gmt_time_string(date, sizeof(date), &curtime);
+	XX_httplib_gmt_time_string(date, sizeof(date), &curtime);
 	mg_printf(conn, "HTTP/1.1 %d %s\r\n", conn->status_code, mg_get_response_code_text(NULL, conn->status_code));
 	send_no_cache_header(conn);
-	mg_printf(conn, "Date: %s\r\n" "Content-Length: 0\r\n" "Connection: %s\r\n\r\n", date, suggest_connection_header(conn));
+	mg_printf(conn, "Date: %s\r\n" "Content-Length: 0\r\n" "Connection: %s\r\n\r\n", date, XX_httplib_suggest_connection_header(conn));
 
 	XX_httplib_fclose(&file);
-}
+
+}  /* XX_httplib_put_file */
 
 
-static void delete_file( struct mg_connection *conn, const char *path ) {
+void XX_httplib_delete_file( struct mg_connection *conn, const char *path ) {
 
 	struct de de;
 
@@ -6141,7 +6154,9 @@ static void delete_file( struct mg_connection *conn, const char *path ) {
 		/* Delete not successful (file locked). */
 		XX_httplib_send_http_error(conn, 423, "Error: Cannot delete file\nremove(%s): %s", path, strerror(ERRNO));
 	}
-}
+
+}  /* XX_httplib_delete_file */
+
 #endif /* !NO_FILES */
 
 
@@ -6338,7 +6353,7 @@ void XX_httplib_handle_ssi_file_request( struct mg_connection *conn, const char 
 		XX_httplib_send_http_error(conn, 500, "Error: Cannot read file\nfopen(%s): %s", path, strerror(ERRNO));
 	} else {
 		conn->must_close = 1;
-		gmt_time_string(date, sizeof(date), &curtime);
+		XX_httplib_gmt_time_string(date, sizeof(date), &curtime);
 		fclose_on_exec(filep, conn);
 		mg_printf(conn, "HTTP/1.1 200 OK\r\n");
 		send_no_cache_header(conn);
@@ -6351,7 +6366,7 @@ void XX_httplib_handle_ssi_file_request( struct mg_connection *conn, const char 
 		          cors2,
 		          cors3,
 		          date,
-		          suggest_connection_header(conn));
+		          XX_httplib_suggest_connection_header(conn));
 		send_ssi_file(conn, path, filep, 0);
 		XX_httplib_fclose(filep);
 	}
@@ -6360,7 +6375,7 @@ void XX_httplib_handle_ssi_file_request( struct mg_connection *conn, const char 
 
 
 #if !defined(NO_FILES)
-static void send_options(struct mg_connection *conn) {
+void XX_httplib_send_options( struct mg_connection *conn ) {
 
 	char date[64];
 	time_t curtime;
@@ -6370,7 +6385,7 @@ static void send_options(struct mg_connection *conn) {
 	curtime           = time( NULL );
 	conn->status_code = 200;
 	conn->must_close  = 1;
-	gmt_time_string( date, sizeof(date), &curtime );
+	XX_httplib_gmt_time_string( date, sizeof(date), &curtime );
 
 	mg_printf(conn,
 	          "HTTP/1.1 200 OK\r\n"
@@ -6381,8 +6396,9 @@ static void send_options(struct mg_connection *conn) {
 	          "PROPFIND, MKCOL\r\n"
 	          "DAV: 1\r\n\r\n",
 	          date,
-	          suggest_connection_header(conn));
-}
+	          XX_httplib_suggest_connection_header(conn));
+
+}  /* XX_httplib_send_options */
 
 
 /* Writes PROPFIND properties for a collection element */
@@ -6392,7 +6408,7 @@ static void print_props( struct mg_connection *conn, const char *uri, struct fil
 
 	if ( conn == NULL  ||  uri == NULL  ||  filep == NULL ) return;
 
-	gmt_time_string(mtime, sizeof(mtime), &filep->last_modified);
+	XX_httplib_gmt_time_string(mtime, sizeof(mtime), &filep->last_modified);
 	conn->num_bytes_sent +=
 	    mg_printf(conn,
 	              "<d:response>"
@@ -6431,13 +6447,13 @@ static void print_dav_dir_entry(struct de *de, void *data) {
 }
 
 
-static void handle_propfind(struct mg_connection *conn, const char *path, struct file *filep) {
+void XX_httplib_handle_propfind( struct mg_connection *conn, const char *path, struct file *filep ) {
 
 	const char *depth = mg_get_header(conn, "Depth");
 	char date[64];
 	time_t curtime = time(NULL);
 
-	gmt_time_string(date, sizeof(date), &curtime);
+	XX_httplib_gmt_time_string(date, sizeof(date), &curtime);
 
 	if (!conn || !path || !filep || !conn->ctx) return;
 
@@ -6445,7 +6461,7 @@ static void handle_propfind(struct mg_connection *conn, const char *path, struct
 	conn->status_code = 207;
 	mg_printf(conn, "HTTP/1.1 207 Multi-Status\r\n" "Date: %s\r\n", date);
 	send_static_cache_header(conn);
-	mg_printf(conn, "Connection: %s\r\n" "Content-Type: text/xml; charset=utf-8\r\n\r\n", suggest_connection_header(conn));
+	mg_printf(conn, "Connection: %s\r\n" "Content-Type: text/xml; charset=utf-8\r\n\r\n", XX_httplib_suggest_connection_header(conn));
 
 	conn->num_bytes_sent += mg_printf(conn, "<?xml version=\"1.0\" encoding=\"utf-8\"?>" "<d:multistatus xmlns:d='DAV:'>\n");
 
@@ -6460,7 +6476,8 @@ static void handle_propfind(struct mg_connection *conn, const char *path, struct
 	}
 
 	conn->num_bytes_sent += mg_printf(conn, "%s\n", "</d:multistatus>");
-}
+
+}  /* XX_httplib_handle_propfind */
 #endif
 
 void mg_lock_connection(struct mg_connection *conn) {
@@ -7034,15 +7051,8 @@ int mg_websocket_client_write(struct mg_connection *conn, int opcode, const char
 }  /* mg_websocket_client_write */
 
 
-static void handle_websocket_request(struct mg_connection *conn,
-                         const char *path,
-                         int is_callback_resource,
-                         mg_websocket_connect_handler ws_connect_handler,
-                         mg_websocket_ready_handler ws_ready_handler,
-                         mg_websocket_data_handler ws_data_handler,
-                         mg_websocket_close_handler ws_close_handler,
-                         void *cbData)
-{
+void XX_httplib_handle_websocket_request( struct mg_connection *conn, const char *path, int is_callback_resource, mg_websocket_connect_handler ws_connect_handler, mg_websocket_ready_handler ws_ready_handler, mg_websocket_data_handler ws_data_handler, mg_websocket_close_handler ws_close_handler, void *cbData ) {
+
 	const char *websock_key = mg_get_header(conn, "Sec-WebSocket-Key");
 	const char *version = mg_get_header(conn, "Sec-WebSocket-Version");
 	int lua_websock = 0;
@@ -7126,12 +7136,17 @@ static void handle_websocket_request(struct mg_connection *conn,
 
 	/* Step 8: Call the close handler */
 	if (ws_close_handler) ws_close_handler(conn, cbData);
-}
+
+}  /* XX_httplib_handle_websocket_request */
+
+#endif /* !USE_WEBSOCKET */
 
 
-static int is_websocket_protocol(const struct mg_connection *conn) {
+int XX_httplib_is_websocket_protocol( const struct mg_connection *conn ) {
 
-	const char *upgrade, *connection;
+#if defined(USE_WEBSOCKET)
+	const char *upgrade;
+	const char *connection;
 
 	/* A websocket protocoll has the following HTTP headers:
 	 *
@@ -7157,8 +7172,14 @@ static int is_websocket_protocol(const struct mg_connection *conn) {
 	 */
 
 	return 1;
-}
-#endif /* !USE_WEBSOCKET */
+
+#else  /* defined(USE_WEBSOCKET) */
+
+	return 0;
+
+#endif  /* defined(USE_WEBSOCKET) */
+
+}  /* XX_httplib_is_websocket_protocol */
 
 
 static int isbyte(int n) {
@@ -7192,7 +7213,7 @@ int XX_httplib_parse_net( const char *spec, uint32_t *net, uint32_t *mask ) {
 }  /* XX_httplib_parse_net */
 
 
-static int set_throttle(const char *spec, uint32_t remote_ip, const char *uri) {
+int XX_httplib_set_throttle( const char *spec, uint32_t remote_ip, const char *uri ) {
 
 	int throttle = 0;
 	struct vec vec, val;
@@ -7218,16 +7239,17 @@ static int set_throttle(const char *spec, uint32_t remote_ip, const char *uri) {
 	}
 
 	return throttle;
-}
+
+}  /* XX_httplib_set_throttle */
 
 
-static uint32_t get_remote_ip(const struct mg_connection *conn) {
+uint32_t XX_httplib_get_remote_ip( const struct mg_connection *conn ) {
 
 	if ( conn == NULL ) return 0;
 
 	return ntohl(*(const uint32_t *)&conn->client.rsa.sin.sin_addr);
 
-}  /* get_remote_ip */
+}  /* XX_httplib_get_remote_ip */
 
 
 /* The mg_upload function is superseeded by mg_handle_form_request. */
@@ -7235,7 +7257,7 @@ static uint32_t get_remote_ip(const struct mg_connection *conn) {
 
 
 
-static int get_first_ssl_listener_index(const struct mg_context *ctx) {
+int XX_httplib_get_first_ssl_listener_index( const struct mg_context *ctx ) {
 
 	unsigned int i;
 	int idx;
@@ -7246,10 +7268,10 @@ static int get_first_ssl_listener_index(const struct mg_context *ctx) {
 
 	return idx;
 
-}  /* get_first_ssl_listener_index */
+}  /* XX_httplib_get_first_ssl_listener_index */
 
 
-static void redirect_to_https_port(struct mg_connection *conn, int ssl_index) {
+void XX_httplib_redirect_to_https_port( struct mg_connection *conn, int ssl_index ) {
 
 	char host[1025];
 	const char *host_header;
@@ -7286,7 +7308,8 @@ static void redirect_to_https_port(struct mg_connection *conn, int ssl_index) {
 		          (conn->request_info.query_string == NULL) ? "" : "?",
 		          (conn->request_info.query_string == NULL) ? "" : conn->request_info.query_string);
 	}
-}
+
+}  /* XX_httplib_redirect_to_https_port */
 
 
 static void mg_set_handler_type(struct mg_context *ctx,
@@ -7446,16 +7469,7 @@ void mg_set_auth_handler(struct mg_context *ctx, const char *uri, mg_request_han
 }
 
 
-static int get_request_handler(struct mg_connection *conn,
-                    int handler_type,
-                    mg_request_handler *handler,
-                    mg_websocket_connect_handler *connect_handler,
-                    mg_websocket_ready_handler *ready_handler,
-                    mg_websocket_data_handler *data_handler,
-                    mg_websocket_close_handler *close_handler,
-                    mg_authorization_handler *auth_handler,
-                    void **cbdata)
-{
+int XX_httplib_get_request_handler( struct mg_connection *conn, int handler_type, mg_request_handler *handler, mg_websocket_connect_handler *connect_handler, mg_websocket_ready_handler *ready_handler, mg_websocket_data_handler *data_handler, mg_websocket_close_handler *close_handler, mg_authorization_handler *auth_handler, void **cbdata ) {
 	const struct mg_request_info *request_info = mg_get_request_info(conn);
 	if (request_info) {
 		const char *uri = request_info->local_uri;
@@ -7536,361 +7550,5 @@ static int get_request_handler(struct mg_connection *conn,
 		mg_unlock_context(conn->ctx);
 	}
 	return 0; /* none found */
-}
 
-
-/* This is the heart of the LibHTTP's logic.
- * This function is called when the request is read, parsed and validated,
- * and LibHTTP must decide what action to take: serve a file, or
- * a directory, or call embedded function, etcetera. */
-void XX_httplib_handle_request( struct mg_connection *conn ) {
-
-	if (conn) {
-		struct mg_request_info *ri = &conn->request_info;
-		char path[PATH_MAX];
-		int uri_len;
-		int ssl_index;
-		int is_found                 = 0;
-		int is_script_resource       = 0;
-		int is_websocket_request     = 0;
-		int is_put_or_delete_request = 0;
-		int is_callback_resource     = 0;
-		int i;
-		struct file file = STRUCT_FILE_INITIALIZER;
-		mg_request_handler callback_handler             = NULL;
-		mg_websocket_connect_handler ws_connect_handler = NULL;
-		mg_websocket_ready_handler ws_ready_handler     = NULL;
-		mg_websocket_data_handler ws_data_handler       = NULL;
-		mg_websocket_close_handler ws_close_handler     = NULL;
-		void *callback_data                             = NULL;
-		mg_authorization_handler auth_handler           = NULL;
-		void *auth_callback_data                        = NULL;
-#if !defined(NO_FILES)
-		time_t curtime = time(NULL);
-		char date[64];
-#endif
-
-		path[0] = 0;
-
-		if (!ri) return;
-
-		/* 1. get the request url */
-		/* 1.1. split into url and query string */
-		if ((conn->request_info.query_string = strchr(ri->request_uri, '?'))
-		    != NULL) {
-			*((char *)conn->request_info.query_string++) = '\0';
-		}
-
-		/* 1.2. do a https redirect, if required. Do not decode URIs yet. */
-		if (!conn->client.is_ssl && conn->client.ssl_redir) {
-			ssl_index = get_first_ssl_listener_index(conn->ctx);
-			if (ssl_index >= 0) {
-				redirect_to_https_port(conn, ssl_index);
-			} else {
-				/* A http to https forward port has been specified,
-				 * but no https port to forward to. */
-				XX_httplib_send_http_error(conn, 503, "%s", "Error: SSL forward not configured properly");
-				mg_cry(conn, "Can not redirect to SSL, no SSL port available");
-			}
-			return;
-		}
-		uri_len = (int)strlen(ri->local_uri);
-
-		/* 1.3. decode url (if config says so) */
-		if (should_decode_url(conn)) mg_url_decode( ri->local_uri, uri_len, (char *)ri->local_uri, uri_len + 1, 0);
-
-		/* 1.4. clean URIs, so a path like allowed_dir/../forbidden_file is
-		 * not possible */
-		remove_double_dots_and_double_slashes((char *)ri->local_uri);
-
-		/* step 1. completed, the url is known now */
-		uri_len = (int)strlen(ri->local_uri);
-
-		/* 3. if this ip has limited speed, set it for this connection */
-		conn->throttle = set_throttle(conn->ctx->config[THROTTLE], get_remote_ip(conn), ri->local_uri);
-
-		/* 4. call a "handle everything" callback, if registered */
-		if (conn->ctx->callbacks.begin_request != NULL) {
-			/* Note that since V1.7 the "begin_request" function is called
-			 * before an authorization check. If an authorization check is
-			 * required, use a request_handler instead. */
-			i = conn->ctx->callbacks.begin_request(conn);
-			if (i > 0) {
-				/* callback already processed the request. Store the
-				   return value as a status code for the access log. */
-				conn->status_code = i;
-				return;
-			} else if (i == 0) {
-				/* LibHTTP should process the request */
-			} else {
-				/* unspecified - may change with the next version */
-				return;
-			}
-		}
-
-		/* request not yet handled by a handler or redirect, so the request
-		 * is processed here */
-
-		/* 5. interpret the url to find out how the request must be handled
-		 */
-		/* 5.1. first test, if the request targets the regular http(s)://
-		 * protocol namespace or the websocket ws(s):// protocol namespace.
-		 */
-		is_websocket_request = is_websocket_protocol(conn);
-
-		/* 5.2. check if the request will be handled by a callback */
-		if (get_request_handler(conn,
-		                        is_websocket_request ? WEBSOCKET_HANDLER
-		                                             : REQUEST_HANDLER,
-		                        &callback_handler,
-		                        &ws_connect_handler,
-		                        &ws_ready_handler,
-		                        &ws_data_handler,
-		                        &ws_close_handler,
-		                        NULL,
-		                        &callback_data)) {
-			/* 5.2.1. A callback will handle this request. All requests
-			 * handled
-			 * by a callback have to be considered as requests to a script
-			 * resource. */
-			is_callback_resource = 1;
-			is_script_resource = 1;
-			is_put_or_delete_request = is_put_or_delete_method(conn);
-		} else {
-		no_callback_resource:
-			/* 5.2.2. No callback is responsible for this request. The URI
-			 * addresses a file based resource (static content or Lua/cgi
-			 * scripts in the file system). */
-			is_callback_resource = 0;
-			interpret_uri(conn,
-			              path,
-			              sizeof(path),
-			              &file,
-			              &is_found,
-			              &is_script_resource,
-			              &is_websocket_request,
-			              &is_put_or_delete_request);
-		}
-
-		/* 6. authorization check */
-		/* 6.1. a custom authorization handler is installed */
-		if (get_request_handler(conn, AUTH_HANDLER, NULL, NULL, NULL, NULL, NULL, &auth_handler, &auth_callback_data)) {
-			if (!auth_handler(conn, auth_callback_data)) return;
-		} else if (is_put_or_delete_request && !is_script_resource && !is_callback_resource) {
-/* 6.2. this request is a PUT/DELETE to a real file */
-/* 6.2.1. thus, the server must have real files */
-#if defined(NO_FILES)
-			if (1) {
-#else
-			if (conn->ctx->config[DOCUMENT_ROOT] == NULL) {
-#endif
-				/* This server does not have any real files, thus the
-				 * PUT/DELETE methods are not valid. */
-				XX_httplib_send_http_error(conn, 405, "%s method not allowed", conn->request_info.request_method);
-				return;
-			}
-
-#if !defined(NO_FILES)
-			/* 6.2.2. Check if put authorization for static files is
-			 * available.
-			 */
-			if (!is_authorized_for_put(conn)) {
-				send_authorization_request(conn);
-				return;
-			}
-#endif
-
-		} else {
-			/* 6.3. This is either a OPTIONS, GET, HEAD or POST request,
-			 * or it is a PUT or DELETE request to a resource that does not
-			 * correspond to a file. Check authorization. */
-			if (!check_authorization(conn, path)) {
-				send_authorization_request(conn);
-				return;
-			}
-		}
-
-		/* request is authorized or does not need authorization */
-
-		/* 7. check if there are request handlers for this uri */
-		if (is_callback_resource) {
-			if (!is_websocket_request) {
-				i = callback_handler(conn, callback_data);
-				if (i > 0) {
-					/* Do nothing, callback has served the request. Store
-					 * the
-					 * return value as status code for the log and discard
-					 * all
-					 * data from the client not used by the callback. */
-					conn->status_code = i;
-					discard_unread_request_data(conn);
-				} else {
-					/* TODO (high): what if the handler did NOT handle the
-					 * request */
-					/* The last version did handle this as a file request,
-					 * but
-					 * since a file request is not always a script resource,
-					 * the authorization check might be different */
-					interpret_uri(conn,
-					              path,
-					              sizeof(path),
-					              &file,
-					              &is_found,
-					              &is_script_resource,
-					              &is_websocket_request,
-					              &is_put_or_delete_request);
-					callback_handler = NULL;
-
-					/* TODO (very low): goto is deprecated but for the
-					 * moment,
-					 * a goto is simpler than some curious loop. */
-					/* The situation "callback does not handle the request"
-					 * needs to be reconsidered anyway. */
-					goto no_callback_resource;
-				}
-			} else {
-#if defined(USE_WEBSOCKET)
-				handle_websocket_request(conn,
-				                         path,
-				                         is_callback_resource,
-				                         ws_connect_handler,
-				                         ws_ready_handler,
-				                         ws_data_handler,
-				                         ws_close_handler,
-				                         callback_data);
-#endif
-			}
-			return;
-		}
-
-/* 8. handle websocket requests */
-#if defined(USE_WEBSOCKET)
-		if (is_websocket_request) {
-			if (is_script_resource) {
-				/* Websocket Lua script, the 0 in the third parameter indicates Lua */
-				handle_websocket_request(conn, path, 0, NULL, NULL, NULL, NULL, &conn->ctx->callbacks);
-			} else {
-				XX_httplib_send_http_error(conn, 404, "%s", "Not found");
-			}
-			return;
-		} else
-#endif
-
-#if defined(NO_FILES)
-			/* 9a. In case the server uses only callbacks, this uri is
-			 * unknown.
-			 * Then, all request handling ends here. */
-			XX_httplib_send_http_error(conn, 404, "%s", "Not Found");
-
-#else
-		/* 9b. This request is either for a static file or resource handled
-		 * by a script file. Thus, a DOCUMENT_ROOT must exist. */
-		if (conn->ctx->config[DOCUMENT_ROOT] == NULL) {
-			XX_httplib_send_http_error(conn, 404, "%s", "Not Found");
-			return;
-		}
-
-		/* 10. File is handled by a script. */
-		if (is_script_resource) {
-			XX_httplib_handle_file_based_request(conn, path, &file);
-			return;
-		}
-
-		/* 11. Handle put/delete/mkcol requests */
-		if (is_put_or_delete_request) {
-			/* 11.1. PUT method */
-			if (!strcmp(ri->request_method, "PUT")) {
-				put_file(conn, path);
-				return;
-			}
-			/* 11.2. DELETE method */
-			if (!strcmp(ri->request_method, "DELETE")) {
-				delete_file(conn, path);
-				return;
-			}
-			/* 11.3. MKCOL method */
-			if (!strcmp(ri->request_method, "MKCOL")) {
-				mkcol(conn, path);
-				return;
-			}
-			/* 11.4. PATCH method
-			 * This method is not supported for static resources,
-			 * only for scripts (Lua, CGI) and callbacks. */
-			XX_httplib_send_http_error(conn, 405, "%s method not allowed", conn->request_info.request_method);
-			return;
-		}
-
-		/* 11. File does not exist, or it was configured that it should be
-		 * hidden */
-		if (!is_found || (must_hide_file(conn, path))) {
-			XX_httplib_send_http_error(conn, 404, "%s", "Not found");
-			return;
-		}
-
-		/* 12. Directory uris should end with a slash */
-		if (file.is_directory && (uri_len > 0)
-		    && (ri->local_uri[uri_len - 1] != '/')) {
-			gmt_time_string(date, sizeof(date), &curtime);
-			mg_printf(conn,
-			          "HTTP/1.1 301 Moved Permanently\r\n"
-			          "Location: %s/\r\n"
-			          "Date: %s\r\n"
-			          /* "Cache-Control: private\r\n" (= default) */
-			          "Content-Length: 0\r\n"
-			          "Connection: %s\r\n\r\n",
-			          ri->request_uri,
-			          date,
-			          suggest_connection_header(conn));
-			return;
-		}
-
-		/* 13. Handle other methods than GET/HEAD */
-		/* 13.1. Handle PROPFIND */
-		if (!strcmp(ri->request_method, "PROPFIND")) {
-			handle_propfind(conn, path, &file);
-			return;
-		}
-		/* 13.2. Handle OPTIONS for files */
-		if (!strcmp(ri->request_method, "OPTIONS")) {
-			/* This standard handler is only used for real files.
-			 * Scripts should support the OPTIONS method themselves, to allow a
-			 * maximum flexibility.
-			 * Lua and CGI scripts may fully support CORS this way (including
-			 * preflights). */
-			send_options(conn);
-			return;
-		}
-		/* 13.3. everything but GET and HEAD (e.g. POST) */
-		if (0 != strcmp(ri->request_method, "GET")
-		    && 0 != strcmp(ri->request_method, "HEAD")) {
-			XX_httplib_send_http_error(conn, 405, "%s method not allowed", conn->request_info.request_method);
-			return;
-		}
-
-		/* 14. directories */
-		if (file.is_directory) {
-			if (substitute_index_file(conn, path, sizeof(path), &file)) {
-				/* 14.1. use a substitute file */
-				/* TODO (high): substitute index may be a script resource.
-				 * define what should be possible in this case. */
-			} else {
-				/* 14.2. no substitute file */
-				if (!mg_strcasecmp(conn->ctx->config[ENABLE_DIRECTORY_LISTING], "yes")) handle_directory_request(conn, path);
-				else XX_httplib_send_http_error(conn, 403, "%s", "Error: Directory listing denied");
-				return;
-			}
-		}
-
-		XX_httplib_handle_file_based_request(conn, path, &file);
-#endif /* !defined(NO_FILES) */
-
-#if 0
-            /* Perform redirect and auth checks before calling begin_request()
-             * handler.
-             * Otherwise, begin_request() would need to perform auth checks and
-             * redirects. */
-#endif
-	}
-	return;
-
-}  /* XX_httplib_handle_request */
+}  /* XX_httplib_get_request_handler */
