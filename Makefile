@@ -78,6 +78,7 @@ LIB_SOURCES =	src/libhttp.c					\
 		src/httplib_sslize.c				\
 		src/httplib_start.c				\
 		src/httplib_stop.c				\
+		src/httplib_tls_dtor.c				\
 		src/httplib_uninitialize_ssl.c			\
 		src/httplib_version.c				\
 		src/httplib_websocket_client_thread.c		\

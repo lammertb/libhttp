@@ -8331,6 +8331,7 @@ int XX_httplib_check_acl( struct mg_context *ctx, uint32_t remote_ip ) {
 
 
 #if !defined(_WIN32)
+
 int XX_httplib_set_uid_option( struct mg_context *ctx ) {
 
 	struct passwd *pw;
@@ -8356,19 +8357,3 @@ int XX_httplib_set_uid_option( struct mg_context *ctx ) {
 }  /* XX_httplib_set_uid_option */
 
 #endif /* !_WIN32 */
-
-
-void XX_httplib_tls_dtor( void *key ) {
-
-	struct mg_workerTLS *tls = (struct mg_workerTLS *)key;
-	/* key == pthread_getspecific(XX_httplib_sTlsKey); */
-
-	if (tls) {
-		if (tls->is_master == 2) {
-			tls->is_master = -3; /* Mark memory as dead */
-			XX_httplib_free(tls);
-		}
-	}
-	pthread_setspecific(XX_httplib_sTlsKey, NULL);
-
-}  /* XX_httplib_tls_dtor */
