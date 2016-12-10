@@ -7254,18 +7254,3 @@ uint32_t XX_httplib_get_remote_ip( const struct mg_connection *conn ) {
 
 /* The mg_upload function is superseeded by mg_handle_form_request. */
 #include "handle_form.inl"
-
-
-
-int XX_httplib_get_first_ssl_listener_index( const struct mg_context *ctx ) {
-
-	unsigned int i;
-	int idx;
-
-	idx = -1;
-
-	if ( ctx != NULL ) for (i = 0; idx == -1 && i < ctx->num_listening_sockets; i++) idx = ctx->listening_sockets[i].is_ssl ? ((int)(i)) : -1;
-
-	return idx;
-
-}  /* XX_httplib_get_first_ssl_listener_index */

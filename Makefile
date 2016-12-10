@@ -53,6 +53,7 @@ LIB_SOURCES =	src/libhttp.c					\
 		src/httplib_consume_socket.c			\
 		src/httplib_download.c				\
 		src/httplib_free_context.c			\
+		src/httplib_get_first_ssl_listener_index.c	\
 		src/httplib_get_rel_url_at_current_server.c	\
 		src/httplib_get_request_handler.c		\
 		src/httplib_get_response.c			\
