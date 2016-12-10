@@ -887,6 +887,7 @@ int			XX_httplib_parse_http_message( char *buf, int len, struct mg_request_info 
 int			XX_httplib_parse_net( const char *spec, uint32_t *net, uint32_t *mask );
 void			XX_httplib_process_new_connection( struct mg_connection *conn );
 void			XX_httplib_produce_socket( struct mg_context *ctx, const struct socket *sp );
+int			XX_httplib_pull( FILE *fp, struct mg_connection *conn, char *buf, int len, double timeout );
 void			XX_httplib_put_file( struct mg_connection *conn, const char *path );
 int			XX_httplib_read_request( FILE *fp, struct mg_connection *conn, char *buf, int bufsiz, int *nread );
 void			XX_httplib_read_websocket( struct mg_connection *conn, mg_websocket_data_handler ws_data_handler, void *callback_data );

@@ -74,6 +74,7 @@ LIB_SOURCES =	src/libhttp.c					\
 		src/httplib_parse_net.c				\
 		src/httplib_process_new_connection.c		\
 		src/httplib_produce_socket.c			\
+		src/httplib_read_websocket.c			\
 		src/httplib_redirect_to_https_port.c		\
 		src/httplib_refresh_trust.c			\
 		src/httplib_reset_per_request_attributes.c	\
