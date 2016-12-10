@@ -881,6 +881,7 @@ int			XX_httplib_match_prefix(const char *pattern, size_t pattern_len, const cha
 void			XX_httplib_mkcol( struct mg_connection *conn, const char *path );
 int			XX_httplib_must_hide_file( struct mg_connection *conn, const char *path );
 const char *		XX_httplib_next_option( const char *list, struct vec *val, struct vec *eq_val );
+int			XX_httplib_parse_http_headers( char **buf, struct mg_request_info *ri );
 int			XX_httplib_parse_http_message( char *buf, int len, struct mg_request_info *ri );
 int			XX_httplib_parse_net( const char *spec, uint32_t *net, uint32_t *mask );
 void			XX_httplib_process_new_connection( struct mg_connection *conn );
@@ -890,6 +891,7 @@ int			XX_httplib_read_request( FILE *fp, struct mg_connection *conn, char *buf, 
 void			XX_httplib_read_websocket( struct mg_connection *conn, mg_websocket_data_handler ws_data_handler, void *callback_data );
 void			XX_httplib_redirect_to_https_port( struct mg_connection *conn, int ssl_index );
 int			XX_httplib_refresh_trust( struct mg_connection *conn );
+void			XX_httplib_remove_bad_file( const struct mg_connection *conn, const char *path );
 void			XX_httplib_remove_double_dots_and_double_slashes( char *s );
 void			XX_httplib_reset_per_request_attributes( struct mg_connection *conn );
 void			XX_httplib_send_authorization_request( struct mg_connection *conn );

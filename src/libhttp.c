@@ -5122,12 +5122,13 @@ static int put_dir(struct mg_connection *conn, const char *path) {
 }
 
 
-static void remove_bad_file(const struct mg_connection *conn, const char *path) {
+void XX_httplib_remove_bad_file( const struct mg_connection *conn, const char *path ) {
 
 	int r = mg_remove(conn, path);
 
 	if (r != 0) mg_cry(conn, "%s: Cannot remove invalid file %s", __func__, path);
-}
+
+}  /* XX_httplib_remove_bad_file */
 
 
 long long mg_store_body( struct mg_connection *conn, const char *path ) {
@@ -5161,7 +5162,7 @@ long long mg_store_body( struct mg_connection *conn, const char *path ) {
 		n = (int)fwrite(buf, 1, (size_t)ret, fi.fp);
 		if (n != ret) {
 			XX_httplib_fclose(&fi);
-			remove_bad_file(conn, path);
+			XX_httplib_remove_bad_file(conn, path);
 			return -13;
 		}
 		ret = mg_read(conn, buf, sizeof(buf));
@@ -5170,7 +5171,7 @@ long long mg_store_body( struct mg_connection *conn, const char *path ) {
 	/* TODO: XX_httplib_fclose should return an error,
 	 * and every caller should check and handle it. */
 	if (fclose(fi.fp) != 0) {
-		remove_bad_file(conn, path);
+		XX_httplib_remove_bad_file(conn, path);
 		return -14;
 	}
 
@@ -5182,7 +5183,7 @@ long long mg_store_body( struct mg_connection *conn, const char *path ) {
  * to the point where parsing stopped.
  * All parameters must be valid pointers (not NULL).
  * Return <0 on error. */
-static int parse_http_headers(char **buf, struct mg_request_info *ri) {
+int XX_httplib_parse_http_headers( char **buf, struct mg_request_info *ri ) {
 
 	int i;
 
@@ -5234,7 +5235,8 @@ static int parse_http_headers(char **buf, struct mg_request_info *ri) {
 		}
 	}
 	return ri->num_headers;
-}
+
+}  /* XX_httplib_parse_http_headers */
 
 
 static int is_valid_http_method(const char *method) {
@@ -5313,7 +5315,7 @@ int XX_httplib_parse_http_message( char *buf, int len, struct mg_request_info *r
 			return -1;
 		}
 		if (is_request) ri->http_version += 5;
-		if (parse_http_headers(&buf, ri) < 0) {
+		if (XX_httplib_parse_http_headers(&buf, ri) < 0) {
 			/* Error while parsing headers */
 			return -1;
 		}
@@ -5887,7 +5889,7 @@ void XX_httplib_handle_cgi_request( struct mg_connection *conn, const char *prog
 	}
 	pbuf = buf;
 	buf[headers_len - 1] = '\0';
-	parse_http_headers(&pbuf, &ri);
+	XX_httplib_parse_http_headers(&pbuf, &ri);
 
 	/* Make up and send the status line */
 	status_text = "OK";
@@ -7250,7 +7252,3 @@ uint32_t XX_httplib_get_remote_ip( const struct mg_connection *conn ) {
 	return ntohl(*(const uint32_t *)&conn->client.rsa.sin.sin_addr);
 
 }  /* XX_httplib_get_remote_ip */
-
-
-/* The mg_upload function is superseeded by mg_handle_form_request. */
-#include "handle_form.inl"

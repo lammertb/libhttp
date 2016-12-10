@@ -1,4 +1,6 @@
-/* Copyright (c) 2016 the Civetweb developers
+/* 
+ * Copyright (c) 2016 Lammert Bies
+ * Copyright (c) 2016 the Civetweb developers
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -18,6 +20,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+
+
+
+#include "libhttp-private.h"
+
 
 
 static int url_encoded_field_found(const struct mg_connection *conn,
@@ -242,7 +249,7 @@ int mg_handle_form_request(struct mg_connection *conn, struct mg_form_data_handl
 						mg_cry(conn, "%s: Cannot write file %s", __func__, path);
 						fclose(fstore.fp);
 						fstore.fp = NULL;
-						remove_bad_file(conn, path);
+						XX_httplib_remove_bad_file(conn, path);
 					}
 					file_size += (int64_t)n;
 
@@ -253,7 +260,7 @@ int mg_handle_form_request(struct mg_connection *conn, struct mg_form_data_handl
 							field_stored(conn, path, file_size, fdh);
 						} else {
 							mg_cry(conn, "%s: Error saving file %s", __func__, path);
-							remove_bad_file(conn, path);
+							XX_httplib_remove_bad_file(conn, path);
 						}
 						fstore.fp = NULL;
 					}
@@ -392,7 +399,7 @@ int mg_handle_form_request(struct mg_connection *conn, struct mg_form_data_handl
 						mg_cry(conn, "%s: Cannot write file %s", __func__, path);
 						fclose(fstore.fp);
 						fstore.fp = NULL;
-						remove_bad_file(conn, path);
+						XX_httplib_remove_bad_file(conn, path);
 					}
 					file_size += (int64_t)n;
 				}
@@ -433,7 +440,7 @@ int mg_handle_form_request(struct mg_connection *conn, struct mg_form_data_handl
 					field_stored(conn, path, file_size, fdh);
 				} else {
 					mg_cry(conn, "%s: Error saving file %s", __func__, path);
-					remove_bad_file(conn, path);
+					XX_httplib_remove_bad_file(conn, path);
 				}
 				fstore.fp = NULL;
 			}
@@ -535,7 +542,7 @@ int mg_handle_form_request(struct mg_connection *conn, struct mg_form_data_handl
 				return -1;
 			}
 
-			parse_http_headers(&hbuf, &part_header);
+			XX_httplib_parse_http_headers(&hbuf, &part_header);
 			if ((hend + 2) != hbuf) {
 				/* Malformed request */
 				return -1;
@@ -630,7 +637,7 @@ int mg_handle_form_request(struct mg_connection *conn, struct mg_form_data_handl
 							mg_cry(conn, "%s: Cannot write file %s", __func__, path);
 							fclose(fstore.fp);
 							fstore.fp = NULL;
-							remove_bad_file(conn, path);
+							XX_httplib_remove_bad_file(conn, path);
 						}
 						file_size += (int64_t)n;
 					}
@@ -678,7 +685,7 @@ int mg_handle_form_request(struct mg_connection *conn, struct mg_form_data_handl
 						mg_cry(conn, "%s: Cannot write file %s", __func__, path);
 						fclose(fstore.fp);
 						fstore.fp = NULL;
-						remove_bad_file(conn, path);
+						XX_httplib_remove_bad_file(conn, path);
 					}
 					file_size += (int64_t)n;
 				}
@@ -693,7 +700,7 @@ int mg_handle_form_request(struct mg_connection *conn, struct mg_form_data_handl
 						field_stored(conn, path, file_size, fdh);
 					} else {
 						mg_cry(conn, "%s: Error saving file %s", __func__, path);
-						remove_bad_file(conn, path);
+						XX_httplib_remove_bad_file(conn, path);
 					}
 					fstore.fp = NULL;
 				}
