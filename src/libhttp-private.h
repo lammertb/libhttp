@@ -901,6 +901,7 @@ int			XX_httplib_forward_body_data( struct mg_connection *conn, FILE *fp, SOCKET
 void			XX_httplib_free_context( struct mg_context *ctx );
 int			XX_httplib_get_first_ssl_listener_index( const struct mg_context *ctx );
 const char *		XX_httplib_get_header( const struct mg_request_info *ri, const char *name );
+void			XX_httplib_get_mime_type( struct mg_context *ctx, const char *path, struct vec *vec );
 int			XX_httplib_get_option_index( const char *name );
 uint64_t		XX_httplib_get_random( void );
 const char *		XX_httplib_get_rel_url_at_current_server( const char *uri, const struct mg_connection *conn );
