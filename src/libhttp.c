@@ -8636,15 +8636,4 @@ void XX_httplib_ssl_get_client_cert_info( struct mg_connection *conn ) {
 
 }  /* XX_httplib_ssl_get_client_cert_info */
 
-
-void XX_httplib_ssl_locking_callback( int mode, int mutex_num, const char *file, int line ) {
-
-	(void)line;
-	(void)file;
-
-	if ( mode & 1 ) pthread_mutex_lock(   & XX_httplib_ssl_mutexes[mutex_num] );
-	else            pthread_mutex_unlock( & XX_httplib_ssl_mutexes[mutex_num] );
-
-}  /* XX_httplib_ssl_locking_callback */
-
 #endif /* !NO_SSL */
