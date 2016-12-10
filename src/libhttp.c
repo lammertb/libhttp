@@ -6495,15 +6495,3 @@ void mg_unlock_connection( struct mg_connection *conn ) {
 	if ( conn != NULL ) pthread_mutex_unlock( & conn->mutex );
 
 }  /* mg_unlock_connection */
-
-void mg_lock_context( struct mg_context *ctx ) {
-
-	if ( ctx != NULL ) pthread_mutex_lock( & ctx->nonce_mutex );
-
-}  /* mg_lock_context */
-
-void mg_unlock_context( struct mg_context *ctx ) {
-
-	if ( ctx != NULL ) pthread_mutex_unlock( & ctx->nonce_mutex );
-
-}  /* mg_unlock_context */
