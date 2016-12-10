@@ -5425,11 +5425,11 @@ int XX_httplib_substitute_index_file( struct mg_connection *conn, char *path, si
 int XX_httplib_is_not_modified( const struct mg_connection *conn, const struct file *filep ) {
 
 	char etag[64];
-	const char *ims = mg_get_header(conn, "If-Modified-Since");
-	const char *inm = mg_get_header(conn, "If-None-Match");
+	const char *ims = mg_get_header( conn, "If-Modified-Since" );
+	const char *inm = mg_get_header( conn, "If-None-Match"     );
 
 	construct_etag(etag, sizeof(etag), filep);
-	if (!filep) return 0;
+	if ( filep == NULL ) return 0;
 	return (inm != NULL && !mg_strcasecmp(etag, inm)) || (ims != NULL && (filep->last_modified <= parse_date_string(ims)));
 
 }  /* XX_httplib_is_not_modified */
@@ -5837,9 +5837,9 @@ void XX_httplib_handle_cgi_request( struct mg_connection *conn, const char *prog
 		goto done;
 	}
 
-	setbuf(in, NULL);
-	setbuf(out, NULL);
-	setbuf(err, NULL);
+	setbuf( in,  NULL );
+	setbuf( out, NULL );
+	setbuf( err, NULL );
 	fout.fp = out;
 
 	if ((conn->request_info.content_length > 0) || conn->is_chunked) {
@@ -6251,19 +6251,18 @@ static void do_ssi_exec(struct mg_connection *conn, char *tag) {
 #endif /* !NO_POPEN */
 
 
-static int mg_fgetc(struct file *filep, int offset) {
+static int mg_fgetc( struct file *filep, int offset ) {
 
-	if (filep == NULL) return EOF;
-	if (filep->membuf != NULL && offset >= 0
-	    && ((unsigned int)(offset)) < filep->size) {
-		return ((const unsigned char *)filep->membuf)[offset];
-	} else if (filep->fp != NULL) {
-		return fgetc(filep->fp);
-	} else return EOF;
-}
+	if ( filep         == NULL                                                              ) return EOF;
+	if ( filep->membuf != NULL  &&  offset >= 0  &&  ((unsigned int)(offset)) < filep->size ) return ((const unsigned char *)filep->membuf)[offset];
+	if ( filep->fp     != NULL                                                              ) return fgetc( filep->fp );
+
+	return EOF;
+
+}  /* mg_fgetc */
 
 
-static void send_ssi_file(struct mg_connection *conn, const char *path, struct file *filep, int include_level) {
+static void send_ssi_file( struct mg_connection *conn, const char *path, struct file *filep, int include_level ) {
 
 	char buf[MG_BUF_LEN];
 	int ch;
@@ -6283,12 +6282,10 @@ static void send_ssi_file(struct mg_connection *conn, const char *path, struct f
 			buf[len++] = (char)ch;
 			buf[len] = '\0';
 			/* assert(len <= (int) sizeof(buf)); */
-			if (len > (int)sizeof(buf)) {
-				break;
-			}
+			if (len > (int)sizeof(buf)) break;
 			if (len < 6 || memcmp(buf, "<!--#", 5) != 0) {
 				/* Not an SSI tag, pass it */
-				(void)mg_write(conn, buf, (size_t)len);
+				mg_write( conn, buf, (size_t)len );
 			} else {
 				if (!memcmp(buf + 5, "include", 7)) {
 					do_ssi_include(conn, path, buf + 12, include_level);
@@ -6485,25 +6482,29 @@ void XX_httplib_handle_propfind( struct mg_connection *conn, const char *path, s
 }  /* XX_httplib_handle_propfind */
 #endif
 
-void mg_lock_connection(struct mg_connection *conn) {
+void mg_lock_connection( struct mg_connection *conn ) {
 
-	if (conn) pthread_mutex_lock(&conn->mutex);
-}
+	if ( conn != NULL ) pthread_mutex_lock( & conn->mutex );
 
-void mg_unlock_connection(struct mg_connection *conn) {
+}  /* mg_lock_connection */
 
-	if (conn) pthread_mutex_unlock(&conn->mutex);
-}
+void mg_unlock_connection( struct mg_connection *conn ) {
 
-void mg_lock_context(struct mg_context *ctx) {
+	if ( conn != NULL ) pthread_mutex_unlock( & conn->mutex );
 
-	if (ctx) pthread_mutex_lock(&ctx->nonce_mutex);
-}
+}  /* mg_unlock_connection */
 
-void mg_unlock_context(struct mg_context *ctx) {
+void mg_lock_context( struct mg_context *ctx ) {
 
-	if (ctx) (void)pthread_mutex_unlock(&ctx->nonce_mutex);
-}
+	if ( ctx != NULL ) pthread_mutex_lock( & ctx->nonce_mutex );
+
+}  /* mg_lock_context */
+
+void mg_unlock_context( struct mg_context *ctx ) {
+
+	if ( ctx != NULL ) pthread_mutex_unlock( & ctx->nonce_mutex );
+
+}  /* mg_unlock_context */
 
 #if defined(USE_TIMERS)
 #include "timer.inl"
@@ -6676,7 +6677,11 @@ static void SHA1Transform(uint32_t state[5], const unsigned char buffer[64]) {
 	state[2] += c;
 	state[3] += d;
 	state[4] += e;
-	a = b = c = d = e = 0;
+	a = 0;
+	b = 0;
+	c = 0;
+	d = 0;
+	e = 0;
 	memset(block, '\0', sizeof(block));
 }
 
@@ -6952,58 +6957,5 @@ void XX_httplib_read_websocket( struct mg_connection *conn, mg_websocket_data_ha
 	XX_httplib_set_thread_name("worker");
 
 }  /* XX_httplib_read_websocket */
-
-
-int XX_httplib_websocket_write_exec( struct mg_connection *conn, int opcode, const char *data, size_t dataLen, uint32_t masking_key ) {
-
-	unsigned char header[14];
-	size_t headerLen = 1;
-
-	int retval = -1;
-
-	header[0] = 0x80 + (opcode & 0xF);
-
-	/* Frame format: http://tools.ietf.org/html/rfc6455#section-5.2 */
-	if (dataLen < 126) {
-		/* inline 7-bit length field */
-		header[1] = (unsigned char)dataLen;
-		headerLen = 2;
-	} else if (dataLen <= 0xFFFF) {
-		/* 16-bit length field */
-		uint16_t len = htons((uint16_t)dataLen);
-		header[1] = 126;
-		memcpy(header + 2, &len, 2);
-		headerLen = 4;
-	} else {
-		/* 64-bit length field */
-		uint32_t len1 = htonl((uint64_t)dataLen >> 32);
-		uint32_t len2 = htonl(dataLen & 0xFFFFFFFF);
-		header[1] = 127;
-		memcpy(header + 2, &len1, 4);
-		memcpy(header + 6, &len2, 4);
-		headerLen = 10;
-	}
-
-	if (masking_key) {
-		/* add mask */
-		header[1] |= 0x80;
-		memcpy(header + headerLen, &masking_key, 4);
-		headerLen += 4;
-	}
-
-
-	/* Note that POSIX/Winsock's send() is threadsafe
-	 * http://stackoverflow.com/questions/1981372/are-parallel-calls-to-send-recv-on-the-same-socket-valid
-	 * but mongoose's mg_printf/mg_write is not (because of the loop in
-	 * push(), although that is only a problem if the packet is large or
-	 * outgoing buffer is full). */
-	(void)mg_lock_connection(conn);
-	retval = mg_write(conn, header, headerLen);
-	if (dataLen > 0) retval = mg_write(conn, data, dataLen);
-	mg_unlock_connection(conn);
-
-	return retval;
-
-}  /* XX_httplib_websocket_write_exec */
 
 #endif /* !USE_WEBSOCKET */
