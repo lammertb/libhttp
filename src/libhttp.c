@@ -545,12 +545,6 @@ struct ssl_func XX_httplib_crypto_sw[] = {{"CRYPTO_num_locks", NULL},
 static const char *month_names[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 #endif /* !NO_CACHING */
 
-/* Describes a string (chunk of memory). */
-struct vec {
-	const char *ptr;
-	size_t len;
-};
-
 
 
 /* Config option name, config types, default value */
@@ -1346,7 +1340,7 @@ const char *mg_get_header( const struct mg_connection *conn, const char *name ) 
  * Value is stored in val vector. If value has form "x=y", then eq_val
  * vector is initialized to point to the "y" part, and val vector length
  * is adjusted to point only to "x". */
-static const char * next_option(const char *list, struct vec *val, struct vec *eq_val) {
+const char *XX_httplib_next_option( const char *list, struct vec *val, struct vec *eq_val ) {
 
 	int end;
 
@@ -1394,7 +1388,10 @@ reparse:
 	}
 
 	return list;
-}
+
+}  /* XX_httplib_next_option */
+
+
 
 /* A helper function for checking if a comma separated list of values contains
  * the given option (case insensitvely).
@@ -1407,7 +1404,7 @@ static int header_has_option(const char *header, const char *option) {
 	assert(option != NULL);
 	assert(option[0] != '\0');
 
-	while ((header = next_option(header, &opt_vec, &eq_vec)) != NULL) {
+	while ((header = XX_httplib_next_option(header, &opt_vec, &eq_vec)) != NULL) {
 		if (mg_strncasecmp(option, opt_vec.ptr, opt_vec.len) == 0) return 1;
 	}
 
@@ -3414,7 +3411,7 @@ interpret_uri(struct mg_connection *conn,   /* in: request (must be valid) */
 	if (truncated) goto interpret_cleanup;
 
 	rewrite = conn->ctx->config[REWRITE];
-	while ((rewrite = next_option(rewrite, &a, &b)) != NULL) {
+	while ((rewrite = XX_httplib_next_option(rewrite, &a, &b)) != NULL) {
 		if ((match_len = match_prefix(a.ptr, a.len, uri)) > 0) {
 			XX_httplib_snprintf(conn, &truncated, filename, filename_buf_len - 1, "%.*s%s", (int)b.len, b.ptr, uri + match_len);
 			break;
@@ -3761,7 +3758,7 @@ static void get_mime_type(struct mg_context *ctx, const char *path, struct vec *
 	/* Scan user-defined mime types first, in case user wants to
 	 * override default mime types. */
 	list = ctx->config[EXTRA_MIME_TYPES];
-	while ((list = next_option(list, &ext_vec, &mime_vec)) != NULL) {
+	while ((list = XX_httplib_next_option(list, &ext_vec, &mime_vec)) != NULL) {
 		/* ext now points to the path suffix */
 		ext = path + path_len - ext_vec.len;
 		if (mg_strncasecmp(ext, ext_vec.ptr, ext_vec.len) == 0) {
@@ -4134,7 +4131,7 @@ static int check_authorization(struct mg_connection *conn, const char *path) {
 	if (!conn || !conn->ctx) return 0;
 
 	list = conn->ctx->config[PROTECT_URI];
-	while ((list = next_option(list, &uri_vec, &filename_vec)) != NULL) {
+	while ((list = XX_httplib_next_option(list, &uri_vec, &filename_vec)) != NULL) {
 		if (!memcmp(conn->request_info.local_uri, uri_vec.ptr, uri_vec.len)) {
 			XX_httplib_snprintf(conn, &truncated, fname, sizeof(fname), "%.*s", (int)filename_vec.len, filename_vec.ptr);
 
@@ -5379,7 +5376,7 @@ static int substitute_index_file(struct mg_connection *conn, char *path, size_t 
 
 		/* Traverse index files list. For each entry, append it to the given
 		 * path and see if the file exists. If it exists, break the loop */
-		while ((list = next_option(list, &filename_vec, NULL)) != NULL) {
+		while ((list = XX_httplib_next_option(list, &filename_vec, NULL)) != NULL) {
 			/* Ignore too long entries that may overflow path buffer */
 			if (filename_vec.len > path_len - (n + 2)) continue;
 
@@ -5701,7 +5698,7 @@ static void prepare_cgi_environment( struct mg_connection *conn, const char *pro
 
 	/* Add user-specified variables */
 	s = conn->ctx->config[CGI_ENVIRONMENT];
-	while ((s = next_option(s, &var_vec, NULL)) != NULL) {
+	while ((s = XX_httplib_next_option(s, &var_vec, NULL)) != NULL) {
 		addenv(env, "%.*s", (int)var_vec.len, var_vec.ptr);
 	}
 
@@ -7165,9 +7162,15 @@ static int isbyte(int n) {
 }  /* isbyte */
 
 
-static int parse_net(const char *spec, uint32_t *net, uint32_t *mask) {
+int XX_httplib_parse_net( const char *spec, uint32_t *net, uint32_t *mask ) {
 
-	int n, a, b, c, d, slash = 32, len = 0;
+	int n;
+	int a;
+	int b;
+	int c;
+	int d;
+	int slash = 32;
+	int len = 0;
 
 	if ((sscanf(spec, "%d.%d.%d.%d/%d%n", &a, &b, &c, &d, &slash, &n) == 5
 	     || sscanf(spec, "%d.%d.%d.%d%n", &a, &b, &c, &d, &n) == 4) && isbyte(a)
@@ -7179,7 +7182,8 @@ static int parse_net(const char *spec, uint32_t *net, uint32_t *mask) {
 	}
 
 	return len;
-}
+
+}  /* XX_httplib_parse_net */
 
 
 static int set_throttle(const char *spec, uint32_t remote_ip, const char *uri) {
@@ -7190,7 +7194,7 @@ static int set_throttle(const char *spec, uint32_t remote_ip, const char *uri) {
 	char mult;
 	double v;
 
-	while ((spec = next_option(spec, &vec, &val)) != NULL) {
+	while ((spec = XX_httplib_next_option(spec, &vec, &val)) != NULL) {
 		mult = ',';
 		if ((val.ptr == NULL) || (sscanf(val.ptr, "%lf%c", &v, &mult) < 1)
 		    || (v < 0) || ((lowercase(&mult) != 'k')
@@ -7200,7 +7204,7 @@ static int set_throttle(const char *spec, uint32_t remote_ip, const char *uri) {
 		v *= (lowercase(&mult) == 'k') ? 1024 : ((lowercase(&mult) == 'm') ? 1048576 : 1);
 		if (vec.len == 1 && vec.ptr[0] == '*') {
 			throttle = (int)v;
-		} else if (parse_net(vec.ptr, &net, &mask) > 0) {
+		} else if (XX_httplib_parse_net(vec.ptr, &net, &mask) > 0) {
 			if ((remote_ip & mask) == net) {
 				throttle = (int)v;
 			}
@@ -8053,7 +8057,7 @@ int XX_httplib_set_ports_option( struct mg_context *ctx ) {
 	len = sizeof(usa);
 	list = ctx->config[LISTENING_PORTS];
 
-	while ((list = next_option(list, &vec, NULL)) != NULL) {
+	while ((list = XX_httplib_next_option(list, &vec, NULL)) != NULL) {
 
 		portsTotal++;
 
@@ -8294,37 +8298,3 @@ void XX_httplib_log_access( const struct mg_connection *conn ) {
 	}
 
 }  /* XX_httplib_log_access */
-
-
-/* Verify given socket address against the ACL.
- * Return -1 if ACL is malformed, 0 if address is disallowed, 1 if allowed.
- */
-int XX_httplib_check_acl( struct mg_context *ctx, uint32_t remote_ip ) {
-
-	int allowed;
-	int flag;
-	uint32_t net;
-	uint32_t mask;
-	struct vec vec;
-
-	if (ctx) {
-		const char *list = ctx->config[ACCESS_CONTROL_LIST];
-
-		/* If any ACL is set, deny by default */
-		allowed = (list == NULL) ? '+' : '-';
-
-		while ((list = next_option(list, &vec, NULL)) != NULL) {
-			flag = vec.ptr[0];
-			if ((flag != '+' && flag != '-') || parse_net(&vec.ptr[1], &net, &mask) == 0) {
-				mg_cry( XX_httplib_fc(ctx), "%s: subnet must be [+|-]x.x.x.x[/x]", __func__);
-				return -1;
-			}
-
-			if (net == (remote_ip & mask)) allowed = flag;
-		}
-
-		return allowed == '+';
-	}
-	return -1;
-
-}  /* XX_httplib_check_acl */

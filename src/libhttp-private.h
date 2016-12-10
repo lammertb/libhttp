@@ -817,6 +817,13 @@ struct file {
 
 #define STRUCT_FILE_INITIALIZER    { (uint64_t)0, (time_t)0, (FILE *)NULL, (const char *)NULL, 0, 0 } 
 
+/* Describes a string (chunk of memory). */
+struct vec {
+	const char *ptr;
+	size_t len;
+};
+
+
 /*
  * Functions local to the server. These functions all begin with XX_httplib to
  * indicate that these are private functions.
@@ -847,7 +854,9 @@ int			XX_httplib_is_valid_port( unsigned long port );
 int			XX_httplib_join_thread( pthread_t threadid );
 void *			XX_httplib_load_dll( struct mg_context *ctx, const char *dll_name, struct ssl_func *sw );
 void			XX_httplib_log_access( const struct mg_connection *conn );
+const char *		XX_httplib_next_option( const char *list, struct vec *val, struct vec *eq_val );
 int			XX_httplib_parse_http_message( char *buf, int len, struct mg_request_info *ri );
+int			XX_httplib_parse_net( const char *spec, uint32_t *net, uint32_t *mask );
 void			XX_httplib_process_new_connection( struct mg_connection *conn );
 void			XX_httplib_produce_socket( struct mg_context *ctx, const struct socket *sp );
 int			XX_httplib_read_request( FILE *fp, struct mg_connection *conn, char *buf, int bufsiz, int *nread );
