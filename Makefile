@@ -103,6 +103,7 @@ LIB_SOURCES =	src/libhttp.c					\
 		src/httplib_version.c				\
 		src/httplib_websocket_client_thread.c		\
 		src/httplib_websocket_client_write.c		\
+		src/httplib_websocket_write.c			\
 		src/httplib_worker_thread.c			\
 		src/md5.c
 LIB_INLINE  = src/mod_lua.inl src/md5.inl

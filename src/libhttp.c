@@ -7006,10 +7006,4 @@ int XX_httplib_websocket_write_exec( struct mg_connection *conn, int opcode, con
 
 }  /* XX_httplib_websocket_write_exec */
 
-int mg_websocket_write( struct mg_connection *conn, int opcode, const char *data, size_t dataLen ) {
-
-	return XX_httplib_websocket_write_exec( conn, opcode, data, dataLen, 0 );
-
-}  /* mg_websocket_write */
-
 #endif /* !USE_WEBSOCKET */
