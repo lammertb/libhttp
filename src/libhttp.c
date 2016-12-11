@@ -828,13 +828,6 @@ void XX_httplib_set_thread_name(const char *threadName) {
 
 
 
-void mg_set_user_connection_data(struct mg_connection *conn, void *data) {
-
-	if (conn != NULL) conn->request_info.conn_data = data;
-
-}  /* mt_set_user_connection_data */
-
-
 void * mg_get_user_connection_data(const struct mg_connection *conn) {
 
 	if (conn != NULL) return conn->request_info.conn_data;
