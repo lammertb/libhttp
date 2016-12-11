@@ -61,6 +61,7 @@ LIB_SOURCES =	src/libhttp.c						\
 		src/httplib_dir_scan_callback.c				\
 		src/httplib_download.c					\
 		src/httplib_fclose_on_exec.c				\
+		src/httplib_fgets.c					\
 		src/httplib_forward_body_data.c				\
 		src/httplib_free_context.c				\
 		src/httplib_get_first_ssl_listener_index.c		\

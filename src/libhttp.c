@@ -3977,32 +3977,3 @@ int XX_httplib_parse_auth_header(struct mg_connection *conn, char *buf, size_t b
 	return 1;
 
 }  /* XX_httplib_parse_auth_header */
-
-
-const char *XX_httplib_fgets( char *buf, size_t size, struct file *filep, char **p ) {
-
-	const char *eof;
-	size_t len;
-	const char *memend;
-
-	if (!filep) return NULL;
-
-	if (filep->membuf != NULL && *p != NULL) {
-		memend = (const char *)&filep->membuf[filep->size];
-		/* Search for \n from p till the end of stream */
-		eof = (char *)memchr(*p, '\n', (size_t)(memend - *p));
-		if (eof != NULL) {
-			eof += 1; /* Include \n */
-		} else {
-			eof = memend; /* Copy remaining data */
-		}
-		len = ((size_t)(eof - *p) > (size - 1)) ? (size - 1) : (size_t)(eof - *p);
-		memcpy(buf, *p, len);
-		buf[len] = '\0';
-		*p += len;
-		return len ? eof : NULL;
-	} else if (filep->fp != NULL) {
-		return fgets(buf, (int)size, filep->fp);
-	} else return NULL;
-
-}  /* XX_httplib_fgets */
