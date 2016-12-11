@@ -870,18 +870,6 @@ int clock_gettime( clockid_t clk_id, struct timespec *tp ) {
 #endif
 
 
-int pthread_cond_init( pthread_cond_t *cv, const void *unused ) {
-
-	(void)unused;
-
-	InitializeCriticalSection(&cv->threadIdSec);
-	cv->waiting_thread = NULL;
-
-	return 0;
-
-}  /* pthread_cond_init */
-
-
 int pthread_cond_timedwait( pthread_cond_t *cv, pthread_mutex_t *mutex, const struct timespec *abstime ) {
 
 	struct mg_workerTLS **ptls;
