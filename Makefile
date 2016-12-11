@@ -101,6 +101,7 @@ LIB_SOURCES =	src/libhttp.c						\
 		src/httplib_remove_bad_file.c				\
 		src/httplib_reset_per_request_attributes.c		\
 		src/httplib_send_file.c					\
+		src/httplib_send_file_data.c				\
 		src/httplib_send_options.c				\
 		src/httplib_send_websocket_handshake.c			\
 		src/httplib_set_acl_option.c				\
