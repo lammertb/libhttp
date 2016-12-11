@@ -828,14 +828,6 @@ void XX_httplib_set_thread_name(const char *threadName) {
 
 
 
-void XX_httplib_strlcpy( register char *dst, register const char *src, size_t n ) {
-
-	for (; *src != '\0' && n > 1; n--) { *dst++ = *src++; }
-	*dst = '\0';
-
-}  /* XX_httplib_strlcpy */
-
-
 int XX_httplib_lowercase(const char *s) {
 
 	return tolower(*(const unsigned char *)s);
