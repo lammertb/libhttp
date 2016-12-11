@@ -2551,37 +2551,3 @@ int XX_httplib_set_non_blocking_mode( SOCKET sock ) {
 }  /* XX_httplib_set_non_blocking_mode */
 
 #endif /* _WIN32 */
-/* End of initial operating system specific define block. */
-
-
-/* Get a random number (independent of C rand function) */
-uint64_t XX_httplib_get_random( void ) {
-
-	static uint64_t lfsr = 0; /* Linear feedback shift register */
-	static uint64_t lcg = 0;  /* Linear congruential generator */
-	struct timespec now;
-
-	memset(&now, 0, sizeof(now));
-	clock_gettime(CLOCK_MONOTONIC, &now);
-
-	if (lfsr == 0) {
-		/* lfsr will be only 0 if has not been initialized,
-		 * so this code is called only once. */
-		lfsr = (((uint64_t)now.tv_sec) << 21) ^ ((uint64_t)now.tv_nsec)
-		       ^ ((uint64_t)(ptrdiff_t)&now) ^ (((uint64_t)time(NULL)) << 33);
-		lcg = (((uint64_t)now.tv_sec) << 25) + (uint64_t)now.tv_nsec
-		      + (uint64_t)(ptrdiff_t)&now;
-	} else {
-		/* Get the next step of both random number generators. */
-		lfsr = (lfsr >> 1)
-		       | ((((lfsr >> 0) ^ (lfsr >> 1) ^ (lfsr >> 3) ^ (lfsr >> 4)) & 1)
-		          << 63);
-		lcg = lcg * 6364136223846793005 + 1442695040888963407;
-	}
-
-	/* Combining two pseudo-random number generators and a high resolution part
-	 * of the current server time will make it hard (impossible?) to guess the
-	 * next number. */
-	return (lfsr ^ lcg ^ (uint64_t)now.tv_nsec);
-
-}  /* XX_httplib_get_random */

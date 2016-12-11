@@ -71,6 +71,7 @@ LIB_SOURCES =	src/libhttp.c						\
 		src/httplib_get_cookie.c				\
 		src/httplib_get_first_ssl_listener_index.c		\
 		src/httplib_get_mime_type.c				\
+		src/httplib_get_random.c				\
 		src/httplib_get_rel_url_at_current_server.c		\
 		src/httplib_get_remote_ip.c				\
 		src/httplib_get_request_handler.c			\
