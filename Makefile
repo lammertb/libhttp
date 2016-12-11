@@ -167,6 +167,7 @@ LIB_SOURCES =	src/libhttp.c						\
 		src/httplib_url_decode.c				\
 		src/httplib_url_encode.c				\
 		src/httplib_version.c					\
+		src/httplib_vprintf.c					\
 		src/httplib_websocket_client_thread.c			\
 		src/httplib_websocket_client_write.c			\
 		src/httplib_websocket_write.c				\
