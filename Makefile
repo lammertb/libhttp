@@ -234,6 +234,7 @@ LIB_SOURCES =	src/libhttp.c						\
 		src/httplib_worker_thread.c				\
 		src/httplib_write.c					\
 		src/md5.c						\
+		src/pthread_cond_broadcast.c				\
 		src/pthread_cond_init.c					\
 		src/pthread_cond_signal.c				\
 		src/pthread_cond_timedwait.c				\

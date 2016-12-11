@@ -869,16 +869,6 @@ int clock_gettime( clockid_t clk_id, struct timespec *tp ) {
 }  /* clock_gettime */
 #endif
 
-int pthread_cond_broadcast( pthread_cond_t *cv ) {
-
-	EnterCriticalSection(&cv->threadIdSec);
-	while (cv->waiting_thread) pthread_cond_signal(cv);
-	LeaveCriticalSection(&cv->threadIdSec);
-
-	return 0;
-
-}  /* pthread_cond_broadcast */
-
 
 int pthread_cond_destroy( pthread_cond_t *cv ) {
 
