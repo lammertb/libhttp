@@ -828,15 +828,6 @@ void XX_httplib_set_thread_name(const char *threadName) {
 
 
 
-const struct mg_request_info * mg_get_request_info( const struct mg_connection *conn ) {
-
-	if ( conn == NULL ) return NULL;
-
-	return & conn->request_info;
-
-}  /* mg_get_request_info */
-
-
 /* Skip the characters until one of the delimiters characters found.
  * 0-terminate resulting word. Skip the delimiter and following whitespaces.
  * Advance pointer to buffer to the next word. Return found 0-terminated word.
