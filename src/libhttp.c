@@ -113,19 +113,6 @@ mg_static_assert(sizeof(size_t) == 4 || sizeof(size_t) == 8, "size_t data type s
 static CRITICAL_SECTION global_log_file_lock;
 
 
-static int pthread_key_create( pthread_key_t *key, void (*_ignored)(void *) ) {
-
-	(void)_ignored;
-
-	if ((key != 0)) {
-		*key = TlsAlloc();
-		return (*key != TLS_OUT_OF_INDEXES) ? 0 : -1;
-	}
-	return -2;
-
-}  /* pthread_key_create */
-
-
 static int pthread_key_delete(pthread_key_t key) {
 
 	return TlsFree(key) ? 0 : 1;
