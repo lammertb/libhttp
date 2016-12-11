@@ -827,13 +827,6 @@ void XX_httplib_set_thread_name(const char *threadName) {
 #endif
 
 
-const struct mg_option * mg_get_valid_options(void) {
-
-	return XX_httplib_config_options;
-
-}  /* mg_get_valid_options */
-
-
 int XX_httplib_is_file_in_memory( const struct mg_connection *conn, const char *path, struct file *filep ) {
 
 	size_t size = 0;
@@ -1827,33 +1820,30 @@ static int pthread_cond_destroy(pthread_cond_t *cv) {
 static void * event_create(void) {
 
 	return (void *)CreateEvent(NULL, FALSE, FALSE, NULL);
-}
+
+}  /* event_create */
 
 
 static int event_wait(void *eventhdl) {
 
 	int res = WaitForSingleObject((HANDLE)eventhdl, INFINITE);
 	return (res == WAIT_OBJECT_0);
-}
+
+}  /* event_wait */
 
 
 static int event_signal(void *eventhdl) {
 
 	return (int)SetEvent((HANDLE)eventhdl);
-}
+
+}a  /* event_signal */
 
 
 static void event_destroy(void *eventhdl) {
 
 	CloseHandle((HANDLE)eventhdl);
-}
+
+}  /* event_destroy */
 #endif
-
-
-#if defined(__MINGW32__)
-/* Enable unused function warning again */
-#pragma GCC diagnostic pop
-#endif
-
 
 #endif /* _WIN32 */
