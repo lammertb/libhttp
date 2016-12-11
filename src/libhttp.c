@@ -2201,26 +2201,6 @@ int XX_httplib_start_thread_with_id( unsigned(__stdcall *f)(void *), void *p, pt
 }  /* XX_httplib_start_thread_with_id */
 
 
-/* Wait for a thread to finish. */
-int XX_httplib_join_thread( pthread_t threadid ) {
-
-	int result;
-	DWORD dwevent;
-
-	result = -1;
-	dwevent = WaitForSingleObject(threadid, INFINITE);
-	if (dwevent == WAIT_FAILED) {
-	} else {
-		if (dwevent == WAIT_OBJECT_0) {
-			CloseHandle(threadid);
-			result = 0;
-		}
-	}
-
-	return result;
-
-}  /* XX_httplib_join_thread */
-
 #else
 
 int XX_httplib_stat( struct mg_connection *conn, const char *path, struct file *filep ) {
@@ -2296,16 +2276,5 @@ int XX_httplib_start_thread_with_id( mg_thread_func_t func, void *param, pthread
 	return result;
 
 }  /* XX_httplib_start_thread_with_id */
-
-
-/* Wait for a thread to finish. */
-int XX_httplib_join_thread( pthread_t threadid ) {
-
-	int result;
-
-	result = pthread_join(threadid, NULL);
-	return result;
-
-}  /* XX_httplib_join_thread */
 
 #endif /* _WIN32 */

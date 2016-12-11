@@ -100,6 +100,7 @@ LIB_SOURCES =	src/libhttp.c						\
 		src/httplib_is_valid_http_method.c			\
 		src/httplib_is_valid_port.c				\
 		src/httplib_is_websocket_protocol.c			\
+		src/httplib_join_thread.c				\
 		src/httplib_load_dll.c					\
 		src/httplib_lock_unlock_connection.c			\
 		src/httplib_lock_unlock_context.c			\
