@@ -121,6 +121,7 @@ LIB_SOURCES =	src/libhttp.c						\
 		src/httplib_produce_socket.c				\
 		src/httplib_put_dir.c					\
 		src/httplib_put_file.c					\
+		src/httplib_read.c					\
 		src/httplib_read_auth_file.c				\
 		src/httplib_read_request.c				\
 		src/httplib_read_websocket.c				\
