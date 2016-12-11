@@ -78,6 +78,7 @@ LIB_SOURCES =	src/libhttp.c						\
 		src/httplib_get_response_code_text.c			\
 		src/httplib_get_system_name.c				\
 		src/httplib_get_uri_type.c				\
+		src/httplib_get_var.c					\
 		src/httplib_getreq.c					\
 		src/httplib_handle_cgi_request.c			\
 		src/httplib_handle_directory_request.c			\
