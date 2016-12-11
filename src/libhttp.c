@@ -827,14 +827,6 @@ void XX_httplib_set_thread_name(const char *threadName) {
 #endif
 
 
-/* difftime for struct timespec. Return value is in seconds. */
-double XX_httplib_difftimespec(const struct timespec *ts_now, const struct timespec *ts_before) {
-
-	return (double)(ts_now->tv_nsec - ts_before->tv_nsec) * 1.0E-9
-	       + (double)(ts_now->tv_sec - ts_before->tv_sec);
-
-}  /* XX_httplib_difftimespec */
-
 
 /* Print error message to the opened error log stream. */
 void mg_cry(const struct mg_connection *conn, const char *fmt, ...) {
