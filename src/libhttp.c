@@ -4457,7 +4457,7 @@ int XX_httplib_connect_socket( struct mg_context *ctx, const char *host, int por
 }  /* XX_httplib_connect_socket */
 
 
-int mg_url_encode(const char *src, char *dst, size_t dst_len) {
+int mg_url_encode( const char *src, char *dst, size_t dst_len ) {
 
 	static const char *dont_escape = "._-$,;~()";
 	static const char *hex = "0123456789abcdef";
@@ -4478,47 +4478,5 @@ int mg_url_encode(const char *src, char *dst, size_t dst_len) {
 
 	*pos = '\0';
 	return (*src == '\0') ? (int)(pos - dst) : -1;
-}
 
-
-void XX_httplib_print_dir_entry( struct de *de ) {
-
-	char size[64];
-	char mod[64];
-	char href[PATH_MAX * 3 /* worst case */];
-	struct tm *tm;
-
-	if ( de->file.is_directory ) XX_httplib_snprintf( de->conn, NULL, size, sizeof(size), "%s", "[DIRECTORY]" );
-	else {
-		/* We use (signed) cast below because MSVC 6 compiler cannot
-		 * convert unsigned __int64 to double. Sigh. */
-		if      ( de->file.size <       1024)  XX_httplib_snprintf( de->conn, NULL, size, sizeof(size), "%d",     (int)   de->file.size                 );
-		else if ( de->file.size <   0x100000 ) XX_httplib_snprintf( de->conn, NULL, size, sizeof(size), "%.1fk", ((double)de->file.size) / 1024.0       );
-		else if ( de->file.size < 0x40000000 ) XX_httplib_snprintf( de->conn, NULL, size, sizeof(size), "%.1fM", ((double)de->file.size) / 1048576.0    );
-		else                                   XX_httplib_snprintf( de->conn, NULL, size, sizeof(size), "%.1fG", ((double)de->file.size) / 1073741824.0 );
-	}
-
-	/* Note: XX_httplib_snprintf will not cause a buffer overflow above.
-	 * So, string truncation checks are not required here. */
-
-	tm = localtime(&de->file.last_modified);
-	if (tm != NULL) {
-		strftime(mod, sizeof(mod), "%d-%b-%Y %H:%M", tm);
-	} else {
-		XX_httplib_strlcpy(mod, "01-Jan-1970 00:00", sizeof(mod));
-		mod[sizeof(mod) - 1] = '\0';
-	}
-	mg_url_encode(de->file_name, href, sizeof(href));
-	de->conn->num_bytes_sent +=
-	    mg_printf(de->conn,
-	              "<tr><td><a href=\"%s%s%s\">%s%s</a></td>"
-	              "<td>&nbsp;%s</td><td>&nbsp;&nbsp;%s</td></tr>\n",
-	              de->conn->request_info.local_uri,
-	              href,
-	              de->file.is_directory ? "/" : "",
-	              de->file_name,
-	              de->file.is_directory ? "/" : "",
-	              mod,
-	              size);
-
-}  /* XX_httplib_print_dir_entry */
+}  /* mg_url_encode */
