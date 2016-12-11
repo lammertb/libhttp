@@ -3167,17 +3167,3 @@ int XX_httplib_vprintf( struct mg_connection *conn, const char *fmt, va_list ap 
 	return len;
 
 }  /* XX_httplib_vprintf */
-
-
-int mg_printf( struct mg_connection *conn, const char *fmt, ... ) {
-
-	va_list ap;
-	int result;
-
-	va_start(ap, fmt);
-	result = XX_httplib_vprintf(conn, fmt, ap);
-	va_end(ap);
-
-	return result;
-
-}  /* mg_printf */
