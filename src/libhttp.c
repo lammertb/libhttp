@@ -3604,29 +3604,3 @@ time_t XX_httplib_parse_date_string( const char *datetime ) {
 }  /* XX_httplib_parse_date_string */
 
 #endif /* !NO_CACHING */
-
-
-/* Protect against directory disclosure attack by removing '..',
- * excessive '/' and '\' characters */
-void XX_httplib_remove_double_dots_and_double_slashes( char *s ) {
-
-	char *p = s;
-
-	while ((s[0] == '.') && (s[1] == '.')) s++;
-
-	while (*s != '\0') {
-		*p++ = *s++;
-		if (s[-1] == '/' || s[-1] == '\\') {
-			/* Skip all following slashes, backslashes and double-dots */
-			while (s[0] != '\0') {
-				if (s[0] == '/' || s[0] == '\\') {
-					s++;
-				} else if (s[0] == '.' && s[1] == '.') {
-					s += 2;
-				} else break;
-			}
-		}
-	}
-	*p = '\0';
-
-}  /* XX_httplib_remove_double_dots_and_double_slashes */

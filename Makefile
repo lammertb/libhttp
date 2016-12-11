@@ -121,6 +121,7 @@ LIB_SOURCES =	src/libhttp.c						\
 		src/httplib_refresh_trust.c				\
 		src/httplib_remove_bad_file.c				\
 		src/httplib_remove_directory.c				\
+		src/httplib_remove_double_dots.c			\
 		src/httplib_reset_per_request_attributes.c		\
 		src/httplib_scan_directory.c				\
 		src/httplib_send_authorization_request.c		\
