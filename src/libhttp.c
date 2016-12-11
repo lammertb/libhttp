@@ -113,12 +113,6 @@ mg_static_assert(sizeof(size_t) == 4 || sizeof(size_t) == 8, "size_t data type s
 static CRITICAL_SECTION global_log_file_lock;
 
 
-static int pthread_setspecific(pthread_key_t key, void *value) {
-
-	return TlsSetValue(key, value) ? 0 : 1;
-
-}  /* pthread_setspecific */
-
 
 static void * pthread_getspecific(pthread_key_t key) {
 
@@ -126,10 +120,6 @@ static void * pthread_getspecific(pthread_key_t key) {
 
 }  /* pthread_getspecific */
 
-#if defined(__MINGW32__)
-/* Enable unused function warning again */
-#pragma GCC diagnostic pop
-#endif  /* __MINGW32__ */
 
 struct pthread_mutex_undefined_struct *XX_httplib_pthread_mutex_attr = NULL;
 #else  /* _WIN32 */
