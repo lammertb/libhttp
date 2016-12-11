@@ -87,6 +87,7 @@ LIB_SOURCES =	src/libhttp.c						\
 		src/httplib_log_access.c				\
 		src/httplib_master_thread.c				\
 		src/httplib_mkcol.c					\
+		src/httplib_must_hide_file.c				\
 		src/httplib_parse_http_headers.c			\
 		src/httplib_parse_http_message.c			\
 		src/httplib_parse_net.c					\

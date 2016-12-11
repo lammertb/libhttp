@@ -4550,17 +4550,3 @@ int WINCDECL XX_httplib_compare_dir_entries( const void *p1, const void *p2 ) {
 	return (query_string[1] == 'd') ? -cmp_result : cmp_result;
 
 }  /* XX_httplib_compare_dir_entries */
-
-
-int XX_httplib_must_hide_file( struct mg_connection *conn, const char *path ) {
-
-	if (conn && conn->ctx) {
-		const char *pw_pattern = "**" PASSWORDS_FILE_NAME "$";
-		const char *pattern = conn->ctx->config[HIDE_FILES];
-		return XX_httplib_match_prefix(pw_pattern, strlen(pw_pattern), path) > 0
-		       || (pattern != NULL
-		           && XX_httplib_match_prefix(pattern, strlen(pattern), path) > 0);
-	}
-	return 0;
-
-}  /* XX_httplib_must_hide_file */
