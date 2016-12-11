@@ -44,6 +44,7 @@ BUILD_DIRS = $(BUILD_DIR) $(BUILD_DIR)/src $(BUILD_DIR)/resources
 LIB_SOURCES =	src/libhttp.c						\
 		src/httplib_accept_new_connection.c			\
 		src/httplib_addenv.c					\
+		src/httplib_atomic_dec.c				\
 		src/httplib_authorize.c					\
 		src/httplib_base64_encode.c				\
 		src/httplib_check_acl.c					\

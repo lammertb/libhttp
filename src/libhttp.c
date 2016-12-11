@@ -589,23 +589,6 @@ int XX_httplib_atomic_inc( volatile int *addr ) {
 }  /* XX_httplib_atomic_inc */
 
 
-int XX_httplib_atomic_dec( volatile int *addr ) {
-
-	int ret;
-#if defined(_WIN32)
-	/* Depending on the SDK, this function uses either
-	 * (volatile unsigned int *) or (volatile LONG *),
-	 * so whatever you use, the other SDK is likely to raise a warning. */
-	ret = InterlockedDecrement((volatile long *)addr);
-#elif defined(__GNUC__)                                                        \
-    && ((__GNUC__ > 4) || ((__GNUC__ == 4) && (__GNUC_MINOR__ > 0)))
-	ret = __sync_sub_and_fetch(addr, 1);
-#else
-	ret = (--(*addr));
-#endif
-	return ret;
-
-}  /* XX_httplib_atomic_dec */
 
 #if !defined(NO_THREAD_NAME)
 #if defined(_WIN32) && defined(_MSC_VER)
