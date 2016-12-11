@@ -104,6 +104,7 @@ LIB_SOURCES =	src/libhttp.c						\
 		src/httplib_remove_bad_file.c				\
 		src/httplib_remove_directory.c				\
 		src/httplib_reset_per_request_attributes.c		\
+		src/httplib_scan_directory.c				\
 		src/httplib_send_file.c					\
 		src/httplib_send_file_data.c				\
 		src/httplib_send_options.c				\
