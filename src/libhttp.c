@@ -225,7 +225,7 @@ void *XX_httplib_realloc_ex( void *memory, size_t newsize, const char *file, uns
 
 #else  /* MEMORY_DEBUGGING */
 
-void * XX_httplib_malloc( size_t a ) {
+void *XX_httplib_malloc( size_t a ) {
 
 	return malloc(a);
 
@@ -415,11 +415,11 @@ struct mg_option XX_httplib_config_options[] = {
 
     {NULL, CONFIG_TYPE_UNKNOWN, NULL}};
 
-/* Check if the XX_httplib_config_options and the corresponding enum have compatible
- * sizes. */
-mg_static_assert((sizeof(XX_httplib_config_options) / sizeof(XX_httplib_config_options[0]))
-                     == (NUM_OPTIONS + 1),
-                 "XX_httplib_config_options and enum not sync");
+/* 
+ * Check if the XX_httplib_config_options and the corresponding enum have
+ * compatible sizes
+ */
+mg_static_assert((sizeof(XX_httplib_config_options) / sizeof(XX_httplib_config_options[0])) == (NUM_OPTIONS + 1), "XX_httplib_config_options and enum not sync");
 
 
 
@@ -618,47 +618,6 @@ void XX_httplib_set_thread_name(const char *threadName) {
 
 
 #if defined(_WIN32)
-
-#ifndef WIN_PTHREADS_TIME_H
-int clock_gettime( clockid_t clk_id, struct timespec *tp ) {
-
-	FILETIME ft;
-	ULARGE_INTEGER li;
-	BOOL ok = FALSE;
-	double d;
-	static double perfcnt_per_sec = 0.0;
-
-	if (tp) {
-		memset(tp, 0, sizeof(*tp));
-		if (clk_id == CLOCK_REALTIME) {
-			GetSystemTimeAsFileTime(&ft);
-			li.LowPart = ft.dwLowDateTime;
-			li.HighPart = ft.dwHighDateTime;
-			li.QuadPart -= 116444736000000000; /* 1.1.1970 in filedate */
-			tp->tv_sec = (time_t)(li.QuadPart / 10000000);
-			tp->tv_nsec = (long)(li.QuadPart % 10000000) * 100;
-			ok = TRUE;
-		} else if (clk_id == CLOCK_MONOTONIC) {
-			if (perfcnt_per_sec == 0.0) {
-				QueryPerformanceFrequency((LARGE_INTEGER *)&li);
-				perfcnt_per_sec = 1.0 / li.QuadPart;
-			}
-			if (perfcnt_per_sec != 0.0) {
-				QueryPerformanceCounter((LARGE_INTEGER *)&li);
-				d = li.QuadPart * perfcnt_per_sec;
-				tp->tv_sec = (time_t)d;
-				d -= tp->tv_sec;
-				tp->tv_nsec = (long)(d * 1.0E9);
-				ok = TRUE;
-			}
-		}
-	}
-
-	return ok ? 0 : -1;
-
-}  /* clock_gettime */
-#endif
-
 
 #ifdef ALTERNATIVE_QUEUE
 static void * event_create(void) {

@@ -237,6 +237,7 @@ LIB_SOURCES =	src/libhttp.c						\
 		src/httplib_websocket_write_exec.c			\
 		src/httplib_worker_thread.c				\
 		src/httplib_write.c					\
+		src/win32_clock_gettime.c				\
 		src/win32_pthread_cond_broadcast.c			\
 		src/win32_pthread_cond_destroy.c			\
 		src/win32_pthread_cond_init.c				\
