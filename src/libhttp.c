@@ -828,14 +828,7 @@ void XX_httplib_set_thread_name(const char *threadName) {
 
 
 
-int XX_httplib_lowercase(const char *s) {
-
-	return tolower(*(const unsigned char *)s);
-
-}  /* XX_httplib_lowercase */
-
-
-int mg_strncasecmp(const char *s1, const char *s2, size_t len) {
+int mg_strncasecmp( const char *s1, const char *s2, size_t len ) {
 
 	int diff = 0;
 
@@ -846,7 +839,8 @@ int mg_strncasecmp(const char *s1, const char *s2, size_t len) {
 	}
 
 	return diff;
-}
+
+}  /* mg_strncasecmp */
 
 
 int mg_strcasecmp(const char *s1, const char *s2) {
