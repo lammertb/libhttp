@@ -828,18 +828,6 @@ void XX_httplib_set_thread_name(const char *threadName) {
 
 
 
-/* Return fake connection structure. Used for logging, if connection
- * is not applicable at the moment of logging. */
-struct mg_connection *XX_httplib_fc( struct mg_context *ctx ) {
-
-	static struct mg_connection fake_connection;
-
-	fake_connection.ctx = ctx;
-	return &fake_connection;
-
-}  /* XX_httplib_fc */
-
-
 const struct mg_request_info * mg_get_request_info( const struct mg_connection *conn ) {
 
 	if ( conn == NULL ) return NULL;
