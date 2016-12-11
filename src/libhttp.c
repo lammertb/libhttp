@@ -827,14 +827,6 @@ void XX_httplib_set_thread_name(const char *threadName) {
 #endif
 
 
-
-const char * XX_httplib_suggest_connection_header( const struct mg_connection *conn ) {
-
-	return XX_httplib_should_keep_alive(conn) ? "keep-alive" : "close";
-
-}  /* XX_httplib_suggest_connection_header */
-
-
 int XX_httplib_send_no_cache_header( struct mg_connection *conn ) {
 
 	/* Send all current and obsolete cache opt-out directives. */

@@ -215,6 +215,7 @@ LIB_SOURCES =	src/libhttp.c						\
 		src/httplib_strncasecmp.c				\
 		src/httplib_strndup.c					\
 		src/httplib_substitute_index_file.c			\
+		src/httplib_suggest_connection_header.c			\
 		src/httplib_timer.c					\
 		src/httplib_tls_dtor.c					\
 		src/httplib_uninitialize_ssl.c				\
