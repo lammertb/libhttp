@@ -124,14 +124,6 @@ pthread_mutexattr_t XX_httplib_pthread_mutex_attr;
 /* Create substitutes for POSIX functions in Win32. */
 
 
-size_t strftime( char *dst, size_t dst_size, const char *fmt, const struct tm *tm ) {
-
-	/* TODO */ //(void)XX_httplib_snprintf(NULL, dst, dst_size, "implement strftime()
-	// for WinCE");
-	return 0;
-
-}  /* strftime */
-
 
 #define _beginthreadex(psec, stack, func, prm, flags, ptid)                    \
 	(uintptr_t) CreateThread(psec, stack, func, prm, flags, ptid)
