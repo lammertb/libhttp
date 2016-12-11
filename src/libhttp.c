@@ -1257,7 +1257,7 @@ static char * skip_quoted(char **buf, const char *delimiters, const char *whites
 		p = end_word - 1;
 		while (*p == quotechar) {
 			/* While the delimiter is quoted, look for the next delimiter. */
-			/* This happens, e.g., in calls from parse_auth_header,
+			/* This happens, e.g., in calls from XX_httplib_parse_auth_header,
 			 * if the user name contains a " character. */
 
 			/* If there is anything beyond end_word, copy it. */
@@ -3894,20 +3894,9 @@ void XX_httplib_open_auth_file( struct mg_connection *conn, const char *path, st
 }  /* XX_httplib_open_auth_file */
 
 
-/* Parsed Authorization header */
-struct ah {
-	char *user;
-	char *uri;
-	char *cnonce;
-	char *response;
-	char *qop;
-	char *nc;
-	char *nonce;
-};
-
 
 /* Return 1 on success. Always initializes the ah structure. */
-static int parse_auth_header(struct mg_connection *conn, char *buf, size_t buf_size, struct ah *ah) {
+int XX_httplib_parse_auth_header(struct mg_connection *conn, char *buf, size_t buf_size, struct ah *ah) {
 
 	char *name;
 	char *value;
@@ -3993,7 +3982,8 @@ static int parse_auth_header(struct mg_connection *conn, char *buf, size_t buf_s
 	} else return 0;
 
 	return 1;
-}
+
+}  /* XX_httplib_parse_auth_header */
 
 
 static const char * mg_fgets(char *buf, size_t size, struct file *filep, char **p) {
@@ -4023,18 +4013,8 @@ static const char * mg_fgets(char *buf, size_t size, struct file *filep, char **
 	} else return NULL;
 }
 
-struct read_auth_file_struct {
-	struct mg_connection *conn;
-	struct ah ah;
-	char *domain;
-	char buf[256 + 256 + 40];
-	char *f_user;
-	char *f_domain;
-	char *f_ha1;
-};
 
-
-static int read_auth_file(struct file *filep, struct read_auth_file_struct *workdata) {
+int XX_httplib_read_auth_file( struct file *filep, struct read_auth_file_struct *workdata ) {
 
 	char *p;
 	int is_authorized = 0;
@@ -4066,7 +4046,7 @@ static int read_auth_file(struct file *filep, struct read_auth_file_struct *work
 				continue;
 			} else if (!strncmp(workdata->f_user + 1, "include=", 8)) {
 				if (XX_httplib_fopen(workdata->conn, workdata->f_user + 9, "r", &fp)) {
-					is_authorized = read_auth_file(&fp, workdata);
+					is_authorized = XX_httplib_read_auth_file(&fp, workdata);
 					XX_httplib_fclose(&fp);
 				} else {
 					mg_cry(workdata->conn, "%s: cannot open authorization file: %s", __func__, workdata->buf);
@@ -4109,23 +4089,5 @@ static int read_auth_file(struct file *filep, struct read_auth_file_struct *work
 	}
 
 	return is_authorized;
-}
 
-
-/* Authorize against the opened passwords file. Return 1 if authorized. */
-int XX_httplib_authorize( struct mg_connection *conn, struct file *filep ) {
-
-	struct read_auth_file_struct workdata;
-	char buf[MG_BUF_LEN];
-
-	if (!conn || !conn->ctx) return 0;
-
-	memset(&workdata, 0, sizeof(workdata));
-	workdata.conn = conn;
-
-	if (!parse_auth_header(conn, buf, sizeof(buf), &workdata.ah)) { return 0; }
-	workdata.domain = conn->ctx->config[AUTHENTICATION_DOMAIN];
-
-	return read_auth_file(filep, &workdata);
-
-}  /* XX_httplib_authorize */
+}  /* XX_httplib_read_auth_file */

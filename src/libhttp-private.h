@@ -867,7 +867,26 @@ struct cgi_environment {
 	size_t varused; /* Number of variables stored in var */
 };
 
+/* Parsed Authorization header */
+struct ah {
+	char *user;
+	char *uri;
+	char *cnonce;
+	char *response;
+	char *qop;
+	char *nc;
+	char *nonce;
+};
 
+struct read_auth_file_struct {
+	struct mg_connection *conn;
+	struct ah ah;
+	char *domain;
+	char buf[256 + 256 + 40];
+	char *f_user;
+	char *f_domain;
+	char *f_ha1;
+};
 
 /*
  * Functions local to the server. These functions all begin with XX_httplib to
@@ -952,6 +971,7 @@ void			XX_httplib_mkcol( struct mg_connection *conn, const char *path );
 int			XX_httplib_must_hide_file( struct mg_connection *conn, const char *path );
 const char *		XX_httplib_next_option( const char *list, struct vec *val, struct vec *eq_val );
 void			XX_httplib_open_auth_file( struct mg_connection *conn, const char *path, struct file *filep );
+int			XX_httplib_parse_auth_header( struct mg_connection *conn, char *buf, size_t buf_size, struct ah *ah );
 time_t			XX_httplib_parse_date_string( const char *datetime );
 int			XX_httplib_parse_http_headers( char **buf, struct mg_request_info *ri );
 int			XX_httplib_parse_http_message( char *buf, int len, struct mg_request_info *ri );
@@ -966,6 +986,7 @@ int			XX_httplib_pull_all( FILE *fp, struct mg_connection *conn, char *buf, int 
 int64_t			XX_httplib_push_all( struct mg_context *ctx, FILE *fp, SOCKET sock, SSL *ssl, const char *buf, int64_t len );
 int			XX_httplib_put_dir( struct mg_connection *conn, const char *path );
 void			XX_httplib_put_file( struct mg_connection *conn, const char *path );
+int			XX_httplib_read_auth_file( struct file *filep, struct read_auth_file_struct *workdata );
 int			XX_httplib_read_request( FILE *fp, struct mg_connection *conn, char *buf, int bufsiz, int *nread );
 void			XX_httplib_read_websocket( struct mg_connection *conn, mg_websocket_data_handler ws_data_handler, void *callback_data );
 void *			XX_httplib_realloc2( void *ptr, size_t size );
