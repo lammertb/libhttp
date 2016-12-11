@@ -828,24 +828,6 @@ void XX_httplib_set_thread_name(const char *threadName) {
 
 
 
-const char * XX_httplib_strcasestr( const char *big_str, const char *small_str ) {
-
-	size_t i;
-	size_t big_len = strlen(big_str);
-	size_t small_len = strlen(small_str);
-
-	if (big_len >= small_len) {
-		for (i = 0; i <= (big_len - small_len); i++) {
-			if (mg_strncasecmp(big_str + i, small_str, small_len) == 0) return big_str + i;
-		}
-	}
-
-	return NULL;
-
-}  /* XX_httplib_strcasestr */
-
-
-
 /* Return null terminated string of given maximum length.
  * Report errors if length is exceeded. */
 void XX_httplib_vsnprintf( const struct mg_connection *conn, int *truncated, char *buf, size_t buflen, const char *fmt, va_list ap ) {
