@@ -828,28 +828,6 @@ void XX_httplib_set_thread_name(const char *threadName) {
 
 
 
-/* HTTP 1.1 assumes keep alive if "Connection:" header is not set
- * This function must tolerate situations when connection info is not
- * set up, for example if request parsing failed. */
-int XX_httplib_should_keep_alive( const struct mg_connection *conn ) {
-
-	if (conn != NULL) {
-		const char *http_version = conn->request_info.http_version;
-		const char *header = mg_get_header(conn, "Connection");
-		if (conn->must_close || conn->internal_error || conn->status_code == 401
-		    || mg_strcasecmp(conn->ctx->config[ENABLE_KEEP_ALIVE], "yes") != 0
-		    || (header != NULL && !XX_httplib_header_has_option(header, "keep-alive"))
-		    || (header == NULL && http_version
-		        && 0 != strcmp(http_version, "1.1"))) {
-			return 0;
-		}
-		return 1;
-	}
-	return 0;
-
-}  /* XX_httplib_should_keep_alive */
-
-
 int XX_httplib_should_decode_url( const struct mg_connection *conn ) {
 
 	if ( conn == NULL  ||  conn->ctx == NULL ) return 0;

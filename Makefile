@@ -187,6 +187,7 @@ LIB_SOURCES =	src/libhttp.c						\
 		src/httplib_set_uid_option.c				\
 		src/httplib_set_user_connection_data.c			\
 		src/httplib_set_websocket_handler.c			\
+		src/httplib_should_keep_alive.c				\
 		src/httplib_skip.c					\
 		src/httplib_skip_quoted.c				\
 		src/httplib_snprintf.c					\
