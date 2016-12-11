@@ -61,6 +61,7 @@ LIB_SOURCES =	src/libhttp.c						\
 		src/httplib_consume_socket.c				\
 		src/httplib_delete_file.c				\
 		src/httplib_dir_scan_callback.c				\
+		src/httplib_discard_unread_request_data.c		\
 		src/httplib_download.c					\
 		src/httplib_fclose_on_exec.c				\
 		src/httplib_fgets.c					\
