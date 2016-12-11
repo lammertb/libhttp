@@ -236,6 +236,7 @@ LIB_SOURCES =	src/libhttp.c						\
 		src/md5.c						\
 		src/pthread_mutex_destroy.c				\
 		src/pthread_mutex_init.c				\
+		src/pthread_mutex_lock.c				\
 		src/sha1.c
 LIB_INLINE  = src/mod_lua.inl src/md5.inl
 APP_SOURCES = src/main.c

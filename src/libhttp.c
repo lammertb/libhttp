@@ -829,13 +829,6 @@ void XX_httplib_set_thread_name(const char *threadName) {
 
 #if defined(_WIN32)
 
-int pthread_mutex_lock( pthread_mutex_t *mutex ) {
-
-	return (WaitForSingleObject(*mutex, INFINITE) == WAIT_OBJECT_0) ? 0 : -1;
-
-}  /* pthread_mutex_lock */
-
-
 int pthread_mutex_trylock( pthread_mutex_t *mutex ) {
 
 	switch ( WaitForSingleObject( *mutex, 0 ) ) {
