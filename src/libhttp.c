@@ -3165,10 +3165,11 @@ int XX_httplib_vprintf( struct mg_connection *conn, const char *fmt, va_list ap 
 	if (buf != mem && buf != NULL) XX_httplib_free(buf);
 
 	return len;
+
 }  /* XX_httplib_vprintf */
 
 
-int mg_printf(struct mg_connection *conn, const char *fmt, ...) {
+int mg_printf( struct mg_connection *conn, const char *fmt, ... ) {
 
 	va_list ap;
 	int result;
@@ -3178,31 +3179,5 @@ int mg_printf(struct mg_connection *conn, const char *fmt, ...) {
 	va_end(ap);
 
 	return result;
-}
 
-
-int mg_url_decode(const char *src, int src_len, char *dst, int dst_len, int is_form_url_encoded) {
-
-	int i;
-	int j;
-	int a;
-	int b;
-#define HEXTOI(x) (isdigit(x) ? (x - '0') : (x - 'W'))
-
-	for (i = j = 0; (i < src_len) && (j < (dst_len - 1)); i++, j++) {
-		if (i < src_len - 2 && src[i] == '%'
-		    && isxdigit(*(const unsigned char *)(src + i + 1))
-		    && isxdigit(*(const unsigned char *)(src + i + 2))) {
-			a = tolower(*(const unsigned char *)(src + i + 1));
-			b = tolower(*(const unsigned char *)(src + i + 2));
-			dst[j] = (char)((HEXTOI(a) << 4) | HEXTOI(b));
-			i += 2;
-		} else if (is_form_url_encoded && src[i] == '+') {
-			dst[j] = ' ';
-		} else dst[j] = src[i];
-	}
-
-	dst[j] = '\0'; /* Null-terminate the destination */
-
-	return (i >= src_len) ? j : -1;
-}
+}  /* mg_printf */
