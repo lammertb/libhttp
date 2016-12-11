@@ -2804,34 +2804,3 @@ int XX_httplib_pull( FILE *fp, struct mg_connection *conn, char *buf, int len, d
 	return -1;
 
 }  /* XX_httplib_pull */
-
-
-int XX_httplib_pull_all( FILE *fp, struct mg_connection *conn, char *buf, int len ) {
-
-	int n;
-	int nread = 0;
-	double timeout = -1.0;
-
-	if (conn->ctx->config[REQUEST_TIMEOUT]) {
-		timeout = atoi(conn->ctx->config[REQUEST_TIMEOUT]) / 1000.0;
-	}
-
-	while (len > 0 && conn->ctx->stop_flag == 0) {
-		n = XX_httplib_pull(fp, conn, buf + nread, len, timeout);
-		if (n < 0) {
-			if (nread == 0) {
-				nread = n; /* Propagate the error */
-			}
-			break;
-		} else if (n == 0) {
-			break; /* No more data to read */
-		} else {
-			conn->consumed_content += n;
-			nread += n;
-			len -= n;
-		}
-	}
-
-	return nread;
-
-}  /* XX_httplib_pull_all */
