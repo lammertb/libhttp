@@ -120,6 +120,7 @@ LIB_SOURCES =	src/libhttp.c						\
 		src/httplib_printf.c					\
 		src/httplib_process_new_connection.c			\
 		src/httplib_produce_socket.c				\
+		src/httplib_pull.c					\
 		src/httplib_pull_all.c					\
 		src/httplib_put_dir.c					\
 		src/httplib_put_file.c					\
