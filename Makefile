@@ -234,6 +234,7 @@ LIB_SOURCES =	src/libhttp.c						\
 		src/httplib_worker_thread.c				\
 		src/httplib_write.c					\
 		src/md5.c						\
+		src/pthread_mutex_destroy.c				\
 		src/pthread_mutex_init.c				\
 		src/sha1.c
 LIB_INLINE  = src/mod_lua.inl src/md5.inl
