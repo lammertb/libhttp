@@ -964,6 +964,7 @@ int			XX_httplib_put_dir( struct mg_connection *conn, const char *path );
 void			XX_httplib_put_file( struct mg_connection *conn, const char *path );
 int			XX_httplib_read_request( FILE *fp, struct mg_connection *conn, char *buf, int bufsiz, int *nread );
 void			XX_httplib_read_websocket( struct mg_connection *conn, mg_websocket_data_handler ws_data_handler, void *callback_data );
+void *			XX_httplib_realloc2( void *ptr, size_t size );
 void			XX_httplib_redirect_to_https_port( struct mg_connection *conn, int ssl_index );
 int			XX_httplib_refresh_trust( struct mg_connection *conn );
 void			XX_httplib_remove_bad_file( const struct mg_connection *conn, const char *path );

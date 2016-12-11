@@ -54,6 +54,7 @@ LIB_SOURCES =	src/libhttp.c						\
 		src/httplib_construct_etag.c				\
 		src/httplib_consume_socket.c				\
 		src/httplib_delete_file.c				\
+		src/httplib_dir_scan_callback.c				\
 		src/httplib_download.c					\
 		src/httplib_fclose_on_exec.c				\
 		src/httplib_forward_body_data.c				\
