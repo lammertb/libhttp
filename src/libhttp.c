@@ -828,16 +828,6 @@ void XX_httplib_set_thread_name(const char *threadName) {
 
 
 
-const char *mg_get_option(const struct mg_context *ctx, const char *name) {
-
-	int i;
-
-	if      ( (i = XX_httplib_get_option_index(name)) == -1 ) return NULL;
-	else if ( ctx == NULL  ||  ctx->config[i] == NULL       ) return "";
-	else                                                      return ctx->config[i];
-}
-
-
 struct mg_context * mg_get_context(const struct mg_connection *conn) {
 
 	return (conn == NULL) ? (struct mg_context *)NULL : (conn->ctx);
