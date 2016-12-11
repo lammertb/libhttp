@@ -112,13 +112,8 @@ mg_static_assert(sizeof(size_t) == 4 || sizeof(size_t) == 8, "size_t data type s
 
 static CRITICAL_SECTION global_log_file_lock;
 
-static DWORD pthread_self(void) {
 
-	return GetCurrentThreadId();
-}
-
-
-static int pthread_key_create( pthread_key_t *key, void (*_ignored)(void *)) {
+static int pthread_key_create( pthread_key_t *key, void (*_ignored)(void *) ) {
 
 	(void)_ignored;
 
