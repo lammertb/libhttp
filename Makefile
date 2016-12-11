@@ -91,6 +91,7 @@ LIB_SOURCES =	src/libhttp.c						\
 		src/httplib_interpret_uri.c				\
 		src/httplib_is_authorized_for_put.c			\
 		src/httplib_is_not_modified.c				\
+		src/httplib_is_put_or_delete_method.c			\
 		src/httplib_is_valid_http_method.c			\
 		src/httplib_is_valid_port.c				\
 		src/httplib_is_websocket_protocol.c			\

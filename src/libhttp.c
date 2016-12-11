@@ -3329,14 +3329,3 @@ void XX_httplib_base64_encode( const unsigned char *src, int src_len, char *dst 
 
 }  /* XX_httplib_base64_encode */
 #endif
-
-
-int XX_httplib_is_put_or_delete_method( const struct mg_connection *conn ) {
-
-	if ( conn == NULL ) return 0;
-
-	const char *s = conn->request_info.request_method;
-
-	return s != NULL && (!strcmp(s, "PUT") || !strcmp(s, "DELETE") || !strcmp(s, "MKCOL") || !strcmp(s, "PATCH"));
-
-}  /* X_httplib_is_put_or_delete_method */
