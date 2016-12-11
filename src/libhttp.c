@@ -857,13 +857,13 @@ static int is_file_in_memory(const struct mg_connection *conn, const char *path,
 }  /* is_file_in_memory */
 
 
-static bool is_file_opened( const struct file *filep ) {
+bool XX_httplib_is_file_opened( const struct file *filep ) {
 
 	if ( filep == NULL ) return false;
 
 	return ( filep->membuf != NULL  ||  filep->fp != NULL );
 
-}  /* is_file_opened */
+}  /* XX_httplib_is_file_opened */
 
 
 /* XX_httplib_fopen will open a file either in memory or on the disk.
@@ -896,7 +896,7 @@ int XX_httplib_fopen( const struct mg_connection *conn, const char *path, const 
 #endif
 	}
 
-	return is_file_opened(filep);
+	return XX_httplib_is_file_opened(filep);
 
 }  /* XX_httplib_fopen */
 
@@ -2009,7 +2009,7 @@ int XX_httplib_stat( struct mg_connection *conn, const char *path, struct file *
 		/* If file name is fishy, reset the file structure and return
 		 * error.
 		 * Note it is important to reset, not just return the error, cause
-		 * functions like is_file_opened() check the struct. */
+		 * functions like XX_httplib_is_file_opened() check the struct. */
 		if (!filep->is_directory && !path_cannot_disclose_cgi(path)) {
 			memset(filep, 0, sizeof(*filep));
 			return 0;
@@ -3848,7 +3848,7 @@ check_password(const char *method,
 
 /* Use the global passwords file, if specified by auth_gpass option,
  * or search for .htpasswd in the requested directory. */
-static void open_auth_file(struct mg_connection *conn, const char *path, struct file *filep) {
+void XX_httplib_open_auth_file( struct mg_connection *conn, const char *path, struct file *filep ) {
 
 	if ( conn == NULL  ||  conn->ctx == NULL ) return;
 
@@ -3890,7 +3890,8 @@ static void open_auth_file(struct mg_connection *conn, const char *path, struct 
 #endif
 		}
 	}
-}
+
+}  /* XX_httplib_open_auth_file */
 
 
 /* Parsed Authorization header */
@@ -4128,40 +4129,3 @@ int XX_httplib_authorize( struct mg_connection *conn, struct file *filep ) {
 	return read_auth_file(filep, &workdata);
 
 }  /* XX_httplib_authorize */
-
-
-/* Return 1 if request is authorised, 0 otherwise. */
-int XX_httplib_check_authorization( struct mg_connection *conn, const char *path ) {
-
-	char fname[PATH_MAX];
-	struct vec uri_vec;
-	struct vec filename_vec;
-	const char *list;
-	struct file file = STRUCT_FILE_INITIALIZER;
-	int authorized = 1;
-	int truncated;
-
-	if (!conn || !conn->ctx) return 0;
-
-	list = conn->ctx->config[PROTECT_URI];
-	while ((list = XX_httplib_next_option(list, &uri_vec, &filename_vec)) != NULL) {
-		if (!memcmp(conn->request_info.local_uri, uri_vec.ptr, uri_vec.len)) {
-			XX_httplib_snprintf(conn, &truncated, fname, sizeof(fname), "%.*s", (int)filename_vec.len, filename_vec.ptr);
-
-			if (truncated || !XX_httplib_fopen(conn, fname, "r", &file)) {
-				mg_cry(conn, "%s: cannot open %s: %s", __func__, fname, strerror(errno));
-			}
-			break;
-		}
-	}
-
-	if (!is_file_opened(&file)) open_auth_file(conn, path, &file);
-
-	if (is_file_opened(&file)) {
-		authorized = XX_httplib_authorize(conn, &file);
-		XX_httplib_fclose(&file);
-	}
-
-	return authorized;
-
-}  /* XX_httplib_check_authorization */
