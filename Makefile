@@ -253,6 +253,7 @@ LIB_SOURCES =	src/libhttp.c						\
 		src/win32_pthread_mutex_unlock.c			\
 		src/win32_pthread_self.c				\
 		src/win32_pthread_setspecific.c				\
+		src/wince_gmtime.c					\
 		src/wince_gmtime_s.c					\
 		src/wince_localtime.c					\
 		src/wince_localtime_s.c					\

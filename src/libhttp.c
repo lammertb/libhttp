@@ -124,14 +124,6 @@ pthread_mutexattr_t XX_httplib_pthread_mutex_attr;
 /* Create substitutes for POSIX functions in Win32. */
 
 
-struct tm *gmtime( const time_t *ptime ) {
-
-	int i = XX_httplib_atomic_inc(&XX_httplib_tm_index) % MAX_WORKER_THREADS;
-	return gmtime_s(ptime, XX_httplib_tm_array + i);
-
-}  /* gmtime */
-
-
 size_t strftime( char *dst, size_t dst_size, const char *fmt, const struct tm *tm ) {
 
 	/* TODO */ //(void)XX_httplib_snprintf(NULL, dst, dst_size, "implement strftime()
