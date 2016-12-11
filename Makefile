@@ -241,6 +241,7 @@ LIB_SOURCES =	src/libhttp.c						\
 		src/pthread_cond_timedwait.c				\
 		src/pthread_cond_wait.c					\
 		src/pthread_key_create.c				\
+		src/pthread_key_delete.c				\
 		src/pthread_mutex_destroy.c				\
 		src/pthread_mutex_init.c				\
 		src/pthread_mutex_lock.c				\
