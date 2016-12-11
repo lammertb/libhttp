@@ -30,6 +30,22 @@
 
 #if defined(_WIN32)
 
+
+static int mg_wcscasecmp( const wchar_t *s1, const wchar_t *s2 ) {
+
+	int diff;
+
+	do {
+		diff = tolower(*s1) - tolower(*s2);
+		s1++;
+		s2++;
+	} while (diff == 0 && s1[-1] != '\0');
+
+	return diff;
+
+}  /* mg_wcscasecmp */
+
+
 /* Encode 'path' which is assumed UTF-8 string, into UNICODE string.
  * wbuf and wbuf_len is a target buffer and its length. */
 void XX_httplib_path_to_unicode( const struct mg_connection *conn, const char *path, wchar_t *wbuf, size_t wbuf_len ) {

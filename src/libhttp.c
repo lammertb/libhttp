@@ -1877,18 +1877,4 @@ static void change_slashes_to_backslashes(char *path) {
 }
 
 
-static int mg_wcscasecmp( const wchar_t *s1, const wchar_t *s2 ) {
-
-	int diff;
-
-	do {
-		diff = tolower(*s1) - tolower(*s2);
-		s1++;
-		s2++;
-	} while (diff == 0 && s1[-1] != '\0');
-
-	return diff;
-
-}  /* mg_wcscasecmp */
-
 #endif /* _WIN32 */
