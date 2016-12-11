@@ -2337,7 +2337,7 @@ pid_t XX_httplib_spawn_process( struct mg_connection *conn, const char *prog, ch
 
 		if (XX_httplib_fopen(conn, cmdline, "r", &file)) {
 			p = (char *)file.membuf;
-			mg_fgets(buf, sizeof(buf), &file, &p);
+			XX_httplib_fgets(buf, sizeof(buf), &file, &p);
 			XX_httplib_fclose(&file);
 			buf[sizeof(buf) - 1] = '\0';
 		}
@@ -3820,16 +3820,8 @@ char * mg_md5(char buf[33], ...) {
 
 
 /* Check the user's password, return 1 if OK */
-static int
-check_password(const char *method,
-               const char *ha1,
-               const char *uri,
-               const char *nonce,
-               const char *nc,
-               const char *cnonce,
-               const char *qop,
-               const char *response)
-{
+int XX_httplib_check_password( const char *method, const char *ha1, const char *uri, const char *nonce, const char *nc, const char *cnonce, const char *qop, const char *response ) {
+
 	char ha2[32 + 1];
 	char expected_response[32 + 1];
 
@@ -3843,7 +3835,8 @@ check_password(const char *method,
 	mg_md5(expected_response, ha1, ":", nonce, ":", nc, ":", cnonce, ":", qop, ":", ha2, NULL);
 
 	return mg_strcasecmp(response, expected_response) == 0;
-}
+
+}  /* XX_httplib_check_password */
 
 
 /* Use the global passwords file, if specified by auth_gpass option,
@@ -3986,7 +3979,7 @@ int XX_httplib_parse_auth_header(struct mg_connection *conn, char *buf, size_t b
 }  /* XX_httplib_parse_auth_header */
 
 
-static const char * mg_fgets(char *buf, size_t size, struct file *filep, char **p) {
+const char *XX_httplib_fgets( char *buf, size_t size, struct file *filep, char **p ) {
 
 	const char *eof;
 	size_t len;
@@ -4011,83 +4004,5 @@ static const char * mg_fgets(char *buf, size_t size, struct file *filep, char **
 	} else if (filep->fp != NULL) {
 		return fgets(buf, (int)size, filep->fp);
 	} else return NULL;
-}
 
-
-int XX_httplib_read_auth_file( struct file *filep, struct read_auth_file_struct *workdata ) {
-
-	char *p;
-	int is_authorized = 0;
-	struct file fp;
-	size_t l;
-
-	if (!filep || !workdata) return 0;
-
-	/* Loop over passwords file */
-	p = (char *)filep->membuf;
-	while (mg_fgets(workdata->buf, sizeof(workdata->buf), filep, &p) != NULL) {
-		l = strlen(workdata->buf);
-		while (l > 0) {
-			if (isspace(workdata->buf[l - 1])
-			    || iscntrl(workdata->buf[l - 1])) {
-				l--;
-				workdata->buf[l] = 0;
-			} else break;
-		}
-		if (l < 1) continue;
-
-		workdata->f_user = workdata->buf;
-
-		if (workdata->f_user[0] == ':') {
-			/* user names may not contain a ':' and may not be empty,
-			 * so lines starting with ':' may be used for a special purpose */
-			if (workdata->f_user[1] == '#') {
-				/* :# is a comment */
-				continue;
-			} else if (!strncmp(workdata->f_user + 1, "include=", 8)) {
-				if (XX_httplib_fopen(workdata->conn, workdata->f_user + 9, "r", &fp)) {
-					is_authorized = XX_httplib_read_auth_file(&fp, workdata);
-					XX_httplib_fclose(&fp);
-				} else {
-					mg_cry(workdata->conn, "%s: cannot open authorization file: %s", __func__, workdata->buf);
-				}
-				continue;
-			}
-			/* everything is invalid for the moment (might change in the
-			 * future) */
-			mg_cry(workdata->conn, "%s: syntax error in authorization file: %s", __func__, workdata->buf);
-			continue;
-		}
-
-		workdata->f_domain = strchr(workdata->f_user, ':');
-		if (workdata->f_domain == NULL) {
-			mg_cry(workdata->conn, "%s: syntax error in authorization file: %s", __func__, workdata->buf);
-			continue;
-		}
-		*(workdata->f_domain) = 0;
-		(workdata->f_domain)++;
-
-		workdata->f_ha1 = strchr(workdata->f_domain, ':');
-		if (workdata->f_ha1 == NULL) {
-			mg_cry(workdata->conn, "%s: syntax error in authorization file: %s", __func__, workdata->buf);
-			continue;
-		}
-		*(workdata->f_ha1) = 0;
-		(workdata->f_ha1)++;
-
-		if (!strcmp(workdata->ah.user, workdata->f_user)
-		    && !strcmp(workdata->domain, workdata->f_domain)) {
-			return check_password(workdata->conn->request_info.request_method,
-			                      workdata->f_ha1,
-			                      workdata->ah.uri,
-			                      workdata->ah.nonce,
-			                      workdata->ah.nc,
-			                      workdata->ah.cnonce,
-			                      workdata->ah.qop,
-			                      workdata->ah.response);
-		}
-	}
-
-	return is_authorized;
-
-}  /* XX_httplib_read_auth_file */
+}  /* XX_httplib_fgets */
