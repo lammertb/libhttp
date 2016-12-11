@@ -1037,6 +1037,7 @@ int			XX_httplib_sslize( struct mg_connection *conn, SSL_CTX *s, int (*func)(SSL
 int			XX_httplib_stat( struct mg_connection *conn, const char *path, struct file *filep );
 const char *		XX_httplib_strcasestr( const char *big_str, const char *small_str );
 char *			XX_httplib_strdup( const char *str );
+char *			XX_httplib_strndup( const char *ptr, size_t len );
 void			XX_httplib_strlcpy( register char *dst, register const char *src, size_t n );
 int			XX_httplib_substitute_index_file( struct mg_connection *conn, char *path, size_t path_len, struct file *filep );
 const char *		XX_httplib_suggest_connection_header( const struct mg_connection *conn );

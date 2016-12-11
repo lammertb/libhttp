@@ -828,20 +828,11 @@ void XX_httplib_set_thread_name(const char *threadName) {
 
 
 
-static char * mg_strndup(const char *ptr, size_t len) {
-
-	char *p;
-
-	if ((p = (char *)XX_httplib_malloc(len + 1)) != NULL) XX_httplib_strlcpy(p, ptr, len + 1);
-
-	return p;
-}
-
-
 char * XX_httplib_strdup( const char *str ) {
 
-	return mg_strndup(str, strlen(str));
-}
+	return XX_httplib_strndup(str, strlen(str));
+
+}  /* XX_httplib_strdup */
 
 
 const char * XX_httplib_strcasestr( const char *big_str, const char *small_str ) {
