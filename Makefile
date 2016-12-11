@@ -60,6 +60,7 @@ LIB_SOURCES =	src/libhttp.c						\
 		src/httplib_connect_websocket_client.c			\
 		src/httplib_construct_etag.c				\
 		src/httplib_consume_socket.c				\
+		src/httplib_cry.c					\
 		src/httplib_delete_file.c				\
 		src/httplib_difftimespec.c				\
 		src/httplib_dir_scan_callback.c				\
