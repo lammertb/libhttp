@@ -828,41 +828,6 @@ void XX_httplib_set_thread_name(const char *threadName) {
 
 
 
-/* Return null terminated string of given maximum length.
- * Report errors if length is exceeded. */
-void XX_httplib_vsnprintf( const struct mg_connection *conn, int *truncated, char *buf, size_t buflen, const char *fmt, va_list ap ) {
-
-	int n;
-	int ok;
-
-	if (buflen == 0) return;
-
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wformat-nonliteral"
-/* Using fmt as a non-literal is intended here, since it is mostly called
- * indirectly by XX_httplib_snprintf */
-#endif
-
-	n = (int)vsnprintf_impl(buf, buflen, fmt, ap);
-	ok = (n >= 0) && ((size_t)n < buflen);
-
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif
-
-	if (ok) {
-		if (truncated) *truncated = 0;
-	} else {
-		if (truncated) *truncated = 1;
-		mg_cry(conn, "truncating vsnprintf buffer: [%.*s]", (int)((buflen > 200) ? 200 : (buflen - 1)), buf);
-		n = (int)buflen - 1;
-	}
-	buf[n] = '\0';
-
-}  /* XX_httplib_vsnprintf */
-
-
 void XX_httplib_snprintf( const struct mg_connection *conn, int *truncated, char *buf, size_t buflen, const char *fmt, ... ) {
 
 	va_list ap;
