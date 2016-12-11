@@ -139,6 +139,7 @@ LIB_SOURCES =	src/libhttp.c						\
 		src/httplib_timer.c					\
 		src/httplib_tls_dtor.c					\
 		src/httplib_uninitialize_ssl.c				\
+		src/httplib_url_encode.c				\
 		src/httplib_version.c					\
 		src/httplib_websocket_client_thread.c			\
 		src/httplib_websocket_client_write.c			\
