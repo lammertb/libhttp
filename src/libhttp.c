@@ -2181,26 +2181,6 @@ mg_start_thread(mg_thread_func_t f, void *p)
 #endif /* defined(USE_STACK_SIZE) && (USE_STACK_SIZE > 1) */
 }
 
-
-/* Start a thread storing the thread context. */
-int XX_httplib_start_thread_with_id( unsigned(__stdcall *f)(void *), void *p, pthread_t *threadidptr ) {
-
-	uintptr_t uip;
-	HANDLE threadhandle;
-	int result = -1;
-
-	uip = _beginthreadex(NULL, 0, (unsigned(__stdcall *)(void *))f, p, 0, NULL);
-	threadhandle = (HANDLE)uip;
-	if ((uip != (uintptr_t)(-1L)) && (threadidptr != NULL)) {
-		*threadidptr = threadhandle;
-		result = 0;
-	}
-
-	return result;
-
-}  /* XX_httplib_start_thread_with_id */
-
-
 #else
 
 int XX_httplib_stat( struct mg_connection *conn, const char *path, struct file *filep ) {
@@ -2253,28 +2233,5 @@ int mg_start_thread(mg_thread_func_t func, void *param) {
 
 	return result;
 }  /* mg_start_thread */
-
-
-/* Start a thread storing the thread context. */
-int XX_httplib_start_thread_with_id( mg_thread_func_t func, void *param, pthread_t *threadidptr ) {
-
-	pthread_t thread_id;
-	pthread_attr_t attr;
-	int result;
-
-	pthread_attr_init(&attr);
-
-#if defined(USE_STACK_SIZE) && (USE_STACK_SIZE > 1)
-	/* Compile-time option to control stack size,
-	 * e.g. -DUSE_STACK_SIZE=16384 */
-	pthread_attr_setstacksize(&attr, USE_STACK_SIZE);
-#endif /* defined(USE_STACK_SIZE) && USE_STACK_SIZE > 1 */
-
-	result = pthread_create(&thread_id, &attr, func, param);
-	pthread_attr_destroy(&attr);
-	if ((result == 0) && (threadidptr != NULL)) *threadidptr = thread_id;
-	return result;
-
-}  /* XX_httplib_start_thread_with_id */
 
 #endif /* _WIN32 */
