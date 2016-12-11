@@ -828,16 +828,6 @@ void XX_httplib_set_thread_name(const char *threadName) {
 
 
 
-void XX_httplib_snprintf( const struct mg_connection *conn, int *truncated, char *buf, size_t buflen, const char *fmt, ... ) {
-
-	va_list ap;
-
-	va_start(ap, fmt);
-	XX_httplib_vsnprintf(conn, truncated, buf, buflen, fmt, ap);
-	va_end(ap);
-}
-
-
 int XX_httplib_get_option_index( const char *name ) {
 
 	int i;
