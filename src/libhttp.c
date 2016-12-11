@@ -828,30 +828,6 @@ void XX_httplib_set_thread_name(const char *threadName) {
 
 
 
-/* Return HTTP header value, or NULL if not found. */
-const char * XX_httplib_get_header( const struct mg_request_info *ri, const char *name ) {
-
-	int i;
-	if (ri) {
-		for (i = 0; i < ri->num_headers; i++) {
-			if (!mg_strcasecmp(name, ri->http_headers[i].name)) return ri->http_headers[i].value;
-		}
-	}
-
-	return NULL;
-
-}  /* XX_httplib_get_header */
-
-
-const char *mg_get_header( const struct mg_connection *conn, const char *name ) {
-
-	if ( conn == NULL ) return NULL;
-
-	return XX_httplib_get_header( & conn->request_info, name );
-
-}  /* mg_get_header */
-
-
 /* A helper function for traversing a comma separated list of values.
  * It returns a list pointer shifted to the next value, or NULL if the end
  * of the list found.
