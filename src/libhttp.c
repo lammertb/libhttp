@@ -828,56 +828,42 @@ void XX_httplib_set_thread_name(const char *threadName) {
 
 
 #if defined(_WIN32)
-/* Create substitutes for POSIX functions in Win32. */
 
-#if defined(__MINGW32__)
-/* Show no warning in case system functions are not used. */
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-function"
-#endif
+int pthread_mutex_destroy( pthread_mutex_t *mutex ) {
 
+	return ( CloseHandle(*mutex) == 0 ) ? -1 : 0;
 
-static int pthread_mutex_init(pthread_mutex_t *mutex, void *unused) {
-
-	(void)unused;
-	*mutex = CreateMutex(NULL, FALSE, NULL);
-	return (*mutex == NULL) ? -1 : 0;
-}
+}  /* pthread_mutex_destroy */
 
 
-static int pthread_mutex_destroy(pthread_mutex_t *mutex) {
-
-	return (CloseHandle(*mutex) == 0) ? -1 : 0;
-}
-
-
-static int pthread_mutex_lock(pthread_mutex_t *mutex) {
+int pthread_mutex_lock( pthread_mutex_t *mutex ) {
 
 	return (WaitForSingleObject(*mutex, INFINITE) == WAIT_OBJECT_0) ? 0 : -1;
-}
+
+}  /* pthread_mutex_lock */
 
 
-#ifdef ENABLE_UNUSED_PTHREAD_FUNCTIONS
-static int pthread_mutex_trylock(pthread_mutex_t *mutex) {
+int pthread_mutex_trylock( pthread_mutex_t *mutex ) {
 
-	switch (WaitForSingleObject(*mutex, 0)) {
+	switch ( WaitForSingleObject( *mutex, 0 ) ) {
 
 		case WAIT_OBJECT_0: return 0;
 		case WAIT_TIMEOUT: return -2; /* EBUSY */
 	}
 	return -1;
-}
-#endif
+
+}  /* pthread_mutex_trylock */
 
 
-static int pthread_mutex_unlock(pthread_mutex_t *mutex) {
+static int pthread_mutex_unlock( pthread_mutex_t *mutex ) {
 
-	return (ReleaseMutex(*mutex) == 0) ? -1 : 0;
-}
+	return ( ReleaseMutex( *mutex ) == 0 ) ? -1 : 0;
+
+}  /* pthread_mutex_unlock */
 
 
 #ifndef WIN_PTHREADS_TIME_H
-static int clock_gettime(clockid_t clk_id, struct timespec *tp) {
+int clock_gettime( clockid_t clk_id, struct timespec *tp ) {
 
 	FILETIME ft;
 	ULARGE_INTEGER li;
@@ -912,20 +898,24 @@ static int clock_gettime(clockid_t clk_id, struct timespec *tp) {
 	}
 
 	return ok ? 0 : -1;
-}
+
+}  /* clock_gettime */
 #endif
 
 
-static int pthread_cond_init(pthread_cond_t *cv, const void *unused) {
+int pthread_cond_init( pthread_cond_t *cv, const void *unused ) {
 
 	(void)unused;
+
 	InitializeCriticalSection(&cv->threadIdSec);
 	cv->waiting_thread = NULL;
+
 	return 0;
-}
+
+}  /* pthread_cond_init */
 
 
-static int pthread_cond_timedwait(pthread_cond_t *cv, pthread_mutex_t *mutex, const struct timespec *abstime) {
+int pthread_cond_timedwait( pthread_cond_t *cv, pthread_mutex_t *mutex, const struct timespec *abstime ) {
 
 	struct mg_workerTLS **ptls;
 	struct mg_workerTLS *tls = (struct mg_workerTLS *)pthread_getspecific(XX_httplib_sTlsKey);
@@ -978,16 +968,18 @@ static int pthread_cond_timedwait(pthread_cond_t *cv, pthread_mutex_t *mutex, co
 	pthread_mutex_lock(mutex);
 
 	return ok ? 0 : -1;
-}
+
+}  /* pthread_cond_timewait */
 
 
-static int pthread_cond_wait(pthread_cond_t *cv, pthread_mutex_t *mutex) {
+int pthread_cond_wait( pthread_cond_t *cv, pthread_mutex_t *mutex ) {
 
 	return pthread_cond_timedwait(cv, mutex, NULL);
-}
+
+}  /* pthread_cond_wait */
 
 
-static int pthread_cond_signal(pthread_cond_t *cv) {
+int pthread_cond_signal( pthread_cond_t *cv ) {
 
 	HANDLE wkup = NULL;
 	BOOL ok = FALSE;
@@ -1003,20 +995,22 @@ static int pthread_cond_signal(pthread_cond_t *cv) {
 	LeaveCriticalSection(&cv->threadIdSec);
 
 	return ok ? 0 : 1;
-}
+
+}  /* pthread_cond_signal */
 
 
-static int pthread_cond_broadcast(pthread_cond_t *cv) {
+int pthread_cond_broadcast( pthread_cond_t *cv ) {
 
 	EnterCriticalSection(&cv->threadIdSec);
 	while (cv->waiting_thread) pthread_cond_signal(cv);
 	LeaveCriticalSection(&cv->threadIdSec);
 
 	return 0;
-}
+
+}  /* pthread_cond_broadcast */
 
 
-static int pthread_cond_destroy(pthread_cond_t *cv) {
+int pthread_cond_destroy( pthread_cond_t *cv ) {
 
 	EnterCriticalSection(&cv->threadIdSec);
 	assert(cv->waiting_thread == NULL);
@@ -1024,7 +1018,8 @@ static int pthread_cond_destroy(pthread_cond_t *cv) {
 	DeleteCriticalSection(&cv->threadIdSec);
 
 	return 0;
-}
+
+}  /* pthread_cond_destroy */
 
 
 #ifdef ALTERNATIVE_QUEUE
@@ -1047,7 +1042,7 @@ static int event_signal(void *eventhdl) {
 
 	return (int)SetEvent((HANDLE)eventhdl);
 
-}a  /* event_signal */
+}  /* event_signal */
 
 
 static void event_destroy(void *eventhdl) {
