@@ -828,14 +828,6 @@ void XX_httplib_set_thread_name(const char *threadName) {
 
 
 
-void * mg_get_user_connection_data(const struct mg_connection *conn) {
-
-	if (conn != NULL) return conn->request_info.conn_data;
-
-	return NULL;
-}
-
-
 int mg_get_server_ports(const struct mg_context *ctx, int size, struct mg_server_ports *ports) {
 
 	int i;
