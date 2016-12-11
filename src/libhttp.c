@@ -4314,10 +4314,3 @@ int mg_modify_passwords_file(const char *fname, const char *domain, const char *
 
 	return 1;
 }
-
-
-int XX_httplib_is_valid_port(unsigned long port) {
-
-	return (port < 0xffff);
-
-}  /* XX_httplib_is_valid_port */
