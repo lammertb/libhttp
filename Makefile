@@ -42,6 +42,8 @@ PORTS = 8080
 BUILD_DIRS = $(BUILD_DIR) $(BUILD_DIR)/src $(BUILD_DIR)/resources
 
 LIB_SOURCES =	src/libhttp.c						\
+		src/extern_md5.c					\
+		src/extern_sha1.c					\
 		src/httplib_accept_new_connection.c			\
 		src/httplib_addenv.c					\
 		src/httplib_atomic_dec.c				\
@@ -235,24 +237,22 @@ LIB_SOURCES =	src/libhttp.c						\
 		src/httplib_websocket_write_exec.c			\
 		src/httplib_worker_thread.c				\
 		src/httplib_write.c					\
-		src/md5.c						\
-		src/pthread_cond_broadcast.c				\
-		src/pthread_cond_destroy.c				\
-		src/pthread_cond_init.c					\
-		src/pthread_cond_signal.c				\
-		src/pthread_cond_timedwait.c				\
-		src/pthread_cond_wait.c					\
-		src/pthread_getspecific.c				\
-		src/pthread_key_create.c				\
-		src/pthread_key_delete.c				\
-		src/pthread_mutex_destroy.c				\
-		src/pthread_mutex_init.c				\
-		src/pthread_mutex_lock.c				\
-		src/pthread_mutex_trylock.c				\
-		src/pthread_mutex_unlock.c				\
-		src/pthread_self.c					\
-		src/pthread_setspecific.c				\
-		src/sha1.c
+		src/win32_pthread_cond_broadcast.c			\
+		src/win32_pthread_cond_destroy.c			\
+		src/win32_pthread_cond_init.c				\
+		src/win32_pthread_cond_signal.c				\
+		src/win32_pthread_cond_timedwait.c			\
+		src/win32_pthread_cond_wait.c				\
+		src/win32_pthread_getspecific.c				\
+		src/win32_pthread_key_create.c				\
+		src/win32_pthread_key_delete.c				\
+		src/win32_pthread_mutex_destroy.c			\
+		src/win32_pthread_mutex_init.c				\
+		src/win32_pthread_mutex_lock.c				\
+		src/win32_pthread_mutex_trylock.c			\
+		src/win32_pthread_mutex_unlock.c			\
+		src/win32_pthread_self.c				\
+		src/win32_pthread_setspecific.c	
 LIB_INLINE  = src/mod_lua.inl src/md5.inl
 APP_SOURCES = src/main.c
 WINDOWS_RESOURCES = resources/res.rc
