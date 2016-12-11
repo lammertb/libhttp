@@ -828,13 +828,6 @@ void XX_httplib_set_thread_name(const char *threadName) {
 
 
 
-char * XX_httplib_strdup( const char *str ) {
-
-	return XX_httplib_strndup(str, strlen(str));
-
-}  /* XX_httplib_strdup */
-
-
 const char * XX_httplib_strcasestr( const char *big_str, const char *small_str ) {
 
 	size_t i;
