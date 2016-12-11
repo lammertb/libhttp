@@ -980,6 +980,7 @@ int			XX_httplib_parse_http_headers( char **buf, struct mg_request_info *ri );
 int			XX_httplib_parse_http_message( char *buf, int len, struct mg_request_info *ri );
 int			XX_httplib_parse_net( const char *spec, uint32_t *net, uint32_t *mask );
 int			XX_httplib_parse_range_header( const char *header, int64_t *a, int64_t *b );
+void			XX_httplib_path_to_unicode( const struct mg_connection *conn, const char *path, wchar_t *wbuf, size_t wbuf_len );
 void			XX_httplib_prepare_cgi_environment( struct mg_connection *conn, const char *prog, struct cgi_environment *env );
 void			XX_httplib_print_dir_entry( struct de *de );
 void			XX_httplib_process_new_connection( struct mg_connection *conn );

@@ -263,8 +263,8 @@ static int rename(const char *a, const char *b) {
 	wchar_t wa[PATH_MAX];
 	wchar_t wb[PATH_MAX];
 
-	path_to_unicode( NULL, a, wa, ARRAY_SIZE(wa) );
-	path_to_unicode( NULL, b, wb, ARRAY_SIZE(wb) );
+	XX_httplib_path_to_unicode( NULL, a, wa, ARRAY_SIZE(wa) );
+	XX_httplib_path_to_unicode( NULL, b, wb, ARRAY_SIZE(wb) );
 
 	return MoveFileW( wa, wb ) ? 0 : -1;
 
@@ -281,7 +281,7 @@ static int stat(const char *name, struct stat *st) {
 	WIN32_FILE_ATTRIBUTE_DATA attr;
 	time_t creation_time, write_time;
 
-	path_to_unicode(NULL, name, wbuf, ARRAY_SIZE(wbuf));
+	XX_httplib_path_to_unicode(NULL, name, wbuf, ARRAY_SIZE(wbuf));
 	memset(&attr, 0, sizeof(attr));
 
 	GetFileAttributesExW(wbuf, GetFileExInfoStandard, &attr);
@@ -884,7 +884,7 @@ int XX_httplib_fopen( const struct mg_connection *conn, const char *path, const 
 	if (!XX_httplib_is_file_in_memory(conn, path, filep)) {
 #ifdef _WIN32
 		wchar_t wbuf[PATH_MAX], wmode[20];
-		path_to_unicode(conn, path, wbuf, ARRAY_SIZE(wbuf));
+		XX_httplib_path_to_unicode(conn, path, wbuf, ARRAY_SIZE(wbuf));
 		MultiByteToWideChar(CP_UTF8, 0, mode, -1, wmode, ARRAY_SIZE(wmode));
 		filep->fp = _wfopen(wbuf, wmode);
 #else
@@ -1877,7 +1877,7 @@ static void change_slashes_to_backslashes(char *path) {
 }
 
 
-static int mg_wcscasecmp(const wchar_t *s1, const wchar_t *s2) {
+static int mg_wcscasecmp( const wchar_t *s1, const wchar_t *s2 ) {
 
 	int diff;
 
@@ -1888,67 +1888,7 @@ static int mg_wcscasecmp(const wchar_t *s1, const wchar_t *s2) {
 	} while (diff == 0 && s1[-1] != '\0');
 
 	return diff;
-}
 
-
-/* Encode 'path' which is assumed UTF-8 string, into UNICODE string.
- * wbuf and wbuf_len is a target buffer and its length. */
-static void path_to_unicode(const struct mg_connection *conn, const char *path, wchar_t *wbuf, size_t wbuf_len) {
-
-	char buf[PATH_MAX];
-	char buf2[PATH_MAX];
-	wchar_t wbuf2[MAX_PATH + 1];
-	DWORD long_len;
-	DWORD err;
-	int (*fcompare)(const wchar_t *, const wchar_t *) = mg_wcscasecmp;
-
-	XX_httplib_strlcpy(buf, path, sizeof(buf));
-	change_slashes_to_backslashes(buf);
-
-	/* Convert to Unicode and back. If doubly-converted string does not
-	 * match the original, something is fishy, reject. */
-	memset(wbuf, 0, wbuf_len * sizeof(wchar_t));
-	MultiByteToWideChar(CP_UTF8, 0, buf, -1, wbuf, (int)wbuf_len);
-	WideCharToMultiByte(
-	    CP_UTF8, 0, wbuf, (int)wbuf_len, buf2, sizeof(buf2), NULL, NULL);
-	if (strcmp(buf, buf2) != 0) {
-		wbuf[0] = L'\0';
-	}
-
-	/* TODO: Add a configuration to switch between case sensitive and
-	 * case insensitive URIs for Windows server. */
-	/*
-	if (conn) {
-	    if (conn->ctx->config[WINDOWS_CASE_SENSITIVE]) {
-	        fcompare = wcscmp;
-	    }
-	}
-	*/
-	(void)conn; /* conn is currently unused */
-
-#if !defined(_WIN32_WCE)
-	/* Only accept a full file path, not a Windows short (8.3) path. */
-	memset(wbuf2, 0, ARRAY_SIZE(wbuf2) * sizeof(wchar_t));
-	long_len = GetLongPathNameW(wbuf, wbuf2, ARRAY_SIZE(wbuf2) - 1);
-	if (long_len == 0) {
-		err = GetLastError();
-		if (err == ERROR_FILE_NOT_FOUND) {
-			/* File does not exist. This is not always a problem here. */
-			return;
-		}
-	}
-	if ((long_len >= ARRAY_SIZE(wbuf2)) || (fcompare(wbuf, wbuf2) != 0)) {
-		/* Short name is used. */
-		wbuf[0] = L'\0';
-	}
-#else
-	(void)long_len;
-	(void)wbuf2;
-	(void)err;
-
-	if (strchr(path, '~')) wbuf[0] = L'\0';
-#endif
-}
-
+}  /* mg_wcscasecmp */
 
 #endif /* _WIN32 */

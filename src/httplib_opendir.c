@@ -42,7 +42,7 @@ static DIR * mg_opendir(const struct mg_connection *conn, const char *name) {
 	} else if ((dir = (DIR *)XX_httplib_malloc(sizeof(*dir))) == NULL) {
 		SetLastError(ERROR_NOT_ENOUGH_MEMORY);
 	} else {
-		path_to_unicode(conn, name, wpath, ARRAY_SIZE(wpath));
+		XX_httplib_path_to_unicode(conn, name, wpath, ARRAY_SIZE(wpath));
 		attrs = GetFileAttributesW(wpath);
 		if (attrs != 0xFFFFFFFF && ((attrs & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY)) {
 

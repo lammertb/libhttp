@@ -65,7 +65,7 @@ int XX_httplib_stat( struct mg_connection *conn, const char *path, struct file *
 		return 1;
 	}
 
-	path_to_unicode(conn, path, wbuf, ARRAY_SIZE(wbuf));
+	XX_httplib_path_to_unicode(conn, path, wbuf, ARRAY_SIZE(wbuf));
 	if (GetFileAttributesExW(wbuf, GetFileExInfoStandard, &info) != 0) {
 		filep->size = MAKEUQUAD(info.nFileSizeLow, info.nFileSizeHigh);
 		filep->last_modified =

@@ -34,7 +34,7 @@ static int mg_mkdir(const struct mg_connection *conn, const char *path, int mode
 	wchar_t wbuf[PATH_MAX];
 
 	(void)mode;
-	path_to_unicode(conn, path, wbuf, ARRAY_SIZE(wbuf));
+	XX_httplib_path_to_unicode(conn, path, wbuf, ARRAY_SIZE(wbuf));
 	return CreateDirectoryW(wbuf, NULL) ? 0 : -1;
 
 }  /* mg_mkdir */

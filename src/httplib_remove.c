@@ -33,7 +33,7 @@
 static int mg_remove(const struct mg_connection *conn, const char *path) {
 
 	wchar_t wbuf[PATH_MAX];
-	path_to_unicode(conn, path, wbuf, ARRAY_SIZE(wbuf));
+	XX_httplib_path_to_unicode(conn, path, wbuf, ARRAY_SIZE(wbuf));
 	return DeleteFileW(wbuf) ? 0 : -1;
 }
 
