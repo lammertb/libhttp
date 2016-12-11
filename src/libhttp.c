@@ -4481,7 +4481,7 @@ int mg_url_encode(const char *src, char *dst, size_t dst_len) {
 }
 
 
-static void print_dir_entry(struct de *de) {
+void XX_httplib_print_dir_entry( struct de *de ) {
 
 	char size[64];
 	char mod[64];
@@ -4520,14 +4520,15 @@ static void print_dir_entry(struct de *de) {
 	              de->file.is_directory ? "/" : "",
 	              mod,
 	              size);
-}
+
+}  /* XX_httplib_print_dir_entry */
 
 
 /* This function is called from send_directory() and used for
  * sorting directory entries by size, or name, or modification time.
  * On windows, __cdecl specification is needed in case if project is built
  * with __stdcall convention. qsort always requires __cdels callback. */
-static int WINCDECL compare_dir_entries( const void *p1, const void *p2 ) {
+int WINCDECL XX_httplib_compare_dir_entries( const void *p1, const void *p2 ) {
 
 	if ( p1 == NULL  ||  p2 == NULL ) return 0;
 
@@ -4548,7 +4549,7 @@ static int WINCDECL compare_dir_entries( const void *p1, const void *p2 ) {
 
 	return (query_string[1] == 'd') ? -cmp_result : cmp_result;
 
-}  /* compare_dir_entries */
+}  /* XX_httplib_compare_dir_entries */
 
 
 int XX_httplib_must_hide_file( struct mg_connection *conn, const char *path ) {
@@ -4587,7 +4588,7 @@ int XX_httplib_scan_directory( struct mg_connection *conn, const char *dir, void
 
 			/* If we don't memset stat structure to zero, mtime will have
 			 * garbage and strftime() will segfault later on in
-			 * print_dir_entry(). memset is required only if XX_httplib_stat()
+			 * XX_httplib_print_dir_entry(). memset is required only if XX_httplib_stat()
 			 * fails. For more details, see
 			 * http://code.google.com/p/mongoose/issues/detail?id=79 */
 			memset(&de.file, 0, sizeof(de.file));
@@ -4634,7 +4635,7 @@ int XX_httplib_remove_directory( struct mg_connection *conn, const char *dir ) {
 
 			/* If we don't memset stat structure to zero, mtime will have
 			 * garbage and strftime() will segfault later on in
-			 * print_dir_entry(). memset is required only if XX_httplib_stat()
+			 * XX_httplib_print_dir_entry(). memset is required only if XX_httplib_stat()
 			 * fails. For more details, see
 			 * http://code.google.com/p/mongoose/issues/detail?id=79 */
 			memset(&de.file, 0, sizeof(de.file));
@@ -4672,12 +4673,6 @@ int XX_httplib_remove_directory( struct mg_connection *conn, const char *dir ) {
 #endif
 
 
-struct dir_scan_data {
-	struct de *entries;
-	unsigned int num_entries;
-	unsigned int arr_size;
-};
-
 
 /* Behaves like realloc(), but frees original pointer on failure */
 static void * realloc2(void *ptr, size_t size) {
@@ -4689,7 +4684,7 @@ static void * realloc2(void *ptr, size_t size) {
 }
 
 
-static void dir_scan_callback(struct de *de, void *data) {
+void XX_httplib_dir_scan_callback( struct de *de, void *data ) {
 
 	struct dir_scan_data *dsd = (struct dir_scan_data *)data;
 
@@ -4706,73 +4701,5 @@ static void dir_scan_callback(struct de *de, void *data) {
 		dsd->entries[dsd->num_entries].conn = de->conn;
 		dsd->num_entries++;
 	}
-}
 
-
-void XX_httplib_handle_directory_request( struct mg_connection *conn, const char *dir ) {
-
-	unsigned int i;
-	int sort_direction;
-	struct dir_scan_data data = {NULL, 0, 128};
-	char date[64];
-	time_t curtime = time(NULL);
-
-	if (!XX_httplib_scan_directory(conn, dir, &data, dir_scan_callback)) {
-		XX_httplib_send_http_error(conn, 500, "Error: Cannot open directory\nopendir(%s): %s", dir, strerror(ERRNO));
-		return;
-	}
-
-	XX_httplib_gmt_time_string(date, sizeof(date), &curtime);
-
-	if (!conn) return;
-
-	sort_direction = ((conn->request_info.query_string != NULL) && (conn->request_info.query_string[1] == 'd')) ? 'a' : 'd';
-
-	conn->must_close = 1;
-	mg_printf(conn, "HTTP/1.1 200 OK\r\n");
-	XX_httplib_send_static_cache_header(conn);
-	mg_printf(conn, "Date: %s\r\n" "Connection: close\r\n" "Content-Type: text/html; charset=utf-8\r\n\r\n", date);
-
-	conn->num_bytes_sent +=
-	    mg_printf(conn,
-	              "<html><head><title>Index of %s</title>"
-	              "<style>th {text-align: left;}</style></head>"
-	              "<body><h1>Index of %s</h1><pre><table cellpadding=\"0\">"
-	              "<tr><th><a href=\"?n%c\">Name</a></th>"
-	              "<th><a href=\"?d%c\">Modified</a></th>"
-	              "<th><a href=\"?s%c\">Size</a></th></tr>"
-	              "<tr><td colspan=\"3\"><hr></td></tr>",
-	              conn->request_info.local_uri,
-	              conn->request_info.local_uri,
-	              sort_direction,
-	              sort_direction,
-	              sort_direction);
-
-	/* Print first entry - link to a parent directory */
-	conn->num_bytes_sent +=
-	    mg_printf(conn,
-	              "<tr><td><a href=\"%s%s\">%s</a></td>"
-	              "<td>&nbsp;%s</td><td>&nbsp;&nbsp;%s</td></tr>\n",
-	              conn->request_info.local_uri,
-	              "..",
-	              "Parent directory",
-	              "-",
-	              "-");
-
-	/* Sort and print directory entries */
-	if (data.entries != NULL) {
-		qsort(data.entries,
-		      (size_t)data.num_entries,
-		      sizeof(data.entries[0]),
-		      compare_dir_entries);
-		for (i = 0; i < data.num_entries; i++) {
-			print_dir_entry(&data.entries[i]);
-			XX_httplib_free(data.entries[i].file_name);
-		}
-		XX_httplib_free(data.entries);
-	}
-
-	conn->num_bytes_sent += mg_printf(conn, "%s", "</table></body></html>");
-	conn->status_code = 200;
-
-}  /* XX_httplib_handle_directory_request */
+}  /* XX_httplib_dir_scan_callback */

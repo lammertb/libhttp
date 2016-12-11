@@ -840,6 +840,13 @@ struct de {
 	struct file file;
 };
 
+struct dir_scan_data {
+	struct de *entries;
+	unsigned int num_entries;
+	unsigned int arr_size;
+};
+
+
 /* This structure helps to create an environment for the spawned CGI program.
  * Environment is an array of "VARIABLE=VALUE\0" ASCIIZ strings,
  * last element must be NULL.
@@ -887,11 +894,13 @@ int			XX_httplib_check_authorization( struct mg_connection *conn, const char *pa
 void			XX_httplib_close_all_listening_sockets( struct mg_context *ctx );
 void			XX_httplib_close_connection( struct mg_connection *conn );
 void			XX_httplib_close_socket_gracefully( struct mg_connection *conn );
+int WINCDECL		XX_httplib_compare_dir_entries( const void *p1, const void *p2 );
 int			XX_httplib_connect_socket( struct mg_context *ctx, const char *host, int port, int use_ssl, char *ebuf, size_t ebuf_len, SOCKET *sock, union usa *sa );
 void			XX_httplib_construct_etag( char *buf, size_t buf_len, const struct file *filep );
 int			XX_httplib_consume_socket( struct mg_context *ctx, struct socket *sp, int thread_index );
 void			XX_httplib_delete_file( struct mg_connection *conn, const char *path );
 double			XX_httplib_difftimespec( const struct timespec *ts_now, const struct timespec *ts_before );
+void			XX_httplib_dir_scan_callback( struct de *de, void *data );
 void			XX_httplib_discard_unread_request_data( struct mg_connection *conn );
 struct mg_connection *	XX_httplib_fc( struct mg_context *ctx );
 void			XX_httplib_fclose( struct file *filep );
@@ -945,6 +954,7 @@ int			XX_httplib_parse_http_message( char *buf, int len, struct mg_request_info 
 int			XX_httplib_parse_net( const char *spec, uint32_t *net, uint32_t *mask );
 int			XX_httplib_parse_range_header( const char *header, int64_t *a, int64_t *b );
 void			XX_httplib_prepare_cgi_environment( struct mg_connection *conn, const char *prog, struct cgi_environment *env );
+void			XX_httplib_print_dir_entry( struct de *de );
 void			XX_httplib_process_new_connection( struct mg_connection *conn );
 void			XX_httplib_produce_socket( struct mg_context *ctx, const struct socket *sp );
 int			XX_httplib_pull( FILE *fp, struct mg_connection *conn, char *buf, int len, double timeout );
