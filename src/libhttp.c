@@ -827,26 +827,6 @@ void XX_httplib_set_thread_name(const char *threadName) {
 #endif
 
 
-int XX_httplib_is_file_in_memory( const struct mg_connection *conn, const char *path, struct file *filep ) {
-
-	size_t size = 0;
-
-	if (!conn || !filep) return 0;
-
-	if (conn->ctx->callbacks.open_file) {
-		filep->membuf = conn->ctx->callbacks.open_file(conn, path, &size);
-		if (filep->membuf != NULL) {
-			/* NOTE: override filep->size only on success. Otherwise, it might
-			 * break constructs like if (!XX_httplib_stat() || !XX_httplib_fopen()) ... */
-			filep->size = size;
-		}
-	}
-
-	return filep->membuf != NULL;
-
-}  /* XX_httplib_is_file_in_memory */
-
-
 bool XX_httplib_is_file_opened( const struct file *filep ) {
 
 	if ( filep == NULL ) return false;
