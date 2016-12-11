@@ -570,25 +570,6 @@ const struct uriprot_tp XX_httplib_abs_uri_protocols[] = {{"http://", 7, 80},
                          {NULL, 0, 0}};
 
 
-int XX_httplib_atomic_inc( volatile int *addr ) {
-
-	int ret;
-#if defined(_WIN32)
-	/* Depending on the SDK, this function uses either
-	 * (volatile unsigned int *) or (volatile LONG *),
-	 * so whatever you use, the other SDK is likely to raise a warning. */
-	ret = InterlockedIncrement((volatile long *)addr);
-#elif defined(__GNUC__)                                                        \
-    && ((__GNUC__ > 4) || ((__GNUC__ == 4) && (__GNUC_MINOR__ > 0)))
-	ret = __sync_add_and_fetch(addr, 1);
-#else
-	ret = (++(*addr));
-#endif
-	return ret;
-
-}  /* XX_httplib_atomic_inc */
-
-
 
 #if !defined(NO_THREAD_NAME)
 #if defined(_WIN32) && defined(_MSC_VER)
