@@ -170,6 +170,7 @@ LIB_SOURCES =	src/libhttp.c						\
 		src/httplib_send_authorization_request.c		\
 		src/httplib_send_file.c					\
 		src/httplib_send_file_data.c				\
+		src/httplib_send_http_error.c				\
 		src/httplib_send_no_cache_header.c			\
 		src/httplib_send_options.c				\
 		src/httplib_send_static_cache_header.c			\
