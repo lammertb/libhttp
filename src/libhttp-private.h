@@ -888,6 +888,7 @@ void			XX_httplib_accept_new_connection( const struct socket *listener, struct m
 void			XX_httplib_addenv( struct cgi_environment *env, PRINTF_FORMAT_STRING(const char *fmt), ... ) PRINTF_ARGS(2, 3); 
 int			XX_httplib_atomic_dec( volatile int *addr );
 int			XX_httplib_atomic_inc( volatile int *addr );
+int			XX_httplib_authorize( struct mg_connection *conn, struct file *filep );
 void			XX_httplib_base64_encode( const unsigned char *src, int src_len, char *dst );
 int			XX_httplib_check_acl( struct mg_context *ctx, uint32_t remote_ip );
 int			XX_httplib_check_authorization( struct mg_connection *conn, const char *path );

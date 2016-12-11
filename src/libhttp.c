@@ -4112,7 +4112,7 @@ static int read_auth_file(struct file *filep, struct read_auth_file_struct *work
 
 
 /* Authorize against the opened passwords file. Return 1 if authorized. */
-static int authorize(struct mg_connection *conn, struct file *filep) {
+int XX_httplib_authorize( struct mg_connection *conn, struct file *filep ) {
 
 	struct read_auth_file_struct workdata;
 	char buf[MG_BUF_LEN];
@@ -4126,7 +4126,8 @@ static int authorize(struct mg_connection *conn, struct file *filep) {
 	workdata.domain = conn->ctx->config[AUTHENTICATION_DOMAIN];
 
 	return read_auth_file(filep, &workdata);
-}
+
+}  /* XX_httplib_authorize */
 
 
 /* Return 1 if request is authorised, 0 otherwise. */
@@ -4157,7 +4158,7 @@ int XX_httplib_check_authorization( struct mg_connection *conn, const char *path
 	if (!is_file_opened(&file)) open_auth_file(conn, path, &file);
 
 	if (is_file_opened(&file)) {
-		authorized = authorize(conn, &file);
+		authorized = XX_httplib_authorize(conn, &file);
 		XX_httplib_fclose(&file);
 	}
 
@@ -4202,23 +4203,3 @@ void XX_httplib_send_authorization_request( struct mg_connection *conn ) {
 	          nonce);
 
 }  /* XX_httplib_send_authorization_request */
-
-
-#if !defined(NO_FILES)
-int XX_httplib_is_authorized_for_put( struct mg_connection *conn ) {
-
-	if ( conn == NULL ) return 0;
-
-	struct file file = STRUCT_FILE_INITIALIZER;
-	const char *passfile = conn->ctx->config[PUT_DELETE_PASSWORDS_FILE];
-	int ret = 0;
-
-	if (passfile != NULL && XX_httplib_fopen(conn, passfile, "r", &file)) {
-		ret = authorize(conn, &file);
-		XX_httplib_fclose(&file);
-	}
-
-	return ret;
-
-}  /* XX_httplib_is_authorized_for_put */
-#endif
