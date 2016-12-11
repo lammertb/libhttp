@@ -869,14 +869,6 @@ int clock_gettime( clockid_t clk_id, struct timespec *tp ) {
 }  /* clock_gettime */
 #endif
 
-
-int pthread_cond_wait( pthread_cond_t *cv, pthread_mutex_t *mutex ) {
-
-	return pthread_cond_timedwait(cv, mutex, NULL);
-
-}  /* pthread_cond_wait */
-
-
 int pthread_cond_signal( pthread_cond_t *cv ) {
 
 	HANDLE wkup = NULL;
