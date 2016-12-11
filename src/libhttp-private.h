@@ -22,6 +22,48 @@
  * THE SOFTWARE.
  */
 
+
+
+/*
+ * The library provides their own memory allocation functions with a debugging
+ * version which counts the number of blocks and bytes allocated. The normal
+ * allocation functions are therefore disabled here, unless a macro has been
+ * set because a library function needs explicit access to the OS version of
+ * the memory allocation functions.
+ */
+
+#if !defined(NO_HTTPLIB_MALLOC_OVERRIDE)
+#ifdef malloc
+#undef malloc
+#endif
+#ifdef calloc
+#undef calloc
+#endif
+#ifdef realloc
+#undef realloc
+#endif
+#ifdef free
+#undef free
+#endif
+#ifdef snprintf
+#undef snprintf
+#endif
+#ifdef vsnprintf
+#undef vsnprintf
+#endif
+#define malloc		DO_NOT_USE_THIS_FUNCTION__USE_httplib_malloc
+#define calloc		DO_NOT_USE_THIS_FUNCTION__USE_httplib_calloc
+#define realloc		DO_NOT_USE_THIS_FUNCTION__USE_httplib_realloc
+#define free		DO_NOT_USE_THIS_FUNCTION__USE_httplib_free
+#define snprintf	DO_NOT_USE_THIS_FUNCTION__USE_httplib_snprintf
+#ifdef _WIN32 /* vsnprintf must not be used in any system, * \ \ \             \
+               * but this define only works well for Windows. */
+#define vsnprintf	DO_NOT_USE_THIS_FUNCTION__USE_httplib_vsnprintf
+#endif
+#endif  /* ! NO_HTTPLIB_MALLOC_OVERRIDE */
+
+
+
 #if defined(_WIN32)
 #if !defined(_CRT_SECURE_NO_WARNINGS)
 #define _CRT_SECURE_NO_WARNINGS /* Disable deprecation warning in VS2005 */
