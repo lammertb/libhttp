@@ -828,15 +828,6 @@ void XX_httplib_set_thread_name(const char *threadName) {
 
 
 
-int XX_httplib_should_decode_url( const struct mg_connection *conn ) {
-
-	if ( conn == NULL  ||  conn->ctx == NULL ) return 0;
-
-	return (mg_strcasecmp(conn->ctx->config[DECODE_URL], "yes") == 0);
-
-}  /* XX_httplib_should_decode_url */
-
-
 const char * XX_httplib_suggest_connection_header( const struct mg_connection *conn ) {
 
 	return XX_httplib_should_keep_alive(conn) ? "keep-alive" : "close";
