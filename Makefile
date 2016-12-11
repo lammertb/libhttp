@@ -167,6 +167,7 @@ LIB_SOURCES =	src/libhttp.c						\
 		src/httplib_ssl_use_pem_file.c				\
 		src/httplib_sslize.c					\
 		src/httplib_start.c					\
+		src/httplib_start_thread.c				\
 		src/httplib_start_thread_with_id.c			\
 		src/httplib_stop.c					\
 		src/httplib_store_body.c				\

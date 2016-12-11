@@ -2169,18 +2169,6 @@ void XX_httplib_set_close_on_exec( SOCKET sock, struct mg_connection *conn ) {
 }  /* XX_httplib_set_close_on_exec */
 
 
-int
-mg_start_thread(mg_thread_func_t f, void *p)
-{
-#if defined(USE_STACK_SIZE) && (USE_STACK_SIZE > 1)
-	/* Compile-time option to control stack size, e.g. -DUSE_STACK_SIZE=16384
-	 */
-	return ((_beginthread((void(__cdecl *)(void *))f, USE_STACK_SIZE, p) == ((uintptr_t)(-1L))) ? -1 : 0);
-#else
-	return ( (_beginthread((void(__cdecl *)(void *))f, 0, p) == ((uintptr_t)(-1L))) ? -1 : 0);
-#endif /* defined(USE_STACK_SIZE) && (USE_STACK_SIZE > 1) */
-}
-
 #else
 
 int XX_httplib_stat( struct mg_connection *conn, const char *path, struct file *filep ) {
@@ -2211,27 +2199,5 @@ void XX_httplib_set_close_on_exec( SOCKET fd, struct mg_connection *conn ) {
 	}
 
 }  /* XX_httplib_set_close_on_exec */
-
-
-int mg_start_thread(mg_thread_func_t func, void *param) {
-
-	pthread_t thread_id;
-	pthread_attr_t attr;
-	int result;
-
-	pthread_attr_init(&attr);
-	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
-
-#if defined(USE_STACK_SIZE) && (USE_STACK_SIZE > 1)
-	/* Compile-time option to control stack size,
-	 * e.g. -DUSE_STACK_SIZE=16384 */
-	pthread_attr_setstacksize(&attr, USE_STACK_SIZE);
-#endif /* defined(USE_STACK_SIZE) && (USE_STACK_SIZE > 1) */
-
-	result = pthread_create(&thread_id, &attr, func, param);
-	pthread_attr_destroy(&attr);
-
-	return result;
-}  /* mg_start_thread */
 
 #endif /* _WIN32 */
