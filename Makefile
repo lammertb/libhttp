@@ -194,6 +194,7 @@ LIB_SOURCES =	src/libhttp.c						\
 		src/httplib_set_ssl_option.c				\
 		src/httplib_set_sock_timeout.c				\
 		src/httplib_set_tcp_nodelay.c				\
+		src/httplib_set_thread_name.c				\
 		src/httplib_set_throttle.c				\
 		src/httplib_set_uid_option.c				\
 		src/httplib_set_user_connection_data.c			\
