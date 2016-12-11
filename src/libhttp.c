@@ -828,21 +828,6 @@ void XX_httplib_set_thread_name(const char *threadName) {
 
 
 
-int mg_strncasecmp( const char *s1, const char *s2, size_t len ) {
-
-	int diff = 0;
-
-	if (len > 0) {
-		do {
-			diff = XX_httplib_lowercase(s1++) - XX_httplib_lowercase(s2++);
-		} while (diff == 0 && s1[-1] != '\0' && --len > 0);
-	}
-
-	return diff;
-
-}  /* mg_strncasecmp */
-
-
 int mg_strcasecmp(const char *s1, const char *s2) {
 
 	int diff;
