@@ -124,13 +124,6 @@ pthread_mutexattr_t XX_httplib_pthread_mutex_attr;
 /* Create substitutes for POSIX functions in Win32. */
 
 
-struct tm * gmtime_s( const time_t *ptime, struct tm *ptm ) {
-	/* FIXME(lsm): fix this. */
-	return localtime_s(ptime, ptm);
-
-}  /* gmtime_s */
-
-
 static struct tm tm_array[MAX_WORKER_THREADS];
 static int tm_index = 0;
 
