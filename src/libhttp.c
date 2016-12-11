@@ -131,33 +131,6 @@ pthread_mutexattr_t XX_httplib_pthread_mutex_attr;
 #define remove(f) mg_remove(NULL, f)
 
 
-struct stat {
-	int64_t st_size;
-	time_t st_mtime;
-};
-
-int stat( const char *name, struct stat *st ) {
-
-	wchar_t wbuf[PATH_MAX];
-	WIN32_FILE_ATTRIBUTE_DATA attr;
-	time_t creation_time, write_time;
-
-	XX_httplib_path_to_unicode(NULL, name, wbuf, ARRAY_SIZE(wbuf));
-	memset(&attr, 0, sizeof(attr));
-
-	GetFileAttributesExW(wbuf, GetFileExInfoStandard, &attr);
-	st->st_size = (((int64_t)attr.nFileSizeHigh) << 32) + (int64_t)attr.nFileSizeLow;
-
-	write_time    = SYS2UNIX_TIME( attr.ftLastWriteTime.dwLowDateTime, attr.ftLastWriteTime.dwHighDateTime );
-	creation_time = SYS2UNIX_TIME( attr.ftCreationTime.dwLowDateTime,  attr.ftCreationTime.dwHighDateTime  );
-
-	if ( creation_time > write_time ) st->st_mtime = creation_time;
-	else                              st->st_mtime = write_time;
-
-	return 0;
-
-}  /* stat */
-
 #define access(x, a) 1 /* not required anyway */
 
 /* WinCE-TODO: define stat, remove, rename, _rmdir, _lseeki64 */

@@ -258,6 +258,7 @@ LIB_SOURCES =	src/libhttp.c						\
 		src/wince_localtime.c					\
 		src/wince_localtime_s.c					\
 		src/wince_rename.c					\
+		src/wince_stat.c					\
 		src/wince_strftime.c					\
 		src/wince_time.c
 LIB_INLINE  = src/mod_lua.inl src/md5.inl
