@@ -828,18 +828,6 @@ void XX_httplib_set_thread_name(const char *threadName) {
 
 
 
-int mg_strcasecmp(const char *s1, const char *s2) {
-
-	int diff;
-
-	do {
-		diff = XX_httplib_lowercase(s1++) - XX_httplib_lowercase(s2++);
-	} while (diff == 0 && s1[-1] != '\0');
-
-	return diff;
-}
-
-
 static char * mg_strndup(const char *ptr, size_t len) {
 
 	char *p;

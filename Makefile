@@ -187,6 +187,7 @@ LIB_SOURCES =	src/libhttp.c						\
 		src/httplib_stop.c					\
 		src/httplib_store_body.c				\
 		src/httplib_strlcpy.c					\
+		src/httplib_strcasecmp.c				\
 		src/httplib_strncasecmp.c				\
 		src/httplib_substitute_index_file.c			\
 		src/httplib_timer.c					\
