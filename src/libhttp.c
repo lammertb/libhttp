@@ -114,13 +114,6 @@ static CRITICAL_SECTION global_log_file_lock;
 
 
 
-static void * pthread_getspecific(pthread_key_t key) {
-
-	return TlsGetValue(key);
-
-}  /* pthread_getspecific */
-
-
 struct pthread_mutex_undefined_struct *XX_httplib_pthread_mutex_attr = NULL;
 #else  /* _WIN32 */
 pthread_mutexattr_t XX_httplib_pthread_mutex_attr;
