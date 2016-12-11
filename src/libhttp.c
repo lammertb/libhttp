@@ -29,12 +29,12 @@
 #ifdef __MACH__
 
 /* clock_gettime is not implemented on OSX prior to 10.12 */
-int _civet_clock_gettime(int clk_id, struct timespec *t);
 
-int _civet_clock_gettime(int clk_id, struct timespec *t) {
+int _civet_clock_gettime( int clk_id, struct timespec *t ) {
 
 	memset(t, 0, sizeof(*t));
 	if (clk_id == CLOCK_REALTIME) {
+
 		struct timeval now;
 		int rv = gettimeofday(&now, NULL);
 		if (rv) return rv;
@@ -74,7 +74,6 @@ int _civet_clock_gettime(int clk_id, struct timespec *t) {
 /* If we compiled with Mac OSX 10.12 or later, then clock_gettime will be
  * declared
  * but it may be NULL at runtime. So we need to check before using it. */
-int _civet_safe_clock_gettime(int clk_id, struct timespec *t);
 
 int _civet_safe_clock_gettime(int clk_id, struct timespec *t) {
 
@@ -103,18 +102,9 @@ mg_static_assert(sizeof(size_t) == 4 || sizeof(size_t) == 8, "size_t data type s
 #ifdef _WIN32
 /* Create substitutes for POSIX functions in Win32. */
 
-#if defined(__MINGW32__)
-/* Show no warning in case system functions are not used. */
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-function"
-#endif  /* __MINGW32__ */
-
-
 static CRITICAL_SECTION global_log_file_lock;
 
-
-
-struct pthread_mutex_undefined_struct *XX_httplib_pthread_mutex_attr = NULL;
+ pthread_mutex_undefined_struct *XX_httplib_pthread_mutex_attr = NULL;
 #else  /* _WIN32 */
 pthread_mutexattr_t XX_httplib_pthread_mutex_attr;
 #endif /* _WIN32 */
@@ -273,19 +263,19 @@ void XX_httplib_free( void *a ) {
 #ifdef vsnprintf
 #undef vsnprintf
 #endif
-#define malloc DO_NOT_USE_THIS_FUNCTION__USE_httplib_malloc
-#define calloc DO_NOT_USE_THIS_FUNCTION__USE_httplib_calloc
-#define realloc DO_NOT_USE_THIS_FUNCTION__USE_XX_httplib_realloc
-#define free DO_NOT_USE_THIS_FUNCTION__USE_httplib_free
-#define snprintf DO_NOT_USE_THIS_FUNCTION__USE_httplib_snprintf
+#define malloc		DO_NOT_USE_THIS_FUNCTION__USE_httplib_malloc
+#define calloc		DO_NOT_USE_THIS_FUNCTION__USE_httplib_calloc
+#define realloc		DO_NOT_USE_THIS_FUNCTION__USE_httplib_realloc
+#define free		DO_NOT_USE_THIS_FUNCTION__USE_httplib_free
+#define snprintf	DO_NOT_USE_THIS_FUNCTION__USE_httplib_snprintf
 #ifdef _WIN32 /* vsnprintf must not be used in any system, * \ \ \             \
                * but this define only works well for Windows. */
-#define vsnprintf DO_NOT_USE_THIS_FUNCTION__USE_httplib_vsnprintf
+#define vsnprintf	DO_NOT_USE_THIS_FUNCTION__USE_httplib_vsnprintf
 #endif
 
 /* Darwin prior to 7.0 and Win32 do not have socklen_t */
 #ifdef NO_SOCKLEN_T
-typedef int socklen_t;
+typedef int		socklen_t;
 #endif /* NO_SOCKLEN_T */
 #define _DARWIN_UNLIMITED_SELECT
 
@@ -296,130 +286,70 @@ typedef int socklen_t;
  * It loads SSL library dynamically and changes NULLs to the actual addresses
  * of respective functions. The macros above (like SSL_connect()) are really
  * just calling these functions indirectly via the pointer. */
-struct ssl_func XX_httplib_ssl_sw[] = {{"SSL_free", NULL},
-                                   {"SSL_accept", NULL},
-                                   {"SSL_connect", NULL},
-                                   {"SSL_read", NULL},
-                                   {"SSL_write", NULL},
-                                   {"SSL_get_error", NULL},
-                                   {"SSL_set_fd", NULL},
-                                   {"SSL_new", NULL},
-                                   {"SSL_CTX_new", NULL},
-                                   {"SSLv23_server_method", NULL},
-                                   {"SSL_library_init", NULL},
-                                   {"SSL_CTX_use_PrivateKey_file", NULL},
-                                   {"SSL_CTX_use_certificate_file", NULL},
-                                   {"SSL_CTX_set_default_passwd_cb", NULL},
-                                   {"SSL_CTX_free", NULL},
-                                   {"SSL_load_error_strings", NULL},
-                                   {"SSL_CTX_use_certificate_chain_file", NULL},
-                                   {"SSLv23_client_method", NULL},
-                                   {"SSL_pending", NULL},
-                                   {"SSL_CTX_set_verify", NULL},
-                                   {"SSL_shutdown", NULL},
-                                   {"SSL_CTX_load_verify_locations", NULL},
-                                   {"SSL_CTX_set_default_verify_paths", NULL},
-                                   {"SSL_CTX_set_verify_depth", NULL},
-                                   {"SSL_get_peer_certificate", NULL},
-                                   {"SSL_get_version", NULL},
-                                   {"SSL_get_current_cipher", NULL},
-                                   {"SSL_CIPHER_get_name", NULL},
-                                   {"SSL_CTX_check_private_key", NULL},
-                                   {"SSL_CTX_set_session_id_context", NULL},
-                                   {"SSL_CTX_ctrl", NULL},
-                                   {"SSL_CTX_set_cipher_list", NULL},
-                                   {NULL, NULL}};
+struct ssl_func XX_httplib_ssl_sw[] = {
+	{ "SSL_free",                           NULL },
+	{ "SSL_accept",                         NULL },
+	{ "SSL_connect",                        NULL },
+	{ "SSL_read",                           NULL },
+	{ "SSL_write",                          NULL },
+	{ "SSL_get_error",                      NULL },
+	{ "SSL_set_fd",                         NULL },
+	{ "SSL_new",                            NULL },
+	{ "SSL_CTX_new",                        NULL },
+	{ "SSLv23_server_method",               NULL },
+	{ "SSL_library_init",                   NULL },
+	{ "SSL_CTX_use_PrivateKey_file",        NULL },
+	{ "SSL_CTX_use_certificate_file",       NULL },
+	{ "SSL_CTX_set_default_passwd_cb",      NULL },
+	{ "SSL_CTX_free",                       NULL },
+	{ "SSL_load_error_strings",             NULL },
+	{ "SSL_CTX_use_certificate_chain_file", NULL },
+	{ "SSLv23_client_method",               NULL },
+	{ "SSL_pending",                        NULL },
+	{ "SSL_CTX_set_verify",                 NULL },
+	{ "SSL_shutdown",                       NULL },
+	{ "SSL_CTX_load_verify_locations",      NULL },
+	{ "SSL_CTX_set_default_verify_paths",   NULL },
+	{ "SSL_CTX_set_verify_depth",           NULL },
+	{ "SSL_get_peer_certificate",           NULL },
+	{ "SSL_get_version",                    NULL },
+	{ "SSL_get_current_cipher",             NULL },
+	{ "SSL_CIPHER_get_name",                NULL },
+	{ "SSL_CTX_check_private_key",          NULL },
+	{ "SSL_CTX_set_session_id_context",     NULL },
+	{ "SSL_CTX_ctrl",                       NULL },
+	{ "SSL_CTX_set_cipher_list",            NULL },
+	{ NULL,                                 NULL }
+};
 
 
 /* Similar array as XX_httplib_ssl_sw. These functions could be located in different
  * lib. */
-struct ssl_func XX_httplib_crypto_sw[] = {{"CRYPTO_num_locks", NULL},
-                                      {"CRYPTO_set_locking_callback", NULL},
-                                      {"CRYPTO_set_id_callback", NULL},
-                                      {"ERR_get_error", NULL},
-                                      {"ERR_error_string", NULL},
-                                      {"ERR_remove_state", NULL},
-                                      {"ERR_free_strings", NULL},
-                                      {"ENGINE_cleanup", NULL},
-                                      {"CONF_modules_unload", NULL},
-                                      {"CRYPTO_cleanup_all_ex_data", NULL},
-                                      {"EVP_cleanup", NULL},
-                                      {"X509_free", NULL},
-                                      {"X509_get_subject_name", NULL},
-                                      {"X509_get_issuer_name", NULL},
-                                      {"X509_NAME_oneline", NULL},
-                                      {"X509_get_serialNumber", NULL},
-                                      {"i2c_ASN1_INTEGER", NULL},
-                                      {"EVP_get_digestbyname", NULL},
-                                      {"ASN1_digest", NULL},
-                                      {"i2d_X509", NULL},
-                                      {NULL, NULL}};
+struct ssl_func XX_httplib_crypto_sw[] = {
+	{ "CRYPTO_num_locks",            NULL },
+	{ "CRYPTO_set_locking_callback", NULL },
+	{ "CRYPTO_set_id_callback",      NULL },
+       	{ "ERR_get_error",               NULL },
+	{ "ERR_error_string",            NULL },
+	{ "ERR_remove_state",            NULL },
+	{ "ERR_free_strings",            NULL },
+	{ "ENGINE_cleanup",              NULL },
+	{ "CONF_modules_unload",         NULL },
+	{ "CRYPTO_cleanup_all_ex_data",  NULL },
+	{ "EVP_cleanup",                 NULL },
+	{ "X509_free",                   NULL },
+	{ "X509_get_subject_name",       NULL },
+	{ "X509_get_issuer_name",        NULL },
+	{ "X509_NAME_oneline",           NULL },
+	{ "X509_get_serialNumber",       NULL },
+	{ "i2c_ASN1_INTEGER",            NULL },
+	{ "EVP_get_digestbyname",        NULL },
+	{ "ASN1_digest",                 NULL },
+	{ "i2d_X509",                    NULL },
+	{ NULL,                          NULL }
+};
 
 #endif /* !defined(NO_SSL)  &&  !defined(NO_SSL_DL) */
-
-
-
-
-
-/* Config option name, config types, default value */
-struct mg_option XX_httplib_config_options[] = {
-    {"cgi_pattern", CONFIG_TYPE_EXT_PATTERN, "**.cgi$|**.pl$|**.php$"},
-    {"cgi_environment", CONFIG_TYPE_STRING, NULL},
-    {"put_delete_auth_file", CONFIG_TYPE_FILE, NULL},
-    {"cgi_interpreter", CONFIG_TYPE_FILE, NULL},
-    {"protect_uri", CONFIG_TYPE_STRING, NULL},
-    {"authentication_domain", CONFIG_TYPE_STRING, "mydomain.com"},
-    {"ssi_pattern", CONFIG_TYPE_EXT_PATTERN, "**.shtml$|**.shtm$"},
-    {"throttle", CONFIG_TYPE_STRING, NULL},
-    {"access_log_file", CONFIG_TYPE_FILE, NULL},
-    {"enable_directory_listing", CONFIG_TYPE_BOOLEAN, "yes"},
-    {"error_log_file", CONFIG_TYPE_FILE, NULL},
-    {"global_auth_file", CONFIG_TYPE_FILE, NULL},
-    {"index_files", CONFIG_TYPE_STRING, "index.xhtml,index.html,index.htm,index.cgi,index.shtml,index.php"},
-    {"enable_keep_alive", CONFIG_TYPE_BOOLEAN, "no"},
-    {"access_control_list", CONFIG_TYPE_STRING, NULL},
-    {"extra_mime_types", CONFIG_TYPE_STRING, NULL},
-    {"listening_ports", CONFIG_TYPE_STRING, "8080"},
-    {"document_root", CONFIG_TYPE_DIRECTORY, NULL},
-    {"ssl_certificate", CONFIG_TYPE_FILE, NULL},
-    {"num_threads", CONFIG_TYPE_NUMBER, "50"},
-    {"run_as_user", CONFIG_TYPE_STRING, NULL},
-    {"url_rewrite_patterns", CONFIG_TYPE_STRING, NULL},
-    {"hide_files_patterns", CONFIG_TYPE_EXT_PATTERN, NULL},
-    {"request_timeout_ms", CONFIG_TYPE_NUMBER, "30000"},
-    {"ssl_verify_peer", CONFIG_TYPE_BOOLEAN, "no"},
-    {"ssl_ca_path", CONFIG_TYPE_DIRECTORY, NULL},
-    {"ssl_ca_file", CONFIG_TYPE_FILE, NULL},
-    {"ssl_verify_depth", CONFIG_TYPE_NUMBER, "9"},
-    {"ssl_default_verify_paths", CONFIG_TYPE_BOOLEAN, "yes"},
-    {"ssl_cipher_list", CONFIG_TYPE_STRING, NULL},
-    {"ssl_protocol_version", CONFIG_TYPE_NUMBER, "0"},
-    {"ssl_short_trust", CONFIG_TYPE_BOOLEAN, "no"},
-#if defined(USE_WEBSOCKET)
-    {"websocket_timeout_ms", CONFIG_TYPE_NUMBER, "30000"},
-#endif
-    {"decode_url", CONFIG_TYPE_BOOLEAN, "yes"},
-
-#if defined(USE_WEBSOCKET)
-    {"websocket_root", CONFIG_TYPE_DIRECTORY, NULL},
-#endif
-    {"access_control_allow_origin", CONFIG_TYPE_STRING, "*"},
-    {"error_pages", CONFIG_TYPE_DIRECTORY, NULL},
-    {"tcp_nodelay", CONFIG_TYPE_NUMBER, "0"},
-#if !defined(NO_CACHING)
-    {"static_file_max_age", CONFIG_TYPE_NUMBER, "3600"},
-#endif
-#if defined(__linux__)
-    {"allow_sendfile_call", CONFIG_TYPE_BOOLEAN, "yes"},
-#endif
-
-    {NULL, CONFIG_TYPE_UNKNOWN, NULL}};
-
-/* 
- * Check if the XX_httplib_config_options and the corresponding enum have
- * compatible sizes
- */
-mg_static_assert((sizeof(XX_httplib_config_options) / sizeof(XX_httplib_config_options[0])) == (NUM_OPTIONS + 1), "XX_httplib_config_options and enum not sync");
 
 
 
@@ -618,16 +548,15 @@ void XX_httplib_set_thread_name(const char *threadName) {
 
 
 #if defined(_WIN32)
-
 #ifdef ALTERNATIVE_QUEUE
-static void * event_create(void) {
+void * event_create(void) {
 
 	return (void *)CreateEvent(NULL, FALSE, FALSE, NULL);
 
 }  /* event_create */
 
 
-static int event_wait(void *eventhdl) {
+int event_wait(void *eventhdl) {
 
 	int res = WaitForSingleObject((HANDLE)eventhdl, INFINITE);
 	return (res == WAIT_OBJECT_0);
@@ -635,18 +564,18 @@ static int event_wait(void *eventhdl) {
 }  /* event_wait */
 
 
-static int event_signal(void *eventhdl) {
+int event_signal(void *eventhdl) {
 
 	return (int)SetEvent((HANDLE)eventhdl);
 
 }  /* event_signal */
 
 
-static void event_destroy(void *eventhdl) {
+void event_destroy(void *eventhdl) {
 
 	CloseHandle((HANDLE)eventhdl);
 
 }  /* event_destroy */
-#endif
 
+#endif  /* ALTERNATIVE_QUEUE */
 #endif /* _WIN32 */
