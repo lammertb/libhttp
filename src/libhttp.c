@@ -828,24 +828,6 @@ void XX_httplib_set_thread_name(const char *threadName) {
 
 
 
-void XX_httplib_sockaddr_to_string(char *buf, size_t len, const union usa *usa) {
-
-	buf[0] = '\0';
-
-	if (!usa) return;
-
-	if (usa->sa.sa_family == AF_INET) {
-		getnameinfo(&usa->sa, sizeof(usa->sin), buf, (unsigned)len, NULL, 0, NI_NUMERICHOST);
-	}
-#if defined(USE_IPV6)
-	else if (usa->sa.sa_family == AF_INET6) {
-		getnameinfo(&usa->sa, sizeof(usa->sin6), buf, (unsigned)len, NULL, 0, NI_NUMERICHOST);
-	}
-#endif
-
-}  /* XX_httplib_sockaddr_to_string */
-
-
 /* Convert time_t to a string. According to RFC2616, Sec 14.18, this must be
  * included in all responses other than 100, 101, 5xx. */
 void XX_httplib_gmt_time_string( char *buf, size_t buf_len, time_t *t ) {
