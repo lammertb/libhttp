@@ -84,6 +84,7 @@ LIB_SOURCES =	src/libhttp.c						\
 		src/httplib_get_request_len.c				\
 		src/httplib_get_response.c				\
 		src/httplib_get_response_code_text.c			\
+		src/httplib_get_server_ports.c				\
 		src/httplib_get_system_name.c				\
 		src/httplib_get_uri_type.c				\
 		src/httplib_get_user_connection_data.c			\

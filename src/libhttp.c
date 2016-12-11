@@ -828,43 +828,6 @@ void XX_httplib_set_thread_name(const char *threadName) {
 
 
 
-int mg_get_server_ports(const struct mg_context *ctx, int size, struct mg_server_ports *ports) {
-
-	int i;
-	int cnt = 0;
-
-	if (size <= 0) { return -1; }
-	memset(ports, 0, sizeof(*ports) * (size_t)size);
-	if (!ctx) { return -1; }
-	if (!ctx->listening_sockets) { return -1; }
-
-	for (i = 0; (i < size) && (i < (int)ctx->num_listening_sockets); i++) {
-
-		ports[cnt].port =
-#if defined(USE_IPV6)
-		    (ctx->listening_sockets[i].lsa.sa.sa_family == AF_INET6)
-		        ? ntohs(ctx->listening_sockets[i].lsa.sin6.sin6_port)
-		        :
-#endif
-		        ntohs(ctx->listening_sockets[i].lsa.sin.sin_port);
-		ports[cnt].is_ssl = ctx->listening_sockets[i].is_ssl;
-		ports[cnt].is_redirect = ctx->listening_sockets[i].ssl_redir;
-
-		if (ctx->listening_sockets[i].lsa.sa.sa_family == AF_INET) {
-			/* IPv4 */
-			ports[cnt].protocol = 1;
-			cnt++;
-		} else if (ctx->listening_sockets[i].lsa.sa.sa_family == AF_INET6) {
-			/* IPv6 */
-			ports[cnt].protocol = 3;
-			cnt++;
-		}
-	}
-
-	return cnt;
-}
-
-
 void XX_httplib_sockaddr_to_string(char *buf, size_t len, const union usa *usa) {
 
 	buf[0] = '\0';
