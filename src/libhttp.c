@@ -869,26 +869,6 @@ int clock_gettime( clockid_t clk_id, struct timespec *tp ) {
 }  /* clock_gettime */
 #endif
 
-int pthread_cond_signal( pthread_cond_t *cv ) {
-
-	HANDLE wkup = NULL;
-	BOOL ok = FALSE;
-
-	EnterCriticalSection(&cv->threadIdSec);
-	if (cv->waiting_thread) {
-		wkup = cv->waiting_thread->pthread_cond_helper_mutex;
-		cv->waiting_thread = cv->waiting_thread->next_waiting_thread;
-
-		ok = SetEvent(wkup);
-		assert(ok);
-	}
-	LeaveCriticalSection(&cv->threadIdSec);
-
-	return ok ? 0 : 1;
-
-}  /* pthread_cond_signal */
-
-
 int pthread_cond_broadcast( pthread_cond_t *cv ) {
 
 	EnterCriticalSection(&cv->threadIdSec);
