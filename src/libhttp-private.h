@@ -958,6 +958,7 @@ int			XX_httplib_inet_pton( int af, const char *src, void *dst, size_t dstlen );
 int			XX_httplib_initialize_ssl( struct mg_context *ctx );
 void XX_httplib_interpret_uri( struct mg_connection *conn, char *filename, size_t filename_buf_len, struct file *filep, int *is_found, int *is_script_resource, int *is_websocket_request, int *is_put_or_delete_request );
 int			XX_httplib_is_authorized_for_put( struct mg_connection *conn );
+int			XX_httplib_is_file_in_memory( const struct mg_connection *conn, const char *path, struct file *filep );
 bool			XX_httplib_is_file_opened( const struct file *filep );
 int			XX_httplib_is_not_modified( const struct mg_connection *conn, const struct file *filep );
 int			XX_httplib_is_put_or_delete_method( const struct mg_connection *conn );

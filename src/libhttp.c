@@ -834,7 +834,7 @@ const struct mg_option * mg_get_valid_options(void) {
 }  /* mg_get_valid_options */
 
 
-static int is_file_in_memory(const struct mg_connection *conn, const char *path, struct file *filep) {
+int XX_httplib_is_file_in_memory( const struct mg_connection *conn, const char *path, struct file *filep ) {
 
 	size_t size = 0;
 
@@ -851,7 +851,7 @@ static int is_file_in_memory(const struct mg_connection *conn, const char *path,
 
 	return filep->membuf != NULL;
 
-}  /* is_file_in_memory */
+}  /* XX_httplib_is_file_in_memory */
 
 
 bool XX_httplib_is_file_opened( const struct file *filep ) {
@@ -881,7 +881,7 @@ int XX_httplib_fopen( const struct mg_connection *conn, const char *path, const 
 
 	if (stat(path, &st) == 0) filep->size = (uint64_t)(st.st_size);
 
-	if (!is_file_in_memory(conn, path, filep)) {
+	if (!XX_httplib_is_file_in_memory(conn, path, filep)) {
 #ifdef _WIN32
 		wchar_t wbuf[PATH_MAX], wmode[20];
 		path_to_unicode(conn, path, wbuf, ARRAY_SIZE(wbuf));
@@ -1963,64 +1963,6 @@ static int path_cannot_disclose_cgi(const char *path) {
 }
 
 
-int XX_httplib_stat( struct mg_connection *conn, const char *path, struct file *filep ) {
-
-	wchar_t wbuf[PATH_MAX];
-	WIN32_FILE_ATTRIBUTE_DATA info;
-	time_t creation_time;
-
-	if ( filep == NULL ) return 0;
-
-	memset(filep, 0, sizeof(*filep));
-
-	if (conn && is_file_in_memory(conn, path, filep)) {
-		/* filep->is_directory = 0; filep->gzipped = 0; .. already done by
-		 * memset */
-		filep->last_modified = time(NULL);
-		/* last_modified = now ... assumes the file may change during runtime,
-		 * so every XX_httplib_fopen call may return different data */
-		/* last_modified = conn->ctx.start_time;
-		 * May be used it the data does not change during runtime. This allows
-		 * browser caching. Since we do not know, we have to assume the file
-		 * in memory may change. */
-		return 1;
-	}
-
-	path_to_unicode(conn, path, wbuf, ARRAY_SIZE(wbuf));
-	if (GetFileAttributesExW(wbuf, GetFileExInfoStandard, &info) != 0) {
-		filep->size = MAKEUQUAD(info.nFileSizeLow, info.nFileSizeHigh);
-		filep->last_modified =
-		    SYS2UNIX_TIME(info.ftLastWriteTime.dwLowDateTime,
-		                  info.ftLastWriteTime.dwHighDateTime);
-
-		/* On Windows, the file creation time can be higher than the
-		 * modification time, e.g. when a file is copied.
-		 * Since the Last-Modified timestamp is used for caching
-		 * it should be based on the most recent timestamp. */
-		creation_time = SYS2UNIX_TIME(info.ftCreationTime.dwLowDateTime,
-		                              info.ftCreationTime.dwHighDateTime);
-		if (creation_time > filep->last_modified) {
-			filep->last_modified = creation_time;
-		}
-
-		filep->is_directory = info.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY;
-		/* If file name is fishy, reset the file structure and return
-		 * error.
-		 * Note it is important to reset, not just return the error, cause
-		 * functions like XX_httplib_is_file_opened() check the struct. */
-		if (!filep->is_directory && !path_cannot_disclose_cgi(path)) {
-			memset(filep, 0, sizeof(*filep));
-			return 0;
-		}
-
-		return 1;
-	}
-
-	return 0;
-
-}  /* XX_httplib_stat */
-
-
 static int mg_remove(const struct mg_connection *conn, const char *path) {
 
 	wchar_t wbuf[PATH_MAX];
@@ -2121,7 +2063,8 @@ static struct dirent * mg_readdir(DIR *dir) {
 
 
 #ifndef HAVE_POLL
-static int poll(struct pollfd *pfd, unsigned int n, int milliseconds) {
+
+static int poll( struct pollfd *pfd, unsigned int n, int milliseconds ) {
 
 	struct timeval tv;
 	fd_set set;
@@ -2148,34 +2091,9 @@ static int poll(struct pollfd *pfd, unsigned int n, int milliseconds) {
 	}
 
 	return result;
-}
+
+}  /* poll */
+
 #endif /* HAVE_POLL */
-
-#if defined(__MINGW32__)
-/* Enable unused function warning again */
-#pragma GCC diagnostic pop
-#endif
-
-#else
-
-int XX_httplib_stat( struct mg_connection *conn, const char *path, struct file *filep ) {
-
-	struct stat st;
-	if (!filep) return 0;
-
-	memset(filep, 0, sizeof(*filep));
-
-	if (conn && is_file_in_memory(conn, path, filep)) return 1;
-
-	if (0 == stat(path, &st)) {
-		filep->size = (uint64_t)(st.st_size);
-		filep->last_modified = st.st_mtime;
-		filep->is_directory = S_ISDIR(st.st_mode);
-		return 1;
-	}
-
-	return 0;
-
-}  /* XX_httplib_stat */
 
 #endif /* _WIN32 */
