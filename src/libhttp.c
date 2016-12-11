@@ -4871,10 +4871,3 @@ void XX_httplib_send_file_data( struct mg_connection *conn, struct file *filep, 
 	}
 
 }  /* XX_httplib_send_file_data */
-
-
-int XX_httplib_parse_range_header( const char *header, int64_t *a, int64_t *b ) {
-
-	return sscanf(header, "bytes=%" INT64_FMT "-%" INT64_FMT, a, b);
-
-}  /* XX_httplib_parse_range_header */
