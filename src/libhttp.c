@@ -828,13 +828,6 @@ void XX_httplib_set_thread_name(const char *threadName) {
 
 
 
-void XX_httplib_fclose( struct file *filep ) {
-
-	if (filep != NULL && filep->fp != NULL) fclose(filep->fp);
-
-}  /* XX_httplib_fclose */
-
-
 void XX_httplib_strlcpy( register char *dst, register const char *src, size_t n ) {
 
 	for (; *src != '\0' && n > 1; n--) { *dst++ = *src++; }
