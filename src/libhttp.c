@@ -3022,56 +3022,5 @@ int mg_read(struct mg_connection *conn, void *buf, size_t len) {
 		return (int)all_read;
 	}
 	return mg_read_inner(conn, buf, len);
-}
 
-
-int mg_write( struct mg_connection *conn, const void *buf, size_t len ) {
-
-	time_t now;
-	int64_t n;
-	int64_t total;
-	int64_t allowed;
-
-	if (conn == NULL) return 0;
-
-	if (conn->throttle > 0) {
-		if ((now = time(NULL)) != conn->last_throttle_time) {
-			conn->last_throttle_time = now;
-			conn->last_throttle_bytes = 0;
-		}
-		allowed = conn->throttle - conn->last_throttle_bytes;
-		if (allowed > (int64_t)len) allowed = (int64_t)len;
-		if ((total = XX_httplib_push_all(conn->ctx,
-		                      NULL,
-		                      conn->client.sock,
-		                      conn->ssl,
-		                      (const char *)buf,
-		                      (int64_t)allowed)) == allowed) {
-			buf = (const char *)buf + total;
-			conn->last_throttle_bytes += total;
-			while (total < (int64_t)len && conn->ctx->stop_flag == 0) {
-				allowed = (conn->throttle > ((int64_t)len - total))
-				              ? (int64_t)len - total
-				              : conn->throttle;
-				if ((n = XX_httplib_push_all(conn->ctx,
-				                  NULL,
-				                  conn->client.sock,
-				                  conn->ssl,
-				                  (const char *)buf,
-				                  (int64_t)allowed)) != allowed) {
-					break;
-				}
-				sleep(1);
-				conn->last_throttle_bytes = allowed;
-				conn->last_throttle_time = time(NULL);
-				buf = (const char *)buf + n;
-				total += n;
-			}
-		}
-	}
-	
-	else total = XX_httplib_push_all(conn->ctx, NULL, conn->client.sock, conn->ssl, (const char *)buf, (int64_t)len);
-
-	return (int)total;
-
-}  /* mg_write */
+}  /* mg_read */
