@@ -828,15 +828,6 @@ void XX_httplib_set_thread_name(const char *threadName) {
 
 
 
-/* Simplified version of XX_httplib_skip_quoted without quote char
- * and whitespace == delimiters */
-char *XX_httplib_skip( char **buf, const char *delimiters ) {
-
-	return XX_httplib_skip_quoted( buf, delimiters, delimiters, 0 );
-
-}  /* XX_httplib_skip */
-
-
 /* Return HTTP header value, or NULL if not found. */
 const char * XX_httplib_get_header( const struct mg_request_info *ri, const char *name ) {
 
