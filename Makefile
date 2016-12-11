@@ -104,6 +104,7 @@ LIB_SOURCES =	src/libhttp.c						\
 		src/httplib_get_valid_options.c				\
 		src/httplib_get_var.c					\
 		src/httplib_getreq.c					\
+		src/httplib_global_data.c				\
 		src/httplib_gmt_time_string.c				\
 		src/httplib_handle_cgi_request.c			\
 		src/httplib_handle_directory_request.c			\
