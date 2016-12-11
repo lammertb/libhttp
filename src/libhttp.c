@@ -2385,14 +2385,6 @@ spawn_cleanup:
 
 #endif /* !NO_CGI */
 
-
-int XX_httplib_set_non_blocking_mode( SOCKET sock ) {
-
-	unsigned long on = 1;
-	return ioctlsocket(sock, (long)FIONBIO, &on);
-
-}  /* XX_httplib_set_non_blocking_mode */
-
 #else
 
 int XX_httplib_stat( struct mg_connection *conn, const char *path, struct file *filep ) {
@@ -2537,17 +2529,5 @@ pid_t XX_httplib_spawn_process( struct mg_connection *conn, const char *prog, ch
 }  /* XX_httplib_spawn_process */
 
 #endif /* !NO_CGI */
-
-
-int XX_httplib_set_non_blocking_mode( SOCKET sock ) {
-
-	int flags;
-
-	flags = fcntl(sock, F_GETFL, 0);
-	fcntl(sock, F_SETFL, flags | O_NONBLOCK);
-
-	return 0;
-
-}  /* XX_httplib_set_non_blocking_mode */
 
 #endif /* _WIN32 */
