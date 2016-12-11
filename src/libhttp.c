@@ -120,37 +120,11 @@ pthread_mutexattr_t XX_httplib_pthread_mutex_attr;
 #endif /* _WIN32 */
 
 
-#if !defined(DEBUG_TRACE)
-#if defined(DEBUG)
-
-
 #if defined(_WIN32_WCE)
 /* Create substitutes for POSIX functions in Win32. */
 
-#if defined(__MINGW32__)
-/* Show no warning in case system functions are not used. */
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-function"
-#endif  /* __MINGW32__ */
 
-
-static time_t time(time_t *ptime) {
-
-	time_t t;
-	SYSTEMTIME st;
-	FILETIME ft;
-
-	GetSystemTime(&st);
-	SystemTimeToFileTime(&st, &ft);
-	t = SYS2UNIX_TIME(ft.dwLowDateTime, ft.dwHighDateTime);
-
-	if (ptime != NULL) *ptime = t;
-
-	return t;
-}
-
-
-static struct tm * localtime_s( const time_t *ptime, struct tm *ptm ) {
+struct tm *localtime_s( const time_t *ptime, struct tm *ptm ) {
 
 	int64_t t = ((int64_t)*ptime) * RATE_DIFF + EPOCH_DIFF;
 	FILETIME ft;
@@ -180,23 +154,25 @@ static struct tm * localtime_s( const time_t *ptime, struct tm *ptm ) {
 }  /* localtime_s */
 
 
-static struct tm * gmtime_s(const time_t *ptime, struct tm *ptm) {
+struct tm * gmtime_s( const time_t *ptime, struct tm *ptm ) {
 	/* FIXME(lsm): fix this. */
 	return localtime_s(ptime, ptm);
-}
+
+}  /* gmtime_s */
+
 
 static struct tm tm_array[MAX_WORKER_THREADS];
 static int tm_index = 0;
 
-static struct tm * localtime( const time_t *ptime ) {
+struct tm *localtime( const time_t *ptime ) {
 
 	int i = XX_httplib_atomic_inc(&tm_index) % (sizeof(tm_array) / sizeof(tm_array[0]));
-	return localtime_s(ptime, tm_array + i);
+	return localtime_s( ptime, tm_array + i );
 
 }  /* localtime */
 
 
-static struct tm * gmtime(const time_t *ptime) {
+struct tm * gmtime(const time_t *ptime) {
 
 	int i = XX_httplib_atomic_inc(&tm_index) % ARRAY_SIZE(tm_array);
 	return gmtime_s(ptime, tm_array + i);
@@ -204,19 +180,21 @@ static struct tm * gmtime(const time_t *ptime) {
 }  /* strftime */
 
 
-static size_t strftime( char *dst, size_t dst_size, const char *fmt, const struct tm *tm ) {
+size_t strftime( char *dst, size_t dst_size, const char *fmt, const struct tm *tm ) {
 
 	/* TODO */ //(void)XX_httplib_snprintf(NULL, dst, dst_size, "implement strftime()
 	// for WinCE");
 	return 0;
-}
+
+}  /* strftime */
+
 
 #define _beginthreadex(psec, stack, func, prm, flags, ptid)                    \
 	(uintptr_t) CreateThread(psec, stack, func, prm, flags, ptid)
 
 #define remove(f) mg_remove(NULL, f)
 
-static int rename(const char *a, const char *b) {
+int rename( const char *a, const char *b ) {
 
 	wchar_t wa[PATH_MAX];
 	wchar_t wb[PATH_MAX];
@@ -233,7 +211,7 @@ struct stat {
 	time_t st_mtime;
 };
 
-static int stat(const char *name, struct stat *st) {
+int stat( const char *name, struct stat *st ) {
 
 	wchar_t wbuf[PATH_MAX];
 	WIN32_FILE_ATTRIBUTE_DATA attr;
@@ -262,15 +240,7 @@ static int stat(const char *name, struct stat *st) {
 #define EACCES 2 /* TODO: See Windows error codes */
 #define ENOENT 3 /* TODO: See Windows Error codes */
 
-#if defined(__MINGW32__)
-/* Enable unused function warning again */
-#pragma GCC diagnostic pop
-#endif  /* __MINGW32__ */
-
 #endif /* defined(_WIN32_WCE) */
-
-#endif /* DEBUG */
-#endif /* DEBUG_TRACE */
 
 #if defined(MEMORY_DEBUGGING)
 unsigned long mg_memory_debug_blockCount   = 0;

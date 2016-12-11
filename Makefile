@@ -252,7 +252,8 @@ LIB_SOURCES =	src/libhttp.c						\
 		src/win32_pthread_mutex_trylock.c			\
 		src/win32_pthread_mutex_unlock.c			\
 		src/win32_pthread_self.c				\
-		src/win32_pthread_setspecific.c	
+		src/win32_pthread_setspecific.c				\
+		src/wince_time.c
 LIB_INLINE  = src/mod_lua.inl src/md5.inl
 APP_SOURCES = src/main.c
 WINDOWS_RESOURCES = resources/res.rc
