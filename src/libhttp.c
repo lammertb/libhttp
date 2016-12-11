@@ -2019,23 +2019,4 @@ static DIR * mg_opendir(const struct mg_connection *conn, const char *name) {
 
 }  /* mg_opendir */
 
-
-static int mg_closedir(DIR *dir) {
-
-	int result = 0;
-
-	if (dir != NULL) {
-		if (dir->handle != INVALID_HANDLE_VALUE)
-			result = FindClose(dir->handle) ? 0 : -1;
-
-		XX_httplib_free(dir);
-	} else {
-		result = -1;
-		SetLastError(ERROR_BAD_ARGUMENTS);
-	}
-
-	return result;
-
-}  /* mg_closedir */
-
 #endif /* _WIN32 */
