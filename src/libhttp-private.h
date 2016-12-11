@@ -63,7 +63,6 @@
 #endif  /* ! NO_HTTPLIB_MALLOC_OVERRIDE */
 
 
-
 #if defined(_WIN32)
 #if !defined(_CRT_SECURE_NO_WARNINGS)
 #define _CRT_SECURE_NO_WARNINGS /* Disable deprecation warning in VS2005 */
@@ -940,6 +939,36 @@ typedef struct {
 	uint32_t count[2];
 	unsigned char buffer[64];
 } SHA1_CTX;
+
+
+
+mg_static_assert(MAX_WORKER_THREADS >= 1, "worker threads must be a positive number");
+mg_static_assert(sizeof(size_t) == 4 || sizeof(size_t) == 8, "size_t data type size check");
+
+/* va_copy should always be a macro, C99 and C++11 - DTL */
+#ifndef va_copy
+#define va_copy(x, y) ((x) = (y))
+#endif
+
+
+#if defined(_WIN32_WCE)
+#define _beginthreadex(psec, stack, func, prm, flags, ptid)	(uintptr_t) CreateThread(psec, stack, func, prm, flags, ptid)
+#define remove(f) mg_remove(NULL, f)
+#define access(x, a) 1 /* not required anyway */
+/* WinCE-TODO: define stat, remove, rename, _rmdir, _lseeki64 */
+#define EEXIST 1 /* TODO: See Windows error codes */
+#define EACCES 2 /* TODO: See Windows error codes */
+#define ENOENT 3 /* TODO: See Windows Error codes */
+#endif /* defined(_WIN32_WCE) */
+
+
+/* Darwin prior to 7.0 and Win32 do not have socklen_t */
+#ifdef NO_SOCKLEN_T
+typedef int		socklen_t;
+#endif /* NO_SOCKLEN_T */
+#define _DARWIN_UNLIMITED_SELECT
+
+
 
 void			SHA1Final( unsigned char digest[20], SHA1_CTX *context );
 void			SHA1Init( SHA1_CTX *context );
