@@ -146,6 +146,7 @@ LIB_SOURCES =	src/libhttp.c						\
 		src/httplib_send_websocket_handshake.c			\
 		src/httplib_set_acl_option.c				\
 		src/httplib_set_auth_handler.c				\
+		src/httplib_set_close_on_exec.c				\
 		src/httplib_set_gpass_option.c				\
 		src/httplib_set_handler_type.c				\
 		src/httplib_set_non_blocking_mode.c			\

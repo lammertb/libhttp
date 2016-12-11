@@ -2156,19 +2156,6 @@ static int poll(struct pollfd *pfd, unsigned int n, int milliseconds) {
 #pragma GCC diagnostic pop
 #endif
 
-/* conn parameter may be NULL */
-void XX_httplib_set_close_on_exec( SOCKET sock, struct mg_connection *conn ) {
-
-	(void)conn; /* Unused. */
-#if defined(_WIN32_WCE)
-	(void)sock;
-#else
-	SetHandleInformation((HANDLE)(intptr_t)sock, HANDLE_FLAG_INHERIT, 0);
-#endif
-
-}  /* XX_httplib_set_close_on_exec */
-
-
 #else
 
 int XX_httplib_stat( struct mg_connection *conn, const char *path, struct file *filep ) {
@@ -2190,14 +2177,5 @@ int XX_httplib_stat( struct mg_connection *conn, const char *path, struct file *
 	return 0;
 
 }  /* XX_httplib_stat */
-
-/* conn may be NULL */
-void XX_httplib_set_close_on_exec( SOCKET fd, struct mg_connection *conn ) {
-
-	if (fcntl(fd, F_SETFD, FD_CLOEXEC) != 0) {
-		if (conn) { mg_cry(conn, "%s: fcntl(F_SETFD FD_CLOEXEC) failed: %s", __func__, strerror(ERRNO)); }
-	}
-
-}  /* XX_httplib_set_close_on_exec */
 
 #endif /* _WIN32 */
