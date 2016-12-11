@@ -26,8 +26,6 @@
 
 #include "libhttp-private.h"
 
-
-#if !defined(NO_FILES)
 int XX_httplib_remove_directory( struct mg_connection *conn, const char *dir ) {
 
 	char path[PATH_MAX];
@@ -86,4 +84,3 @@ int XX_httplib_remove_directory( struct mg_connection *conn, const char *dir ) {
 	return ok;
 
 }  /* XX_httplib_remove_directory */
-#endif

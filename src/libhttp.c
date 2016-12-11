@@ -2035,30 +2035,7 @@ static int mg_closedir(DIR *dir) {
 	}
 
 	return result;
-}
 
-
-static struct dirent * mg_readdir(DIR *dir) {
-
-	struct dirent *result = 0;
-
-	if (dir) {
-		if (dir->handle != INVALID_HANDLE_VALUE) {
-			result = &dir->result;
-			WideCharToMultiByte(CP_UTF8, 0, dir->info.cFileName, -1, result->d_name, sizeof(result->d_name), NULL, NULL);
-
-			if (!FindNextFileW(dir->handle, &dir->info)) {
-
-				FindClose(dir->handle);
-				dir->handle = INVALID_HANDLE_VALUE;
-			}
-
-		} else {
-			SetLastError(ERROR_FILE_NOT_FOUND);
-		}
-	} else SetLastError(ERROR_BAD_ARGUMENTS);
-
-	return result;
-}
+}  /* mg_closedir */
 
 #endif /* _WIN32 */

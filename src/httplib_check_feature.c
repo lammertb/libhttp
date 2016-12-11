@@ -41,9 +41,7 @@ unsigned mg_check_feature( unsigned feature ) {
 /* Set bits for available features according to API documentation.
  * This bit mask is created at compile time, according to the active
  * preprocessor defines. It is a single const value at runtime. */
-#if !defined(NO_FILES)
 	                                    | 0x0001u
-#endif
 #if !defined(NO_SSL)
 	                                    | 0x0002u
 #endif

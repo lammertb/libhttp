@@ -132,6 +132,7 @@ LIB_SOURCES =	src/libhttp.c						\
 		src/httplib_read_auth_file.c				\
 		src/httplib_read_request.c				\
 		src/httplib_read_websocket.c				\
+		src/httplib_readdir.c					\
 		src/httplib_realloc2.c					\
 		src/httplib_redirect_to_https_port.c			\
 		src/httplib_refresh_trust.c				\
