@@ -4878,12 +4878,3 @@ int XX_httplib_parse_range_header( const char *header, int64_t *a, int64_t *b ) 
 	return sscanf(header, "bytes=%" INT64_FMT "-%" INT64_FMT, a, b);
 
 }  /* XX_httplib_parse_range_header */
-
-
-void XX_httplib_construct_etag( char *buf, size_t buf_len, const struct file *filep ) {
-
-	if (filep != NULL && buf != NULL) {
-		XX_httplib_snprintf(NULL, NULL, buf, buf_len, "\"%lx.%" INT64_FMT "\"", (unsigned long)filep->last_modified, filep->size);
-	}
-
-}  /* XX_httplib_construct_etag */

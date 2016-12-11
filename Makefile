@@ -51,6 +51,7 @@ LIB_SOURCES =	src/libhttp.c						\
 		src/httplib_close_socket_gracefully.c			\
 		src/httplib_connect_client.c				\
 		src/httplib_connect_websocket_client.c			\
+		src/httplib_construct_etag.c				\
 		src/httplib_consume_socket.c				\
 		src/httplib_delete_file.c				\
 		src/httplib_download.c					\
