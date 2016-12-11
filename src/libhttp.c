@@ -870,18 +870,6 @@ int clock_gettime( clockid_t clk_id, struct timespec *tp ) {
 #endif
 
 
-int pthread_cond_destroy( pthread_cond_t *cv ) {
-
-	EnterCriticalSection(&cv->threadIdSec);
-	assert(cv->waiting_thread == NULL);
-	LeaveCriticalSection(&cv->threadIdSec);
-	DeleteCriticalSection(&cv->threadIdSec);
-
-	return 0;
-
-}  /* pthread_cond_destroy */
-
-
 #ifdef ALTERNATIVE_QUEUE
 static void * event_create(void) {
 
