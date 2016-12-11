@@ -130,17 +130,6 @@ pthread_mutexattr_t XX_httplib_pthread_mutex_attr;
 
 #define remove(f) mg_remove(NULL, f)
 
-int rename( const char *a, const char *b ) {
-
-	wchar_t wa[PATH_MAX];
-	wchar_t wb[PATH_MAX];
-
-	XX_httplib_path_to_unicode( NULL, a, wa, ARRAY_SIZE(wa) );
-	XX_httplib_path_to_unicode( NULL, b, wb, ARRAY_SIZE(wb) );
-
-	return MoveFileW( wa, wb ) ? 0 : -1;
-
-}  /* rename */
 
 struct stat {
 	int64_t st_size;
