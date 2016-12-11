@@ -79,6 +79,7 @@ LIB_SOURCES =	src/libhttp.c						\
 		src/httplib_handle_request.c				\
 		src/httplib_handle_static_file_request.c		\
 		src/httplib_handle_websocket_request.c			\
+		src/httplib_inet_pton.c					\
 		src/httplib_initialize_ssl.c				\
 		src/httplib_is_not_modified.c				\
 		src/httplib_is_valid_http_method.c			\
