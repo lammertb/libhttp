@@ -31,6 +31,30 @@
 #if defined(_WIN32)
 
 
+
+/* For Windows, change all slashes to backslashes in path names. */
+static void change_slashes_to_backslashes( char *path ) {
+
+	int i;
+
+	for (i = 0; path[i] != '\0'; i++) {
+		if (path[i] == '/') {
+			path[i] = '\\';
+		}
+
+		/* remove double backslash (check i > 0 to preserve UNC paths,
+		 * like \\server\file.txt) */
+		if ((path[i] == '\\') && (i > 0)) {
+			while (path[i + 1] == '\\' || path[i + 1] == '/') {
+				memmove(path + i + 1, path + i + 2, strlen(path + i + 1));
+			}
+		}
+	}
+
+}  /* change_slashes_to_backslashes */
+
+
+
 static int mg_wcscasecmp( const wchar_t *s1, const wchar_t *s2 ) {
 
 	int diff;
