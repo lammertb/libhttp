@@ -107,6 +107,7 @@ LIB_SOURCES =	src/libhttp.c						\
 		src/httplib_handle_request.c				\
 		src/httplib_handle_static_file_request.c		\
 		src/httplib_handle_websocket_request.c			\
+		src/httplib_header_has_option.c				\
 		src/httplib_inet_pton.c					\
 		src/httplib_initialize_ssl.c				\
 		src/httplib_interpret_uri.c				\
@@ -130,6 +131,7 @@ LIB_SOURCES =	src/libhttp.c						\
 		src/httplib_mkdir.c					\
 		src/httplib_modify_passwords_file.c			\
 		src/httplib_must_hide_file.c				\
+		src/httplib_next_option.c				\
 		src/httplib_open_auth_file.c				\
 		src/httplib_opendir.c					\
 		src/httplib_parse_auth_header.c				\
