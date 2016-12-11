@@ -172,6 +172,7 @@ LIB_SOURCES =	src/libhttp.c						\
 		src/httplib_send_file_data.c				\
 		src/httplib_send_no_cache_header.c			\
 		src/httplib_send_options.c				\
+		src/httplib_send_static_cache_header.c			\
 		src/httplib_send_websocket_handshake.c			\
 		src/httplib_set_acl_option.c				\
 		src/httplib_set_auth_handler.c				\
