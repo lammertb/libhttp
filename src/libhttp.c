@@ -827,14 +827,6 @@ void XX_httplib_set_thread_name(const char *threadName) {
 #endif
 
 
-bool XX_httplib_is_file_opened( const struct file *filep ) {
-
-	if ( filep == NULL ) return false;
-
-	return ( filep->membuf != NULL  ||  filep->fp != NULL );
-
-}  /* XX_httplib_is_file_opened */
-
 
 /* XX_httplib_fopen will open a file either in memory or on the disk.
  * The input parameter path is a string in UTF-8 encoding.
