@@ -183,6 +183,7 @@ LIB_SOURCES =	src/libhttp.c						\
 		src/httplib_set_uid_option.c				\
 		src/httplib_set_user_connection_data.c			\
 		src/httplib_set_websocket_handler.c			\
+		src/httplib_skip_quoted.c				\
 		src/httplib_snprintf.c					\
 		src/httplib_sockaddr_to_string.c			\
 		src/httplib_spawn_process.c				\
