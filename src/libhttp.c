@@ -827,18 +827,6 @@ void XX_httplib_set_thread_name(const char *threadName) {
 #endif
 
 
-int XX_httplib_send_no_cache_header( struct mg_connection *conn ) {
-
-	/* Send all current and obsolete cache opt-out directives. */
-	return mg_printf(conn,
-	                 "Cache-Control: no-cache, no-store, "
-	                 "must-revalidate, private, max-age=0\r\n"
-	                 "Pragma: no-cache\r\n"
-	                 "Expires: 0\r\n");
-
-}  /* XX_httplib_send_no_cache_header */
-
-
 int XX_httplib_send_static_cache_header(struct mg_connection *conn) {
 
 #if !defined(NO_CACHING)
