@@ -1978,45 +1978,7 @@ static int mg_mkdir(const struct mg_connection *conn, const char *path, int mode
 	(void)mode;
 	path_to_unicode(conn, path, wbuf, ARRAY_SIZE(wbuf));
 	return CreateDirectoryW(wbuf, NULL) ? 0 : -1;
-}
 
-
-/* Create substitutes for POSIX functions in Win32. */
-
-#if defined(__MINGW32__)
-/* Show no warning in case system functions are not used. */
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-function"
-#endif
-
-
-/* Implementation of POSIX opendir/closedir/readdir for Windows. */
-static DIR * mg_opendir(const struct mg_connection *conn, const char *name) {
-
-	DIR *dir = NULL;
-	wchar_t wpath[PATH_MAX];
-	DWORD attrs;
-
-	if (name == NULL) {
-		SetLastError(ERROR_BAD_ARGUMENTS);
-	} else if ((dir = (DIR *)XX_httplib_malloc(sizeof(*dir))) == NULL) {
-		SetLastError(ERROR_NOT_ENOUGH_MEMORY);
-	} else {
-		path_to_unicode(conn, name, wpath, ARRAY_SIZE(wpath));
-		attrs = GetFileAttributesW(wpath);
-		if (attrs != 0xFFFFFFFF && ((attrs & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY)) {
-
-			wcscat(wpath, L"\\*");
-			dir->handle = FindFirstFileW(wpath, &dir->info);
-			dir->result.d_name[0] = '\0';
-		} else {
-			XX_http_free(dir);
-			dir = NULL;
-		}
-	}
-
-	return dir;
-
-}  /* mg_opendir */
+}  /* mg_mkdir */
 
 #endif /* _WIN32 */

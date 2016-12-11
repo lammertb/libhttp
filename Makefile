@@ -112,6 +112,7 @@ LIB_SOURCES =	src/libhttp.c						\
 		src/httplib_modify_passwords_file.c			\
 		src/httplib_must_hide_file.c				\
 		src/httplib_open_auth_file.c				\
+		src/httplib_opendir.c					\
 		src/httplib_parse_auth_header.c				\
 		src/httplib_parse_date_string.c				\
 		src/httplib_parse_http_headers.c			\
