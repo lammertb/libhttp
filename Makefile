@@ -71,6 +71,7 @@ LIB_SOURCES =	src/libhttp.c						\
 		src/httplib_forward_body_data.c				\
 		src/httplib_free_context.c				\
 		src/httplib_get_builtin_mime_type.c			\
+		src/httplib_get_context.c				\
 		src/httplib_get_cookie.c				\
 		src/httplib_get_first_ssl_listener_index.c		\
 		src/httplib_get_mime_type.c				\
