@@ -1962,12 +1962,4 @@ static int path_cannot_disclose_cgi(const char *path) {
 	return isalnum(last) || strchr(allowed_last_characters, last) != NULL;
 }
 
-
-static int mg_remove(const struct mg_connection *conn, const char *path) {
-
-	wchar_t wbuf[PATH_MAX];
-	path_to_unicode(conn, path, wbuf, ARRAY_SIZE(wbuf));
-	return DeleteFileW(wbuf) ? 0 : -1;
-}
-
 #endif /* _WIN32 */
