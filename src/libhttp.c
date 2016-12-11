@@ -4671,15 +4671,3 @@ int XX_httplib_remove_directory( struct mg_connection *conn, const char *dir ) {
 
 }  /* XX_httplib_remove_directory */
 #endif
-
-
-
-/* Behaves like realloc(), but frees original pointer on failure */
-void *XX_httplib_realloc2( void *ptr, size_t size ) {
-
-	void *new_ptr = XX_httplib_realloc(ptr, size);
-	if (new_ptr == NULL) XX_httplib_free(ptr);
-
-	return new_ptr;
-
-}  /* XX_httplib_realloc2 */
