@@ -1242,7 +1242,7 @@ const struct mg_request_info * mg_get_request_info( const struct mg_connection *
  * 0-terminate resulting word. Skip the delimiter and following whitespaces.
  * Advance pointer to buffer to the next word. Return found 0-terminated word.
  * Delimiters can be quoted with quotechar. */
-static char * skip_quoted(char **buf, const char *delimiters, const char *whitespace, char quotechar) {
+char * XX_httplib_skip_quoted( char **buf, const char *delimiters, const char *whitespace, char quotechar ) {
 
 	char *p;
 	char *begin_word;
@@ -1285,14 +1285,15 @@ static char * skip_quoted(char **buf, const char *delimiters, const char *whites
 	}
 
 	return begin_word;
-}
+
+}  /* XX_httplib_skip_quoted */
 
 
-/* Simplified version of skip_quoted without quote char
+/* Simplified version of XX_httplib_skip_quoted without quote char
  * and whitespace == delimiters */
 char *XX_httplib_skip( char **buf, const char *delimiters ) {
 
-	return skip_quoted( buf, delimiters, delimiters, 0 );
+	return XX_httplib_skip_quoted( buf, delimiters, delimiters, 0 );
 
 }  /* XX_httplib_skip */
 
@@ -3885,95 +3886,3 @@ void XX_httplib_open_auth_file( struct mg_connection *conn, const char *path, st
 	}
 
 }  /* XX_httplib_open_auth_file */
-
-
-
-/* Return 1 on success. Always initializes the ah structure. */
-int XX_httplib_parse_auth_header(struct mg_connection *conn, char *buf, size_t buf_size, struct ah *ah) {
-
-	char *name;
-	char *value;
-	char *s;
-	const char *auth_header;
-	uint64_t nonce;
-
-	if (!ah || !conn) return 0;
-
-	memset(ah, 0, sizeof(*ah));
-	if ((auth_header = mg_get_header(conn, "Authorization")) == NULL || mg_strncasecmp(auth_header, "Digest ", 7) != 0) return 0;
-
-	/* Make modifiable copy of the auth header */
-	XX_httplib_strlcpy(buf, auth_header + 7, buf_size);
-	s = buf;
-
-	/* Parse authorization header */
-	for (;;) {
-		/* Gobble initial spaces */
-		while (isspace(*(unsigned char *)s)) {
-			s++;
-		}
-		name = skip_quoted(&s, "=", " ", 0);
-		/* Value is either quote-delimited, or ends at first comma or space. */
-		if (s[0] == '\"') {
-			s++;
-			value = skip_quoted(&s, "\"", " ", '\\');
-			if (s[0] == ',') {
-				s++;
-			}
-		} else {
-			value = skip_quoted(&s, ", ", " ", 0); /* IE uses commas, FF uses
-			                                        * spaces */
-		}
-		if (*name == '\0') break;
-
-		if      ( ! strcmp( name, "username" ) ) ah->user     = value;
-		else if ( ! strcmp( name, "cnonce"   ) ) ah->cnonce   = value;
-		else if ( ! strcmp( name, "response" ) ) ah->response = value;
-		else if ( ! strcmp( name, "uri"      ) ) ah->uri      = value;
-		else if ( ! strcmp( name, "qop"      ) ) ah->qop      = value;
-		else if ( ! strcmp( name, "nc"       ) ) ah->nc       = value;
-		else if ( ! strcmp( name, "nonce"    ) ) ah->nonce    = value;
-	}
-
-#ifndef NO_NONCE_CHECK
-	/* Read the nonce from the response. */
-	if (ah->nonce == NULL) return 0;
-	s = NULL;
-	nonce = strtoull(ah->nonce, &s, 10);
-	if ((s == NULL) || (*s != 0)) {
-		return 0;
-	}
-
-	/* Convert the nonce from the client to a number. */
-	nonce ^= conn->ctx->auth_nonce_mask;
-
-	/* The converted number corresponds to the time the nounce has been
-	 * created. This should not be earlier than the server start. */
-	/* Server side nonce check is valuable in all situations but one:
-	 * if the server restarts frequently, but the client should not see
-	 * that, so the server should accept nonces from previous starts. */
-	/* However, the reasonable default is to not accept a nonce from a
-	 * previous start, so if anyone changed the access rights between
-	 * two restarts, a new login is required. */
-	if (nonce < (uint64_t)conn->ctx->start_time) {
-		/* nonce is from a previous start of the server and no longer valid
-		 * (replay attack?) */
-		return 0;
-	}
-	/* Check if the nonce is too high, so it has not (yet) been used by the
-	 * server. */
-	if (nonce >= ((uint64_t)conn->ctx->start_time + conn->ctx->nonce_count)) {
-		return 0;
-	}
-#else
-	(void)nonce;
-#endif
-
-	/* CGI needs it as REMOTE_USER */
-	if (ah->user != NULL) {
-		conn->request_info.remote_user = XX_httplib_strdup(ah->user);
-	} else return 0;
-
-	return 1;
-
-}  /* XX_httplib_parse_auth_header */

@@ -97,6 +97,7 @@ LIB_SOURCES =	src/libhttp.c						\
 		src/httplib_mkcol.c					\
 		src/httplib_modify_passwords_file.c			\
 		src/httplib_must_hide_file.c				\
+		src/httplib_parse_auth_header.c				\
 		src/httplib_parse_http_headers.c			\
 		src/httplib_parse_http_message.c			\
 		src/httplib_parse_net.c					\

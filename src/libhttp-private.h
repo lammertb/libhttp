@@ -1021,6 +1021,7 @@ int			XX_httplib_set_uid_option( struct mg_context *ctx );
 int			XX_httplib_should_decode_url( const struct mg_connection *conn );
 int			XX_httplib_should_keep_alive( const struct mg_connection *conn );
 char *			XX_httplib_skip( char **buf, const char *delimiters );
+char *			XX_httplib_skip_quoted( char **buf, const char *delimiters, const char *whitespace, char quotechar );
 void			XX_httplib_snprintf( const struct mg_connection *conn, int *truncated, char *buf, size_t buflen, PRINTF_FORMAT_STRING(const char *fmt), ... ) PRINTF_ARGS(5, 6);
 void			XX_httplib_sockaddr_to_string(char *buf, size_t len, const union usa *usa );
 pid_t			XX_httplib_spawn_process( struct mg_connection *conn, const char *prog, char *envblk, char *envp[], int fdin[2], int fdout[2], int fderr[2], const char *dir );
