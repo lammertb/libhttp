@@ -3783,39 +3783,3 @@ void XX_httplib_get_mime_type( struct mg_context *ctx, const char *path, struct 
 	vec->len = strlen(vec->ptr);
 
 }  /* XX_httplib_get_mime_type */
-
-
-/* Stringify binary data. Output buffer must be twice as big as input,
- * because each byte takes 2 bytes in string representation */
-static void bin2str(char *to, const unsigned char *p, size_t len) {
-
-	static const char *hex = "0123456789abcdef";
-
-	for (; len--; p++) {
-		*to++ = hex[p[0] >> 4];
-		*to++ = hex[p[0] & 0x0f];
-	}
-	*to = '\0';
-
-}  /* bin2str */
-
-
-/* Return stringified MD5 hash for list of strings. Buffer must be 33 bytes. */
-char * mg_md5(char buf[33], ...) {
-
-	md5_byte_t hash[16];
-	const char *p;
-	va_list ap;
-	md5_state_t ctx;
-
-	md5_init(&ctx);
-
-	va_start(ap, buf);
-	while ((p = va_arg(ap, const char *)) != NULL) md5_append(&ctx, (const md5_byte_t *)p, strlen(p));
-	va_end(ap);
-
-	md5_finish(&ctx, hash);
-	bin2str(buf, hash, sizeof(hash));
-	return buf;
-
-}  /* mg_md5 */

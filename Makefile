@@ -95,6 +95,7 @@ LIB_SOURCES =	src/libhttp.c						\
 		src/httplib_lock_unlock_context.c			\
 		src/httplib_log_access.c				\
 		src/httplib_master_thread.c				\
+		src/httplib_md5.c					\
 		src/httplib_mkcol.c					\
 		src/httplib_modify_passwords_file.c			\
 		src/httplib_must_hide_file.c				\
