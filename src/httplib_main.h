@@ -837,7 +837,6 @@ const char *		XX_httplib_fgets( char *buf, size_t size, struct file *filep, char
 int			XX_httplib_fopen( const struct mg_connection *conn, const char *path, const char *mode, struct file *filep );
 int			XX_httplib_forward_body_data( struct mg_connection *conn, FILE *fp, SOCKET sock, SSL *ssl );
 void			XX_httplib_free_context( struct mg_context *ctx );
-int			XX_httplib_get_first_ssl_listener_index( const struct mg_context *ctx );
 const char *		XX_httplib_get_header( const struct mg_request_info *ri, const char *name );
 void			XX_httplib_get_mime_type( struct mg_context *ctx, const char *path, struct vec *vec );
 int			XX_httplib_get_option_index( const char *name );
@@ -862,7 +861,6 @@ void			XX_httplib_handle_static_file_request( struct mg_connection *conn, const 
 void			XX_httplib_handle_websocket_request( struct mg_connection *conn, const char *path, int is_callback_resource, mg_websocket_connect_handler ws_connect_handler, mg_websocket_ready_handler ws_ready_handler, mg_websocket_data_handler ws_data_handler, mg_websocket_close_handler ws_close_handler, void *cbData );
 int			XX_httplib_header_has_option( const char *header, const char *option );
 int			XX_httplib_inet_pton( int af, const char *src, void *dst, size_t dstlen );
-int			XX_httplib_initialize_ssl( struct mg_context *ctx );
 void XX_httplib_interpret_uri( struct mg_connection *conn, char *filename, size_t filename_buf_len, struct file *filep, int *is_found, int *is_script_resource, int *is_websocket_request, int *is_put_or_delete_request );
 int			XX_httplib_is_authorized_for_put( struct mg_connection *conn );
 int			XX_httplib_is_file_in_memory( const struct mg_connection *conn, const char *path, struct file *filep );
@@ -926,7 +924,6 @@ void			XX_httplib_set_handler_type( struct mg_context *ctx, const char *uri, int
 int			XX_httplib_set_non_blocking_mode( SOCKET sock );
 int			XX_httplib_set_ports_option( struct mg_context *ctx );
 int			XX_httplib_set_sock_timeout( SOCKET sock, int milliseconds );
-int			XX_httplib_set_ssl_option( struct mg_context *ctx );
 int			XX_httplib_set_tcp_nodelay( SOCKET sock, int nodelay_on );
 void			XX_httplib_set_thread_name( const char *name );
 int			XX_httplib_set_throttle( const char *spec, uint32_t remote_ip, const char *uri );
@@ -938,13 +935,6 @@ char *			XX_httplib_skip_quoted( char **buf, const char *delimiters, const char 
 void			XX_httplib_snprintf( const struct mg_connection *conn, int *truncated, char *buf, size_t buflen, PRINTF_FORMAT_STRING(const char *fmt), ... ) PRINTF_ARGS(5, 6);
 void			XX_httplib_sockaddr_to_string(char *buf, size_t len, const union usa *usa );
 pid_t			XX_httplib_spawn_process( struct mg_connection *conn, const char *prog, char *envblk, char *envp[], int fdin[2], int fdout[2], int fderr[2], const char *dir );
-const char *		XX_httplib_ssl_error( void );
-void			XX_httplib_ssl_get_client_cert_info( struct mg_connection *conn );
-long			XX_httplib_ssl_get_protocol( int version_id );
-unsigned long		XX_httplib_ssl_id_callback( void );
-void			XX_httplib_ssl_locking_callback( int mode, int mutex_num, const char *file, int line );
-int			XX_httplib_ssl_use_pem_file( struct mg_context *ctx, const char *pem );
-int			XX_httplib_sslize( struct mg_connection *conn, SSL_CTX *s, int (*func)(SSL *) );
 int			XX_httplib_stat( struct mg_connection *conn, const char *path, struct file *filep );
 const char *		XX_httplib_strcasestr( const char *big_str, const char *small_str );
 char *			XX_httplib_strdup( const char *str );
@@ -952,8 +942,6 @@ char *			XX_httplib_strndup( const char *ptr, size_t len );
 void			XX_httplib_strlcpy( register char *dst, register const char *src, size_t n );
 int			XX_httplib_substitute_index_file( struct mg_connection *conn, char *path, size_t path_len, struct file *filep );
 const char *		XX_httplib_suggest_connection_header( const struct mg_connection *conn );
-void			XX_httplib_tls_dtor( void *key );
-void			XX_httplib_uninitialize_ssl( struct mg_context *ctx );
 int			XX_httplib_vprintf( struct mg_connection *conn, const char *fmt, va_list ap );
 void			XX_httplib_vsnprintf( const struct mg_connection *conn, int *truncated, char *buf, size_t buflen, const char *fmt, va_list ap );
 int			XX_httplib_websocket_write_exec( struct mg_connection *conn, int opcode, const char *data, size_t dataLen, uint32_t masking_key );

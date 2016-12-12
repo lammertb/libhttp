@@ -132,6 +132,21 @@ struct ssl_func {
 
 
 
+int				XX_httplib_get_first_ssl_listener_index( const struct mg_context *ctx );
+int				XX_httplib_initialize_ssl( struct mg_context *ctx );
+int				XX_httplib_set_ssl_option( struct mg_context *ctx );
+const char *			XX_httplib_ssl_error( void );
+void				XX_httplib_ssl_get_client_cert_info( struct mg_connection *conn );
+long				XX_httplib_ssl_get_protocol( int version_id );
+unsigned long			XX_httplib_ssl_id_callback( void );
+void				XX_httplib_ssl_locking_callback( int mode, int mutex_num, const char *file, int line );
+int				XX_httplib_ssl_use_pem_file( struct mg_context *ctx, const char *pem );
+int				XX_httplib_sslize( struct mg_connection *conn, SSL_CTX *s, int (*func)(SSL *) );
+void				XX_httplib_tls_dtor( void *key );
+void				XX_httplib_uninitialize_ssl( struct mg_context *ctx );
+
+
+
 extern int			XX_httplib_cryptolib_users;
 extern struct ssl_func		XX_httplib_crypto_sw[];
 extern struct ssl_func		XX_httplib_ssl_sw[];

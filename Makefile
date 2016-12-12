@@ -530,6 +530,7 @@ ${OBJDIR}httplib_get_cookie${OBJEXT}					: ${SRCDIR}httplib_get_cookie.c					\
 									  ${SRCDIR}httplib_main.h
 
 ${OBJDIR}httplib_get_first_ssl_listener_index${OBJEXT}			: ${SRCDIR}httplib_get_first_ssl_listener_index.c		\
+									  ${SRCDIR}httplib_ssl.h					\
 									  ${SRCDIR}httplib_main.h
 
 ${OBJDIR}httplib_get_header${OBJEXT}					: ${SRCDIR}httplib_get_header.c					\
@@ -621,6 +622,7 @@ ${OBJDIR}httplib_handle_propfind${OBJEXT}				: ${SRCDIR}httplib_handle_propfind.
 									  ${SRCDIR}httplib_main.h
 
 ${OBJDIR}httplib_handle_request${OBJEXT}				: ${SRCDIR}httplib_handle_request.c				\
+									  ${SRCDIR}httplib_ssl.h					\
 									  ${SRCDIR}httplib_main.h
 
 ${OBJDIR}httplib_handle_static_file_request${OBJEXT}			: ${SRCDIR}httplib_handle_static_file_request.c			\
@@ -696,6 +698,7 @@ ${OBJDIR}httplib_malloc${OBJEXT}					: ${SRCDIR}httplib_malloc.c					\
 
 ${OBJDIR}httplib_master_thread${OBJEXT}					: ${SRCDIR}httplib_master_thread.c				\
 									  ${SRCDIR}httplib_pthread.h					\
+									  ${SRCDIR}httplib_ssl.h					\
 									  ${SRCDIR}httplib_main.h
 
 ${OBJDIR}httplib_match_prefix${OBJEXT}					: ${SRCDIR}httplib_match_prefix.c				\
@@ -946,10 +949,12 @@ ${OBJDIR}httplib_ssl_get_protocol${OBJEXT}				: ${SRCDIR}httplib_ssl_get_protoco
 ${OBJDIR}httplib_ssl_id_callback${OBJEXT}				: ${SRCDIR}httplib_ssl_id_callback.c				\
 									  ${SRCDIR}httplib_memory.h					\
 									  ${SRCDIR}httplib_pthread.h					\
+									  ${SRCDIR}httplib_ssl.h					\
 									  ${SRCDIR}httplib_main.h
 
 ${OBJDIR}httplib_ssl_locking_callback${OBJEXT}				: ${SRCDIR}httplib_ssl_locking_callback.c			\
 									  ${SRCDIR}httplib_pthread.h					\
+									  ${SRCDIR}httplib_ssl.h					\
 									  ${SRCDIR}httplib_main.h
 
 ${OBJDIR}httplib_ssl_use_pem_file${OBJEXT}				: ${SRCDIR}httplib_ssl_use_pem_file.c				\
@@ -1012,6 +1017,7 @@ ${OBJDIR}httplib_timer${OBJEXT}						: ${SRCDIR}httplib_timer.c					\
 ${OBJDIR}httplib_tls_dtor${OBJEXT}					: ${SRCDIR}httplib_tls_dtor.c					\
 									  ${SRCDIR}httplib_memory.h					\
 									  ${SRCDIR}httplib_pthread.h					\
+									  ${SRCDIR}httplib_ssl.h					\
 									  ${SRCDIR}httplib_main.h
 
 ${OBJDIR}httplib_uninitialize_ssl${OBJEXT}				: ${SRCDIR}httplib_uninitialize_ssl.c				\
