@@ -1114,7 +1114,3 @@ extern pthread_mutexattr_t	XX_httplib_pthread_mutex_attr;
 
 extern const struct uriprot_tp	XX_httplib_abs_uri_protocols[];
 extern struct mg_option		XX_httplib_config_options[];
-extern int			XX_httplib_cryptolib_users;
-extern struct ssl_func		XX_httplib_crypto_sw[];
-extern struct ssl_func		XX_httplib_ssl_sw[];
-extern int			XX_httplib_sTlsInit;

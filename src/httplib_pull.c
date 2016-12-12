@@ -25,6 +25,7 @@
 
 
 #include "httplib_main.h"
+#include "httplib_ssl.h"
 
 
 /* Read from IO channel - opened file descriptor, socket, or SSL descriptor.

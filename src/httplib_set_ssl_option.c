@@ -25,7 +25,7 @@
 
 
 #include "httplib_main.h"
-
+#include "httplib_ssl.h"
 
 
 static void *ssllib_dll_handle;    /* Store the ssl library handle. */
