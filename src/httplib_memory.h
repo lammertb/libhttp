@@ -1,7 +1,5 @@
 /* 
- * Copyright (c) 2016 Lammert Bies
- * Copyright (c) 2013-2016 the Civetweb developers
- * Copyright (c) 2004-2013 Sergey Lyubka
+ * Copyright (C) 2016 Lammert Bies
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,31 +22,24 @@
 
 
 
-#include "httplib_main.h"
-#include "httplib_memory.h"
+#if defined(MEMORY_DEBUGGING)
 
+void *			XX_httplib_calloc_ex( size_t count, size_t size, const char *file, unsigned line );
+void			XX_httplib_free_ex( void *memory, const char *file, unsigned line );
+void *			XX_httplib_malloc_ex( size_t size, const char *file, unsigned line );
+void *			XX_httplib_realloc_ex( void *memory, size_t newsize, const char *file, unsigned line );
+#define			XX_httplib_calloc(a, b) XX_httplib_calloc_ex(a, b, __FILE__, __LINE__)
+#define			XX_httplib_free(a) XX_httplib_free_ex(a, __FILE__, __LINE__)
+#define			XX_httplib_malloc(a) XX_httplib_malloc_ex(a, __FILE__, __LINE__)
+#define			XX_httplib_realloc(a, b) XX_httplib_realloc_ex(a, b, __FILE__, __LINE__)
 
+#else  /* MEMORY_DEBUGGING */
 
-/*
- * void XX_httplib_close_all_listening_sockets( struct mg_context *ctx );
- *
- * The function XX_httplib_close_all_listening_sockets() closes all listening
- * sockets of a given context.
- */
+void *			XX_httplib_calloc( size_t a, size_t b );
+void			XX_httplib_free( void *a );
+void *			XX_httplib_malloc( size_t a );
+void *			XX_httplib_realloc( void *a, size_t b );
 
-void XX_httplib_close_all_listening_sockets( struct mg_context *ctx ) {
+#endif  /* MEMORY_DEBUGGING */
 
-	unsigned int i;
-
-	if ( ctx == NULL ) return;
-
-	for (i = 0; i < ctx->num_listening_sockets; i++) {
-		closesocket(ctx->listening_sockets[i].sock);
-		ctx->listening_sockets[i].sock = INVALID_SOCKET;
-	}
-	XX_httplib_free(ctx->listening_sockets);
-	ctx->listening_sockets = NULL;
-	XX_httplib_free(ctx->listening_socket_fds);
-	ctx->listening_socket_fds = NULL;
-
-}  /* XX_close_all_listening_sockets */
+void *			XX_httplib_realloc2( void *ptr, size_t size );

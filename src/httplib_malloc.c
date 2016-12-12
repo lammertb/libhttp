@@ -25,6 +25,7 @@
 
 
 #include "httplib_main.h"
+#include "httplib_memory.h"
 
 
 #if defined(MEMORY_DEBUGGING)

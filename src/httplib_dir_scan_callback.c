@@ -25,6 +25,7 @@
 
 
 #include "httplib_main.h"
+#include "httplib_memory.h"
 
 
 

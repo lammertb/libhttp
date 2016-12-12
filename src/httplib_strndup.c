@@ -25,6 +25,7 @@
 
 
 #include "httplib_main.h"
+#include "httplib_memory.h"
 
 
 char * XX_httplib_strndup( const char *ptr, size_t len ) {

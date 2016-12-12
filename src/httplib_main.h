@@ -1000,7 +1000,7 @@ int			XX_httplib_is_valid_http_method( const char *method );
 int			XX_httplib_is_valid_port( unsigned long port );
 int			XX_httplib_is_websocket_protocol( const struct mg_connection *conn );
 int			XX_httplib_join_thread( pthread_t threadid );
-int			XX_httplib_kill(pid_t pid, int sig_num);
+int			XX_httplib_kill( pid_t pid, int sig_num );
 void *			XX_httplib_load_dll( struct mg_context *ctx, const char *dll_name, struct ssl_func *sw );
 void			XX_httplib_log_access( const struct mg_connection *conn );
 int			XX_httplib_lowercase( const char *s );
@@ -1031,7 +1031,6 @@ int			XX_httplib_read_auth_file( struct file *filep, struct read_auth_file_struc
 int			XX_httplib_read_request( FILE *fp, struct mg_connection *conn, char *buf, int bufsiz, int *nread );
 void			XX_httplib_read_websocket( struct mg_connection *conn, mg_websocket_data_handler ws_data_handler, void *callback_data );
 struct dirent *		XX_httplib_readdir( DIR *dir );
-void *			XX_httplib_realloc2( void *ptr, size_t size );
 void			XX_httplib_redirect_to_https_port( struct mg_connection *conn, int ssl_index );
 int			XX_httplib_refresh_trust( struct mg_connection *conn );
 int			XX_httplib_remove( const struct mg_connection *conn, const char *path );
@@ -1118,22 +1117,6 @@ void *			XX_httplib_worker_thread( void *thread_func_param );
 
 extern pthread_mutexattr_t	XX_httplib_pthread_mutex_attr;
 #endif /* _WIN32 */
-
-#if defined(MEMORY_DEBUGGING)
-void *			XX_httplib_calloc_ex( size_t count, size_t size, const char *file, unsigned line );
-void			XX_httplib_free_ex( void *memory, const char *file, unsigned line );
-void *			XX_httplib_malloc_ex( size_t size, const char *file, unsigned line );
-void *			XX_httplib_realloc_ex( void *memory, size_t newsize, const char *file, unsigned line );
-#define			XX_httplib_calloc(a, b) XX_httplib_calloc_ex(a, b, __FILE__, __LINE__)
-#define			XX_httplib_free(a) XX_httplib_free_ex(a, __FILE__, __LINE__)
-#define			XX_httplib_malloc(a) XX_httplib_malloc_ex(a, __FILE__, __LINE__)
-#define			XX_httplib_realloc(a, b) XX_httplib_realloc_ex(a, b, __FILE__, __LINE__)
-#else  /* MEMORY_DEBUGGING */
-void *			XX_httplib_calloc( size_t a, size_t b );
-void			XX_httplib_free( void *a );
-void *			XX_httplib_malloc( size_t a );
-void *			XX_httplib_realloc( void *a, size_t b );
-#endif  /* MEMORY_DEBUGGING */
 
 extern const struct uriprot_tp	XX_httplib_abs_uri_protocols[];
 extern struct mg_option		XX_httplib_config_options[];
