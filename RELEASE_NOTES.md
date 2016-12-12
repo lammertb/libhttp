@@ -5,11 +5,13 @@ Release Notes v2.0 (work in progress)
 Changes
 -------
 
+- Added several hundred MIME types
+- Prototypes an definitions split over multiple header files
 - All functions moved to their own source files for better maintainability
 - Removed deprecated function `mg_get_ports();`
 - Removed sqlite3 from the distribution
-- Removed Lua support
-- Removed Duktape support
+- Removed Lua support temporarily
+- Removed Duktape support temporarily
 - Removed Symbian support
 - Changed references from CivetWeb to LibHTTP in documentation
 - Removed deprecated function `mg_upload();`
