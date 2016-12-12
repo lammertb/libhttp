@@ -610,6 +610,7 @@ ${OBJDIR}httplib_global_data${OBJEXT}					: ${SRCDIR}httplib_global_data.c				\
 									  ${SRCDIR}httplib_main.h
 
 ${OBJDIR}httplib_gmt_time_string${OBJEXT}				: ${SRCDIR}httplib_gmt_time_string.c				\
+									  ${SRCDIR}httplib_string.h					\
 									  ${SRCDIR}httplib_main.h
 
 ${OBJDIR}httplib_handle_cgi_request${OBJEXT}				: ${SRCDIR}httplib_handle_cgi_request.c				\
@@ -767,6 +768,7 @@ ${OBJDIR}httplib_parse_range_header${OBJEXT}				: ${SRCDIR}httplib_parse_range_h
 									  ${SRCDIR}httplib_main.h
 
 ${OBJDIR}httplib_path_to_unicode${OBJEXT}				: ${SRCDIR}httplib_path_to_unicode.c				\
+									  ${SRCDIR}httplib_string.h					\
 									  ${SRCDIR}httplib_main.h
 
 ${OBJDIR}httplib_poll${OBJEXT}						: ${SRCDIR}httplib_poll.c					\
@@ -833,6 +835,7 @@ ${OBJDIR}httplib_realloc2${OBJEXT}					: ${SRCDIR}httplib_realloc2.c					\
 									  ${SRCDIR}httplib_main.h
 
 ${OBJDIR}httplib_redirect_to_https_port${OBJEXT}			: ${SRCDIR}httplib_redirect_to_https_port.c			\
+									  ${SRCDIR}httplib_string.h					\
 									  ${SRCDIR}httplib_main.h
 
 ${OBJDIR}httplib_refresh_trust${OBJEXT}					: ${SRCDIR}httplib_refresh_trust.c				\
@@ -1033,6 +1036,7 @@ ${OBJDIR}httplib_strdup${OBJEXT}					: ${SRCDIR}httplib_strdup.c					\
 									  ${SRCDIR}httplib_main.h
 
 ${OBJDIR}httplib_strlcpy${OBJEXT}					: ${SRCDIR}httplib_strlcpy.c					\
+									  ${SRCDIR}httplib_string.h					\
 									  ${SRCDIR}httplib_main.h
 
 ${OBJDIR}httplib_strncasecmp${OBJEXT}					: ${SRCDIR}httplib_strncasecmp.c				\
@@ -1044,6 +1048,7 @@ ${OBJDIR}httplib_strndup${OBJEXT}					: ${SRCDIR}httplib_strndup.c					\
 									  ${SRCDIR}httplib_main.h
 
 ${OBJDIR}httplib_substitute_index_file${OBJEXT}				: ${SRCDIR}httplib_substitute_index_file.c			\
+									  ${SRCDIR}httplib_string.h					\
 									  ${SRCDIR}httplib_main.h
 
 ${OBJDIR}httplib_suggest_connection_header${OBJEXT}			: ${SRCDIR}httplib_suggest_connection_header.c			\

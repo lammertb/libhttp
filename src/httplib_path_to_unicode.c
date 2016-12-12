@@ -22,15 +22,10 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
-
-
+#include "httplib_string.h"
 
 #if defined(_WIN32)
-
-
 
 /* For Windows, change all slashes to backslashes in path names. */
 static void change_slashes_to_backslashes( char *path ) {
@@ -127,6 +122,5 @@ void XX_httplib_path_to_unicode( const struct mg_connection *conn, const char *p
 #endif
 
 }  /* XX_httplib_path_to_unicode */
-
 
 #endif /* _WIN32 */

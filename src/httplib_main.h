@@ -935,7 +935,6 @@ char *			XX_httplib_skip_quoted( char **buf, const char *delimiters, const char 
 void			XX_httplib_sockaddr_to_string(char *buf, size_t len, const union usa *usa );
 pid_t			XX_httplib_spawn_process( struct mg_connection *conn, const char *prog, char *envblk, char *envp[], int fdin[2], int fdout[2], int fderr[2], const char *dir );
 int			XX_httplib_stat( struct mg_connection *conn, const char *path, struct file *filep );
-void			XX_httplib_strlcpy( register char *dst, register const char *src, size_t n );
 int			XX_httplib_substitute_index_file( struct mg_connection *conn, char *path, size_t path_len, struct file *filep );
 const char *		XX_httplib_suggest_connection_header( const struct mg_connection *conn );
 int			XX_httplib_websocket_write_exec( struct mg_connection *conn, int opcode, const char *data, size_t dataLen, uint32_t masking_key );
