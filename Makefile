@@ -397,6 +397,7 @@ ${OBJDIR}extern_ssl_lut${OBJEXT}					: ${SRCDIR}extern_ssl_lut.c					\
 									  ${SRCDIR}httplib_main.h
 
 ${OBJDIR}httplib_accept_new_connection${OBJEXT}				: ${SRCDIR}httplib_accept_new_connection.c			\
+									  ${SRCDIR}httplib_ssl.h					\
 									  ${SRCDIR}httplib_main.h
 
 ${OBJDIR}httplib_addenv${OBJEXT}					: ${SRCDIR}httplib_addenv.c					\
@@ -473,6 +474,7 @@ ${OBJDIR}httplib_consume_socket${OBJEXT}				: ${SRCDIR}httplib_consume_socket.c	
 									  ${SRCDIR}httplib_main.h
 
 ${OBJDIR}httplib_cry${OBJEXT}						: ${SRCDIR}httplib_cry.c					\
+									  ${SRCDIR}httplib_ssl.h					\
 									  ${SRCDIR}httplib_main.h
 
 ${OBJDIR}httplib_delete_file${OBJEXT}					: ${SRCDIR}httplib_delete_file.c				\
@@ -670,6 +672,7 @@ ${OBJDIR}httplib_join_thread${OBJEXT}					: ${SRCDIR}httplib_join_thread.c				\
 									  ${SRCDIR}httplib_main.h
 
 ${OBJDIR}httplib_load_dll${OBJEXT}					: ${SRCDIR}httplib_load_dll.c					\
+									  ${SRCDIR}httplib_ssl.h					\
 									  ${SRCDIR}httplib_main.h
 
 ${OBJDIR}httplib_lock_unlock_connection${OBJEXT}			: ${SRCDIR}httplib_lock_unlock_connection.c			\
@@ -681,6 +684,7 @@ ${OBJDIR}httplib_lock_unlock_context${OBJEXT}				: ${SRCDIR}httplib_lock_unlock_
 									  ${SRCDIR}httplib_main.h
 
 ${OBJDIR}httplib_log_access${OBJEXT}					: ${SRCDIR}httplib_log_access.c					\
+									  ${SRCDIR}httplib_ssl.h					\
 									  ${SRCDIR}httplib_main.h
 
 ${OBJDIR}httplib_lowercase${OBJEXT}					: ${SRCDIR}httplib_lowercase.c					\
@@ -747,6 +751,7 @@ ${OBJDIR}httplib_poll${OBJEXT}						: ${SRCDIR}httplib_poll.c					\
 
 ${OBJDIR}httplib_prepare_cgi_environment${OBJEXT}			: ${SRCDIR}httplib_prepare_cgi_environment.c			\
 									  ${SRCDIR}httplib_memory.h					\
+									  ${SRCDIR}httplib_ssl.h					\
 									  ${SRCDIR}httplib_main.h
 
 ${OBJDIR}httplib_print_dir_entry${OBJEXT}				: ${SRCDIR}httplib_print_dir_entry.c				\
@@ -935,6 +940,7 @@ ${OBJDIR}httplib_ssl_get_client_cert_info${OBJEXT}			: ${SRCDIR}httplib_ssl_get_
 									  ${SRCDIR}httplib_main.h
 
 ${OBJDIR}httplib_ssl_get_protocol${OBJEXT}				: ${SRCDIR}httplib_ssl_get_protocol.c				\
+									  ${SRCDIR}httplib_ssl.h					\
 									  ${SRCDIR}httplib_main.h
 
 ${OBJDIR}httplib_ssl_id_callback${OBJEXT}				: ${SRCDIR}httplib_ssl_id_callback.c				\

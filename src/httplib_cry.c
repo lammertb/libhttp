@@ -25,6 +25,7 @@
 
 
 #include "httplib_main.h"
+#include "httplib_ssl.h"
 
 
 /* Print error message to the opened error log stream. */
