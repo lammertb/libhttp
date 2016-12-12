@@ -62,16 +62,10 @@
 /* conditional expression is constant: introduced by FD_SET(..) */
 #pragma warning(disable : 4127)
 #pragma warning(disable : 4548)
-/* non-constant aggregate initializer: issued due to missing C99 support */
-#pragma warning(disable : 4204)
 /* padding added after data member */
 #pragma warning(disable : 4820)
 /* not defined as a preprocessor macro, replacing with '0' for '#if/#elif' */
 #pragma warning(disable : 4668)
-/* no function prototype given: converting '()' to '(void)' */
-#pragma warning(disable : 4255)
-/* function has been selected for automatic inline expansion */
-#pragma warning(disable : 4711)
 #endif
 
 

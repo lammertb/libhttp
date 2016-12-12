@@ -5,6 +5,7 @@ Release Notes v2.0 (work in progress)
 Changes
 -------
 
+- All functions moved to their own source files for better maintainability
 - Removed deprecated function `mg_get_ports();`
 - Removed sqlite3 from the distribution
 - Removed Lua support
