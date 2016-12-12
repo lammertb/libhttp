@@ -29,13 +29,13 @@
 
 
 /*
- * int XX_httplib_is_valid_http_method( const char *method );
+ * bool XX_httplib_is_valid_http_method( const char *method );
  *
  * The function XX_httplib_is_valid_http_method() checks if the method in a
  * request is a valid method.
  */
 
-int XX_httplib_is_valid_http_method( const char *method ) {
+bool XX_httplib_is_valid_http_method( const char *method ) {
 
 	return !strcmp(method, "GET")        /* HTTP (RFC 2616) */
 	       || !strcmp(method, "POST")    /* HTTP (RFC 2616) */

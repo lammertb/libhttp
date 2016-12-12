@@ -858,7 +858,7 @@ int			XX_httplib_is_file_in_memory( const struct mg_connection *conn, const char
 bool			XX_httplib_is_file_opened( const struct file *filep );
 int			XX_httplib_is_not_modified( const struct mg_connection *conn, const struct file *filep );
 int			XX_httplib_is_put_or_delete_method( const struct mg_connection *conn );
-int			XX_httplib_is_valid_http_method( const char *method );
+bool			XX_httplib_is_valid_http_method( const char *method );
 int			XX_httplib_is_valid_port( unsigned long port );
 int			XX_httplib_is_websocket_protocol( const struct mg_connection *conn );
 int			XX_httplib_join_thread( pthread_t threadid );
