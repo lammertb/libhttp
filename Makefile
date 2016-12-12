@@ -944,6 +944,7 @@ ${OBJDIR}httplib_ssl_get_protocol${OBJEXT}				: ${SRCDIR}httplib_ssl_get_protoco
 									  ${SRCDIR}httplib_main.h
 
 ${OBJDIR}httplib_ssl_id_callback${OBJEXT}				: ${SRCDIR}httplib_ssl_id_callback.c				\
+									  ${SRCDIR}httplib_memory.h					\
 									  ${SRCDIR}httplib_pthread.h					\
 									  ${SRCDIR}httplib_main.h
 
