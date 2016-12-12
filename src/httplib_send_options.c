@@ -22,11 +22,8 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
-
-
+#include "httplib_utils.h"
 
 /*
  * void XX_httplib_send_options( struct mg_connection *conn );

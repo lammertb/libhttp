@@ -22,14 +22,11 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
 #include "httplib_memory.h"
 #include "httplib_pthread.h"
 #include "httplib_ssl.h"
-
-
+#include "httplib_utils.h"
 
 /*
  * void XX_httplib_unitialize_ssl( struct mg_context *ctx );

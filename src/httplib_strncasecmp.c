@@ -22,10 +22,8 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
-
+#include "httplib_utils.h"
 
 int mg_strncasecmp( const char *s1, const char *s2, size_t len ) {
 

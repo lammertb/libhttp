@@ -26,6 +26,7 @@
 #include "httplib_memory.h"
 #include "httplib_ssl.h"
 #include "httplib_string.h"
+#include "httplib_utils.h"
 
 /*
  * int XX_httplib_connect_socket();

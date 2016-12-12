@@ -22,11 +22,8 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
-
-
+#include "httplib_utils.h"
 
 void XX_httplib_base64_encode( const unsigned char *src, int src_len, char *dst ) {
 

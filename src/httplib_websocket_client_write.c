@@ -22,12 +22,9 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
 #include "httplib_memory.h"
-
-
+#include "httplib_utils.h"
 
 #if defined(USE_WEBSOCKET)
 

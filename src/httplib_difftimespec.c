@@ -22,10 +22,8 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
-
+#include "httplib_utils.h"
 
 /* difftime for struct timespec. Return value is in seconds. */
 double XX_httplib_difftimespec(const struct timespec *ts_now, const struct timespec *ts_before) {

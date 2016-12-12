@@ -22,12 +22,9 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
 #include "httplib_memory.h"
-
-
+#include "httplib_utils.h"
 
 static int parse_port_string( const struct vec *vec, struct socket *so, int *ip_version );
 

@@ -22,12 +22,9 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
 #include "httplib_ssl.h"
-
-
+#include "httplib_utils.h"
 
 /*
  * void XX_httplib_handle_request( struct mg_connection *conn );

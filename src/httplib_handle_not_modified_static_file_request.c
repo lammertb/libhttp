@@ -22,11 +22,8 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
-
-
+#include "httplib_utils.h"
 
 /*
  * void XX_httplib_handle_not_modified_static_file_request( struct mg_connection *conn, struct file *filep );

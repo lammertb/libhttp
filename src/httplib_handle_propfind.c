@@ -24,6 +24,7 @@
 
 #include "httplib_main.h"
 #include "httplib_string.h"
+#include "httplib_utils.h"
 
 #if !defined(NO_FILES)
 

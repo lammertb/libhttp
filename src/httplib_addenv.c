@@ -25,6 +25,7 @@
 #include "httplib_main.h"
 #include "httplib_memory.h"
 #include "httplib_string.h"
+#include "httplib_utils.h"
 
 /*
  * void XX_httplib_addenv( struct cgi_environment *env, const char *fmt, ... );

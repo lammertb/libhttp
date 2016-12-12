@@ -22,11 +22,8 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
-
-
+#include "httplib_utils.h"
 
 /* Get a random number (independent of C rand function) */
 uint64_t XX_httplib_get_random( void ) {

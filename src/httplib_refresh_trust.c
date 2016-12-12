@@ -22,12 +22,9 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
 #include "httplib_ssl.h"
-
-
+#include "httplib_utils.h"
 
 /*
  * int XX_httplib_refresh_trust( struct mg_connection *conn );

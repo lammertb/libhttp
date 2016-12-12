@@ -27,6 +27,7 @@
 #include "httplib_pthread.h"
 #include "httplib_ssl.h"
 #include "httplib_string.h"
+#include "httplib_utils.h"
 
 /*
  * struct mg_context *mg_start( const struct mg_callbacks *callbacks, void *user_data, const char **options );

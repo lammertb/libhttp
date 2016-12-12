@@ -1,7 +1,5 @@
 /* 
- * Copyright (c) 2016 Lammert Bies
- * Copyright (c) 2013-2016 the Civetweb developers
- * Copyright (c) 2004-2013 Sergey Lyubka
+ * Copyright (C) 2016 Lammert Bies
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,41 +20,14 @@
  * THE SOFTWARE.
  */
 
-#include "httplib_main.h"
-#include "httplib_utils.h"
 
-int XX_httplib_inet_pton( int af, const char *src, void *dst, size_t dstlen ) {
 
-	struct addrinfo hints, *res, *ressave;
-	int func_ret = 0;
-	int gai_ret;
-
-	memset(&hints, 0, sizeof(struct addrinfo));
-	hints.ai_family = af;
-
-	gai_ret = getaddrinfo(src, NULL, &hints, &res);
-	if (gai_ret != 0) {
-		/* gai_strerror could be used to convert gai_ret to a string */
-		/* POSIX return values: see
-		 * http://pubs.opengroup.org/onlinepubs/9699919799/functions/freeaddrinfo.html
-		 */
-		/* Windows return values: see
-		 * https://msdn.microsoft.com/en-us/library/windows/desktop/ms738520%28v=vs.85%29.aspx
-		 */
-		return 0;
-	}
-
-	ressave = res;
-
-	while (res) {
-		if (dstlen >= res->ai_addrlen) {
-			memcpy(dst, res->ai_addr, res->ai_addrlen);
-			func_ret = 1;
-		}
-		res = res->ai_next;
-	}
-
-	freeaddrinfo(ressave);
-	return func_ret;
-
-}  /* XX_httplib_inet_pton */
+void			XX_httplib_addenv( struct cgi_environment *env, PRINTF_FORMAT_STRING(const char *fmt), ... ) PRINTF_ARGS(2, 3);
+int			XX_httplib_atomic_dec( volatile int *addr );
+int			XX_httplib_atomic_inc( volatile int *addr );
+void			XX_httplib_base64_encode( const unsigned char *src, int src_len, char *dst );
+double			XX_httplib_difftimespec( const struct timespec *ts_now, const struct timespec *ts_before );
+uint64_t		XX_httplib_get_random( void );
+void			XX_httplib_gmt_time_string( char *buf, size_t buf_len, time_t *t );
+int			XX_httplib_inet_pton( int af, const char *src, void *dst, size_t dstlen );
+int			XX_httplib_lowercase( const char *s );

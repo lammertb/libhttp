@@ -22,14 +22,11 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
 #include "httplib_memory.h"
 #include "httplib_pthread.h"
 #include "httplib_ssl.h"
-
-
+#include "httplib_utils.h"
 
 static void *	worker_thread_run( struct worker_thread_args *thread_args );
 

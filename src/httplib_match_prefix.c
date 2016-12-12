@@ -22,11 +22,8 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
-
-
+#include "httplib_utils.h"
 
 /* Perform case-insensitive match of string against pattern */
 int XX_httplib_match_prefix(const char *pattern, size_t pattern_len, const char *str) {

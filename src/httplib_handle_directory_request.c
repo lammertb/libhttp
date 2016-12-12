@@ -22,12 +22,9 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
 #include "httplib_memory.h"
-
-
+#include "httplib_utils.h"
 
 void XX_httplib_handle_directory_request( struct mg_connection *conn, const char *dir ) {
 
