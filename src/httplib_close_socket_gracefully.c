@@ -74,7 +74,7 @@ void XX_httplib_close_socket_gracefully( struct mg_connection *conn ) {
 	 * when server decides to close the connection; then when client
 	 * does recv() it gets no data back. */
 	do {
-		n = pull( NULL, conn, buf, sizeof(buf), 1E-10 /* TODO: allow 0 as timeout */);
+		n = XX_httplib_pull( NULL, conn, buf, sizeof(buf), 1E-10 /* TODO: allow 0 as timeout */);
 	} while (n > 0);
 #endif
 

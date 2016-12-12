@@ -35,12 +35,12 @@ int XX_httplib_remove_directory( struct mg_connection *conn, const char *dir ) {
 	int truncated;
 	int ok = 1;
 
-	if ((dirp = mg_opendir(conn, dir)) == NULL) {
+	if ((dirp = XX_httplib_opendir(conn, dir)) == NULL) {
 		return 0;
 	} else {
 		de.conn = conn;
 
-		while ((dp = mg_readdir(dirp)) != NULL) {
+		while ((dp = XX_httplib_readdir(dirp)) != NULL) {
 			/* Do not show current dir (but show hidden files as they will
 			 * also be removed) */
 			if (!strcmp(dp->d_name, ".") || !strcmp(dp->d_name, "..")) continue;
@@ -69,14 +69,14 @@ int XX_httplib_remove_directory( struct mg_connection *conn, const char *dir ) {
 				if (de.file.is_directory) {
 					if (XX_httplib_remove_directory(conn, path) == 0) ok = 0;
 				} else {
-					if (mg_remove(conn, path) == 0) ok = 0;
+					if (XX_httplib_remove(conn, path) == 0) ok = 0;
 				}
 			} else {
 				/* file is in memory. It can not be deleted. */
 				ok = 0;
 			}
 		}
-		mg_closedir(dirp);
+		XX_httplib_closedir(dirp);
 
 		IGNORE_UNUSED_RESULT(rmdir(dir));
 	}

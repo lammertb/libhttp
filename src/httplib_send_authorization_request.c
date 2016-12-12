@@ -26,6 +26,8 @@
 
 #include "libhttp-private.h"
 
+#include "httplib_pthread.h"
+
 
 
 void XX_httplib_send_authorization_request( struct mg_connection *conn ) {

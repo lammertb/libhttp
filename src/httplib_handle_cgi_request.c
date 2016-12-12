@@ -242,7 +242,7 @@ done:
 	XX_httplib_free(blk.buf);
 
 	if (pid != (pid_t)-1) {
-		kill(pid, SIGKILL);
+		XX_httplib_kill(pid, SIGKILL);
 #if !defined(_WIN32)
 		{
 			int st;

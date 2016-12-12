@@ -26,6 +26,8 @@
 
 #include "libhttp-private.h"
 
+#include "httplib_pthread.h"
+
 
 
 static struct mg_connection *	mg_connect_client_impl( const struct mg_client_options *client_options, int use_ssl, char *ebuf, size_t ebuf_len );

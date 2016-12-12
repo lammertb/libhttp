@@ -26,6 +26,8 @@
 
 #include "libhttp-private.h"
 
+#include "httplib_pthread.h"
+
 
 
 static void	master_thread_run( void *thread_func_param );

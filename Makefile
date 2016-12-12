@@ -1,45 +1,391 @@
 #
+# Library: libhttp
+# File:    Makefile
+# Author:  Lammert Bies
+#
+# This file is licensed under the MIT License as stated below
+#
 # Copyright (c) 2016 Lammert Bies
-# Copyright (c) 2013 No Face Press, LLC
-# License http://opensource.org/licenses/mit-license.php MIT License
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#
+# Description
+# -----------
+# This Makefile is used to build the libhttp library. The only action you should
+# normally have to do is to run the make program from the command line,
+# independent on the Operating System you are working on.
+#
+# This Makefile is manually maintained. No autoconf or automake involved. This
+# was a deliberate decision due to the absense of these tools on some systems,
+# in particular in Windows environments.
+#
+# Dependencies
+# ------------
+# This Makefile is known to be functional with GNU Make. Other make utilities
+# may work or may have problems. GNU Make is available both in source code
+# and precompiled binaries for a large number of environments and therefore
+# you are recommended to install a version of GNU Make if you encounter
+# problems with the default make utility in your development chain.
+#
+# Aside from GNU Make and the standard C compiler headers and libraries which
+# should have been installed already together with your compiler there are no
+# other known dependencies.
+#
+# Library Type
+# ------------
+# The generated library is a library useable for static linking in this
+# source directory structure. The decision for a static linkable library
+# was deliberate because of the relatively small size of the library and the
+# routines and to avoid version and dependency issues when distributing the
+# end application to different environments.
 #
 
-#
-# For help try, "make help"
-#
-
-include resources/Makefile.in-os
-
-CPROG = libhttp
-#CXXPROG = libhttp
-UNIT_TEST_PROG = libhttp_test
-
-BUILD_DIR = out
-
-# Installation directories by convention
-# http://www.gnu.org/prep/standards/html_node/Directory-Variables.html
-PREFIX = /usr/local
-EXEC_PREFIX = $(PREFIX)
-BINDIR = $(EXEC_PREFIX)/bin
-DATAROOTDIR = $(PREFIX)/share
-DOCDIR = $(DATAROOTDIR)/doc/$(CPROG)
-SYSCONFDIR = $(PREFIX)/etc
-HTMLDIR = $(DOCDIR)
-
-# build tools
-MKDIR = mkdir -p
-RMF = rm -f
-RMRF = rm -rf
-
-# desired configuration of the document root
-# never assume that the document_root actually
-# exists on the build machine.  When building
-# a chroot, PREFIX if just a directory which
-# later becomes /.
 DOCUMENT_ROOT = $(HTMLDIR)
 PORTS = 8080
 
-BUILD_DIRS = $(BUILD_DIR) $(BUILD_DIR)/src $(BUILD_DIR)/resources
+# only set main compile options if none were chosen
+
+LIBS = -lpthread -lm
+
+ifdef CONFIG_FILE
+  CFLAGS += -DCONFIG_FILE=\"$(CONFIG_FILE)\"
+endif
+
+ifdef CONFIG_FILE2
+  CFLAGS += -DCONFIG_FILE2=\"$(CONFIG_FILE2)\"
+endif
+
+ifdef SSL_LIB
+  CFLAGS += -DSSL_LIB=\"$(SSL_LIB)\"
+endif
+
+ifdef CRYPTO_LIB
+  CFLAGS += -DCRYPTO_LIB=\"$(CRYPTO_LIB)\"
+endif
+
+ifneq ($(OS),Windows_NT)
+OS:=$(shell uname -s)
+endif
+
+DFLAGS = -DUSE_STACK_SIZE=102400 -DUSE_WEBSOCKET -DUSE_IPV6
+
+INCDIR = include/
+LIBDIR = lib/
+OBJDIR = obj/
+SRCDIR = src/
+CC     = cc
+RM     = /bin/rm -f
+OBJEXT = .o
+LIBEXT = .a
+OFLAG  = -o
+AR     = ar
+ARQC   = qc 
+ARQ    = q
+RANLIB = ranlib
+
+CFLAGS=	-Wall \
+	-Wextra \
+	-Wstrict-prototypes \
+	-Wshadow \
+	-Wpointer-arith \
+	-Wformat-security \
+	-Winit-self \
+	-Wcast-qual \
+	-Wcast-align \
+	-Wwrite-strings \
+	-Wnested-externs \
+	-Wredundant-decls \
+	-Werror \
+	-O3 \
+	-funsigned-char \
+	-I${INCDIR}
+
+ifeq ($(OS),Windows_NT)
+INCDIR = include\\
+LIBDIR = lib\\
+OBJDIR = obj\\
+SRCDIR = src\\
+CC     = cl
+RM     = del /q
+OBJEXT = .obj
+LIBEXT = .lib
+OFLAG  = -Fo
+AR     = lib
+ARQC   = /NOLOGO /OUT:
+ARQ    = /NOLOGO
+RANLIB = dir
+
+CFLAGS = -Ox -Ot -MT -GT -volatile:iso -I${INCDIR} -nologo -J -sdl -Wall -WX -wd4464 -wd4710 -wd4711 -wd4201 -wd4820
+endif
+
+${OBJDIR}%${OBJEXT} : ${SRCDIR}%.c
+	${CC} -c ${CPPFLAGS} ${CFLAGS} ${DFLAGS} ${OFLAG}$@ $<
+
+all: ${LIBDIR}libhttp${LIBEXT}
+
+clean:
+	${RM} ${OBJDIR}*${OBJEXT}
+	${RM} ${LIBDIR}libhttp${LIBEXT}
+
+OBJLIST =									\
+	${OBJDIR}extern_md5${OBJEXT}						\
+	${OBJDIR}extern_sha1${OBJEXT}						\
+	${OBJDIR}extern_ssl_lut${OBJEXT}					\
+	${OBJDIR}httplib_accept_new_connection${OBJEXT}				\
+	${OBJDIR}httplib_addenv${OBJEXT}					\
+	${OBJDIR}httplib_atomic_dec${OBJEXT}					\
+	${OBJDIR}httplib_atomic_inc${OBJEXT}					\
+	${OBJDIR}httplib_authorize${OBJEXT}					\
+	${OBJDIR}httplib_base64_encode${OBJEXT}					\
+	${OBJDIR}httplib_check_acl${OBJEXT}					\
+	${OBJDIR}httplib_check_authorization${OBJEXT}				\
+	${OBJDIR}httplib_check_feature${OBJEXT}					\
+	${OBJDIR}httplib_check_password${OBJEXT}				\
+	${OBJDIR}httplib_close_all_listening_sockets${OBJEXT}			\
+	${OBJDIR}httplib_close_connection${OBJEXT}				\
+	${OBJDIR}httplib_close_socket_gracefully${OBJEXT}			\
+	${OBJDIR}httplib_closedir${OBJEXT}					\
+	${OBJDIR}httplib_compare_dir_entries${OBJEXT}				\
+	${OBJDIR}httplib_config_options${OBJEXT}				\
+	${OBJDIR}httplib_connect_client${OBJEXT}				\
+	${OBJDIR}httplib_connect_socket${OBJEXT}				\
+	${OBJDIR}httplib_connect_websocket_client${OBJEXT}			\
+	${OBJDIR}httplib_construct_etag${OBJEXT}				\
+	${OBJDIR}httplib_consume_socket${OBJEXT}				\
+	${OBJDIR}httplib_cry${OBJEXT}						\
+	${OBJDIR}httplib_delete_file${OBJEXT}					\
+	${OBJDIR}httplib_difftimespec${OBJEXT}					\
+	${OBJDIR}httplib_dir_scan_callback${OBJEXT}				\
+	${OBJDIR}httplib_discard_unread_request_data${OBJEXT}			\
+	${OBJDIR}httplib_download${OBJEXT}					\
+	${OBJDIR}httplib_event_queue${OBJEXT}					\
+	${OBJDIR}httplib_fc${OBJEXT}						\
+	${OBJDIR}httplib_fclose${OBJEXT}					\
+	${OBJDIR}httplib_fclose_on_exec${OBJEXT}				\
+	${OBJDIR}httplib_fgets${OBJEXT}						\
+	${OBJDIR}httplib_fopen${OBJEXT}						\
+	${OBJDIR}httplib_forward_body_data${OBJEXT}				\
+	${OBJDIR}httplib_free_context${OBJEXT}					\
+	${OBJDIR}httplib_get_builtin_mime_type${OBJEXT}				\
+	${OBJDIR}httplib_get_context${OBJEXT}					\
+	${OBJDIR}httplib_get_cookie${OBJEXT}					\
+	${OBJDIR}httplib_get_first_ssl_listener_index${OBJEXT}			\
+	${OBJDIR}httplib_get_header${OBJEXT}					\
+	${OBJDIR}httplib_get_mime_type${OBJEXT}					\
+	${OBJDIR}httplib_get_option${OBJEXT}					\
+	${OBJDIR}httplib_get_option_index${OBJEXT}				\
+	${OBJDIR}httplib_get_random${OBJEXT}					\
+	${OBJDIR}httplib_get_rel_url_at_current_server${OBJEXT}			\
+	${OBJDIR}httplib_get_remote_ip${OBJEXT}					\
+	${OBJDIR}httplib_get_request_handler${OBJEXT}				\
+	${OBJDIR}httplib_get_request_info${OBJEXT}				\
+	${OBJDIR}httplib_get_request_len${OBJEXT}				\
+	${OBJDIR}httplib_get_response${OBJEXT}					\
+	${OBJDIR}httplib_get_response_code_text${OBJEXT}			\
+	${OBJDIR}httplib_get_server_ports${OBJEXT}				\
+	${OBJDIR}httplib_get_system_name${OBJEXT}				\
+	${OBJDIR}httplib_get_uri_type${OBJEXT}					\
+	${OBJDIR}httplib_get_user_connection_data${OBJEXT}			\
+	${OBJDIR}httplib_get_user_data${OBJEXT}					\
+	${OBJDIR}httplib_get_valid_options${OBJEXT}				\
+	${OBJDIR}httplib_get_var${OBJEXT}					\
+	${OBJDIR}httplib_getreq${OBJEXT}					\
+	${OBJDIR}httplib_global_data${OBJEXT}					\
+	${OBJDIR}httplib_gmt_time_string${OBJEXT}				\
+	${OBJDIR}httplib_handle_cgi_request${OBJEXT}				\
+	${OBJDIR}httplib_handle_directory_request${OBJEXT}			\
+	${OBJDIR}httplib_handle_file_based_request${OBJEXT}			\
+	${OBJDIR}httplib_handle_form_request${OBJEXT}				\
+	${OBJDIR}httplib_handle_not_modified_static_file_request${OBJEXT}	\
+	${OBJDIR}httplib_handle_propfind${OBJEXT}				\
+	${OBJDIR}httplib_handle_request${OBJEXT}				\
+	${OBJDIR}httplib_handle_static_file_request${OBJEXT}			\
+	${OBJDIR}httplib_handle_websocket_request${OBJEXT}			\
+	${OBJDIR}httplib_header_has_option${OBJEXT}				\
+	${OBJDIR}httplib_inet_pton${OBJEXT}					\
+	${OBJDIR}httplib_initialize_ssl${OBJEXT}				\
+	${OBJDIR}httplib_interpret_uri${OBJEXT}					\
+	${OBJDIR}httplib_is_authorized_for_put${OBJEXT}				\
+	${OBJDIR}httplib_is_file_in_memory${OBJEXT}				\
+	${OBJDIR}httplib_is_file_opened${OBJEXT}				\
+	${OBJDIR}httplib_is_not_modified${OBJEXT}				\
+	${OBJDIR}httplib_is_put_or_delete_method${OBJEXT}			\
+	${OBJDIR}httplib_is_valid_http_method${OBJEXT}				\
+	${OBJDIR}httplib_is_valid_port${OBJEXT}					\
+	${OBJDIR}httplib_is_websocket_protocol${OBJEXT}				\
+	${OBJDIR}httplib_join_thread${OBJEXT}					\
+	${OBJDIR}httplib_load_dll${OBJEXT}					\
+	${OBJDIR}httplib_lock_unlock_connection${OBJEXT}			\
+	${OBJDIR}httplib_lock_unlock_context${OBJEXT}				\
+	${OBJDIR}httplib_log_access${OBJEXT}					\
+	${OBJDIR}httplib_lowercase${OBJEXT}					\
+	${OBJDIR}httplib_malloc${OBJEXT}					\
+	${OBJDIR}httplib_master_thread${OBJEXT}					\
+	${OBJDIR}httplib_match_prefix${OBJEXT}					\
+	${OBJDIR}httplib_md5${OBJEXT}						\
+	${OBJDIR}httplib_mkcol${OBJEXT}						\
+	${OBJDIR}httplib_mkdir${OBJEXT}						\
+	${OBJDIR}httplib_modify_passwords_file${OBJEXT}				\
+	${OBJDIR}httplib_must_hide_file${OBJEXT}				\
+	${OBJDIR}httplib_next_option${OBJEXT}					\
+	${OBJDIR}httplib_open_auth_file${OBJEXT}				\
+	${OBJDIR}httplib_opendir${OBJEXT}					\
+	${OBJDIR}httplib_parse_auth_header${OBJEXT}				\
+	${OBJDIR}httplib_parse_date_string${OBJEXT}				\
+	${OBJDIR}httplib_parse_http_headers${OBJEXT}				\
+	${OBJDIR}httplib_parse_http_message${OBJEXT}				\
+	${OBJDIR}httplib_parse_net${OBJEXT}					\
+	${OBJDIR}httplib_parse_range_header${OBJEXT}				\
+	${OBJDIR}httplib_path_to_unicode${OBJEXT}				\
+	${OBJDIR}httplib_poll${OBJEXT}						\
+	${OBJDIR}httplib_prepare_cgi_environment${OBJEXT}			\
+	${OBJDIR}httplib_print_dir_entry${OBJEXT}				\
+	${OBJDIR}httplib_printf${OBJEXT}					\
+	${OBJDIR}httplib_process_new_connection${OBJEXT}			\
+	${OBJDIR}httplib_produce_socket${OBJEXT}				\
+	${OBJDIR}httplib_pull${OBJEXT}						\
+	${OBJDIR}httplib_pull_all${OBJEXT}					\
+	${OBJDIR}httplib_push_all${OBJEXT}					\
+	${OBJDIR}httplib_put_dir${OBJEXT}					\
+	${OBJDIR}httplib_put_file${OBJEXT}					\
+	${OBJDIR}httplib_read${OBJEXT}						\
+	${OBJDIR}httplib_read_auth_file${OBJEXT}				\
+	${OBJDIR}httplib_read_request${OBJEXT}					\
+	${OBJDIR}httplib_read_websocket${OBJEXT}				\
+	${OBJDIR}httplib_readdir${OBJEXT}					\
+	${OBJDIR}httplib_realloc2${OBJEXT}					\
+	${OBJDIR}httplib_redirect_to_https_port${OBJEXT}			\
+	${OBJDIR}httplib_refresh_trust${OBJEXT}					\
+	${OBJDIR}httplib_remove${OBJEXT}					\
+	${OBJDIR}httplib_remove_bad_file${OBJEXT}				\
+	${OBJDIR}httplib_remove_directory${OBJEXT}				\
+	${OBJDIR}httplib_remove_double_dots${OBJEXT}				\
+	${OBJDIR}httplib_reset_per_request_attributes${OBJEXT}			\
+	${OBJDIR}httplib_scan_directory${OBJEXT}				\
+	${OBJDIR}httplib_send_authorization_request${OBJEXT}			\
+	${OBJDIR}httplib_send_file${OBJEXT}					\
+	${OBJDIR}httplib_send_file_data${OBJEXT}				\
+	${OBJDIR}httplib_send_http_error${OBJEXT}				\
+	${OBJDIR}httplib_send_no_cache_header${OBJEXT}				\
+	${OBJDIR}httplib_send_options${OBJEXT}					\
+	${OBJDIR}httplib_send_static_cache_header${OBJEXT}			\
+	${OBJDIR}httplib_send_websocket_handshake${OBJEXT}			\
+	${OBJDIR}httplib_set_acl_option${OBJEXT}				\
+	${OBJDIR}httplib_set_auth_handler${OBJEXT}				\
+	${OBJDIR}httplib_set_close_on_exec${OBJEXT}				\
+	${OBJDIR}httplib_set_gpass_option${OBJEXT}				\
+	${OBJDIR}httplib_set_handler_type${OBJEXT}				\
+	${OBJDIR}httplib_set_non_blocking_mode${OBJEXT}				\
+	${OBJDIR}httplib_set_ports_option${OBJEXT}				\
+	${OBJDIR}httplib_set_request_handler${OBJEXT}				\
+	${OBJDIR}httplib_set_ssl_option${OBJEXT}				\
+	${OBJDIR}httplib_set_sock_timeout${OBJEXT}				\
+	${OBJDIR}httplib_set_tcp_nodelay${OBJEXT}				\
+	${OBJDIR}httplib_set_thread_name${OBJEXT}				\
+	${OBJDIR}httplib_set_throttle${OBJEXT}					\
+	${OBJDIR}httplib_set_uid_option${OBJEXT}				\
+	${OBJDIR}httplib_set_user_connection_data${OBJEXT}			\
+	${OBJDIR}httplib_set_websocket_handler${OBJEXT}				\
+	${OBJDIR}httplib_should_decode_url${OBJEXT}				\
+	${OBJDIR}httplib_should_keep_alive${OBJEXT}				\
+	${OBJDIR}httplib_skip${OBJEXT}						\
+	${OBJDIR}httplib_skip_quoted${OBJEXT}					\
+	${OBJDIR}httplib_snprintf${OBJEXT}					\
+	${OBJDIR}httplib_sockaddr_to_string${OBJEXT}				\
+	${OBJDIR}httplib_spawn_process${OBJEXT}					\
+	${OBJDIR}httplib_ssi${OBJEXT}						\
+	${OBJDIR}httplib_ssl_error${OBJEXT}					\
+	${OBJDIR}httplib_ssl_get_client_cert_info${OBJEXT}			\
+	${OBJDIR}httplib_ssl_get_protocol${OBJEXT}				\
+	${OBJDIR}httplib_ssl_id_callback${OBJEXT}				\
+	${OBJDIR}httplib_ssl_locking_callback${OBJEXT}				\
+	${OBJDIR}httplib_ssl_use_pem_file${OBJEXT}				\
+	${OBJDIR}httplib_sslize${OBJEXT}					\
+	${OBJDIR}httplib_start${OBJEXT}						\
+	${OBJDIR}httplib_start_thread${OBJEXT}					\
+	${OBJDIR}httplib_start_thread_with_id${OBJEXT}				\
+	${OBJDIR}httplib_stat${OBJEXT}						\
+	${OBJDIR}httplib_stop${OBJEXT}						\
+	${OBJDIR}httplib_store_body${OBJEXT}					\
+	${OBJDIR}httplib_strlcpy${OBJEXT}					\
+	${OBJDIR}httplib_strcasecmp${OBJEXT}					\
+	${OBJDIR}httplib_strcasestr${OBJEXT}					\
+	${OBJDIR}httplib_strdup${OBJEXT}					\
+	${OBJDIR}httplib_strncasecmp${OBJEXT}					\
+	${OBJDIR}httplib_strndup${OBJEXT}					\
+	${OBJDIR}httplib_substitute_index_file${OBJEXT}				\
+	${OBJDIR}httplib_suggest_connection_header${OBJEXT}			\
+	${OBJDIR}httplib_timer${OBJEXT}						\
+	${OBJDIR}httplib_tls_dtor${OBJEXT}					\
+	${OBJDIR}httplib_uninitialize_ssl${OBJEXT}				\
+	${OBJDIR}httplib_url_decode${OBJEXT}					\
+	${OBJDIR}httplib_url_encode${OBJEXT}					\
+	${OBJDIR}httplib_version${OBJEXT}					\
+	${OBJDIR}httplib_vprintf${OBJEXT}					\
+	${OBJDIR}httplib_vsnprintf${OBJEXT}					\
+	${OBJDIR}httplib_websocket_client_thread${OBJEXT}			\
+	${OBJDIR}httplib_websocket_client_write${OBJEXT}			\
+	${OBJDIR}httplib_websocket_write${OBJEXT}				\
+	${OBJDIR}httplib_websocket_write_exec${OBJEXT}				\
+	${OBJDIR}httplib_worker_thread${OBJEXT}					\
+	${OBJDIR}httplib_write${OBJEXT}						\
+	${OBJDIR}osx_clock_gettime${OBJEXT}					\
+	${OBJDIR}win32_clock_gettime${OBJEXT}					\
+	${OBJDIR}win32_pthread_cond_broadcast${OBJEXT}				\
+	${OBJDIR}win32_pthread_cond_destroy${OBJEXT}				\
+	${OBJDIR}win32_pthread_cond_init${OBJEXT}				\
+	${OBJDIR}win32_pthread_cond_signal${OBJEXT}				\
+	${OBJDIR}win32_pthread_cond_timedwait${OBJEXT}				\
+	${OBJDIR}win32_pthread_cond_wait${OBJEXT}				\
+	${OBJDIR}win32_pthread_getspecific${OBJEXT}				\
+	${OBJDIR}win32_pthread_key_create${OBJEXT}				\
+	${OBJDIR}win32_pthread_key_delete${OBJEXT}				\
+	${OBJDIR}win32_pthread_mutex_destroy${OBJEXT}				\
+	${OBJDIR}win32_pthread_mutex_init${OBJEXT}				\
+	${OBJDIR}win32_pthread_mutex_lock${OBJEXT}				\
+	${OBJDIR}win32_pthread_mutex_trylock${OBJEXT}				\
+	${OBJDIR}win32_pthread_mutex_unlock${OBJEXT}				\
+	${OBJDIR}win32_pthread_self${OBJEXT}					\
+	${OBJDIR}win32_pthread_setspecific${OBJEXT}				\
+	${OBJDIR}wince_gmtime${OBJEXT}						\
+	${OBJDIR}wince_gmtime_s${OBJEXT}					\
+	${OBJDIR}wince_localtime${OBJEXT}					\
+	${OBJDIR}wince_localtime_s${OBJEXT}					\
+	${OBJDIR}wince_rename${OBJEXT}						\
+	${OBJDIR}wince_stat${OBJEXT}						\
+	${OBJDIR}wince_strftime${OBJEXT}					\
+	${OBJDIR}wince_time${OBJEXT}
+
+#
+# Creation of the library from the individually compiled object files
+#
+
+${LIBDIR}libhttp${LIBEXT} :	\
+	${OBJLIST}		\
+	Makefile
+		${RM}        ${LIBDIR}libhttp${LIBEXT}
+		${AR} ${ARQC}${LIBDIR}libhttp${LIBEXT} ${OBJLIST}
+		${RANLIB}    ${LIBDIR}libhttp${LIBEXT}
+
+#
+# Individual source files with their header dependencies
+#
 
 LIB_SOURCES =	src/extern_md5.c					\
 		src/extern_sha1.c					\
@@ -55,17 +401,31 @@ LIB_SOURCES =	src/extern_md5.c					\
 		src/httplib_check_feature.c				\
 		src/httplib_check_password.c				\
 		src/httplib_close_all_listening_sockets.c		\
-		src/httplib_close_connection.c				\
-		src/httplib_close_socket_gracefully.c			\
+
+${OBJDIR}httplib_close_connection${OBJEXT}	: ${SRCDIR}httplib_close_connection.c	\
+						  ${SRCDIR}httplib_pthread.h
+
+TEST=		src/httplib_close_socket_gracefully.c			\
 		src/httplib_closedir.c					\
 		src/httplib_compare_dir_entries.c			\
 		src/httplib_config_options.c				\
-		src/httplib_connect_client.c				\
-		src/httplib_connect_socket.c				\
+
+
+
+${OBJDIR}httplib_connect_client${OBJEXT}	: ${SRCDIR}httplib_connect_client.c	\
+						  ${SRCDIR}httplib_pthread.h
+
+TEST=		src/httplib_connect_socket.c				\
 		src/httplib_connect_websocket_client.c			\
 		src/httplib_construct_etag.c				\
-		src/httplib_consume_socket.c				\
-		src/httplib_cry.c					\
+
+
+${OBJDIR}httplib_consume_socket${OBJEXT}	: ${SRCDIR}httplib_consume_socket.c	\
+						  ${SRCDIR}httplib_pthread.h
+
+
+
+TEST=		src/httplib_cry.c					\
 		src/httplib_delete_file.c				\
 		src/httplib_difftimespec.c				\
 		src/httplib_dir_scan_callback.c				\
@@ -78,8 +438,14 @@ LIB_SOURCES =	src/extern_md5.c					\
 		src/httplib_fgets.c					\
 		src/httplib_fopen.c					\
 		src/httplib_forward_body_data.c				\
-		src/httplib_free_context.c				\
-		src/httplib_get_builtin_mime_type.c			\
+
+
+${OBJDIR}httplib_free_context${OBJEXT}		: ${SRCDIR}httplib_free_context.c	\
+						  ${SRCDIR}httplib_pthread.h
+
+
+
+TEST=		src/httplib_get_builtin_mime_type.c			\
 		src/httplib_get_context.c				\
 		src/httplib_get_cookie.c				\
 		src/httplib_get_first_ssl_listener_index.c		\
@@ -116,8 +482,13 @@ LIB_SOURCES =	src/extern_md5.c					\
 		src/httplib_handle_websocket_request.c			\
 		src/httplib_header_has_option.c				\
 		src/httplib_inet_pton.c					\
-		src/httplib_initialize_ssl.c				\
-		src/httplib_interpret_uri.c				\
+
+
+${OBJDIR}httplib_initialize_ssl${OBJEXT}	: ${SRCDIR}httplib_initialize_ssl.c	\
+						  ${SRCDIR}httplib_pthread.h
+
+
+TEST=		src/httplib_interpret_uri.c				\
 		src/httplib_is_authorized_for_put.c			\
 		src/httplib_is_file_in_memory.c				\
 		src/httplib_is_file_opened.c				\
@@ -128,13 +499,30 @@ LIB_SOURCES =	src/extern_md5.c					\
 		src/httplib_is_websocket_protocol.c			\
 		src/httplib_join_thread.c				\
 		src/httplib_load_dll.c					\
-		src/httplib_lock_unlock_connection.c			\
-		src/httplib_lock_unlock_context.c			\
-		src/httplib_log_access.c				\
+
+
+
+${OBJDIR}httplib_lock_unlock_connection${OBJEXT}	: ${SRCDIR}httplib_lock_unlock_connection.c	\
+							  ${SRCDIR}httplib_pthread.h
+
+${OBJDIR}httplib_lock_unlock_context${OBJEXT}		: ${SRCDIR}httplib_lock_unlock_context.c	\
+							  ${SRCDIR}httplib_pthread.h
+
+
+
+TEST=		src/httplib_log_access.c				\
 		src/httplib_lowercase.c					\
 		src/httplib_malloc.c					\
-		src/httplib_master_thread.c				\
-		src/httplib_match_prefix.c				\
+
+
+
+${OBJDIR}httplib_master_thread${OBJEXT}			: ${SRCDIR}httplib_master_thread.c		\
+							  ${SRCDIR}httplib_pthread.h
+
+
+
+
+TEST=		src/httplib_match_prefix.c				\
 		src/httplib_md5.c					\
 		src/httplib_mkcol.c					\
 		src/httplib_mkdir.c					\
@@ -155,8 +543,15 @@ LIB_SOURCES =	src/extern_md5.c					\
 		src/httplib_print_dir_entry.c				\
 		src/httplib_printf.c					\
 		src/httplib_process_new_connection.c			\
-		src/httplib_produce_socket.c				\
-		src/httplib_pull.c					\
+
+
+
+${OBJDIR}httplib_produce_socket${OBJEXT}		: ${SRCDIR}httplib_produce_socket.c		\
+							  ${SRCDIR}httplib_pthread.h
+
+
+
+TEST=		src/httplib_pull.c					\
 		src/httplib_pull_all.c					\
 		src/httplib_push_all.c					\
 		src/httplib_put_dir.c					\
@@ -175,8 +570,14 @@ LIB_SOURCES =	src/extern_md5.c					\
 		src/httplib_remove_double_dots.c			\
 		src/httplib_reset_per_request_attributes.c		\
 		src/httplib_scan_directory.c				\
-		src/httplib_send_authorization_request.c		\
-		src/httplib_send_file.c					\
+
+
+
+${OBJDIR}httplib_send_authorization_request${OBJEXT}	: ${SRCDIR}httplib_send_authorization_request.c		\
+							  ${SRCDIR}httplib_pthread.h
+
+
+TEST=		src/httplib_send_file.c					\
 		src/httplib_send_file_data.c				\
 		src/httplib_send_http_error.c				\
 		src/httplib_send_no_cache_header.c			\
@@ -211,11 +612,23 @@ LIB_SOURCES =	src/extern_md5.c					\
 		src/httplib_ssl_get_client_cert_info.c			\
 		src/httplib_ssl_get_protocol.c				\
 		src/httplib_ssl_id_callback.c				\
-		src/httplib_ssl_locking_callback.c			\
-		src/httplib_ssl_use_pem_file.c				\
+
+
+${OBJDIR}httplib_ssl_locking_callback${OBJEXT}		: ${SRCDIR}httplib_ssl_locking_callback.c	\
+							  ${SRCDIR}httplib_pthread.h
+
+
+TEST=		src/httplib_ssl_use_pem_file.c				\
 		src/httplib_sslize.c					\
-		src/httplib_start.c					\
-		src/httplib_start_thread.c				\
+
+
+
+${OBJDIR}httplib_start${OBJEXT}				: ${SRCDIR}httplib_start.c			\
+							  ${SRCDIR}httplib_pthread.h
+
+
+
+TEST=		src/httplib_start_thread.c				\
 		src/httplib_start_thread_with_id.c			\
 		src/httplib_stat.c					\
 		src/httplib_stop.c					\
@@ -229,9 +642,18 @@ LIB_SOURCES =	src/extern_md5.c					\
 		src/httplib_substitute_index_file.c			\
 		src/httplib_suggest_connection_header.c			\
 		src/httplib_timer.c					\
-		src/httplib_tls_dtor.c					\
-		src/httplib_uninitialize_ssl.c				\
-		src/httplib_url_decode.c				\
+
+
+
+${OBJDIR}httplib_tls_dtor${OBJEXT}			: ${SRCDIR}httplib_tls_dtor.c			\
+							  ${SRCDIR}httplib_pthread.h
+
+${OBJDIR}httplib_uninitialize_ssl${OBJEXT}		: ${SRCDIR}httplib_uninitialize_ssl.c		\
+							  ${SRCDIR}httplib_pthread.h
+
+
+
+TEST=		src/httplib_url_decode.c				\
 		src/httplib_url_encode.c				\
 		src/httplib_version.c					\
 		src/httplib_vprintf.c					\
@@ -240,27 +662,70 @@ LIB_SOURCES =	src/extern_md5.c					\
 		src/httplib_websocket_client_write.c			\
 		src/httplib_websocket_write.c				\
 		src/httplib_websocket_write_exec.c			\
-		src/httplib_worker_thread.c				\
-		src/httplib_write.c					\
+
+
+
+${OBJDIR}httplib_worker_thread${OBJEXT}			: ${SRCDIR}httplib_worker_thread.c		\
+							  ${SRCDIR}httplib_pthread.h
+
+
+
+TEST=		src/httplib_write.c					\
 		src/osx_clock_gettime.c					\
 		src/win32_clock_gettime.c				\
-		src/win32_pthread_cond_broadcast.c			\
-		src/win32_pthread_cond_destroy.c			\
-		src/win32_pthread_cond_init.c				\
-		src/win32_pthread_cond_signal.c				\
-		src/win32_pthread_cond_timedwait.c			\
-		src/win32_pthread_cond_wait.c				\
-		src/win32_pthread_getspecific.c				\
-		src/win32_pthread_key_create.c				\
-		src/win32_pthread_key_delete.c				\
-		src/win32_pthread_mutex_destroy.c			\
-		src/win32_pthread_mutex_init.c				\
-		src/win32_pthread_mutex_lock.c				\
-		src/win32_pthread_mutex_trylock.c			\
-		src/win32_pthread_mutex_unlock.c			\
-		src/win32_pthread_self.c				\
-		src/win32_pthread_setspecific.c				\
-		src/wince_gmtime.c					\
+
+
+${OBJDIR}win32_pthread_cond_broadcast${OBJEXT}	: ${SRCDIR}win32_pthread_cond_broadcast.c	\
+						  ${SRCDIR}httplib_pthread.h
+
+${OBJDIR}win32_pthread_cond_destroy${OBJEXT}	: ${SRCDIR}win32_pthread_cond_destroy.c		\
+						  ${SRCDIR}httplib_pthread.h
+
+${OBJDIR}win32_pthread_cond_init${OBJEXT}	: ${SRCDIR}win32_pthread_cond_init.c		\
+						  ${SRCDIR}httplib_pthread.h
+
+${OBJDIR}win32_pthread_cond_signal${OBJEXT}	: ${SRCDIR}win32_pthread_cond_signal.c		\
+						  ${SRCDIR}httplib_pthread.h
+
+${OBJDIR}win32_pthread_cond_timedwait${OBJEXT}	: ${SRCDIR}win32_pthread_cond_timedwait.c	\
+						  ${SRCDIR}httplib_pthread.h
+
+${OBJDIR}win32_pthread_cond_wait${OBJEXT}	: ${SRCDIR}win32_pthread_cond_wait.c		\
+						  ${SRCDIR}httplib_pthread.h
+
+${OBJDIR}win32_pthread_getspecific${OBJEXT}	: ${SRCDIR}win32_pthread_getspecific.c		\
+						  ${SRCDIR}httplib_pthread.h
+
+${OBJDIR}win32_pthread_key_create${OBJEXT}	: ${SRCDIR}win32_pthread_key_create.c		\
+						  ${SRCDIR}httplib_pthread.h
+
+${OBJDIR}win32_pthread_key_delete${OBJEXT}	: ${SRCDIR}win32_pthread_key_delete.c		\
+						  ${SRCDIR}httplib_pthread.h
+
+${OBJDIR}win32_pthread_mutex_destroy${OBJEXT}	: ${SRCDIR}win32_pthread_mutex_destroy.c	\
+						  ${SRCDIR}httplib_pthread.h
+
+${OBJDIR}win32_pthread_mutex_init${OBJEXT}	: ${SRCDIR}win32_pthread_mutex_init.c		\
+						  ${SRCDIR}httplib_pthread.h
+
+${OBJDIR}win32_pthread_mutex_lock${OBJEXT}	: ${SRCDIR}win32_pthread_mutex_lock.c		\
+						  ${SRCDIR}httplib_pthread.h
+
+${OBJDIR}win32_pthread_mutex_trylock${OBJEXT}	: ${SRCDIR}win32_pthread_mutex_trylock.c	\
+						  ${SRCDIR}httplib_pthread.h
+
+${OBJDIR}win32_pthread_mutex_unlock${OBJEXT}	: ${SRCDIR}win32_pthread_mutex_unlock.c		\
+						  ${SRCDIR}httplib_pthread.h
+
+${OBJDIR}win32_pthread_self${OBJEXT}		: ${SRCDIR}win32_pthread_self.c			\
+						  ${SRCDIR}httplib_pthread.h
+
+${OBJDIR}win32_pthread_setspecific${OBJEXT}	: ${SRCDIR}win32_pthread_setspecific.c		\
+						  ${SRCDIR}httplib_pthread.h
+
+
+
+TEST=		src/wince_gmtime.c					\
 		src/wince_gmtime_s.c					\
 		src/wince_localtime.c					\
 		src/wince_localtime_s.c					\
@@ -268,229 +733,3 @@ LIB_SOURCES =	src/extern_md5.c					\
 		src/wince_stat.c					\
 		src/wince_strftime.c					\
 		src/wince_time.c
-LIB_INLINE  = src/mod_lua.inl src/md5.inl
-APP_SOURCES = src/main.c
-WINDOWS_RESOURCES = resources/res.rc
-UNIT_TEST_SOURCES = test/unit_test.c
-SOURCE_DIRS =
-
-OBJECTS = $(LIB_SOURCES:.c=.o) $(APP_SOURCES:.c=.o)
-BUILD_RESOURCES =
-
-# The unit tests include the source files directly to get visibility to the
-# static functions.  So we clear OBJECTS so that we don't try to build or link
-# with any external object.
-ifeq ($(MAKECMDGOALS), unit_test)
-OBJECTS =
-BUILD_DIRS += $(BUILD_DIR)/test
-endif
-
-# only set main compile options if none were chosen
-CFLAGS += -Wall -Wextra -Werror -Wshadow -Wformat-security -Winit-self -Wmissing-prototypes -D$(TARGET_OS) -Iinclude $(COPT) -DUSE_STACK_SIZE=102400 -DUSE_WEBSOCKET
-
-LIBS = -lpthread -lm
-
-ifdef WITH_DEBUG
-  CFLAGS += -g -DDEBUG
-else
-  CFLAGS += -O2 -DNDEBUG
-endif
-
-ifdef WITH_CPP
-  OBJECTS += src/LibHTTPtServer.o
-  LCC = $(CXX)
-else
-  LCC = $(CC)
-endif
-
-ifdef WITH_IPV6
-  CFLAGS += -DUSE_IPV6
-endif
-
-ifdef WITH_WEBSOCKET
-  CFLAGS += -DUSE_WEBSOCKET
-endif
-
-ifdef CONFIG_FILE
-  CFLAGS += -DCONFIG_FILE=\"$(CONFIG_FILE)\"
-endif
-
-ifdef CONFIG_FILE2
-  CFLAGS += -DCONFIG_FILE2=\"$(CONFIG_FILE2)\"
-endif
-
-ifdef SSL_LIB
-  CFLAGS += -DSSL_LIB=\"$(SSL_LIB)\"
-endif
-
-ifdef CRYPTO_LIB
-  CFLAGS += -DCRYPTO_LIB=\"$(CRYPTO_LIB)\"
-endif
-
-BUILD_DIRS += $(addprefix $(BUILD_DIR)/, $(SOURCE_DIRS))
-BUILD_OBJECTS = $(addprefix $(BUILD_DIR)/, $(OBJECTS))
-MAIN_OBJECTS = $(addprefix $(BUILD_DIR)/, $(APP_SOURCES:.c=.o))
-LIB_OBJECTS = $(filter-out $(MAIN_OBJECTS), $(BUILD_OBJECTS))
-
-ifeq ($(TARGET_OS),LINUX)
-  LIBS += -lrt -ldl
-  CAN_INSTALL = 1
-endif
-
-ifeq ($(TARGET_OS),WIN32)
-  MKDIR = mkdir
-  RMF = del /q
-  RMRF = rmdir /s /q
-endif
-
-ifneq (, $(findstring mingw32, $(shell $(CC) -dumpmachine)))
-  BUILD_RESOURCES = $(BUILD_DIR)/$(WINDOWS_RESOURCES:.rc=.o)
-  LIBS += -lws2_32 -mwindows
-  SHARED_LIB = dll
-else
-  SHARED_LIB = so
-endif
-
-all: build
-
-help:
-	@echo "make help                show this message"
-	@echo "make build               compile"
-	@echo "make install             install on the system"
-	@echo "make clean               clean up the mess"
-	@echo "make lib                 build a static library"
-	@echo "make slib                build a shared library"
-	@echo "make unit_test           build unit tests executable"
-	@echo ""
-	@echo " Make Options"
-	@echo "   WITH_DEBUG=1          build with GDB debug support"
-	@echo "   WITH_IPV6=1           with IPV6 support"
-	@echo "   WITH_WEBSOCKET=1      build with web socket support"
-	@echo "   WITH_CPP=1            build library with c++ classes"
-	@echo "   CONFIG_FILE=file      use 'file' as the config file"
-	@echo "   CONFIG_FILE2=file     use 'file' as the backup config file"
-	@echo "   DOCUMENT_ROOT=/path   document root override when installing"
-	@echo "   PORTS=8080            listening ports override when installing"
-	@echo "   SSL_LIB=libssl.so.0   use versioned SSL library"
-	@echo "   CRYPTO_LIB=libcrypto.so.0 system versioned CRYPTO library"
-	@echo "   PREFIX=/usr/local     sets the install directory"
-	@echo "   COPT='-DNO_SSL'       method to insert compile flags"
-	@echo ""
-	@echo " Compile Flags"
-	@echo "   NDEBUG                strip off all debug code"
-	@echo "   DEBUG                 build debug version (very noisy)"
-	@echo "   NO_CGI                disable CGI support"
-	@echo "   NO_SSL                disable SSL functionality"
-	@echo "   NO_SSL_DL             link against system libssl library"
-	@echo "   NO_FILES              do not serve files from a directory"
-	@echo "   NO_CACHING            disable caching (usefull for systems without timegm())"
-	@echo "   MAX_REQUEST_SIZE      maximum header size, default 16384"
-	@echo ""
-	@echo " Variables"
-	@echo "   TARGET_OS='$(TARGET_OS)'"
-	@echo "   CFLAGS='$(CFLAGS)'"
-	@echo "   CXXFLAGS='$(CXXFLAGS)'"
-	@echo "   LDFLAGS='$(LDFLAGS)'"
-	@echo "   CC='$(CC)'"
-	@echo "   CXX='$(CXX)'"
-
-build: $(CPROG) $(CXXPROG)
-
-unit_test: $(UNIT_TEST_PROG)
-
-ifeq ($(CAN_INSTALL),1)
-install: $(HTMLDIR)/index.html $(SYSCONFDIR)/libhttp.conf
-	install -d -m 755  "$(DOCDIR)"
-	install -m 644 *.md "$(DOCDIR)"
-	install -d -m 755 "$(BINDIR)"
-	install -m 755 $(CPROG) "$(BINDIR)/"
-
-# Install target we do not want to overwrite
-# as it may be an upgrade
-$(HTMLDIR)/index.html:
-	install -d -m 755  "$(HTMLDIR)"
-	install -m 644 resources/itworks.html $(HTMLDIR)/index.html
-	install -m 644 resources/civetweb_64x64.png $(HTMLDIR)/
-
-# Install target we do not want to overwrite
-# as it may be an upgrade
-$(SYSCONFDIR)/libhttp.conf:
-	install -d -m 755  "$(SYSCONFDIR)"
-	install -m 644 resources/libhttp.conf  "$(SYSCONFDIR)/"
-	@sed -i 's#^document_root.*$$#document_root $(DOCUMENT_ROOT)#' "$(SYSCONFDIR)/libhttp.conf"
-	@sed -i 's#^listening_ports.*$$#listening_ports $(PORTS)#' "$(SYSCONFDIR)/libhttp.conf"
-
-else
-install:
-	@echo "Target not flagged for installation.  Use CAN_INSTALL=1 to force"
-	@echo "As a precaution only LINUX targets are set as installable."
-	@echo "If the target is linux-like, use CAN_INSTALL=1 option."
-endif
-
-lib: lib$(CPROG).a
-
-slib: lib$(CPROG).$(SHARED_LIB)
-
-clean:
-	$(RMRF) $(BUILD_DIR)
-	$(eval version=$(shell grep "define LIBHTTP_VERSION" include/libhttp.h | sed 's|.*VERSION "\(.*\)"|\1|g'))
-	$(eval major=$(shell echo $(version) | cut -d'.' -f1))
-	$(RMRF) lib$(CPROG).a
-	$(RMRF) lib$(CPROG).so
-	$(RMRF) lib$(CPROG).so.$(major)
-	$(RMRF) lib$(CPROG).so.$(version).0
-	$(RMRF) $(CPROG)
-	$(RMF) $(UNIT_TEST_PROG)
-
-distclean: clean
-	$(RMF) $(CPROG) lib$(CPROG).so lib$(CPROG).a *.dmg *.msi *.exe lib$(CPROG).dll lib$(CPROG).dll.a
-	$(RMF) $(UNIT_TEST_PROG)
-
-lib$(CPROG).a: CFLAGS += -fPIC
-lib$(CPROG).a: $(LIB_OBJECTS)
-	@$(RMF) $@
-	ar cq $@ $(LIB_OBJECTS)
-
-lib$(CPROG).so: CFLAGS += -fPIC
-lib$(CPROG).so: $(LIB_OBJECTS)
-	$(eval version=$(shell grep "define LIBHTTP_VERSION" include/libhttp.h | sed 's|.*VERSION "\(.*\)"|\1|g'))
-	$(eval major=$(shell echo $(version) | cut -d'.' -f1))
-	$(LCC) -shared -Wl,-soname,$@.$(major) -o $@.$(version).0 $(CFLAGS) $(LDFLAGS) $(LIB_OBJECTS)
-	ln -s -f $@.$(major) $@
-	ln -s -f $@.$(version).0 $@.$(major)
-
-lib$(CPROG).dll: CFLAGS += -fPIC
-lib$(CPROG).dll: $(LIB_OBJECTS)
-	$(LCC) -shared -o $@ $(CFLAGS) $(LDFLAGS) $(LIB_OBJECTS) $(LIBS) -Wl,--out-implib,lib$(CPROG).dll.a
-
-$(UNIT_TEST_PROG): CFLAGS += -Isrc -g
-$(UNIT_TEST_PROG): $(LIB_SOURCES) $(LIB_INLINE) $(UNIT_TEST_SOURCES) $(BUILD_OBJECTS)
-	$(LCC) -o $@ $(CFLAGS) $(LDFLAGS) $(UNIT_TEST_SOURCES) $(BUILD_OBJECTS) $(LIBS)
-
-$(CPROG): $(BUILD_OBJECTS) $(BUILD_RESOURCES)
-	$(LCC) -o $@ $(CFLAGS) $(LDFLAGS) $(BUILD_OBJECTS) $(BUILD_RESOURCES) $(LIBS)
-
-$(CXXPROG): $(BUILD_OBJECTS)
-	$(CXX) -o $@ $(CFLAGS) $(LDFLAGS) $(BUILD_OBJECTS) $(LIBS)
-
-$(BUILD_OBJECTS): $(BUILD_DIRS)
-
-$(BUILD_DIRS):
-	-@$(MKDIR) "$@"
-
-$(BUILD_DIR)/%.o : %.cpp
-	$(CXX) -c $(CFLAGS) $(CXXFLAGS) $< -o $@
-
-$(BUILD_DIR)/%.o : %.c
-	$(CC) -c $(CFLAGS) $< -o $@
-
-$(BUILD_RESOURCES) : $(WINDOWS_RESOURCES)
-	windres $(WINDRES_FLAGS) $< $@
-
-# This rules is used to keep the code formatted in a reasonable manor
-# For this to work astyle must be installed and in the path
-# http://sourceforge.net/projects/astyle
-indent:
-	astyle --suffix=none --style=linux --indent=spaces=4 --lineend=linux  include/*.h src/*.c src/*.cpp src/*.inl examples/*/*.c  examples/*/*.cpp
-
-.PHONY: all help build install clean lib so

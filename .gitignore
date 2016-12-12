@@ -1,7 +1,6 @@
 
 libhttp
 *-cache
-out
 *.dmg
 *.msi
 *.exe
@@ -9,6 +8,11 @@ out
 [oO]utput
 [tT]esting
 *~
+
+obj/*.o
+obj/*.obj
+lib/*.lib
+lib/*.a
 
 
 #################

@@ -68,6 +68,8 @@ int XX_httplib_is_websocket_protocol( const struct mg_connection *conn ) {
 
 #else  /* defined(USE_WEBSOCKET) */
 
+	(void)conn;
+
 	return 0;
 
 #endif  /* defined(USE_WEBSOCKET) */

@@ -24,8 +24,6 @@
 
 
 
-#define NO_HTTPLIB_MALLOC_OVERRIDE
-
 #include "libhttp-private.h"
 
 

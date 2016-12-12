@@ -36,12 +36,12 @@ int XX_httplib_scan_directory( struct mg_connection *conn, const char *dir, void
 	struct de de;
 	int truncated;
 
-	if ((dirp = mg_opendir(conn, dir)) == NULL) {
+	if ((dirp = XX_httplib_opendir(conn, dir)) == NULL) {
 		return 0;
 	} else {
 		de.conn = conn;
 
-		while ((dp = mg_readdir(dirp)) != NULL) {
+		while ((dp = XX_httplib_readdir(dirp)) != NULL) {
 			/* Do not show current dir and hidden files */
 			if (!strcmp(dp->d_name, ".") || !strcmp(dp->d_name, "..") || XX_httplib_must_hide_file(conn, dp->d_name)) continue;
 
@@ -65,7 +65,7 @@ int XX_httplib_scan_directory( struct mg_connection *conn, const char *dir, void
 			de.file_name = dp->d_name;
 			cb(&de, data);
 		}
-		(void)mg_closedir(dirp);
+		(void)XX_httplib_closedir(dirp);
 	}
 	return 1;
 

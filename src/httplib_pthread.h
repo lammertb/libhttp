@@ -1,7 +1,5 @@
 /* 
- * Copyright (c) 2016 Lammert Bies
- * Copyright (c) 2013-2016 the Civetweb developers
- * Copyright (c) 2004-2013 Sergey Lyubka
+ * Copyright (C) 2016 Lammert Bies
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,24 +22,32 @@
 
 
 
-#include "libhttp-private.h"
+extern pthread_mutex_t *	XX_httplib_ssl_mutexes;
+extern pthread_key_t		XX_httplib_sTlsKey;
+extern int			XX_httplib_thread_idx_max;
 
-#include "httplib_pthread.h"
 
 
+#if defined(_WIN32)
 
-#ifdef _WIN32
+int		pthread_cond_broadcast( pthread_cond_t *cv );
+int		pthread_cond_destroy( pthread_cond_t *cv );
+int		pthread_cond_init( pthread_cond_t *cv, const void *unused );
+int		pthread_cond_signal( pthread_cond_t *cv );
+int		pthread_cond_timedwait( pthread_cond_t *cv, pthread_mutex_t *mutex, const struct timespec *abstime );
+int		pthread_cond_wait( pthread_cond_t *cv, pthread_mutex_t *mutex );
 
-int pthread_key_create( pthread_key_t *key, void (*_ignored)(void *) ) {
+int		pthread_key_create( pthread_key_t *key, void (*_ignored)(void *) );
+int		pthread_key_delete( pthread_key_t key );
 
-	(void)_ignored;
+int		pthread_mutex_destroy( pthread_mutex_t *mutex );
+int		pthread_mutex_init( pthread_mutex_t *mutex, void *unused );
+int		pthread_mutex_lock( pthread_mutex_t *mutex );
+int		pthread_mutex_trylock( pthread_mutex_t *mutex );
+int		pthread_mutex_unlock( pthread_mutex_t *mutex );
 
-	if ((key != 0)) {
-		*key = TlsAlloc();
-		return (*key != TLS_OUT_OF_INDEXES) ? 0 : -1;
-	}
-	return -2;
-
-}  /* pthread_key_create */
+void *		pthread_getspecific( pthread_key_t key );
+int		pthread_setspecific( pthread_key_t key, void *value );
+DWORD		pthread_self( void );
 
 #endif  /* _WIN32 */

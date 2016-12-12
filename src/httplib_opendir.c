@@ -31,7 +31,7 @@
 #if defined(_WIN32)
 
 /* Implementation of POSIX opendir/closedir/readdir for Windows. */
-static DIR * mg_opendir(const struct mg_connection *conn, const char *name) {
+DIR *XX_httplib_opendir( const struct mg_connection *conn, const char *name ) {
 
 	DIR *dir = NULL;
 	wchar_t wpath[PATH_MAX];
@@ -50,13 +50,13 @@ static DIR * mg_opendir(const struct mg_connection *conn, const char *name) {
 			dir->handle = FindFirstFileW(wpath, &dir->info);
 			dir->result.d_name[0] = '\0';
 		} else {
-			XX_http_free(dir);
+			XX_httplib_free(dir);
 			dir = NULL;
 		}
 	}
 
 	return dir;
 
-}  /* mg_opendir */
+}  /* XX_httplib_opendir */
 
 #endif /* _WIN32 */

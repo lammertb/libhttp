@@ -29,7 +29,7 @@
 
 #if defined(_WIN32)
 
-static int mg_mkdir(const struct mg_connection *conn, const char *path, int mode) {
+int XX_httplib_mkdir( const struct mg_connection *conn, const char *path, int mode ) {
 
 	wchar_t wbuf[PATH_MAX];
 
@@ -37,6 +37,6 @@ static int mg_mkdir(const struct mg_connection *conn, const char *path, int mode
 	XX_httplib_path_to_unicode(conn, path, wbuf, ARRAY_SIZE(wbuf));
 	return CreateDirectoryW(wbuf, NULL) ? 0 : -1;
 
-}  /* mg_mkdir */
+}  /* XX_httplib_mkdir */
 
 #endif /* _WIN32 */

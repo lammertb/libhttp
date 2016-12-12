@@ -26,11 +26,13 @@
 
 #include "libhttp-private.h"
 
+#include "httplib_pthread.h"
+
 
 
 #if defined(_WIN32)
 
-static int pthread_setspecific(pthread_key_t key, void *value) {
+int pthread_setspecific( pthread_key_t key, void *value ) {
 
 	return TlsSetValue(key, value) ? 0 : 1;
 

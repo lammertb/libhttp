@@ -60,7 +60,7 @@ int XX_httplib_put_dir( struct mg_connection *conn, const char *path ) {
 		buf[len] = '\0';
 
 		/* Try to create intermediate directory */
-		if (!XX_httplib_stat(conn, buf, &file) && mg_mkdir(conn, buf, 0755) != 0) {
+		if (!XX_httplib_stat(conn, buf, &file) && XX_httplib_mkdir(conn, buf, 0755) != 0) {
 			/* path does not exixt and can not be created */
 			res = -2;
 			break;

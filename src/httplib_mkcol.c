@@ -68,7 +68,7 @@ void XX_httplib_mkcol( struct mg_connection *conn, const char *path ) {
 		return;
 	}
 
-	rc = mg_mkdir( conn, path, 0755 );
+	rc = XX_httplib_mkdir( conn, path, 0755 );
 
 	if ( rc == 0 ) {
 

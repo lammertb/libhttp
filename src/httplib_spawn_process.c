@@ -33,7 +33,7 @@
 
 #define SIGKILL (0)
 
-static int kill(pid_t pid, int sig_num) {
+int XX_httplib_kill(pid_t pid, int sig_num) {
 
 	TerminateProcess((HANDLE)pid, (UINT)sig_num);
 	CloseHandle((HANDLE)pid);

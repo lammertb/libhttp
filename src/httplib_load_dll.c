@@ -28,6 +28,42 @@
 
 
 
+
+#if defined(_WIN32)
+
+#if !defined(NO_SSL_DL) && !defined(NO_SSL)
+/* If SSL is loaded dynamically, dlopen/dlclose is required. */
+/* Create substitutes for POSIX functions in Win32. */
+
+
+static HANDLE dlopen( const char *dll_name, int flags ) {
+
+	wchar_t wbuf[PATH_MAX];
+
+	(void)flags;
+	XX_httplib_path_to_unicode(NULL, dll_name, wbuf, ARRAY_SIZE(wbuf));
+	return LoadLibraryW(wbuf);
+
+}  /* dlopen */
+
+
+static int dlclose( void *handle ) {
+
+	int result;
+
+	if ( FreeLibrary((HMODULE)handle) != 0 ) result = 0;
+	else                                     result = -1;
+
+	return result;
+
+}  /* dlclose */
+
+#endif
+
+#endif
+
+
+
 /*
  * XX_httplib_load_dll( struct mg_context *ctx, const char *dll_name, struct ssl_func *sw );
  *
@@ -76,38 +112,3 @@ void *XX_httplib_load_dll( struct mg_context *ctx, const char *dll_name, struct 
 #endif /* NO_SSL_DL */
 
 #endif /* !NO_SSL */
-
-
-
-#if defined(_WIN32)
-
-#if !defined(NO_SSL_DL) && !defined(NO_SSL)
-/* If SSL is loaded dynamically, dlopen/dlclose is required. */
-/* Create substitutes for POSIX functions in Win32. */
-
-
-static HANDLE dlopen( const char *dll_name, int flags ) {
-
-	wchar_t wbuf[PATH_MAX];
-
-	(void)flags;
-	XX_httplib_path_to_unicode(NULL, dll_name, wbuf, ARRAY_SIZE(wbuf));
-	return LoadLibraryW(wbuf);
-
-}  /* dlopen */
-
-
-static int dlclose( void *handle ) {
-
-	int result;
-
-	if ( FreeLibrary((HMODULE)handle) != 0 ) result = 0;
-	else                                     result = -1;
-
-	return result;
-
-}  /* dlclose */
-
-#endif
-
-#endif

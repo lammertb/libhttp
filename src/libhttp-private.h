@@ -24,45 +24,6 @@
 
 
 
-/*
- * The library provides their own memory allocation functions with a debugging
- * version which counts the number of blocks and bytes allocated. The normal
- * allocation functions are therefore disabled here, unless a macro has been
- * set because a library function needs explicit access to the OS version of
- * the memory allocation functions.
- */
-
-#if !defined(NO_HTTPLIB_MALLOC_OVERRIDE)
-#ifdef malloc
-#undef malloc
-#endif
-#ifdef calloc
-#undef calloc
-#endif
-#ifdef realloc
-#undef realloc
-#endif
-#ifdef free
-#undef free
-#endif
-#ifdef snprintf
-#undef snprintf
-#endif
-#ifdef vsnprintf
-#undef vsnprintf
-#endif
-#define malloc		DO_NOT_USE_THIS_FUNCTION__USE_httplib_malloc
-#define calloc		DO_NOT_USE_THIS_FUNCTION__USE_httplib_calloc
-#define realloc		DO_NOT_USE_THIS_FUNCTION__USE_httplib_realloc
-#define free		DO_NOT_USE_THIS_FUNCTION__USE_httplib_free
-#define snprintf	DO_NOT_USE_THIS_FUNCTION__USE_httplib_snprintf
-#ifdef _WIN32 /* vsnprintf must not be used in any system, * \ \ \             \
-               * but this define only works well for Windows. */
-#define vsnprintf	DO_NOT_USE_THIS_FUNCTION__USE_httplib_vsnprintf
-#endif
-#endif  /* ! NO_HTTPLIB_MALLOC_OVERRIDE */
-
-
 #if defined(_WIN32)
 #if !defined(_CRT_SECURE_NO_WARNINGS)
 #define _CRT_SECURE_NO_WARNINGS /* Disable deprecation warning in VS2005 */
@@ -100,6 +61,7 @@
 #pragma warning(disable : 4306)
 /* conditional expression is constant: introduced by FD_SET(..) */
 #pragma warning(disable : 4127)
+#pragma warning(disable : 4548)
 /* non-constant aggregate initializer: issued due to missing C99 support */
 #pragma warning(disable : 4204)
 /* padding added after data member */
@@ -304,12 +266,12 @@ typedef long off_t;
 #define fileno(x) (_fileno(x))
 #endif /* !fileno MINGW #defines fileno */
 
-typedef HANDLE pthread_mutex_t;
-typedef DWORD pthread_key_t;
-typedef HANDLE pthread_t;
+typedef HANDLE		pthread_mutex_t;
+typedef DWORD		pthread_key_t;
+typedef HANDLE		pthread_t;
 typedef struct {
-	CRITICAL_SECTION threadIdSec;
-	struct mg_workerTLS *waiting_thread; /* The chain of threads */
+	CRITICAL_SECTION	threadIdSec;
+	struct mg_workerTLS *	waiting_thread; /* The chain of threads */
 } pthread_cond_t;
 
 #ifndef __clockid_t_defined
@@ -333,12 +295,6 @@ struct timespec {
 #endif
 
 #define pid_t HANDLE /* MINGW typedefs pid_t to int. Using #define here. */
-
-static int pthread_mutex_lock(pthread_mutex_t *);
-static int pthread_mutex_unlock(pthread_mutex_t *);
-static void path_to_unicode(const struct mg_connection *conn, const char *path, wchar_t *wbuf, size_t wbuf_len);
-static const char *mg_fgets(char *buf, size_t size, struct file *filep, char **p);
-
 
 /* POSIX dirent interface */
 struct dirent {
@@ -412,7 +368,6 @@ typedef unsigned short int in_port_t;
 #endif /* O_BINARY */
 #define closesocket(a) (close(a))
 #define mg_mkdir(conn, path, mode) (mkdir(path, mode))
-#define mg_remove(conn, x) (remove(x))
 #define mg_sleep(x) (usleep((x)*1000))
 #define mg_opendir(conn, x) (opendir(x))
 #define mg_closedir(x) (closedir(x))
@@ -697,6 +652,9 @@ struct mg_workerTLS {
 #endif
 };
 
+#if defined(_WIN32)
+extern CRITICAL_SECTION			global_log_file_lock;
+#endif
 
 #define PASSWORDS_FILE_NAME ".htpasswd"
 #define CGI_ENVIRONMENT_SIZE (4096)
@@ -953,7 +911,6 @@ mg_static_assert(sizeof(size_t) == 4 || sizeof(size_t) == 8, "size_t data type s
 
 #if defined(_WIN32_WCE)
 #define _beginthreadex(psec, stack, func, prm, flags, ptid)	(uintptr_t) CreateThread(psec, stack, func, prm, flags, ptid)
-#define remove(f) mg_remove(NULL, f)
 #define access(x, a) 1 /* not required anyway */
 /* WinCE-TODO: define stat, remove, rename, _rmdir, _lseeki64 */
 #define EEXIST 1 /* TODO: See Windows error codes */
@@ -968,6 +925,11 @@ typedef int		socklen_t;
 #endif /* NO_SOCKLEN_T */
 #define _DARWIN_UNLIMITED_SELECT
 
+#if defined(_WIN32)
+#define SIGKILL (0)
+int		clock_gettime( clockid_t clk_id, struct timespec *tp );
+int		poll( struct pollfd *pfd, unsigned int n, int milliseconds );
+#endif
 
 
 void			SHA1Final( unsigned char digest[20], SHA1_CTX *context );
@@ -985,6 +947,7 @@ int			XX_httplib_check_authorization( struct mg_connection *conn, const char *pa
 int			XX_httplib_check_password( const char *method, const char *ha1, const char *uri, const char *nonce, const char *nc, const char *cnonce, const char *qop, const char *response );
 void			XX_httplib_close_all_listening_sockets( struct mg_context *ctx );
 void			XX_httplib_close_connection( struct mg_connection *conn );
+int			XX_httplib_closedir( DIR *dir );
 void			XX_httplib_close_socket_gracefully( struct mg_connection *conn );
 int WINCDECL		XX_httplib_compare_dir_entries( const void *p1, const void *p2 );
 int			XX_httplib_connect_socket( struct mg_context *ctx, const char *host, int port, int use_ssl, char *ebuf, size_t ebuf_len, SOCKET *sock, union usa *sa );
@@ -1037,14 +1000,17 @@ int			XX_httplib_is_valid_http_method( const char *method );
 int			XX_httplib_is_valid_port( unsigned long port );
 int			XX_httplib_is_websocket_protocol( const struct mg_connection *conn );
 int			XX_httplib_join_thread( pthread_t threadid );
+int			XX_httplib_kill(pid_t pid, int sig_num);
 void *			XX_httplib_load_dll( struct mg_context *ctx, const char *dll_name, struct ssl_func *sw );
 void			XX_httplib_log_access( const struct mg_connection *conn );
 int			XX_httplib_lowercase( const char *s );
 int			XX_httplib_match_prefix(const char *pattern, size_t pattern_len, const char *str);
 void			XX_httplib_mkcol( struct mg_connection *conn, const char *path );
+int			XX_httplib_mkdir( const struct mg_connection *conn, const char *path, int mode );
 int			XX_httplib_must_hide_file( struct mg_connection *conn, const char *path );
 const char *		XX_httplib_next_option( const char *list, struct vec *val, struct vec *eq_val );
 void			XX_httplib_open_auth_file( struct mg_connection *conn, const char *path, struct file *filep );
+DIR *			XX_httplib_opendir( const struct mg_connection *conn, const char *name );
 int			XX_httplib_parse_auth_header( struct mg_connection *conn, char *buf, size_t buf_size, struct ah *ah );
 time_t			XX_httplib_parse_date_string( const char *datetime );
 int			XX_httplib_parse_http_headers( char **buf, struct mg_request_info *ri );
@@ -1064,9 +1030,11 @@ void			XX_httplib_put_file( struct mg_connection *conn, const char *path );
 int			XX_httplib_read_auth_file( struct file *filep, struct read_auth_file_struct *workdata );
 int			XX_httplib_read_request( FILE *fp, struct mg_connection *conn, char *buf, int bufsiz, int *nread );
 void			XX_httplib_read_websocket( struct mg_connection *conn, mg_websocket_data_handler ws_data_handler, void *callback_data );
+struct dirent *		XX_httplib_readdir( DIR *dir );
 void *			XX_httplib_realloc2( void *ptr, size_t size );
 void			XX_httplib_redirect_to_https_port( struct mg_connection *conn, int ssl_index );
 int			XX_httplib_refresh_trust( struct mg_connection *conn );
+int			XX_httplib_remove( const struct mg_connection *conn, const char *path );
 void			XX_httplib_remove_bad_file( const struct mg_connection *conn, const char *path );
 int			XX_httplib_remove_directory( struct mg_connection *conn, const char *dir );
 void			XX_httplib_remove_double_dots_and_double_slashes( char *s );
@@ -1171,8 +1139,5 @@ extern const struct uriprot_tp	XX_httplib_abs_uri_protocols[];
 extern struct mg_option		XX_httplib_config_options[];
 extern int			XX_httplib_cryptolib_users;
 extern struct ssl_func		XX_httplib_crypto_sw[];
-extern pthread_mutex_t *	XX_httplib_ssl_mutexes;
 extern struct ssl_func		XX_httplib_ssl_sw[];
 extern int			XX_httplib_sTlsInit;
-extern pthread_key_t		XX_httplib_sTlsKey;
-extern int			XX_httplib_thread_idx_max;

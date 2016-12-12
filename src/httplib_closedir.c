@@ -30,7 +30,7 @@
 
 #if defined(_WIN32)
 
-int mg_closedir(DIR *dir) {
+int XX_httplib_closedir( DIR *dir ) {
 
 	int result = 0;
 
@@ -46,6 +46,6 @@ int mg_closedir(DIR *dir) {
 
 	return result;
 
-}  /* mg_closedir */
+}  /* XX_httplib_closedir */
 
 #endif /* _WIN32 */

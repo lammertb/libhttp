@@ -26,6 +26,8 @@
 
 #include "libhttp-private.h"
 
+#include "httplib_pthread.h"
+
 
 
 static void *	worker_thread_run( struct worker_thread_args *thread_args );

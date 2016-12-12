@@ -37,7 +37,7 @@
 
 void XX_httplib_remove_bad_file( const struct mg_connection *conn, const char *path ) {
 
-	int r = mg_remove(conn, path);
+	int r = XX_httplib_remove( conn, path );
 
 	if (r != 0) mg_cry(conn, "%s: Cannot remove invalid file %s", __func__, path);
 

@@ -30,7 +30,7 @@
 
 #if defined(_WIN32)
 
-struct dirent * mg_readdir(DIR *dir) {
+struct dirent *XX_httplib_readdir( DIR *dir ) {
 
 	struct dirent *result = 0;
 
@@ -52,6 +52,6 @@ struct dirent * mg_readdir(DIR *dir) {
 
 	return result;
 
-}  /* mg_readdir */
+}  /* XX_httplib_readdir */
 
 #endif /* _WIN32 */

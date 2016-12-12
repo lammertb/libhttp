@@ -26,6 +26,9 @@
 
 #include "libhttp-private.h"
 
+#include "httplib_pthread.h"
+
+
 
 #if defined(_WIN32)
 

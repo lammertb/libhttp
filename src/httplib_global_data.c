@@ -31,7 +31,7 @@
 #ifdef _WIN32
 CRITICAL_SECTION			global_log_file_lock;
 
-pthread_mutex_undefined_struct *	XX_httplib_pthread_mutex_attr = NULL;
+struct pthread_mutex_undefined_struct *	XX_httplib_pthread_mutex_attr = NULL;
 #else  /* _WIN32 */
 pthread_mutexattr_t			XX_httplib_pthread_mutex_attr;
 #endif /* _WIN32 */

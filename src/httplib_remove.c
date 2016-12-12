@@ -28,13 +28,18 @@
 
 
 
-#if defined(_WIN32)
+int XX_httplib_remove( const struct mg_connection *conn, const char *path ) {
 
-static int mg_remove(const struct mg_connection *conn, const char *path) {
+#if defined(_WIN32)
 
 	wchar_t wbuf[PATH_MAX];
 	XX_httplib_path_to_unicode(conn, path, wbuf, ARRAY_SIZE(wbuf));
 	return DeleteFileW(wbuf) ? 0 : -1;
-}
 
-#endif /* _WIN32 */
+#else  /* _WIN32 */
+
+	return remove( path );
+
+#endif  /* _WIN32 */
+
+}  /* XX_httplib_remove */

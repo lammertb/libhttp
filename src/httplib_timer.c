@@ -24,6 +24,10 @@
 
 
 
+#include "libhttp-private.h"
+
+
+
 #if defined(USE_TIMERS)
 
 #if !defined(MAX_TIMERS)
