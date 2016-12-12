@@ -24,7 +24,7 @@
 
 
 
-#include "libhttp-private.h"
+#include "httplib_main.h"
 
 
 /* Behaves like realloc(), but frees original pointer on failure */

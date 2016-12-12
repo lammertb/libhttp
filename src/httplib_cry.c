@@ -24,7 +24,7 @@
 
 
 
-#include "libhttp-private.h"
+#include "httplib_main.h"
 
 
 /* Print error message to the opened error log stream. */

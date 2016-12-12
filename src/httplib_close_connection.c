@@ -24,8 +24,7 @@
 
 
 
-#include "libhttp-private.h"
-
+#include "httplib_main.h"
 #include "httplib_pthread.h"
 
 

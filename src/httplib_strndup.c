@@ -24,7 +24,7 @@
 
 
 
-#include "libhttp-private.h"
+#include "httplib_main.h"
 
 
 char * XX_httplib_strndup( const char *ptr, size_t len ) {

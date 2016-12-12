@@ -24,7 +24,7 @@
 
 
 
-#include "libhttp-private.h"
+#include "httplib_main.h"
 
 
 /* Read from IO channel - opened file descriptor, socket, or SSL descriptor.

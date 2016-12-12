@@ -24,7 +24,7 @@
 
 
 
-#include "libhttp-private.h"
+#include "httplib_main.h"
 
 
 /* difftime for struct timespec. Return value is in seconds. */

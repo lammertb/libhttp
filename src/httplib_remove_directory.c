@@ -24,7 +24,9 @@
 
 
 
-#include "libhttp-private.h"
+#include "httplib_main.h"
+
+
 
 int XX_httplib_remove_directory( struct mg_connection *conn, const char *dir ) {
 

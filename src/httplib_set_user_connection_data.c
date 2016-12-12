@@ -24,7 +24,7 @@
 
 
 
-#include "libhttp-private.h"
+#include "httplib_main.h"
 
 
 void mg_set_user_connection_data(struct mg_connection *conn, void *data) {

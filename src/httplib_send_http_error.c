@@ -24,7 +24,7 @@
 
 
 
-#include "libhttp-private.h"
+#include "httplib_main.h"
 
 
 void XX_httplib_send_http_error( struct mg_connection *conn, int status, const char *fmt, ... ) {
