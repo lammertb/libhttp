@@ -22,11 +22,8 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
-
-
+#include "httplib_string.h"
 
 /*
  * void XX_httplib_construct_etag( char *buf, size_t buf_len, const struct file *filep );

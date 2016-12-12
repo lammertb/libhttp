@@ -22,11 +22,8 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
-
-
+#include "httplib_string.h"
 
 /*
  * int XX_httplib_getreq( struct mg_connection *conn, char *ebuf, size_t ebuf_len, int *err );

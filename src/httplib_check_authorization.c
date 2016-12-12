@@ -22,10 +22,8 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
-
+#include "httplib_string.h"
 
 /* Return 1 if request is authorised, 0 otherwise. */
 int XX_httplib_check_authorization( struct mg_connection *conn, const char *path ) {

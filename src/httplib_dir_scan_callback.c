@@ -22,12 +22,9 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
 #include "httplib_memory.h"
-
-
+#include "httplib_string.h"
 
 void XX_httplib_dir_scan_callback( struct de *de, void *data ) {
 

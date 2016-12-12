@@ -22,11 +22,8 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
-
-
+#include "httplib_string.h"
 
 /* Return 1 on success. Always initializes the ah structure. */
 int XX_httplib_parse_auth_header(struct mg_connection *conn, char *buf, size_t buf_size, struct ah *ah) {

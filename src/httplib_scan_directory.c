@@ -22,11 +22,8 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
-
-
+#include "httplib_string.h"
 
 int XX_httplib_scan_directory( struct mg_connection *conn, const char *dir, void *data, void (*cb)(struct de *, void *) ) {
 

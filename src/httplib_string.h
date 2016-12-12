@@ -1,7 +1,5 @@
 /* 
- * Copyright (c) 2016 Lammert Bies
- * Copyright (c) 2013-2016 the Civetweb developers
- * Copyright (c) 2004-2013 Sergey Lyubka
+ * Copyright (C) 2016 Lammert Bies
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,16 +20,11 @@
  * THE SOFTWARE.
  */
 
-#include "httplib_main.h"
-#include "httplib_memory.h"
-#include "httplib_string.h"
 
-char * XX_httplib_strndup( const char *ptr, size_t len ) {
 
-	char *p;
-
-	if ((p = (char *)XX_httplib_malloc(len + 1)) != NULL) XX_httplib_strlcpy(p, ptr, len + 1);
-
-	return p;
-
-}  /* XX_httplib_strndup */
+void			XX_httplib_snprintf( const struct mg_connection *conn, int *truncated, char *buf, size_t buflen, PRINTF_FORMAT_STRING(const char *fmt), ... ) PRINTF_ARGS(5, 6);
+const char *		XX_httplib_strcasestr( const char *big_str, const char *small_str );
+char *			XX_httplib_strdup( const char *str );
+char *			XX_httplib_strndup( const char *ptr, size_t len );
+int			XX_httplib_vprintf( struct mg_connection *conn, const char *fmt, va_list ap );
+void			XX_httplib_vsnprintf( const struct mg_connection *conn, int *truncated, char *buf, size_t buflen, const char *fmt, va_list ap );

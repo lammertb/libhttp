@@ -22,10 +22,8 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
-
+#include "httplib_string.h"
 
 /* HCP24: some changes to compare hole var_name */
 int mg_get_cookie(const char *cookie_header, const char *var_name, char *dst, size_t dst_size) {

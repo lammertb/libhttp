@@ -22,11 +22,8 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
-
-
+#include "httplib_string.h"
 
 static void send_ssi_file(struct mg_connection *, const char *, struct file *, int);
 

@@ -22,10 +22,8 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
-
+#include "httplib_string.h"
 
 void XX_httplib_send_http_error( struct mg_connection *conn, int status, const char *fmt, ... ) {
 

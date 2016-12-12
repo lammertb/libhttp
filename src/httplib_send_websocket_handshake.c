@@ -22,11 +22,8 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
-
-
+#include "httplib_string.h"
 
 /*
  * int XX_httplib_send_websocket_handshake( struct mg_connection *conn, const char *websock_key );

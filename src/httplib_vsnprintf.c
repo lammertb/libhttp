@@ -22,11 +22,8 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
-
-
+#include "httplib_string.h"
 
 /* Return null terminated string of given maximum length.
  * Report errors if length is exceeded. */

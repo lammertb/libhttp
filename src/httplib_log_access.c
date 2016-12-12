@@ -22,12 +22,9 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
 #include "httplib_ssl.h"
-
-
+#include "httplib_string.h"
 
 static const char *header_val( const struct mg_connection *conn, const char *header );
 

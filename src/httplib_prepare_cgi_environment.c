@@ -22,13 +22,10 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
 #include "httplib_memory.h"
 #include "httplib_ssl.h"
-
-
+#include "httplib_string.h"
 
 /*
  * void XX_httplib_prepare_cgi_environment( struct mg_connection *conn, const char *prog, struct cgi_environment *env );

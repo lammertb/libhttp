@@ -22,11 +22,8 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
-
-
+#include "httplib_string.h"
 
 int mg_printf( struct mg_connection *conn, const char *fmt, ... ) {
 

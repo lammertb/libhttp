@@ -22,11 +22,8 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
-
-
+#include "httplib_string.h"
 
 /*
  * int mg_get_response( struct mg_connection *conn, char *ebuf, size_t ebuf_len, int timeout );

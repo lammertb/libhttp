@@ -22,10 +22,8 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
-
+#include "httplib_string.h"
 
 #if defined(_WIN32)
 

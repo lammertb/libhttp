@@ -22,15 +22,12 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
 #include "httplib_memory.h"
-
-
+#include "httplib_string.h"
 
 /* Alternative alloc_vprintf() for non-compliant C runtimes */
-static int alloc_vprintf2(char **buf, const char *fmt, va_list ap) {
+static int alloc_vprintf2( char **buf, const char *fmt, va_list ap ) {
 
 	va_list ap_copy;
 	size_t size = MG_BUF_LEN / 4;

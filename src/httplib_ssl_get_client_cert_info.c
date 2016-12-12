@@ -22,13 +22,10 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
 #include "httplib_memory.h"
 #include "httplib_ssl.h"
-
-
+#include "httplib_string.h"
 
 #if !defined(NO_SSL)
 

@@ -22,12 +22,9 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
 #include "httplib_memory.h"
-
-
+#include "httplib_string.h"
 
 /*
  * void XX_httplib_handle_cgi_request( struct mg_connection *conn, const char *prog );
