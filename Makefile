@@ -387,120 +387,184 @@ ${LIBDIR}libhttp${LIBEXT} :	\
 # Individual source files with their header dependencies
 #
 
-LIB_SOURCES =	src/extern_md5.c					\
-		src/extern_sha1.c					\
-		src/extern_ssl_lut.c					\
-		src/httplib_accept_new_connection.c			\
-		src/httplib_addenv.c					\
-		src/httplib_atomic_dec.c				\
-		src/httplib_atomic_inc.c				\
-		src/httplib_authorize.c					\
-		src/httplib_base64_encode.c				\
-		src/httplib_check_acl.c					\
-		src/httplib_check_authorization.c			\
-		src/httplib_check_feature.c				\
-		src/httplib_check_password.c				\
-		src/httplib_close_all_listening_sockets.c		\
+${OBJDIR}extern_md5${OBJEXT}				: ${SRCDIR}extern_md5.c
 
-${OBJDIR}httplib_close_connection${OBJEXT}	: ${SRCDIR}httplib_close_connection.c	\
-						  ${SRCDIR}httplib_pthread.h
+${OBJDIR}extern_sha1${OBJEXT}				: ${SRCDIR}extern_sha1.c
 
-TEST=		src/httplib_close_socket_gracefully.c			\
-		src/httplib_closedir.c					\
-		src/httplib_compare_dir_entries.c			\
-		src/httplib_config_options.c				\
+${OBJDIR}extern_ssl_lut${OBJEXT}			: ${SRCDIR}extern_ssl_lut.c
 
+${OBJDIR}httplib_accept_new_connection${OBJEXT}		: ${SRCDIR}httplib_accept_new_connection.c
 
+${OBJDIR}httplib_addenv${OBJEXT}			: ${SRCDIR}httplib_addenv.c
 
-${OBJDIR}httplib_connect_client${OBJEXT}	: ${SRCDIR}httplib_connect_client.c	\
-						  ${SRCDIR}httplib_pthread.h
+${OBJDIR}httplib_atomic_dec${OBJEXT}			: ${SRCDIR}httplib_atomic_dec.c
 
-TEST=		src/httplib_connect_socket.c				\
-		src/httplib_connect_websocket_client.c			\
-		src/httplib_construct_etag.c				\
+${OBJDIR}httplib_atomic_inc${OBJEXT}			: ${SRCDIR}httplib_atomic_inc.c
 
+${OBJDIR}httplib_authorize${OBJEXT}			: ${SRCDIR}httplib_authorize.c
 
-${OBJDIR}httplib_consume_socket${OBJEXT}	: ${SRCDIR}httplib_consume_socket.c	\
-						  ${SRCDIR}httplib_pthread.h
+${OBJDIR}httplib_base64_encode${OBJEXT}			: ${SRCDIR}httplib_base64_encode.c
 
+${OBJDIR}httplib_check_acl${OBJEXT}			: ${SRCDIR}httplib_check_acl.c
 
+${OBJDIR}httplib_check_authorization${OBJEXT}		: ${SRCDIR}httplib_check_authorization.c
 
-TEST=		src/httplib_cry.c					\
-		src/httplib_delete_file.c				\
-		src/httplib_difftimespec.c				\
-		src/httplib_dir_scan_callback.c				\
-		src/httplib_discard_unread_request_data.c		\
-		src/httplib_download.c					\
-		src/httplib_event_queue.c				\
-		src/httplib_fc.c					\
-		src/httplib_fclose.c					\
-		src/httplib_fclose_on_exec.c				\
-		src/httplib_fgets.c					\
-		src/httplib_fopen.c					\
-		src/httplib_forward_body_data.c				\
+${OBJDIR}httplib_check_feature${OBJEXT}			: ${SRCDIR}httplib_check_feature.c
 
+${OBJDIR}httplib_check_password${OBJEXT}		: ${SRCDIR}httplib_check_password.c
 
-${OBJDIR}httplib_free_context${OBJEXT}		: ${SRCDIR}httplib_free_context.c	\
-						  ${SRCDIR}httplib_pthread.h
+${OBJDIR}httplib_close_all_listening_sockets${OBJDIR}	: ${SRCDIR}httplib_close_all_listening_sockets.c
 
+${OBJDIR}httplib_close_connection${OBJEXT}		: ${SRCDIR}httplib_close_connection.c	\
+							  ${SRCDIR}httplib_pthread.h
 
+${OBJDIR}httplib_close_socket_gracefully${OBJEXT}	: ${SRCDIR}httplib_close_socket_gracefully.c
 
-TEST=		src/httplib_get_builtin_mime_type.c			\
-		src/httplib_get_context.c				\
-		src/httplib_get_cookie.c				\
-		src/httplib_get_first_ssl_listener_index.c		\
-		src/httplib_get_header.c				\
-		src/httplib_get_mime_type.c				\
-		src/httplib_get_option.c				\
-		src/httplib_get_option_index.c				\
-		src/httplib_get_random.c				\
-		src/httplib_get_rel_url_at_current_server.c		\
-		src/httplib_get_remote_ip.c				\
-		src/httplib_get_request_handler.c			\
-		src/httplib_get_request_info.c				\
-		src/httplib_get_request_len.c				\
-		src/httplib_get_response.c				\
-		src/httplib_get_response_code_text.c			\
-		src/httplib_get_server_ports.c				\
-		src/httplib_get_system_name.c				\
-		src/httplib_get_uri_type.c				\
-		src/httplib_get_user_connection_data.c			\
-		src/httplib_get_user_data.c				\
-		src/httplib_get_valid_options.c				\
-		src/httplib_get_var.c					\
-		src/httplib_getreq.c					\
-		src/httplib_global_data.c				\
-		src/httplib_gmt_time_string.c				\
-		src/httplib_handle_cgi_request.c			\
-		src/httplib_handle_directory_request.c			\
-		src/httplib_handle_file_based_request.c			\
-		src/httplib_handle_form_request.c			\
-		src/httplib_handle_not_modified_static_file_request.c	\
-		src/httplib_handle_propfind.c				\
-		src/httplib_handle_request.c				\
-		src/httplib_handle_static_file_request.c		\
-		src/httplib_handle_websocket_request.c			\
-		src/httplib_header_has_option.c				\
-		src/httplib_inet_pton.c					\
+${OBJDIR}httplib_closedir${OBJEXT}			: ${SRCDIR}httplib_closedir.c
 
+${OBJDIR}httplib_compare_dir_entries${OBJEXT}		: ${SRCDIR}httplib_compare_dir_entries.c
 
-${OBJDIR}httplib_initialize_ssl${OBJEXT}	: ${SRCDIR}httplib_initialize_ssl.c	\
-						  ${SRCDIR}httplib_pthread.h
+${OBJDIR}httplib_config_options${OBJEXT}		: ${SRCDIR}httplib_config_options.c
 
+${OBJDIR}httplib_connect_client${OBJEXT}		: ${SRCDIR}httplib_connect_client.c	\
+							  ${SRCDIR}httplib_pthread.h
 
-TEST=		src/httplib_interpret_uri.c				\
-		src/httplib_is_authorized_for_put.c			\
-		src/httplib_is_file_in_memory.c				\
-		src/httplib_is_file_opened.c				\
-		src/httplib_is_not_modified.c				\
-		src/httplib_is_put_or_delete_method.c			\
-		src/httplib_is_valid_http_method.c			\
-		src/httplib_is_valid_port.c				\
-		src/httplib_is_websocket_protocol.c			\
-		src/httplib_join_thread.c				\
-		src/httplib_load_dll.c					\
+${OBJDIR}httplib_connect_socket${OBJEXT}		: ${SRCDIR}httplib_connect_socket.c
 
+${OBJDIR}httplib_connect_websocket_client${OBJEXT}	: ${SRCDIR}httplib_connect_websocket_client.c
 
+${OBJDIR}httplib_construct_etag${OBJEXT}		: ${SRCDIR}httplib_construct_etag.c
+
+${OBJDIR}httplib_consume_socket${OBJEXT}		: ${SRCDIR}httplib_consume_socket.c	\
+							  ${SRCDIR}httplib_pthread.h
+
+${OBJDIR}httplib_cry${OBJEXT}				: ${SRCDIR}httplib_cry.c
+
+${OBJDIR}httplib_delete_file${OBJEXT}			: ${SRCDIR}httplib_delete_file.c
+
+${OBJDIR}httplib_difftimespec${OBJEXT}			: ${SRCDIR}httplib_difftimespec.c
+
+${OBJDIR}httplib_dir_scan_callback${OBJEXT}		: ${SRCDIR}httplib_dir_scan_callback.c
+
+${OBJDIR}httplib_discard_unread_request_data${OBJEXT}	: ${SRCDIR}httplib_discard_unread_request_data.c
+
+${OBJDIR}httplib_download${OBJEXT}			: ${SRCDIR}httplib_download.c
+
+${OBJDIR}httplib_event_queue${OBJEXT}			: ${SRCDIR}httplib_event_queue.c
+
+${OBJDIR}httplib_fc${OBJEXT}				: ${SRCDIR}httplib_fc.c
+
+${OBJDIR}httplib_fclose${OBJEXT}			: ${SRCDIR}httplib_fclose.c
+
+${OBJDIR}httplib_fclose_on_exec${OBJEXT}		: ${SRCDIR}httplib_fclose_on_exec.c
+
+${OBJDIR}httplib_fgets${OBJEXT}				: ${SRCDIR}httplib_fgets.c
+
+${OBJDIR}httplib_fopen${OBJEXT}				: ${SRCDIR}httplib_fopen.c
+
+${OBJDIR}httplib_forward_body_data${OBJEXT}		: ${SRCDIR}httplib_forward_body_data.c
+
+${OBJDIR}httplib_free_context${OBJEXT}			: ${SRCDIR}httplib_free_context.c	\
+							  ${SRCDIR}httplib_pthread.h
+
+${OBJDIR}httplib_get_builtin_mime_type${OBJEXT}		: ${SRCDIR}httplib_get_builtin_mime_type.c
+
+${OBJDIR}httplib_get_context${OBJEXT}			: ${SRCDIR}httplib_get_context.c
+
+${OBJDIR}httplib_get_cookie${OBJEXT}			: ${SRCDIR}httplib_get_cookie.c
+
+${OBJDIR}httplib_get_first_ssl_listener_index${OBJEXT}	: ${SRCDIR}httplib_get_first_ssl_listener_index.c
+
+${OBJDIR}httplib_get_header${OBJEXT}			: ${SRCDIR}httplib_get_header.c
+
+${OBJDIR}httplib_get_mime_type${OBJEXT}			: ${SRCDIR}httplib_get_mime_type.c
+
+${OBJDIR}httplib_get_option${OBJEXT}			: ${SRCDIR}httplib_get_option.c
+
+${OBJDIR}httplib_get_option_index${OBJEXT}		: ${SRCDIR}httplib_get_option_index.c
+
+${OBJDIR}httplib_get_random${OBJEXT}			: ${SRCDIR}httplib_get_random.c
+
+${OBJDIR}httplib_get_rel_url_at_current_server${OBJEXT}	: ${SRCDIR}httplib_get_rel_url_at_current_server.c
+
+${OBJDIR}httplib_get_remote_ip${OBJEXT}			: ${SRCDIR}httplib_get_remote_ip.c
+
+${OBJDIR}httplib_get_request_handler${OBJEXT}		: ${SRCDIR}httplib_get_request_handler.c
+
+${OBJDIR}httplib_get_request_info${OBJEXT}		: ${SRCDIR}httplib_get_request_info.c
+
+${OBJDIR}httplib_get_request_len${OBJEXT}		: ${SRCDIR}httplib_get_request_len.c
+
+${OBJDIR}httplib_get_response${OBJEXT}			: ${SRCDIR}httplib_get_response.c
+
+${OBJDIR}httplib_get_response_code_text${OBJEXT}	: ${SRCDIR}httplib_get_response_code_text.c
+
+${OBJDIR}httplib_get_server_ports${OBJEXT}		: ${SRCDIR}httplib_get_server_ports.c
+
+${OBJDIR}httplib_get_system_name${OBJEXT}		: ${SRCDIR}httplib_get_system_name.c
+
+${OBJDIR}httplib_get_uri_type${OBJEXT}			: ${SRCDIR}httplib_get_uri_type.c
+
+${OBJDIR}httplib_get_user_connection_data${OBJEXT}	: ${SRCDIR}httplib_get_user_connection_data.c
+
+${OBJDIR}httplib_get_user_data${OBJEXT}			: ${SRCDIR}httplib_get_user_data.c
+
+${OBJDIR}httplib_get_valid_options${OBJEXT}		: ${SRCDIR}httplib_get_valid_options.c
+
+${OBJDIR}httplib_get_var${OBJEXT}			: ${SRCDIR}httplib_get_var.c
+
+${OBJDIR}httplib_getreq${OBJEXT}			: ${SRCDIR}httplib_getreq.c
+
+${OBJDIR}httplib_global_data${OBJEXT}			: ${SRCDIR}httplib_global_data.c
+
+${OBJDIR}httplib_gmt_time_string${OBJEXT}		: ${SRCDIR}httplib_gmt_time_string.c
+
+${OBJDIR}httplib_handle_cgi_request${OBJEXT}		: ${SRCDIR}httplib_handle_cgi_request.c
+
+${OBJDIR}httplib_handle_directory_request${OBJEXT}	: ${SRCDIR}httplib_handle_directory_request.c
+
+${OBJDIR}httplib_handle_file_based_request${OBJEXT}	: ${SRCDIR}httplib_handle_file_based_request.c
+
+${OBJDIR}httplib_handle_form_request${OBJEXT}		: ${SRCDIR}httplib_handle_form_request.c
+
+${OBJDIR}httplib_handle_not_modified_static_file_request${OBJEXT}	: ${SRCDIR}httplib_handle_not_modified_static_file_request.c
+
+${OBJDIR}httplib_handle_propfind${OBJEXT}		: ${SRCDIR}httplib_handle_propfind.c
+
+${OBJDIR}httplib_handle_request${OBJEXT}		: ${SRCDIR}httplib_handle_request.c
+
+${OBJDIR}httplib_handle_static_file_request${OBJEXT}	: ${SRCDIR}httplib_handle_static_file_request.c
+
+${OBJDIR}httplib_handle_websocket_request${OBJEXT}	: ${SRCDIR}httplib_handle_websocket_request.c
+
+${OBJDIR}httplib_header_has_option${OBJEXT}		: ${SRCDIR}httplib_header_has_option.c
+
+${OBJDIR}httplib_inet_pton${OBJEXT}			: ${SRCDIR}httplib_inet_pton.c
+
+${OBJDIR}httplib_initialize_ssl${OBJEXT}		: ${SRCDIR}httplib_initialize_ssl.c	\
+							  ${SRCDIR}httplib_pthread.h
+
+${OBJDIR}httplib_interpret_uri${OBJEXT}			: ${SRCDIR}httplib_interpret_uri.c
+
+${OBJDIR}httplib_is_authorized_for_put${OBJEXT}		: ${SRCDIR}httplib_is_authorized_for_put.c
+
+${OBJDIR}httplib_is_file_in_memory${OBJEXT}		: ${SRCDIR}httplib_is_file_in_memory.c
+
+${OBJDIR}httplib_is_file_opened${OBJEXT}		: ${SRCDIR}httplib_is_file_opened.c
+
+${OBJDIR}httplib_is_not_modified${OBJEXT}		: ${SRCDIR}httplib_is_not_modified.c
+
+${OBJDIR}httplib_is_put_or_delete_method${OBJEXT}	: ${SRCDIR}httplib_is_put_or_delete_method.c
+
+${OBJDIR}httplib_is_valid_http_method${OBJEXT}		: ${SRCDIR}httplib_is_valid_http_method.c
+
+${OBJDIR}httplib_is_valid_port${OBJEXT}			: ${SRCDIR}httplib_is_valid_port.c
+
+${OBJDIR}httplib_is_websocket_protocol${OBJEXT}		: ${SRCDIR}httplib_is_websocket_protocol.c
+
+${OBJDIR}httplib_join_thread${OBJEXT}			: ${SRCDIR}httplib_join_thread.c
+
+${OBJDIR}httplib_load_dll${OBJEXT}			: ${SRCDIR}httplib_load_dll.c
 
 ${OBJDIR}httplib_lock_unlock_connection${OBJEXT}	: ${SRCDIR}httplib_lock_unlock_connection.c	\
 							  ${SRCDIR}httplib_pthread.h
@@ -508,142 +572,209 @@ ${OBJDIR}httplib_lock_unlock_connection${OBJEXT}	: ${SRCDIR}httplib_lock_unlock_
 ${OBJDIR}httplib_lock_unlock_context${OBJEXT}		: ${SRCDIR}httplib_lock_unlock_context.c	\
 							  ${SRCDIR}httplib_pthread.h
 
+${OBJDIR}httplib_log_access${OBJEXT}			: ${SRCDIR}httplib_log_access.c
 
+${OBJDIR}httplib_lowercase${OBJEXT}			: ${SRCDIR}httplib_lowercase.c
 
-TEST=		src/httplib_log_access.c				\
-		src/httplib_lowercase.c					\
-		src/httplib_malloc.c					\
-
-
+${OBJDIR}httplib_malloc${OBJEXT}			: ${SRCDIR}httplib_malloc.c
 
 ${OBJDIR}httplib_master_thread${OBJEXT}			: ${SRCDIR}httplib_master_thread.c		\
 							  ${SRCDIR}httplib_pthread.h
 
+${OBJDIR}httplib_match_prefix${OBJEXT}			: ${SRCDIR}httplib_match_prefix.c
 
+${OBJDIR}httplib_md5${OBJEXT}				: ${SRCDIR}httplib_md5.c
 
+${OBJDIR}httplib_mkcol${OBJEXT}				: ${SRCDIR}httplib_mkcol.c
 
-TEST=		src/httplib_match_prefix.c				\
-		src/httplib_md5.c					\
-		src/httplib_mkcol.c					\
-		src/httplib_mkdir.c					\
-		src/httplib_modify_passwords_file.c			\
-		src/httplib_must_hide_file.c				\
-		src/httplib_next_option.c				\
-		src/httplib_open_auth_file.c				\
-		src/httplib_opendir.c					\
-		src/httplib_parse_auth_header.c				\
-		src/httplib_parse_date_string.c				\
-		src/httplib_parse_http_headers.c			\
-		src/httplib_parse_http_message.c			\
-		src/httplib_parse_net.c					\
-		src/httplib_parse_range_header.c			\
-		src/httplib_path_to_unicode.c				\
-		src/httplib_poll.c					\
-		src/httplib_prepare_cgi_environment.c			\
-		src/httplib_print_dir_entry.c				\
-		src/httplib_printf.c					\
-		src/httplib_process_new_connection.c			\
+${OBJDIR}httplib_mkdir${OBJEXT}				: ${SRCDIR}httplib_mkdir.c
 
+${OBJDIR}httplib_modify_passwords_file${OBJEXT}		: ${SRCDIR}httplib_modify_passwords_file.c
 
+${OBJDIR}httplib_must_hide_file${OBJEXT}		: ${SRCDIR}httplib_must_hide_file.c
+
+${OBJDIR}httplib_next_option${OBJEXT}			: ${SRCDIR}httplib_next_option.c
+
+${OBJDIR}httplib_open_auth_file${OBJEXT}		: ${SRCDIR}httplib_open_auth_file.c
+
+${OBJDIR}httplib_opendir${OBJEXT}			: ${SRCDIR}httplib_opendir.c
+
+${OBJDIR}httplib_parse_auth_header${OBJEXT}		: ${SRCDIR}httplib_parse_auth_header.c
+
+${OBJDIR}httplib_parse_date_string${OBJEXT}		: ${SRCDIR}httplib_parse_date_string.c
+
+${OBJDIR}httplib_parse_http_headers${OBJEXT}		: ${SRCDIR}httplib_parse_http_headers.c
+
+${OBJDIR}httplib_parse_http_message${OBJEXT}		: ${SRCDIR}httplib_parse_http_message.c
+
+${OBJDIR}httplib_parse_net${OBJEXT}			: ${SRCDIR}httplib_parse_net.c
+
+${OBJDIR}httplib_parse_range_header${OBJEXT}		: ${SRCDIR}httplib_parse_range_header.c
+
+${OBJDIR}httplib_path_to_unicode${OBJEXT}		: ${SRCDIR}httplib_path_to_unicode.c
+
+${OBJDIR}httplib_poll${OBJEXT}				: ${SRCDIR}httplib_poll.c
+
+${OBJDIR}httplib_prepare_cgi_environment${OBJEXT}	: ${SRCDIR}httplib_prepare_cgi_environment.c
+
+${OBJDIR}httplib_print_dir_entry${OBJEXT}		: ${SRCDIR}httplib_print_dir_entry.c
+
+${OBJDIR}httplib_printf${OBJEXT}			: ${SRCDIR}httplib_printf.c
+
+${OBJDIR}httplib_process_new_connection${OBJEXT}	: ${SRCDIR}httplib_process_new_connection.c
 
 ${OBJDIR}httplib_produce_socket${OBJEXT}		: ${SRCDIR}httplib_produce_socket.c		\
 							  ${SRCDIR}httplib_pthread.h
 
+${OBJDIR}httplib_pull${OBJEXT}				: ${SRCDIR}httplib_pull.c
 
+${OBJDIR}httplib_pull_all${OBJEXT}			: ${SRCDIR}httplib_pull_all.c
 
-TEST=		src/httplib_pull.c					\
-		src/httplib_pull_all.c					\
-		src/httplib_push_all.c					\
-		src/httplib_put_dir.c					\
-		src/httplib_put_file.c					\
-		src/httplib_read.c					\
-		src/httplib_read_auth_file.c				\
-		src/httplib_read_request.c				\
-		src/httplib_read_websocket.c				\
-		src/httplib_readdir.c					\
-		src/httplib_realloc2.c					\
-		src/httplib_redirect_to_https_port.c			\
-		src/httplib_refresh_trust.c				\
-		src/httplib_remove.c					\
-		src/httplib_remove_bad_file.c				\
-		src/httplib_remove_directory.c				\
-		src/httplib_remove_double_dots.c			\
-		src/httplib_reset_per_request_attributes.c		\
-		src/httplib_scan_directory.c				\
+${OBJDIR}httplib_push_all${OBJEXT}			: ${SRCDIR}httplib_push_all.c
 
+${OBJDIR}httplib_put_dir${OBJEXT}			: ${SRCDIR}httplib_put_dir.c
 
+${OBJDIR}httplib_put_file${OBJEXT}			: ${SRCDIR}httplib_put_file.c
+
+${OBJDIR}httplib_read${OBJEXT}				: ${SRCDIR}httplib_read.c
+
+${OBJDIR}httplib_read_auth_file${OBJEXT}		: ${SRCDIR}httplib_read_auth_file.c
+
+${OBJDIR}httplib_read_request${OBJEXT}			: ${SRCDIR}httplib_read_request.c
+
+${OBJDIR}httplib_read_websocket${OBJEXT}		: ${SRCDIR}httplib_read_websocket.c
+
+${OBJDIR}httplib_readdir${OBJEXT}			: ${SRCDIR}httplib_readdir.c
+
+${OBJDIR}httplib_realloc2${OBJEXT}			: ${SRCDIR}httplib_realloc2.c
+
+${OBJDIR}httplib_redirect_to_https_port${OBJEXT}	: ${SRCDIR}httplib_redirect_to_https_port.c
+
+${OBJDIR}httplib_refresh_trust${OBJEXT}			: ${SRCDIR}httplib_refresh_trust.c
+
+${OBJDIR}httplib_remove${OBJEXT}			: ${SRCDIR}httplib_remove.c
+
+${OBJDIR}httplib_remove_bad_file${OBJEXT}		: ${SRCDIR}httplib_remove_bad_file.c
+
+${OBJDIR}httplib_remove_directory${OBJEXT}		: ${SRCDIR}httplib_remove_directory.c
+
+${OBJDIR}httplib_remove_double_dots${OBJEXT}		: ${SRCDIR}httplib_remove_double_dots.c
+
+${OBJDIR}httplib_reset_per_request_attributes${OBJEXT}	: ${SRCDIR}httplib_reset_per_request_attributes.c
+
+${OBJDIR}httplib_scan_directory${OBJEXT}		: ${SRCDIR}httplib_scan_directory.c
 
 ${OBJDIR}httplib_send_authorization_request${OBJEXT}	: ${SRCDIR}httplib_send_authorization_request.c		\
 							  ${SRCDIR}httplib_pthread.h
 
+${OBJDIR}httplib_send_file${OBJEXT}			: ${SRCDIR}httplib_send_file.c
 
-TEST=		src/httplib_send_file.c					\
-		src/httplib_send_file_data.c				\
-		src/httplib_send_http_error.c				\
-		src/httplib_send_no_cache_header.c			\
-		src/httplib_send_options.c				\
-		src/httplib_send_static_cache_header.c			\
-		src/httplib_send_websocket_handshake.c			\
-		src/httplib_set_acl_option.c				\
-		src/httplib_set_auth_handler.c				\
-		src/httplib_set_close_on_exec.c				\
-		src/httplib_set_gpass_option.c				\
-		src/httplib_set_handler_type.c				\
-		src/httplib_set_non_blocking_mode.c			\
-		src/httplib_set_ports_option.c				\
-		src/httplib_set_request_handler.c			\
-		src/httplib_set_ssl_option.c				\
-		src/httplib_set_sock_timeout.c				\
-		src/httplib_set_tcp_nodelay.c				\
-		src/httplib_set_thread_name.c				\
-		src/httplib_set_throttle.c				\
-		src/httplib_set_uid_option.c				\
-		src/httplib_set_user_connection_data.c			\
-		src/httplib_set_websocket_handler.c			\
-		src/httplib_should_decode_url.c				\
-		src/httplib_should_keep_alive.c				\
-		src/httplib_skip.c					\
-		src/httplib_skip_quoted.c				\
-		src/httplib_snprintf.c					\
-		src/httplib_sockaddr_to_string.c			\
-		src/httplib_spawn_process.c				\
-		src/httplib_ssi.c					\
-		src/httplib_ssl_error.c					\
-		src/httplib_ssl_get_client_cert_info.c			\
-		src/httplib_ssl_get_protocol.c				\
-		src/httplib_ssl_id_callback.c				\
+${OBJDIR}httplib_send_file_data${OBJEXT}		: ${SRCDIR}httplib_send_file_data.c
 
+${OBJDIR}httplib_send_http_error${OBJEXT}		: ${SRCDIR}httplib_send_http_error.c
+
+${OBJDIR}httplib_send_no_cache_header${OBJEXT}		: ${SRCDIR}httplib_send_no_cache_header.c
+
+${OBJDIR}httplib_send_options${OBJEXT}			: ${SRCDIR}httplib_send_options.c
+
+${OBJDIR}httplib_send_static_cache_header${OBJEXT}	: ${SRCDIR}httplib_send_static_cache_header.c
+
+${OBJDIR}httplib_send_websocket_handshake${OBJEXT}	: ${SRCDIR}httplib_send_websocket_handshake.c
+
+${OBJDIR}httplib_set_acl_option${OBJEXT}		: ${SRCDIR}httplib_set_acl_option.c
+
+${OBJDIR}httplib_set_auth_handler${OBJEXT}		: ${SRCDIR}httplib_set_auth_handler.c
+
+${OBJDIR}httplib_set_close_on_exec${OBJEXT}		: ${SRCDIR}httplib_set_close_on_exec.c
+
+${OBJDIR}httplib_set_gpass_option${OBJEXT}		: ${SRCDIR}httplib_set_gpass_option.c
+
+${OBJDIR}httplib_set_handler_type${OBJEXT}		: ${SRCDIR}httplib_set_handler_type.c
+
+${OBJDIR}httplib_set_non_blocking_mode${OBJEXT}		: ${SRCDIR}httplib_set_non_blocking_mode.c
+
+${OBJDIR}httplib_set_ports_option${OBJEXT}		: ${SRCDIR}httplib_set_ports_option.c
+
+${OBJDIR}httplib_set_request_handler${OBJEXT}		: ${SRCDIR}httplib_set_request_handler.c
+
+${OBJDIR}httplib_set_ssl_option${OBJEXT}		: ${SRCDIR}httplib_set_ssl_option.c
+
+${OBJDIR}httplib_set_sock_timeout${OBJEXT}		: ${SRCDIR}httplib_set_sock_timeout.c
+
+${OBJDIR}httplib_set_tcp_nodelay${OBJEXT}		: ${SRCDIR}httplib_set_tcp_nodelay.c
+
+${OBJDIR}httplib_set_thread_name${OBJEXT}		: ${SRCDIR}httplib_set_thread_name.c
+
+${OBJDIR}httplib_set_throttle${OBJEXT}			: ${SRCDIR}httplib_set_throttle.c
+
+${OBJDIR}httplib_set_uid_option${OBJEXT}		: ${SRCDIR}httplib_set_uid_option.c
+
+${OBJDIR}httplib_set_user_connection_data${OBJEXT}	: ${SRCDIR}httplib_set_user_connection_data.c
+
+${OBJDIR}httplib_set_websocket_handler${OBJEXT}		: ${SRCDIR}httplib_set_websocket_handler.c
+
+${OBJDIR}httplib_should_decode_url${OBJEXT}		: ${SRCDIR}httplib_should_decode_url.c
+
+${OBJDIR}httplib_should_keep_alive${OBJEXT}		: ${SRCDIR}httplib_should_keep_alive.c
+
+${OBJDIR}httplib_skip${OBJEXT}				: ${SRCDIR}httplib_skip.c
+
+${OBJDIR}httplib_skip_quoted${OBJEXT}			: ${SRCDIR}httplib_skip_quoted.c
+
+${OBJDIR}httplib_snprintf${OBJEXT}			: ${SRCDIR}httplib_snprintf.c
+
+${OBJDIR}httplib_sockaddr_to_string${OBJEXT}		: ${SRCDIR}httplib_sockaddr_to_string.c
+
+${OBJDIR}httplib_spawn_process${OBJEXT}			: ${SRCDIR}httplib_spawn_process.c
+
+${OBJDIR}httplib_ssi${OBJEXT}				: ${SRCDIR}httplib_ssi.c
+
+${OBJDIR}httplib_ssl_error${OBJEXT}			: ${SRCDIR}httplib_ssl_error.c
+
+${OBJDIR}httplib_ssl_get_client_cert_info${OBJEXT}	: ${SRCDIR}httplib_ssl_get_client_cert_info.c
+
+${OBJDIR}httplib_ssl_get_protocol${OBJEXT}		: ${SRCDIR}httplib_ssl_get_protocol.c
+
+${OBJDIR}httplib_ssl_id_callback${OBJEXT}		: ${SRCDIR}httplib_ssl_id_callback.c		\
+							  ${SRCDIR}httplib_pthread.h
 
 ${OBJDIR}httplib_ssl_locking_callback${OBJEXT}		: ${SRCDIR}httplib_ssl_locking_callback.c	\
 							  ${SRCDIR}httplib_pthread.h
 
+${OBJDIR}httplib_ssl_use_pem_file${OBJEXT}		: ${SRCDIR}httplib_ssl_use_pem_file.c
 
-TEST=		src/httplib_ssl_use_pem_file.c				\
-		src/httplib_sslize.c					\
-
-
+${OBJDIR}httplib_sslize${OBJEXT}			: ${SRCDIR}httplib_sslize.c
 
 ${OBJDIR}httplib_start${OBJEXT}				: ${SRCDIR}httplib_start.c			\
 							  ${SRCDIR}httplib_pthread.h
 
+${OBJDIR}httplib_start_thread${OBJEXT}			: ${SRCDIR}httplib_start_thread.c
 
+${OBJDIR}httplib_start_thread_with_id${OBJEXT}		: ${SRCDIR}httplib_start_thread_with_id.c
 
-TEST=		src/httplib_start_thread.c				\
-		src/httplib_start_thread_with_id.c			\
-		src/httplib_stat.c					\
-		src/httplib_stop.c					\
-		src/httplib_store_body.c				\
-		src/httplib_strlcpy.c					\
-		src/httplib_strcasecmp.c				\
-		src/httplib_strcasestr.c				\
-		src/httplib_strdup.c					\
-		src/httplib_strncasecmp.c				\
-		src/httplib_strndup.c					\
-		src/httplib_substitute_index_file.c			\
-		src/httplib_suggest_connection_header.c			\
-		src/httplib_timer.c					\
+${OBJDIR}httplib_stat${OBJEXT}				: ${SRCDIR}httplib_stat.c
 
+${OBJDIR}httplib_stop${OBJEXT}				: ${SRCDIR}httplib_stop.c
 
+${OBJDIR}httplib_store_body${OBJEXT}			: ${SRCDIR}httplib_store_body.c
+
+${OBJDIR}httplib_strlcpy${OBJEXT}			: ${SRCDIR}httplib_strlcpy.c
+
+${OBJDIR}httplib_strcasecmp${OBJEXT}			: ${SRCDIR}httplib_strcasecmp.c
+
+${OBJDIR}httplib_strcasestr${OBJEXT}			: ${SRCDIR}httplib_strcasestr.c
+
+${OBJDIR}httplib_strdup${OBJEXT}			: ${SRCDIR}httplib_strdup.c
+
+${OBJDIR}httplib_strncasecmp${OBJEXT}			: ${SRCDIR}httplib_strncasecmp.c
+
+${OBJDIR}httplib_strndup${OBJEXT}			: ${SRCDIR}httplib_strndup.c
+
+${OBJDIR}httplib_substitute_index_file${OBJEXT}		: ${SRCDIR}httplib_substitute_index_file.c
+
+${OBJDIR}httplib_suggest_connection_header${OBJEXT}	: ${SRCDIR}httplib_suggest_connection_header.c
+
+${OBJDIR}httplib_timer${OBJEXT}				: ${SRCDIR}httplib_timer.c
 
 ${OBJDIR}httplib_tls_dtor${OBJEXT}			: ${SRCDIR}httplib_tls_dtor.c			\
 							  ${SRCDIR}httplib_pthread.h
@@ -651,85 +782,94 @@ ${OBJDIR}httplib_tls_dtor${OBJEXT}			: ${SRCDIR}httplib_tls_dtor.c			\
 ${OBJDIR}httplib_uninitialize_ssl${OBJEXT}		: ${SRCDIR}httplib_uninitialize_ssl.c		\
 							  ${SRCDIR}httplib_pthread.h
 
+${OBJDIR}httplib_url_decode${OBJEXT}			: ${SRCDIR}httplib_url_decode.c
 
+${OBJDIR}httplib_url_encode${OBJEXT}			: ${SRCDIR}httplib_url_encode.c
 
-TEST=		src/httplib_url_decode.c				\
-		src/httplib_url_encode.c				\
-		src/httplib_version.c					\
-		src/httplib_vprintf.c					\
-		src/httplib_vsnprintf.c					\
-		src/httplib_websocket_client_thread.c			\
-		src/httplib_websocket_client_write.c			\
-		src/httplib_websocket_write.c				\
-		src/httplib_websocket_write_exec.c			\
+${OBJDIR}httplib_version${OBJEXT}			: ${SRCDIR}httplib_version.c
 
+${OBJDIR}httplib_vprintf${OBJEXT}			: ${SRCDIR}httplib_vprintf.c
 
+${OBJDIR}httplib_vsnprintf${OBJEXT}			: ${SRCDIR}httplib_vsnprintf.c
+
+${OBJDIR}httplib_websocket_client_thread${OBJEXT}	: ${SRCDIR}httplib_websocket_client_thread.c
+
+${OBJDIR}httplib_websocket_client_write${OBJEXT}	: ${SRCDIR}httplib_websocket_client_write.c
+
+${OBJDIR}httplib_websocket_write${OBJEXT}		: ${SRCDIR}httplib_websocket_write.c
+
+${OBJDIR}httplib_websocket_write_exec${OBJEXT}		: ${SRCDIR}httplib_websocket_write_exec.c
 
 ${OBJDIR}httplib_worker_thread${OBJEXT}			: ${SRCDIR}httplib_worker_thread.c		\
 							  ${SRCDIR}httplib_pthread.h
 
+${OBJDIR}httplib_write${OBJEXT}				: ${SRCDIR}httplib_write.c
 
+${OBJDIR}osx_clock_gettime${OBJEXT}			: ${SRCDIR}osx_clock_gettime.c
 
-TEST=		src/httplib_write.c					\
-		src/osx_clock_gettime.c					\
-		src/win32_clock_gettime.c				\
+${OBJDIR}win32_clock_gettime${OBJEXT}			: ${SRCDIR}win32_clock_gettime.c
 
+${OBJDIR}win32_pthread_cond_broadcast${OBJEXT}		: ${SRCDIR}win32_pthread_cond_broadcast.c	\
+							  ${SRCDIR}httplib_pthread.h
 
-${OBJDIR}win32_pthread_cond_broadcast${OBJEXT}	: ${SRCDIR}win32_pthread_cond_broadcast.c	\
-						  ${SRCDIR}httplib_pthread.h
+${OBJDIR}win32_pthread_cond_destroy${OBJEXT}		: ${SRCDIR}win32_pthread_cond_destroy.c		\
+							  ${SRCDIR}httplib_pthread.h
 
-${OBJDIR}win32_pthread_cond_destroy${OBJEXT}	: ${SRCDIR}win32_pthread_cond_destroy.c		\
-						  ${SRCDIR}httplib_pthread.h
+${OBJDIR}win32_pthread_cond_init${OBJEXT}		: ${SRCDIR}win32_pthread_cond_init.c		\
+							  ${SRCDIR}httplib_pthread.h
 
-${OBJDIR}win32_pthread_cond_init${OBJEXT}	: ${SRCDIR}win32_pthread_cond_init.c		\
-						  ${SRCDIR}httplib_pthread.h
+${OBJDIR}win32_pthread_cond_signal${OBJEXT}		: ${SRCDIR}win32_pthread_cond_signal.c		\
+							  ${SRCDIR}httplib_pthread.h
 
-${OBJDIR}win32_pthread_cond_signal${OBJEXT}	: ${SRCDIR}win32_pthread_cond_signal.c		\
-						  ${SRCDIR}httplib_pthread.h
+${OBJDIR}win32_pthread_cond_timedwait${OBJEXT}		: ${SRCDIR}win32_pthread_cond_timedwait.c	\
+							  ${SRCDIR}httplib_pthread.h
 
-${OBJDIR}win32_pthread_cond_timedwait${OBJEXT}	: ${SRCDIR}win32_pthread_cond_timedwait.c	\
-						  ${SRCDIR}httplib_pthread.h
+${OBJDIR}win32_pthread_cond_wait${OBJEXT}		: ${SRCDIR}win32_pthread_cond_wait.c		\
+							  ${SRCDIR}httplib_pthread.h
 
-${OBJDIR}win32_pthread_cond_wait${OBJEXT}	: ${SRCDIR}win32_pthread_cond_wait.c		\
-						  ${SRCDIR}httplib_pthread.h
+${OBJDIR}win32_pthread_getspecific${OBJEXT}		: ${SRCDIR}win32_pthread_getspecific.c		\
+							  ${SRCDIR}httplib_pthread.h
 
-${OBJDIR}win32_pthread_getspecific${OBJEXT}	: ${SRCDIR}win32_pthread_getspecific.c		\
-						  ${SRCDIR}httplib_pthread.h
+${OBJDIR}win32_pthread_key_create${OBJEXT}		: ${SRCDIR}win32_pthread_key_create.c		\
+							  ${SRCDIR}httplib_pthread.h
 
-${OBJDIR}win32_pthread_key_create${OBJEXT}	: ${SRCDIR}win32_pthread_key_create.c		\
-						  ${SRCDIR}httplib_pthread.h
+${OBJDIR}win32_pthread_key_delete${OBJEXT}		: ${SRCDIR}win32_pthread_key_delete.c		\
+							  ${SRCDIR}httplib_pthread.h
 
-${OBJDIR}win32_pthread_key_delete${OBJEXT}	: ${SRCDIR}win32_pthread_key_delete.c		\
-						  ${SRCDIR}httplib_pthread.h
+${OBJDIR}win32_pthread_mutex_destroy${OBJEXT}		: ${SRCDIR}win32_pthread_mutex_destroy.c	\
+							  ${SRCDIR}httplib_pthread.h
 
-${OBJDIR}win32_pthread_mutex_destroy${OBJEXT}	: ${SRCDIR}win32_pthread_mutex_destroy.c	\
-						  ${SRCDIR}httplib_pthread.h
+${OBJDIR}win32_pthread_mutex_init${OBJEXT}		: ${SRCDIR}win32_pthread_mutex_init.c		\
+							  ${SRCDIR}httplib_pthread.h
 
-${OBJDIR}win32_pthread_mutex_init${OBJEXT}	: ${SRCDIR}win32_pthread_mutex_init.c		\
-						  ${SRCDIR}httplib_pthread.h
+${OBJDIR}win32_pthread_mutex_lock${OBJEXT}		: ${SRCDIR}win32_pthread_mutex_lock.c		\
+							  ${SRCDIR}httplib_pthread.h
 
-${OBJDIR}win32_pthread_mutex_lock${OBJEXT}	: ${SRCDIR}win32_pthread_mutex_lock.c		\
-						  ${SRCDIR}httplib_pthread.h
+${OBJDIR}win32_pthread_mutex_trylock${OBJEXT}		: ${SRCDIR}win32_pthread_mutex_trylock.c	\
+							  ${SRCDIR}httplib_pthread.h
 
-${OBJDIR}win32_pthread_mutex_trylock${OBJEXT}	: ${SRCDIR}win32_pthread_mutex_trylock.c	\
-						  ${SRCDIR}httplib_pthread.h
+${OBJDIR}win32_pthread_mutex_unlock${OBJEXT}		: ${SRCDIR}win32_pthread_mutex_unlock.c		\
+							  ${SRCDIR}httplib_pthread.h
 
-${OBJDIR}win32_pthread_mutex_unlock${OBJEXT}	: ${SRCDIR}win32_pthread_mutex_unlock.c		\
-						  ${SRCDIR}httplib_pthread.h
+${OBJDIR}win32_pthread_self${OBJEXT}			: ${SRCDIR}win32_pthread_self.c			\
+							  ${SRCDIR}httplib_pthread.h
 
-${OBJDIR}win32_pthread_self${OBJEXT}		: ${SRCDIR}win32_pthread_self.c			\
-						  ${SRCDIR}httplib_pthread.h
+${OBJDIR}win32_pthread_setspecific${OBJEXT}		: ${SRCDIR}win32_pthread_setspecific.c		\
+							  ${SRCDIR}httplib_pthread.h
 
-${OBJDIR}win32_pthread_setspecific${OBJEXT}	: ${SRCDIR}win32_pthread_setspecific.c		\
-						  ${SRCDIR}httplib_pthread.h
+${OBJDIR}wince_gmtime${OBJEXT}				: ${SRCDIR}wince_gmtime.c
 
+${OBJDIR}wince_gmtime_s${OBJEXT}			: ${SRCDIR}wince_gmtime_s.c
 
+${OBJDIR}wince_localtime${OBJEXT}			: ${SRCDIR}wince_localtime.c
 
-TEST=		src/wince_gmtime.c					\
-		src/wince_gmtime_s.c					\
-		src/wince_localtime.c					\
-		src/wince_localtime_s.c					\
-		src/wince_rename.c					\
-		src/wince_stat.c					\
-		src/wince_strftime.c					\
-		src/wince_time.c
+${OBJDIR}wince_localtime_s${OBJEXT}			: ${SRCDIR}wince_localtime_s.c
+
+${OBJDIR}wince_rename${OBJEXT}				: ${SRCDIR}wince_rename.c
+
+${OBJDIR}wince_stat${OBJEXT}				: ${SRCDIR}wince_stat.c
+
+${OBJDIR}wince_strftime${OBJEXT}			: ${SRCDIR}wince_strftime.c
+
+${OBJDIR}wince_time${OBJEXT}				: ${SRCDIR}wince_time.c
+

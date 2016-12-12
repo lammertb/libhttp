@@ -38,6 +38,7 @@ int XX_httplib_remove( const struct mg_connection *conn, const char *path ) {
 
 #else  /* _WIN32 */
 
+	(void)conn;
 	return remove( path );
 
 #endif  /* _WIN32 */
