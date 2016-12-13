@@ -18,6 +18,10 @@
 
 The function `httplib_get_builtin_mime_type()` tries to determine the MIME type of a given file. If the MIME type cannot be determined, the value `text/plain` is returned. Please note that this function does not an intelligent check of the file contents. The MIME type is solely determined based on the file name extension.
 
+This function selects the MIME type from a static list of known MIME type which was created at compile time. It is possible to add or override values used as MIME type in the library at runtime, but these manual changes do not alter the builtin list and these user changed values will therefore not be returned by the `httplib_get_builtin_mime_type()` function.
+
+The function uses an efficient binary search algorithm, but this has implications if you want to change the list in the source code. The list has to be sorted in the source file already, otherwise it may not return valid values available in the list. After the source code has changed it is best to run the `testmime` executable in the project directory which checks the integrity of the static MIME type list. This executable is updated automatically with every compile run of the library when `make` is invoked with the default `Makefile` provided with the project.
+
 ### See Also
 
 * [`mg_send_mime_file();`](mg_send_mime_file.md)
