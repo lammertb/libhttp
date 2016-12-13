@@ -282,7 +282,7 @@ Changes
 - Added new C++ abstraction class CivetServer
 - Added thread safety for and fixed websocket defects (Morgan McGuire)
 - Created PKGBUILD to use Arch distribution (Daniel Oaks)
-- Created new documentation on Embeddeding, Building and yaSSL (see docs/).
+- Created new documentation on Embeddeding, Building and yaSSL (see doc/).
 - Updated License file to include all licenses.
 - Replaced MD5 implementation due to questionable license.
      + This requires new source file md5.inl

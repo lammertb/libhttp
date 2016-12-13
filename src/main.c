@@ -255,7 +255,7 @@ static NO_RETURN void show_usage_and_exit(const char *exeName) {
 static const char *config_file_top_comment =
     "# LibHTTP web server configuration file.\n"
     "# For detailed description of every option, visit\n"
-    "# https://github.com/lammertb/libhttp/blob/master/docs/UserManual.md\n"
+    "# https://github.com/lammertb/libhttp/blob/master/doc/UserManual.md\n"
     "# Lines starting with '#' and empty lines are ignored.\n"
     "# To make a change, remove leading '#', modify option's value,\n"
     "# save this file and then restart LibHTTP.\n\n";

@@ -34,7 +34,7 @@ package: build
 	install -m 644 resources/itworks.html $(OSXBIN_DIR)/index.html
 	install -m 644 resources/civetweb_64x64.png $(OSXBIN_DIR)/
 	install -m 755 $(CPROG) $(OSXBIN_DIR)/$(PACKAGE)
-	install -m 644 docs/Installing.md $(DMG_DIR)/Installing.txt
+	install -m 644 doc/Installing.md $(DMG_DIR)/Installing.txt
 	install -m 644 LICENSE.md $(DMG_DIR)/License.txt
 	rm -rf $(ZIPFILENAME)
 	cd $(DMG_DIR) && zip -r ../../$(ZIPFILENAME) .

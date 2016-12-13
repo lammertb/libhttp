@@ -29,12 +29,12 @@ Trouble tickets should be filed on GitHub
 Quick start documentation
 --------------------------
 
-- [docs/APIReference.md](docs/APIReference.md) - Reference of the C programming API
-- [docs/Installing.md](docs/Installing.md) - Install Guide (for end users using pre-built binaries)
-- [docs/UserManual.md](docs/UserManual.md) - End User Guide
-- [docs/Building.md](docs/Building.md) - Building the Server (quick start guide)
-- [docs/Embedding.md](docs/Embedding.md) - Embedding (how to add HTTP support to an existing application)
-- [docs/OpenSSL.md](docs/OpenSSL.md) - Adding HTTPS (SSL/TLS) support using OpenSSL.
+- [doc/APIReference.md](doc/APIReference.md) - Reference of the C programming API
+- [doc/Installing.md](doc/Installing.md) - Install Guide (for end users using pre-built binaries)
+- [doc/UserManual.md](doc/UserManual.md) - End User Guide
+- [doc/Building.md](doc/Building.md) - Building the Server (quick start guide)
+- [doc/Embedding.md](doc/Embedding.md) - Embedding (how to add HTTP support to an existing application)
+- [doc/OpenSSL.md](doc/OpenSSL.md) - Adding HTTPS (SSL/TLS) support using OpenSSL.
 - [RELEASE_NOTES.md](RELEASE_NOTES.md) - Release Notes
 - [LICENSE.md](LICENSE.md) - Copyright License
 
@@ -61,7 +61,7 @@ simplicity by a carefully selected list of features:
 Support
 -------
 
-This project is very easy to install and use. Please read the [documentation](docs/) and have a look at the [examples] (examples/).
+This project is very easy to install and use. Please read the [documentation](doc/) and have a look at the [examples] (examples/).
 
 
 Contributions
@@ -71,7 +71,7 @@ Contributions are welcome provided all contributions carry the MIT license.
 
 DO NOT APPLY fixes copied from Mongoose to this project to prevent GPL tainting. LibHTTP which is a Civetweb fork is based on a 2014 version of Mongoose and they are developed independently. By now the code base differs, so patches cannot be safely transfered in either direction.
 
-Some guidelines can be found in [docs/Contribution.md](docs/Contribution.md).
+Some guidelines can be found in [doc/Contribution.md](doc/Contribution.md).
 
 
 ### Authors
