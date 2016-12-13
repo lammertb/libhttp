@@ -68,13 +68,13 @@ int main( void ) {
 	} while ( p1 != NULL  &&  p2 != NULL );
 
 
-	printf( "Mime type van CSV: \"%s\"\n", mg_get_builtin_mime_type( "fiets.CsV" ) );
+	printf( "Mime type of CSV: \"%s\"\n", httplib_get_builtin_mime_type( "car.CsV" ) );
 
 	for (a=0; a<index; a++) {
 
 		XX_httplib_snprintf( NULL, NULL, buffer, BUFLEN, "filename%s", XX_httplib_builtin_mime_ext( a ) );
 		p1 = XX_httplib_builtin_mime_type( a );
-		p2 = mg_get_builtin_mime_type( buffer );
+		p2 = httplib_get_builtin_mime_type( buffer );
 
 		if ( p1 != p2 ) {
 

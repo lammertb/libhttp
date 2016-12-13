@@ -23,7 +23,7 @@ Additional custom header fields can be added as a parameter. Please make sure th
 
 ### See Also
 
-* [`mg_get_builtin_mime_type();`](mg_get_builtin_mime_type.md)
+* [`httplib_get_builtin_mime_type();`](httplib_get_builtin_mime_type.md)
 * [`mg_printf();`](mg_printf.md)
 * [`mg_send_file();`](mg_send_file.md)
 * [`mg_send_mime_file();`](mg_send_mime_file.md)

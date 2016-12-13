@@ -32,7 +32,7 @@ the API can be found in [Embedding.md](Embedding.md).
 * [`mg_connect_websocket_client( host, port, use_ssl, error_buffer, error_buffer_size, path, origin, data_func, close_func, user_data);`](api/mg_connect_websocket_client.md)
 * [`mg_cry( conn, fmt, ... );`](api/mg_cry.md)
 * [`mg_download( host, port, use_ssl, error_buffer, error_buffer_size, fmt, ... );`](api/mg_download.md)
-* [`mg_get_builtin_mime_type( file_name );`](api/mg_get_builtin_mime_type.md)
+* [`httplib_get_builtin_mime_type( file_name );`](api/httplib_get_builtin_mime_type.md)
 * [`mg_get_context( conn );`](api/mg_get_context.md)
 * [`mg_get_cookie( cookie, var_name, buf, buf_len );`](api/mg_get_cookie.md)
 * [`mg_get_header( conn, name );`](api/mg_get_header.md)

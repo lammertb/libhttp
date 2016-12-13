@@ -54,7 +54,7 @@ void XX_httplib_get_mime_type( struct mg_context *ctx, const char *path, struct 
 		}
 	}
 
-	vec->ptr = mg_get_builtin_mime_type(path);
-	vec->len = strlen(vec->ptr);
+	vec->ptr = httplib_get_builtin_mime_type( path );
+	vec->len = strlen( vec->ptr );
 
 }  /* XX_httplib_get_mime_type */

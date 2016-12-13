@@ -803,9 +803,7 @@ typedef void *(*mg_thread_func_t)(void *);
 CIVETWEB_API int mg_start_thread(mg_thread_func_t f, void *p);
 
 
-/* Return builtin mime type for the given file name.
-   For unrecognized extensions, "text/plain" is returned. */
-CIVETWEB_API const char *mg_get_builtin_mime_type(const char *file_name);
+CIVETWEB_API const char *	httplib_get_builtin_mime_type( const char *file_name );
 
 
 /* Get text representation of HTTP status code. */

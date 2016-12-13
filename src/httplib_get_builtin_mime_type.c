@@ -534,19 +534,19 @@ static const struct {
 
 
 /*
- * const char *mg_get_builtin_mime_type( const char *path );
+ * const char *httplib_get_builtin_mime_type( const char *path );
  *
- * The function mg_get_builtin_mime_type() returns the mime type associated
- * with the file with a given extension which is passed as a parameter. The
- * function performs a binary search through the list of MIME types which is
- * very efficient and only needs 10 steps for 1000 items in the list or 20
- * steps for 1000000 items.
+ * The function httplib_get_builtin_mime_type() returns the mime type
+ * associated with the file with a given extension which is passed as a
+ * parameter. The function performs a binary search through the list of MIME
+ * types which is very efficient and only needs 10 steps for 1000 items in the
+ * list or 20 steps for 1000000 items.
  *
  * If no matching file extension could be found in the list, the default value
  * of "text/plain" is returned instead.
  */
 
-const char *mg_get_builtin_mime_type( const char *path ) {
+const char *httplib_get_builtin_mime_type( const char *path ) {
 
 	int start;
 	int eind;
@@ -579,7 +579,7 @@ const char *mg_get_builtin_mime_type( const char *path ) {
 
 	return "text/plain";
 
-}  /* mg_get_builtin_mime_type */
+}  /* httplib_get_builtin_mime_type */
 
 
 

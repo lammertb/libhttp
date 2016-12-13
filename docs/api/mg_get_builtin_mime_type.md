@@ -1,6 +1,6 @@
 # LibHTTP API Reference
 
-### `mg_get_builtin_mime_type( file_name );`
+### `httplib_get_builtin_mime_type( file_name );`
 
 ### Parameters
 
@@ -16,7 +16,7 @@
 
 ### Description
 
-The function `mg_get_builtin_mime_type()` tries to determine the MIME type of a given file. If the MIME type cannot be determined, the value `text/plain` is returned. Please note that this function does not an intelligent check of the file contents. The MIME type is solely determined based on the file name extension.
+The function `httplib_get_builtin_mime_type()` tries to determine the MIME type of a given file. If the MIME type cannot be determined, the value `text/plain` is returned. Please note that this function does not an intelligent check of the file contents. The MIME type is solely determined based on the file name extension.
 
 ### See Also
 
