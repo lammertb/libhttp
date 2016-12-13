@@ -22,10 +22,9 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
 
+#define NUM_MIME_TYPES		(sizeof(builtin_mime_types)/sizeof(builtin_mime_types[0]))
 
 static const struct {
 	const char *extension;
@@ -38,8 +37,8 @@ static const struct {
 	{ ".aab",	"application/x-authorware-bin"				},
 	{ ".aac",	"audio/aac"						},
 	{ ".aam",	"application/x-authorware-map"				},
-	{ ".aat",	"application/font-sfnt"					},
 	{ ".aas",	"application/x-authorware-seg"				},
+	{ ".aat",	"application/font-sfnt"					},
 	{ ".abc",	"text/vnd.abc"						},
 	{ ".acgi",	"text/html"						},
 	{ ".afl",	"video/animaflex"					},
@@ -75,8 +74,8 @@ static const struct {
 	{ ".bz2",	"application/x-bzip2"					},
 
 	{ ".c",		"text/x-c"						},
-	{ ".cat",	"application/vnd.ms-pki.seccat"				},
 	{ ".c++",	"text/x-c"						},
+	{ ".cat",	"application/vnd.ms-pki.seccat"				},
 	{ ".cc",	"text/x-c"						},
 	{ ".ccad",	"application/clariscad"					},
 	{ ".cco",	"application/x-cocoa"					},
@@ -499,6 +498,7 @@ static const struct {
 	{ ".wsrc",	"application/x-wais-source"				},
 	{ ".wtk",	"application/x-wintalk"					},
 
+	{ ".x-png",	"image/png"						},
 	{ ".xbm",	"image/x-xbm"						},
 	{ ".xdr",	"video/x-amt-demorun"					},
 	{ ".xgz",	"xgl/drawing"						},
@@ -521,7 +521,6 @@ static const struct {
 	{ ".xmz",	"xgl/movie"						},
 	{ ".xpix",	"application/x-vnd.ls-xpix"				},
 	{ ".xpm",	"image/x-xpixmap"					},
-	{ ".x-png",	"image/png"						},
 	{ ".xsl",	"application/xml"					},
 	{ ".xslt",	"application/xml"					},
 	{ ".xsr",	"video/x-amt-showrun"					},
@@ -532,15 +531,30 @@ static const struct {
 	{ ".zip",	"application/x-zip-compressed"				},
 	{ ".zoo",	"application/octet-stream"				},
 	{ ".zsh",	"text/x-script.zsh"					},
-
-	{ NULL,		NULL							}
 };
 
 
+
+/*
+ * const char *mg_get_builtin_mime_type( const char *path );
+ *
+ * The function mg_get_builtin_mime_type() returns the mime type associated
+ * with the file with a given extension which is passed as a parameter. The
+ * function performs a binary search through the list of MIME types which is
+ * very efficient and only needs 10 steps for 1000 items in the list or 20
+ * steps for 1000000 items.
+ *
+ * If no matching file extension could be found in the list, the default value
+ * of "text/plain" is returned instead.
+ */
+
 const char *mg_get_builtin_mime_type( const char *path ) {
 
+	int start;
+	int eind;
+	int midden;
+	int retval;
 	const char *ext;
-	size_t i;
 	size_t path_len;
 
 	path_len = strlen( path );
@@ -550,11 +564,62 @@ const char *mg_get_builtin_mime_type( const char *path ) {
 
 	ext = & path[path_len-1];
 
-	for (i = 0; builtin_mime_types[i].extension != NULL; i++) {
+	start = 0;
+	eind  = NUM_MIME_TYPES;
 
-		if ( ! mg_strcasecmp( ext, builtin_mime_types[i].extension ) ) return builtin_mime_types[i].mime_type;
+	while ( eind-start > 1 ) {
+
+		midden = (start+eind) >> 1;
+		retval = mg_strcasecmp( ext, builtin_mime_types[midden].extension );
+
+		if      ( retval == 0 ) return builtin_mime_types[midden].mime_type;
+		else if ( retval <  0 ) eind  = midden;
+		else                    start = midden;
 	}
+
+	if ( ! mg_strcasecmp( ext, builtin_mime_types[start].extension ) ) return builtin_mime_types[start].mime_type;
 
 	return "text/plain";
 
 }  /* mg_get_builtin_mime_type */
+
+
+
+/*
+ * const char *XX_httplib_builtin_mime_ext( int index );
+ *
+ * The function XX_httplib_builtin_mime_ext() returns the file extension of
+ * a MIME type as stored in a specific location in the list with MIME types.
+ *
+ * If the index is invalid, NULL is returned.
+ */
+
+const char *XX_httplib_builtin_mime_ext( int index ) {
+
+
+	if ( index <  0              ) return NULL;
+	if ( index >= NUM_MIME_TYPES ) return NULL;
+
+	return builtin_mime_types[index].extension;
+
+}  /* XX_httplib_builtin_mime_ext */
+
+
+
+/*
+ * const char *XX_httplib_builtin_mime_type( int index );
+ *
+ * The function XX_httplib_builtin_mime_type() returns the MIME type of of a
+ * record stored in a specific location in the list with MIME types.
+ *
+ * If the index is invalid, NULL is returned.
+ */
+
+const char *XX_httplib_builtin_mime_type( int index ) {
+
+	if ( index <  0              ) return NULL;
+	if ( index >= NUM_MIME_TYPES ) return NULL;
+
+	return builtin_mime_types[index].mime_type;
+
+}  /* XX_httplib_builtin_mime_type */

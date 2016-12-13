@@ -89,11 +89,16 @@ INCDIR = include/
 LIBDIR = lib/
 OBJDIR = obj/
 SRCDIR = src/
+TSTDIR = test/
 CC     = cc
+LINK   = cc
 RM     = /bin/rm -f
+STRIP  = strip
 OBJEXT = .o
 LIBEXT = .a
+EXEEXT =
 OFLAG  = -o
+XFLAG  = -o
 AR     = ar
 ARQC   = qc 
 ARQ    = q
@@ -121,11 +126,16 @@ INCDIR = include\\
 LIBDIR = lib\\
 OBJDIR = obj\\
 SRCDIR = src\\
+TSTDIR = test\\
 CC     = cl
+LINK   = link
 RM     = del /q
+STRIP  = dir
 OBJEXT = .obj
 LIBEXT = .lib
+EXEEXT = .exe
 OFLAG  = -Fo
+XFLAG  = /NOLOGO /OUT:
 AR     = lib
 ARQC   = /NOLOGO /OUT:
 ARQ    = /NOLOGO
@@ -137,11 +147,25 @@ endif
 ${OBJDIR}%${OBJEXT} : ${SRCDIR}%.c
 	${CC} -c ${CPPFLAGS} ${CFLAGS} ${DFLAGS} ${OFLAG}$@ $<
 
-all: ${LIBDIR}libhttp${LIBEXT}
+${TSTDIR}${OBJDIR}%${OBJEXT} : ${TSTDIR}%.c
+	${CC} -c ${CPPFLAGS} ${CFLAGS} ${DFLAGS} ${OFLAG}$@ $<
+
+all: ${LIBDIR}libhttp${LIBEXT} testmime${EXEEXT}
 
 clean:
 	${RM} ${OBJDIR}*${OBJEXT}
 	${RM} ${LIBDIR}libhttp${LIBEXT}
+	${RM} testmime${EXEEXT}
+
+testmime${EXEEXT} :					\
+		${TSTDIR}${OBJDIR}testmime${OBJEXT}	\
+		${LIBDIR}libhttp${LIBEXT}		\
+		Makefile
+	${LINK} ${XFLAG}testmime${EXEEXT}		\
+		${TSTDIR}${OBJDIR}testmime${OBJEXT}	\
+		${LIBDIR}libhttp${LIBEXT}
+	${STRIP} testmime${EXEEXT}
+
 
 OBJLIST =									\
 	${OBJDIR}extern_md5${OBJEXT}						\
@@ -386,6 +410,8 @@ ${LIBDIR}libhttp${LIBEXT} :	\
 #
 # Individual source files with their header dependencies
 #
+
+${TSTDIR}${OBJDIR}testmime${OBJEXT}					: ${TSTDIR}testmime.c
 
 ${OBJDIR}extern_md5${OBJEXT}						: ${SRCDIR}extern_md5.c
 

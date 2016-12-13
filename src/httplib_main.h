@@ -811,6 +811,8 @@ void			SHA1Update( SHA1_CTX *context, const unsigned char *data, uint32_t len );
 
 void			XX_httplib_accept_new_connection( const struct socket *listener, struct mg_context *ctx );
 int			XX_httplib_authorize( struct mg_connection *conn, struct file *filep );
+const char *		XX_httplib_builtin_mime_ext( int index );
+const char *		XX_httplib_builtin_mime_type( int index );
 int			XX_httplib_check_acl( struct mg_context *ctx, uint32_t remote_ip );
 int			XX_httplib_check_authorization( struct mg_connection *conn, const char *path );
 int			XX_httplib_check_password( const char *method, const char *ha1, const char *uri, const char *nonce, const char *nc, const char *cnonce, const char *qop, const char *response );

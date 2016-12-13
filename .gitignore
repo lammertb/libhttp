@@ -13,6 +13,8 @@ obj/*.o
 obj/*.obj
 lib/*.lib
 lib/*.a
+test/obj/*.o
+test/obj/*.obj
 
 
 #################
