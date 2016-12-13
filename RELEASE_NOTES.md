@@ -5,6 +5,7 @@ Release Notes v2.0 (work in progress)
 Changes
 -------
 
+- Search in MIME types list now costs O(log(N)) instead of O(N)
 - Added several hundred MIME types
 - Prototypes an definitions split over multiple header files
 - All functions moved to their own source files for better maintainability
