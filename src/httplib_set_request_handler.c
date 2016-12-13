@@ -25,14 +25,14 @@
 #include "httplib_main.h"
 
 /*
- * void mg_set_request_handler( struct mg_context *ctx, const char *uri, mg_request_handler handler, void *cbdata );
+ * void httplib_set_request_handler( struct httplib_context *ctx, const char *uri, httplib_request_handler handler, void *cbdata );
  *
- * The function mg_set_request_handler() sets a request handler for a specific
+ * The function httplib_set_request_handler() sets a request handler for a specific
  * uri in a server context.
  */
 
-void mg_set_request_handler( struct mg_context *ctx, const char *uri, mg_request_handler handler, void *cbdata ) {
+void httplib_set_request_handler( struct httplib_context *ctx, const char *uri, httplib_request_handler handler, void *cbdata ) {
 
 	XX_httplib_set_handler_type( ctx, uri, REQUEST_HANDLER, (handler == NULL), handler, NULL, NULL, NULL, NULL, NULL, cbdata );
 
-}  /* mg_set_request_handler */
+}  /* httplib_set_request_handler */

@@ -24,14 +24,14 @@
 
 #include "httplib_main.h"
 
-int mg_get_var( const char *data, size_t data_len, const char *name, char *dst, size_t dst_len ) {
+int httplib_get_var( const char *data, size_t data_len, const char *name, char *dst, size_t dst_len ) {
 
-	return mg_get_var2( data, data_len, name, dst, dst_len, 0 );
+	return httplib_get_var2( data, data_len, name, dst, dst_len, 0 );
 
-}  /* mg_get_var */
+}  /* httplib_get_var */
 
 
-int mg_get_var2( const char *data, size_t data_len, const char *name, char *dst, size_t dst_len, size_t occurrence ) {
+int httplib_get_var2( const char *data, size_t data_len, const char *name, char *dst, size_t dst_len, size_t occurrence ) {
 
 	const char *p;
 	const char *e;
@@ -53,7 +53,7 @@ int mg_get_var2( const char *data, size_t data_len, const char *name, char *dst,
 		/* data is "var1=val1&var2=val2...". Find variable first */
 		for (p = data; p + name_len < e; p++) {
 			if ((p == data || p[-1] == '&') && p[name_len] == '='
-			    && !mg_strncasecmp(name, p, name_len) && 0 == occurrence--) {
+			    && !httplib_strncasecmp(name, p, name_len) && 0 == occurrence--) {
 				/* Point p to variable value */
 				p += name_len + 1;
 
@@ -64,7 +64,7 @@ int mg_get_var2( const char *data, size_t data_len, const char *name, char *dst,
 				if (s < p) return -3;
 
 				/* Decode variable into destination buffer */
-				len = mg_url_decode(p, (int)(s - p), dst, (int)dst_len, 1);
+				len = httplib_url_decode(p, (int)(s - p), dst, (int)dst_len, 1);
 
 				/* Redirect error code from -1 to -2 (destination buffer too
 				 * small). */
@@ -76,4 +76,4 @@ int mg_get_var2( const char *data, size_t data_len, const char *name, char *dst,
 
 	return len;
 
-}  /* mg_get_var2 */
+}  /* httplib_get_var2 */

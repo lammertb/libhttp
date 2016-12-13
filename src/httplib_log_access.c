@@ -26,17 +26,17 @@
 #include "httplib_ssl.h"
 #include "httplib_string.h"
 
-static const char *header_val( const struct mg_connection *conn, const char *header );
+static const char *header_val( const struct httplib_connection *conn, const char *header );
 
 /*
- * void XX_httplib_log_access( const struct mg_connection *conn );
+ * void XX_httplib_log_access( const struct httplib_connection *conn );
  *
  * The function XX_httplib_log_access() logs an access of a client.
  */
 
-void XX_httplib_log_access( const struct mg_connection *conn ) {
+void XX_httplib_log_access( const struct httplib_connection *conn ) {
 
-	const struct mg_request_info *ri;
+	const struct httplib_request_info *ri;
 	struct file fi;
 	char date[64];
 	char src_addr[IP_ADDR_STR_LEN];
@@ -104,17 +104,17 @@ void XX_httplib_log_access( const struct mg_connection *conn ) {
 
 
 /*
- * static const char *header_val( const struct mg_connection *conn, const char *header );
+ * static const char *header_val( const struct httplib_connection *conn, const char *header );
  *
  * The function header_val() returns the value of a specific header of a
  * connection.
  */
 
-static const char *header_val( const struct mg_connection *conn, const char *header ) {
+static const char *header_val( const struct httplib_connection *conn, const char *header ) {
 
 	const char *header_value;
 
-	if ((header_value = mg_get_header(conn, header)) == NULL) return "-";
+	if ((header_value = httplib_get_header(conn, header)) == NULL) return "-";
 	else                                                      return header_value;
 
 }  /* header_val */

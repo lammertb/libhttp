@@ -25,7 +25,7 @@
 #include "httplib_main.h"
 #include "httplib_utils.h"
 
-int mg_strncasecmp( const char *s1, const char *s2, size_t len ) {
+int httplib_strncasecmp( const char *s1, const char *s2, size_t len ) {
 
 	int diff = 0;
 
@@ -37,4 +37,4 @@ int mg_strncasecmp( const char *s1, const char *s2, size_t len ) {
 
 	return diff;
 
-}  /* mg_strncasecmp */
+}  /* httplib_strncasecmp */

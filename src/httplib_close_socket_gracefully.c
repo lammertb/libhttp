@@ -25,13 +25,13 @@
 #include "httplib_main.h"
 
 /*
- * void XX_httplib_close_socket_gracefully( struct mg_connection *conn );
+ * void XX_httplib_close_socket_gracefully( struct httplib_connection *conn );
  *
  * The function XX_httplib_close_socket_gracefully() closes a socket in a
  * graceful way.
  */
 
-void XX_httplib_close_socket_gracefully( struct mg_connection *conn ) {
+void XX_httplib_close_socket_gracefully( struct httplib_connection *conn ) {
 
 #if defined(_WIN32)
 	char buf[MG_BUF_LEN];
@@ -54,7 +54,7 @@ void XX_httplib_close_socket_gracefully( struct mg_connection *conn ) {
 		/* Socket already closed by client/peer, close socket without linger */
 	} else {
 		if (setsockopt(conn->client.sock, SOL_SOCKET, SO_LINGER, (char *)&linger, sizeof(linger)) != 0) {
-			mg_cry(conn, "%s: setsockopt(SOL_SOCKET SO_LINGER) failed: %s", __func__, strerror(ERRNO));
+			httplib_cry(conn, "%s: setsockopt(SOL_SOCKET SO_LINGER) failed: %s", __func__, strerror(ERRNO));
 		}
 	}
 

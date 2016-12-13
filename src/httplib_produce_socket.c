@@ -26,14 +26,14 @@
 #include "httplib_pthread.h"
 
 /*
- * void XX_httplib_produce_socket( struct mg_context *ctx, const struct socket *sp );
+ * void XX_httplib_produce_socket( struct httplib_context *ctx, const struct socket *sp );
  *
  * The function XX_httplib_produce_socket() is used to produce a socket.
  */
 
 #if defined(ALTERNATIVE_QUEUE)
 
-void XX_httplib_produce_socket( struct mg_context *ctx, const struct socket *sp ) {
+void XX_httplib_produce_socket( struct httplib_context *ctx, const struct socket *sp ) {
 
 	unsigned int i;
 
@@ -48,7 +48,7 @@ void XX_httplib_produce_socket( struct mg_context *ctx, const struct socket *sp 
 			}
 		}
 		/* queue is full */
-		mg_sleep(1);
+		httplib_sleep(1);
 	}
 
 }  /* XX_httplib_produce_socket */
@@ -56,7 +56,7 @@ void XX_httplib_produce_socket( struct mg_context *ctx, const struct socket *sp 
 #else /* ALTERNATIVE_QUEUE */
 
 /* Master thread adds accepted socket to a queue */
-void XX_httplib_produce_socket(struct mg_context *ctx, const struct socket *sp) {
+void XX_httplib_produce_socket(struct httplib_context *ctx, const struct socket *sp) {
 
 #define QUEUE_SIZE(ctx) ((int)(ARRAY_SIZE(ctx->queue)))
 	if (!ctx) return;

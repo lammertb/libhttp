@@ -31,13 +31,13 @@ static int parse_port_string( const struct vec *vec, struct socket *so, int *ip_
 
 
 /*
- * int XX_httplib_set_ports_option( struct mg_context *ctx );
+ * int XX_httplib_set_ports_option( struct httplib_context *ctx );
  *
  * The function XX_httplib_set_ports_option() set the port options for a
  * context.
  */
 
-int XX_httplib_set_ports_option( struct mg_context *ctx ) {
+int XX_httplib_set_ports_option( struct httplib_context *ctx ) {
 
 	const char *list;
 	int on = 1;
@@ -67,7 +67,7 @@ int XX_httplib_set_ports_option( struct mg_context *ctx ) {
 		portsTotal++;
 
 		if (!parse_port_string(&vec, &so, &ip_version)) {
-			mg_cry( XX_httplib_fc(ctx),
+			httplib_cry( XX_httplib_fc(ctx),
 			       "%.*s: invalid port spec (entry %i). Expecting list of: %s",
 			       (int)vec.len,
 			       vec.ptr,
@@ -79,7 +79,7 @@ int XX_httplib_set_ports_option( struct mg_context *ctx ) {
 #if !defined(NO_SSL)
 		if (so.is_ssl && ctx->ssl_ctx == NULL) {
 
-			mg_cry( XX_httplib_fc(ctx), "Cannot add SSL socket (entry %i). Is -ssl_certificate option set?", portsTotal);
+			httplib_cry( XX_httplib_fc(ctx), "Cannot add SSL socket (entry %i). Is -ssl_certificate option set?", portsTotal);
 			continue;
 		}
 #endif
@@ -87,7 +87,7 @@ int XX_httplib_set_ports_option( struct mg_context *ctx ) {
 		if ((so.sock = socket(so.lsa.sa.sa_family, SOCK_STREAM, 6))
 		    == INVALID_SOCKET) {
 
-			mg_cry( XX_httplib_fc(ctx), "cannot create socket (entry %i)", portsTotal);
+			httplib_cry( XX_httplib_fc(ctx), "cannot create socket (entry %i)", portsTotal);
 			continue;
 		}
 
@@ -99,18 +99,18 @@ int XX_httplib_set_ports_option( struct mg_context *ctx ) {
 		 * Windows might need a few seconds before
 		 * the same port can be used again in the
 		 * same process, so a short Sleep may be
-		 * required between mg_stop and mg_start.
+		 * required between httplib_stop and httplib_start.
 		 */
 		if (setsockopt(so.sock, SOL_SOCKET, SO_EXCLUSIVEADDRUSE, (SOCK_OPT_TYPE)&on, sizeof(on)) != 0) {
 
 			/* Set reuse option, but don't abort on errors. */
-			mg_cry( XX_httplib_fc(ctx), "cannot set socket option SO_EXCLUSIVEADDRUSE (entry %i)", portsTotal);
+			httplib_cry( XX_httplib_fc(ctx), "cannot set socket option SO_EXCLUSIVEADDRUSE (entry %i)", portsTotal);
 		}
 #else
 		if (setsockopt(so.sock, SOL_SOCKET, SO_REUSEADDR, (SOCK_OPT_TYPE)&on, sizeof(on)) != 0) {
 
 			/* Set reuse option, but don't abort on errors. */
-			mg_cry( XX_httplib_fc(ctx), "cannot set socket option SO_REUSEADDR (entry %i)", portsTotal);
+			httplib_cry( XX_httplib_fc(ctx), "cannot set socket option SO_REUSEADDR (entry %i)", portsTotal);
 		}
 #endif
 
@@ -121,11 +121,11 @@ int XX_httplib_set_ports_option( struct mg_context *ctx ) {
 				    && setsockopt(so.sock, IPPROTO_IPV6, IPV6_V6ONLY, (void *)&off, sizeof(off)) != 0) {
 
 					/* Set IPv6 only option, but don't abort on errors. */
-					mg_cry( XX_httplib_fc(ctx), "cannot set socket option IPV6_V6ONLY (entry %i)", portsTotal);
+					httplib_cry( XX_httplib_fc(ctx), "cannot set socket option IPV6_V6ONLY (entry %i)", portsTotal);
 				}
 			}
 #else
-			mg_cry( XX_httplib_fc(ctx), "IPv6 not available");
+			httplib_cry( XX_httplib_fc(ctx), "IPv6 not available");
 			closesocket(so.sock);
 			so.sock = INVALID_SOCKET;
 			continue;
@@ -136,7 +136,7 @@ int XX_httplib_set_ports_option( struct mg_context *ctx ) {
 
 			len = sizeof(so.lsa.sin);
 			if (bind(so.sock, &so.lsa.sa, len) != 0) {
-				mg_cry( XX_httplib_fc(ctx), "cannot bind to %.*s: %d (%s)", (int)vec.len, vec.ptr, (int)ERRNO, strerror(errno));
+				httplib_cry( XX_httplib_fc(ctx), "cannot bind to %.*s: %d (%s)", (int)vec.len, vec.ptr, (int)ERRNO, strerror(errno));
 				closesocket(so.sock);
 				so.sock = INVALID_SOCKET;
 				continue;
@@ -147,7 +147,7 @@ int XX_httplib_set_ports_option( struct mg_context *ctx ) {
 
 			len = sizeof(so.lsa.sin6);
 			if (bind(so.sock, &so.lsa.sa, len) != 0) {
-				mg_cry( XX_httplib_fc(ctx), "cannot bind to IPv6 %.*s: %d (%s)", (int)vec.len, vec.ptr, (int)ERRNO, strerror(errno));
+				httplib_cry( XX_httplib_fc(ctx), "cannot bind to IPv6 %.*s: %d (%s)", (int)vec.len, vec.ptr, (int)ERRNO, strerror(errno));
 				closesocket(so.sock);
 				so.sock = INVALID_SOCKET;
 				continue;
@@ -155,13 +155,13 @@ int XX_httplib_set_ports_option( struct mg_context *ctx ) {
 		}
 #endif
 		else {
-			mg_cry( XX_httplib_fc(ctx), "cannot bind: address family not supported (entry %i)", portsTotal);
+			httplib_cry( XX_httplib_fc(ctx), "cannot bind: address family not supported (entry %i)", portsTotal);
 			continue;
 		}
 
 		if (listen(so.sock, SOMAXCONN) != 0) {
 
-			mg_cry( XX_httplib_fc(ctx), "cannot listen to %.*s: %d (%s)", (int)vec.len, vec.ptr, (int)ERRNO, strerror(errno));
+			httplib_cry( XX_httplib_fc(ctx), "cannot listen to %.*s: %d (%s)", (int)vec.len, vec.ptr, (int)ERRNO, strerror(errno));
 			closesocket(so.sock);
 			so.sock = INVALID_SOCKET;
 			continue;
@@ -171,7 +171,7 @@ int XX_httplib_set_ports_option( struct mg_context *ctx ) {
 		    || usa.sa.sa_family != so.lsa.sa.sa_family) {
 
 			int err = (int)ERRNO;
-			mg_cry( XX_httplib_fc(ctx), "call to getsockname failed %.*s: %d (%s)", (int)vec.len, vec.ptr, err, strerror(errno));
+			httplib_cry( XX_httplib_fc(ctx), "call to getsockname failed %.*s: %d (%s)", (int)vec.len, vec.ptr, err, strerror(errno));
 			closesocket(so.sock);
 			so.sock = INVALID_SOCKET;
 			continue;
@@ -189,7 +189,7 @@ int XX_httplib_set_ports_option( struct mg_context *ctx ) {
 
 		if ((ptr = XX_httplib_realloc(ctx->listening_sockets, (ctx->num_listening_sockets + 1) * sizeof(ctx->listening_sockets[0]))) == NULL) {
 
-			mg_cry( XX_httplib_fc(ctx), "%s", "Out of memory");
+			httplib_cry( XX_httplib_fc(ctx), "%s", "Out of memory");
 			closesocket(so.sock);
 			so.sock = INVALID_SOCKET;
 			continue;
@@ -200,7 +200,7 @@ int XX_httplib_set_ports_option( struct mg_context *ctx ) {
 		         (ctx->num_listening_sockets + 1)
 		             * sizeof(ctx->listening_socket_fds[0]))) == NULL) {
 
-			mg_cry( XX_httplib_fc(ctx), "%s", "Out of memory");
+			httplib_cry( XX_httplib_fc(ctx), "%s", "Out of memory");
 			closesocket(so.sock);
 			so.sock = INVALID_SOCKET;
 			XX_httplib_free(ptr);
@@ -276,7 +276,7 @@ static int parse_port_string( const struct vec *vec, struct socket *so, int *ip_
 	} else if (sscanf(vec->ptr, "[%49[^]]]:%u%n", buf, &port, &len) == 2
 	           && XX_httplib_inet_pton( AF_INET6, buf, &so->lsa.sin6, sizeof(so->lsa.sin6))) {
 		/* IPv6 address, examples: see above */
-		/* so->lsa.sin6.sin6_family = AF_INET6; already set by mg_inet_pton
+		/* so->lsa.sin6.sin6_family = AF_INET6; already set by httplib_inet_pton
 		 */
 		so->lsa.sin6.sin6_port = htons((uint16_t)port);
 		*ip_version = 6;

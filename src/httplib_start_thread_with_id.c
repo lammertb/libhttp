@@ -48,7 +48,7 @@ int XX_httplib_start_thread_with_id( unsigned(__stdcall *f)(void *), void *p, pt
 #else
 
 /* Start a thread storing the thread context. */
-int XX_httplib_start_thread_with_id( mg_thread_func_t func, void *param, pthread_t *threadidptr ) {
+int XX_httplib_start_thread_with_id( httplib_thread_func_t func, void *param, pthread_t *threadidptr ) {
 
 	pthread_t thread_id;
 	pthread_attr_t attr;

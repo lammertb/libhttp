@@ -26,7 +26,7 @@
 #include "httplib_utils.h"
 
 /*
- * int XX_httplib_read_request( FILE *fp, struct mg_connection *conn, char *buf, int bufsiz, int *nread );
+ * int XX_httplib_read_request( FILE *fp, struct httplib_connection *conn, char *buf, int bufsiz, int *nread );
  *
  * The function XX_httplib_read_request() keeps reading the input (which can
  * either be an opened file descriptor, a socket sock or an SSL descriptor ssl)
@@ -36,14 +36,14 @@
  * is incremented by the number of bytes read.
  */
 
-int XX_httplib_read_request( FILE *fp, struct mg_connection *conn, char *buf, int bufsiz, int *nread ) {
+int XX_httplib_read_request( FILE *fp, struct httplib_connection *conn, char *buf, int bufsiz, int *nread ) {
 
 	int request_len;
 	int n = 0;
 	struct timespec last_action_time;
 	double request_timeout;
 
-	if (!conn) return 0;
+	if ( conn == NULL ) return 0;
 
 	memset(&last_action_time, 0, sizeof(last_action_time));
 

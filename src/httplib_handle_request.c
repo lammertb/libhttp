@@ -27,7 +27,7 @@
 #include "httplib_utils.h"
 
 /*
- * void XX_httplib_handle_request( struct mg_connection *conn );
+ * void XX_httplib_handle_request( struct httplib_connection *conn );
  *
  * The function XX_httplib_handle_request() handles an incoming request. This
  * is the heart of the LibHTTP's logic. This function is called when the
@@ -35,11 +35,11 @@
  * to take: serve a file, or a directory, or call embedded function, etcetera.
  */
 
-void XX_httplib_handle_request( struct mg_connection *conn ) {
+void XX_httplib_handle_request( struct httplib_connection *conn ) {
 
 	if ( conn == NULL ) return;
 
-	struct mg_request_info *ri = &conn->request_info;
+	struct httplib_request_info *ri = &conn->request_info;
 	char path[PATH_MAX];
 	int uri_len;
 	int ssl_index;
@@ -50,13 +50,13 @@ void XX_httplib_handle_request( struct mg_connection *conn ) {
 	int is_callback_resource     = 0;
 	int i;
 	struct file file = STRUCT_FILE_INITIALIZER;
-	mg_request_handler callback_handler             = NULL;
-	mg_websocket_connect_handler ws_connect_handler = NULL;
-	mg_websocket_ready_handler ws_ready_handler     = NULL;
-	mg_websocket_data_handler ws_data_handler       = NULL;
-	mg_websocket_close_handler ws_close_handler     = NULL;
+	httplib_request_handler callback_handler             = NULL;
+	httplib_websocket_connect_handler ws_connect_handler = NULL;
+	httplib_websocket_ready_handler ws_ready_handler     = NULL;
+	httplib_websocket_data_handler ws_data_handler       = NULL;
+	httplib_websocket_close_handler ws_close_handler     = NULL;
 	void *callback_data                             = NULL;
-	mg_authorization_handler auth_handler           = NULL;
+	httplib_authorization_handler auth_handler           = NULL;
 	void *auth_callback_data                        = NULL;
 #if !defined(NO_FILES)
 	time_t curtime = time(NULL);
@@ -83,14 +83,14 @@ void XX_httplib_handle_request( struct mg_connection *conn ) {
 			/* A http to https forward port has been specified,
 			 * but no https port to forward to. */
 			XX_httplib_send_http_error(conn, 503, "%s", "Error: SSL forward not configured properly");
-			mg_cry(conn, "Can not redirect to SSL, no SSL port available");
+			httplib_cry(conn, "Can not redirect to SSL, no SSL port available");
 		}
 		return;
 	}
 	uri_len = (int)strlen(ri->local_uri);
 
 	/* 1.3. decode url (if config says so) */
-	if (XX_httplib_should_decode_url(conn)) mg_url_decode( ri->local_uri, uri_len, (char *)ri->local_uri, uri_len + 1, 0);
+	if (XX_httplib_should_decode_url(conn)) httplib_url_decode( ri->local_uri, uri_len, (char *)ri->local_uri, uri_len + 1, 0);
 
 	/* 1.4. clean URIs, so a path like allowed_dir/../forbidden_file is
 	 * not possible */
@@ -324,7 +324,7 @@ void XX_httplib_handle_request( struct mg_connection *conn ) {
 	if (file.is_directory && (uri_len > 0)
 	    && (ri->local_uri[uri_len - 1] != '/')) {
 		XX_httplib_gmt_time_string(date, sizeof(date), &curtime);
-		mg_printf(conn,
+		httplib_printf(conn,
 		          "HTTP/1.1 301 Moved Permanently\r\n"
 		          "Location: %s/\r\n"
 		          "Date: %s\r\n"
@@ -368,7 +368,7 @@ void XX_httplib_handle_request( struct mg_connection *conn ) {
 			 * define what should be possible in this case. */
 		} else {
 			/* 14.2. no substitute file */
-			if (!mg_strcasecmp(conn->ctx->config[ENABLE_DIRECTORY_LISTING], "yes")) XX_httplib_handle_directory_request(conn, path);
+			if (!httplib_strcasecmp(conn->ctx->config[ENABLE_DIRECTORY_LISTING], "yes")) XX_httplib_handle_directory_request(conn, path);
 			else XX_httplib_send_http_error(conn, 403, "%s", "Error: Directory listing denied");
 			return;
 		}

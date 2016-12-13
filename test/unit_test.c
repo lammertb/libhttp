@@ -93,7 +93,7 @@ void check_func(int condition, const char *cond_txt, unsigned line)
 
 static void test_parse_http_message()
 {
-	struct mg_request_info ri;
+	struct httplib_request_info ri;
 	char req1[] = "GET / HTTP/1.1\r\n\r\n";
 	char req2[] = "BLAH / HTTP/1.1\r\n\r\n";
 	char req3[] = "GET / HTTP/1.1\r\nBah\r\n";
@@ -136,8 +136,8 @@ static void test_parse_http_message()
 
 static void test_should_keep_alive(void)
 {
-	struct mg_connection conn;
-	struct mg_context ctx;
+	struct httplib_connection conn;
+	struct httplib_context ctx;
 	char req1[] = "GET / HTTP/1.1\r\n\r\n";
 	char req2[] = "GET / HTTP/1.0\r\n\r\n";
 	char req3[] = "GET / HTTP/1.1\r\nConnection: close\r\n\r\n";
@@ -238,7 +238,7 @@ static char *read_file(const char *path, int *size)
 	char *data = NULL;
 	if ((fp = fopen(path, "rb")) != NULL && !fstat(fileno(fp), &st)) {
 		*size = (int)st.st_size;
-		data = mg_malloc(*size);
+		data = httplib_malloc(*size);
 		ASSERT(data != NULL);
 		ASSERT(fread(data, 1, *size, fp) == (size_t)*size);
 		fclose(fp);
@@ -256,7 +256,7 @@ static const char *upload_filename2 = "upload_test2.txt";
 static const char *upload_ok_message = "upload successful";
 
 static const char *
-open_file_cb(const struct mg_connection *conn, const char *path, size_t *size)
+open_file_cb(const struct httplib_connection *conn, const char *path, size_t *size)
 {
 	(void)conn;
 	if (!strcmp(path, "./blah")) {
@@ -266,9 +266,9 @@ open_file_cb(const struct mg_connection *conn, const char *path, size_t *size)
 	return NULL;
 }
 
-static void upload_cb(struct mg_connection *conn, const char *path)
+static void upload_cb(struct httplib_connection *conn, const char *path)
 {
-	const struct mg_request_info *ri = mg_get_request_info(conn);
+	const struct httplib_request_info *ri = httplib_get_request_info(conn);
 	char *p1, *p2;
 	int len1, len2;
 
@@ -278,8 +278,8 @@ static void upload_cb(struct mg_connection *conn, const char *path)
 		ASSERT((p2 = read_file(path, &len2)) != NULL);
 		ASSERT(len1 == len2);
 		ASSERT(memcmp(p1, p2, len1) == 0);
-		mg_free(p1);
-		mg_free(p2);
+		httplib_free(p1);
+		httplib_free(p2);
 		remove(upload_filename);
 	} else if (atoi(ri->query_string) == 2) {
 		if (!strcmp(path, "./upload_test.txt")) {
@@ -287,16 +287,16 @@ static void upload_cb(struct mg_connection *conn, const char *path)
 			ASSERT((p2 = read_file(path, &len2)) != NULL);
 			ASSERT(len1 == len2);
 			ASSERT(memcmp(p1, p2, len1) == 0);
-			mg_free(p1);
-			mg_free(p2);
+			httplib_free(p1);
+			httplib_free(p2);
 			remove(upload_filename);
 		} else if (!strcmp(path, "./upload_test2.txt")) {
 			ASSERT((p1 = read_file("README.md", &len1)) != NULL);
 			ASSERT((p2 = read_file(path, &len2)) != NULL);
 			ASSERT(len1 == len2);
 			ASSERT(memcmp(p1, p2, len1) == 0);
-			mg_free(p1);
-			mg_free(p2);
+			httplib_free(p1);
+			httplib_free(p2);
 			remove(upload_filename);
 		} else {
 			ASSERT(0);
@@ -305,18 +305,15 @@ static void upload_cb(struct mg_connection *conn, const char *path)
 		ASSERT(0);
 	}
 
-	mg_printf(conn,
-	          "HTTP/1.0 200 OK\r\nContent-Length: %d\r\n\r\n%s",
-	          (int)strlen(upload_ok_message),
-	          upload_ok_message);
+	httplib_printf(conn, "HTTP/1.0 200 OK\r\nContent-Length: %d\r\n\r\n%s", (int)strlen(upload_ok_message), upload_ok_message);
 }
 
-static int begin_request_handler_cb(struct mg_connection *conn)
+static int begin_request_handler_cb(struct httplib_connection *conn)
 {
 
-	const struct mg_request_info *ri = mg_get_request_info(conn);
+	const struct httplib_request_info *ri = httplib_get_request_info(conn);
 	int req_len = (int)(ri->content_length);
-	const char *s_req_len = mg_get_header(conn, "Content-Length");
+	const char *s_req_len = httplib_get_header(conn, "Content-Length");
 	char *data;
 	long to_write, write_now;
 	int bytes_read, bytes_written;
@@ -330,7 +327,7 @@ static int begin_request_handler_cb(struct mg_connection *conn)
 		} else {
 			to_write = atol(ri->uri + 6);
 		}
-		mg_printf(conn,
+		httplib_printf(conn,
 		          "HTTP/1.1 200 OK\r\n"
 		          "Connection: close\r\n"
 		          "Content-Length: %li\r\n"
@@ -338,7 +335,7 @@ static int begin_request_handler_cb(struct mg_connection *conn)
 		          to_write);
 		while (to_write > 0) {
 			write_now = to_write > fetch_data_size ? fetch_data_size : to_write;
-			bytes_written = mg_write(conn, fetch_data, write_now);
+			bytes_written = httplib_write(conn, fetch_data, write_now);
 			ASSERT(bytes_written == write_now);
 			if (bytes_written < 0) {
 				ASSERT(0);
@@ -352,32 +349,32 @@ static int begin_request_handler_cb(struct mg_connection *conn)
 
 	if (!strcmp(ri->uri, "/content_length")) {
 		if (req_len > 0) {
-			data = mg_malloc(req_len);
+			data = httplib_malloc(req_len);
 			assert(data != NULL);
-			bytes_read = mg_read(conn, data, req_len);
+			bytes_read = httplib_read(conn, data, req_len);
 			ASSERT(bytes_read == req_len);
 
-			mg_printf(conn,
+			httplib_printf(conn,
 			          "HTTP/1.1 200 OK\r\n"
 			          "Connection: close\r\n"
 			          "Content-Length: %d\r\n" /* The official definition */
 			          "Content-Type: text/plain\r\n\r\n",
 			          bytes_read);
-			mg_write(conn, data, bytes_read);
+			httplib_write(conn, data, bytes_read);
 
-			mg_free(data);
+			httplib_free(data);
 		} else {
-			data = mg_malloc(1024);
+			data = httplib_malloc(1024);
 			assert(data != NULL);
-			bytes_read = mg_read(conn, data, 1024);
+			bytes_read = httplib_read(conn, data, 1024);
 
-			mg_printf(conn,
+			httplib_printf(conn,
 			          "HTTP/1.1 200 OK\r\n"
 			          "Connection: close\r\n"
 			          "Content-Type: text/plain\r\n\r\n");
-			mg_write(conn, data, bytes_read);
+			httplib_write(conn, data, bytes_read);
 
-			mg_free(data);
+			httplib_free(data);
 		}
 		close_connection(conn);
 		return 1;
@@ -385,13 +382,13 @@ static int begin_request_handler_cb(struct mg_connection *conn)
 
 	if (!strcmp(ri->uri, "/upload")) {
 		ASSERT(ri->query_string != NULL);
-		ASSERT(mg_upload(conn, ".") == atoi(ri->query_string));
+		ASSERT(httplib_upload(conn, ".") == atoi(ri->query_string));
 	}
 
 	return 0;
 }
 
-static int log_message_cb(const struct mg_connection *conn, const char *msg)
+static int log_message_cb(const struct httplib_connection *conn, const char *msg)
 {
 	(void)conn;
 	printf("%s\n", msg);
@@ -399,25 +396,20 @@ static int log_message_cb(const struct mg_connection *conn, const char *msg)
 }
 
 
-int (*begin_request)(struct mg_connection *);
-void (*end_request)(const struct mg_connection *, int reply_status_code);
-int (*log_message)(const struct mg_connection *, const char *message);
+int (*begin_request)(struct httplib_connection *);
+void (*end_request)(const struct httplib_connection *, int reply_status_code);
+int (*log_message)(const struct httplib_connection *, const char *message);
 int (*init_ssl)(void *ssl_context, void *user_data);
-int (*websocket_connect)(const struct mg_connection *);
-void (*websocket_ready)(struct mg_connection *);
-int (*websocket_data)(struct mg_connection *,
-                      int bits,
-                      char *data,
-                      size_t data_len);
-void (*connection_close)(struct mg_connection *);
-const char *(*open_file)(const struct mg_connection *,
-                         const char *path,
-                         size_t *data_len);
-void (*init_lua)(struct mg_connection *, void *lua_context);
-void (*upload)(struct mg_connection *, const char *file_name);
-int (*http_error)(struct mg_connection *, int status);
+int (*websocket_connect)(const struct httplib_connection *);
+void (*websocket_ready)(struct httplib_connection *);
+int (*websocket_data)(struct httplib_connection *, int bits, char *data, size_t data_len);
+void (*connection_close)(struct httplib_connection *);
+const char *(*open_file)(const struct httplib_connection *, const char *path, size_t *data_len);
+void (*init_lua)(struct httplib_connection *, void *lua_context);
+void (*upload)(struct httplib_connection *, const char *file_name);
+int (*http_error)(struct httplib_connection *, int status);
 
-static struct mg_callbacks CALLBACKS;
+static struct httplib_callbacks CALLBACKS;
 
 static void init_CALLBACKS()
 {
@@ -442,14 +434,14 @@ static const char *OPTIONS[] = {
     NULL,
 };
 
-static char *read_conn(struct mg_connection *conn, int *size)
+static char *read_conn(struct httplib_connection *conn, int *size)
 {
 	char buf[100], *data = NULL;
 	int len;
 	*size = 0;
-	while ((len = mg_read(conn, buf, sizeof(buf))) > 0) {
+	while ((len = httplib_read(conn, buf, sizeof(buf))) > 0) {
 		*size += len;
-		data = mg_realloc(data, *size);
+		data = httplib_realloc(data, *size);
 		ASSERT(data != NULL);
 		memcpy(data + *size - len, buf, len);
 	}
@@ -457,26 +449,26 @@ static char *read_conn(struct mg_connection *conn, int *size)
 }
 
 #ifdef MEMORY_DEBUGGING
-extern unsigned long mg_memory_debug_blockCount;
-extern unsigned long mg_memory_debug_totalMemUsed;
+extern unsigned long httplib_memory_debug_blockCount;
+extern unsigned long httplib_memory_debug_totalMemUsed;
 #endif
 
-static void ut_mg_stop(struct mg_context *ctx)
+static void ut_httplib_stop(struct httplib_context *ctx)
 {
-	/* mg_stop for unit_test */
-	mg_stop(ctx);
+	/* httplib_stop for unit_test */
+	httplib_stop(ctx);
 #ifdef MEMORY_DEBUGGING
-	ASSERT(mg_memory_debug_blockCount == 0);
-	ASSERT(mg_memory_debug_totalMemUsed == 0);
-	mg_memory_debug_blockCount = 0;
-	mg_memory_debug_totalMemUsed = 0;
+	ASSERT(httplib_memory_debug_blockCount == 0);
+	ASSERT(httplib_memory_debug_totalMemUsed == 0);
+	httplib_memory_debug_blockCount = 0;
+	httplib_memory_debug_totalMemUsed = 0;
 #endif
 
-	mg_sleep(31000); /* This is required to ensure the operating system already
+	httplib_sleep(31000); /* This is required to ensure the operating system already
 	                    allows to use the port again */
 }
 
-static void test_mg_download(int use_ssl)
+static void test_httplib_download(int use_ssl)
 {
 
 	const char *test_data = "123456789A123456789B";
@@ -484,9 +476,9 @@ static void test_mg_download(int use_ssl)
 	char *p1, *p2, ebuf[100];
 	const char *h;
 	int i, len1, len2, port;
-	struct mg_connection *conn;
-	struct mg_context *ctx;
-	const struct mg_request_info *ri;
+	struct httplib_connection *conn;
+	struct httplib_context *ctx;
+	const struct httplib_request_info *ri;
 
 	if (use_ssl) {
 		port = atoi(HTTPS_PORT);
@@ -494,105 +486,63 @@ static void test_mg_download(int use_ssl)
 		port = atoi(HTTP_PORT);
 	}
 
-	ctx = mg_start(&CALLBACKS, NULL, OPTIONS);
+	ctx = httplib_start(&CALLBACKS, NULL, OPTIONS);
 
 	ASSERT(ctx != NULL);
 
-	ASSERT(mg_download(NULL, port, use_ssl, ebuf, sizeof(ebuf), "%s", "") ==
+	ASSERT(httplib_download(NULL, port, use_ssl, ebuf, sizeof(ebuf), "%s", "") ==
 	       NULL);
-	ASSERT(mg_download("localhost", 0, use_ssl, ebuf, sizeof(ebuf), "%s", "") ==
+	ASSERT(httplib_download("localhost", 0, use_ssl, ebuf, sizeof(ebuf), "%s", "") ==
 	       NULL);
 	ASSERT(
-	    mg_download("localhost", port, use_ssl, ebuf, sizeof(ebuf), "%s", "") ==
+	    httplib_download("localhost", port, use_ssl, ebuf, sizeof(ebuf), "%s", "") ==
 	    NULL);
 
 	/* Fetch nonexistent file, should see 404 */
-	ASSERT((conn = mg_download("localhost",
-	                           port,
-	                           use_ssl,
-	                           ebuf,
-	                           sizeof(ebuf),
-	                           "%s",
-	                           "GET /gimbec HTTP/1.0\r\n\r\n")) != NULL);
+	ASSERT((conn = httplib_download("localhost", port, use_ssl, ebuf, sizeof(ebuf), "%s", "GET /gimbec HTTP/1.0\r\n\r\n")) != NULL);
 	ASSERT(strcmp(conn->request_info.uri, "404") == 0);
-	mg_close_connection(conn);
+	httplib_close_connection(conn);
 
 	if (use_ssl) {
-		ASSERT((conn = mg_download("google.com",
-		                           443,
-		                           1,
-		                           ebuf,
-		                           sizeof(ebuf),
-		                           "%s",
-		                           "GET / HTTP/1.0\r\n\r\n")) != NULL);
-		mg_close_connection(conn);
+		ASSERT((conn = httplib_download("google.com", 443, 1, ebuf, sizeof(ebuf), "%s", "GET / HTTP/1.0\r\n\r\n")) != NULL);
+		httplib_close_connection(conn);
 	} else {
-		ASSERT((conn = mg_download("google.com",
-		                           80,
-		                           0,
-		                           ebuf,
-		                           sizeof(ebuf),
-		                           "%s",
-		                           "GET / HTTP/1.0\r\n\r\n")) != NULL);
-		mg_close_connection(conn);
+		ASSERT((conn = httplib_download("google.com", 80, 0, ebuf, sizeof(ebuf), "%s", "GET / HTTP/1.0\r\n\r\n")) != NULL);
+		httplib_close_connection(conn);
 	}
 
 	/* Fetch unit_test.c, should succeed */
-	ASSERT((conn = mg_download("localhost",
-	                           port,
-	                           use_ssl,
-	                           ebuf,
-	                           sizeof(ebuf),
-	                           "%s",
-	                           "GET /unit_test.c HTTP/1.0\r\n\r\n")) != NULL);
-	ASSERT(&conn->request_info == mg_get_request_info(conn));
+	ASSERT((conn = httplib_download("localhost", port, use_ssl, ebuf, sizeof(ebuf), "%s", "GET /unit_test.c HTTP/1.0\r\n\r\n")) != NULL);
+	ASSERT(&conn->request_info == httplib_get_request_info(conn));
 	ASSERT(!strcmp(conn->request_info.uri, "200"));
 	ASSERT((p1 = read_conn(conn, &len1)) != NULL);
 	ASSERT((p2 = read_file("unit_test.c", &len2)) != NULL);
 	ASSERT(len1 == len2);
 	ASSERT(memcmp(p1, p2, len1) == 0);
-	mg_free(p1);
-	mg_free(p2);
-	mg_close_connection(conn);
+	httplib_free(p1);
+	httplib_free(p2);
+	httplib_close_connection(conn);
 
 	/* Fetch in-memory file, should succeed. */
-	ASSERT((conn = mg_download("localhost",
-	                           port,
-	                           use_ssl,
-	                           ebuf,
-	                           sizeof(ebuf),
-	                           "%s",
-	                           "GET /blah HTTP/1.1\r\n\r\n")) != NULL);
+	ASSERT((conn = httplib_download("localhost", port, use_ssl, ebuf, sizeof(ebuf), "%s", "GET /blah HTTP/1.1\r\n\r\n")) != NULL);
 	ASSERT((p1 = read_conn(conn, &len1)) != NULL);
 	ASSERT(len1 == (int)strlen(inmemory_file_data));
 	ASSERT(memcmp(p1, inmemory_file_data, len1) == 0);
-	mg_free(p1);
-	mg_close_connection(conn);
+	httplib_free(p1);
+	httplib_close_connection(conn);
 
 	/* Fetch in-memory data with no Content-Length, should succeed. */
-	ASSERT((conn = mg_download("localhost",
-	                           port,
-	                           use_ssl,
-	                           ebuf,
-	                           sizeof(ebuf),
-	                           "%s",
-	                           "GET /data/all HTTP/1.1\r\n\r\n")) != NULL);
+	ASSERT((conn = httplib_download("localhost", port, use_ssl, ebuf, sizeof(ebuf), "%s", "GET /data/all HTTP/1.1\r\n\r\n")) != NULL);
 	ASSERT(conn->request_info.content_length == fetch_data_size);
 	ASSERT((p1 = read_conn(conn, &len1)) != NULL);
 	ASSERT(len1 == (int)fetch_data_size);
 	ASSERT(memcmp(p1, fetch_data, len1) == 0);
-	mg_free(p1);
-	mg_close_connection(conn);
+	httplib_free(p1);
+	httplib_close_connection(conn);
 
 	/* Fetch in-memory data with no Content-Length, should succeed. */
 	for (i = 0; i <= 1024 * /* 1024 * */ 8; i += (i < 2 ? 1 : i)) {
-		ASSERT((conn = mg_download("localhost",
-		                           port,
-		                           use_ssl,
-		                           ebuf,
-		                           sizeof(ebuf),
-		                           "GET /data/%i HTTP/1.1\r\n\r\n",
-		                           i)) != NULL);
+		ASSERT((conn = httplib_download("localhost", port, use_ssl, ebuf, sizeof(ebuf), "GET /data/%i HTTP/1.1\r\n\r\n", i)) != NULL);
 		ASSERT(conn->request_info.content_length == i);
 		len1 = -1;
 		p1 = read_conn(conn, &len1);
@@ -609,13 +559,13 @@ static void test_mg_download(int use_ssl)
 			ASSERT(memcmp(p1, fetch_data, fetch_data_size) == 0);
 		}
 
-		mg_free(p1);
-		mg_close_connection(conn);
+		httplib_free(p1);
+		httplib_close_connection(conn);
 	}
 
 	/* Fetch data with Content-Length, should succeed and return the defined
 	 * length. */
-	ASSERT((conn = mg_download(
+	ASSERT((conn = httplib_download(
 	            "localhost",
 	            port,
 	            use_ssl,
@@ -624,7 +574,7 @@ static void test_mg_download(int use_ssl)
 	            "POST /content_length HTTP/1.1\r\nContent-Length: %u\r\n\r\n%s",
 	            (unsigned)strlen(test_data),
 	            test_data)) != NULL);
-	h = mg_get_header(conn, "Content-Length");
+	h = httplib_get_header(conn, "Content-Length");
 	ASSERT((h != NULL) && (atoi(h) == (int)strlen(test_data)));
 	ASSERT((p1 = read_conn(conn, &len1)) != NULL);
 	ASSERT(len1 == (int)strlen(test_data));
@@ -633,13 +583,13 @@ static void test_mg_download(int use_ssl)
 	ASSERT(strcmp(conn->request_info.request_method, "HTTP/1.1") == 0);
 	ASSERT(strcmp(conn->request_info.uri, "200") == 0);
 	ASSERT(strcmp(conn->request_info.http_version, "OK") == 0);
-	mg_free(p1);
-	mg_close_connection(conn);
+	httplib_free(p1);
+	httplib_close_connection(conn);
 
 	/* A POST request without Content-Length set is only valid, if the request
 	 * used Transfer-Encoding: chunked. Otherwise, it is an HTTP protocol
 	 * violation. Here we send a chunked request, the reply is not chunked. */
-	ASSERT((conn = mg_download("localhost",
+	ASSERT((conn = httplib_download("localhost",
 	                           port,
 	                           use_ssl,
 	                           ebuf,
@@ -650,17 +600,17 @@ static void test_mg_download(int use_ssl)
 	                           "\r\n%x\r\n%s\r\n0\r\n\r\n",
 	                           (uint32_t)strlen(test_data),
 	                           test_data)) != NULL);
-	h = mg_get_header(conn, "Content-Length");
+	h = httplib_get_header(conn, "Content-Length");
 	ASSERT(h == NULL);
 	ASSERT(conn->request_info.content_length == -1);
 	ASSERT((p1 = read_conn(conn, &len1)) != NULL);
 	ASSERT(len1 == (int)strlen(test_data));
 	ASSERT(memcmp(p1, test_data, len1) == 0);
-	mg_free(p1);
-	mg_close_connection(conn);
+	httplib_free(p1);
+	httplib_close_connection(conn);
 
 	/* Another chunked POST request with different chunk sizes. */
-	ASSERT((conn = mg_download("localhost",
+	ASSERT((conn = httplib_download("localhost",
 	                           port,
 	                           use_ssl,
 	                           ebuf,
@@ -683,78 +633,62 @@ static void test_mg_download(int use_ssl)
 	                           test_data[6],
 	                           (uint32_t)strlen(test_data + 7),
 	                           test_data + 7)) != NULL);
-	h = mg_get_header(conn, "Content-Length");
+	h = httplib_get_header(conn, "Content-Length");
 	ASSERT(h == NULL);
 	ASSERT(conn->request_info.content_length == -1);
 	ASSERT((p1 = read_conn(conn, &len1)) != NULL);
 	ASSERT(len1 == (int)strlen(test_data));
 	ASSERT(memcmp(p1, test_data, len1) == 0);
-	mg_free(p1);
-	mg_close_connection(conn);
+	httplib_free(p1);
+	httplib_close_connection(conn);
 
 	/* Test non existent */
-	ASSERT((conn = mg_download("localhost",
-	                           port,
-	                           use_ssl,
-	                           ebuf,
-	                           sizeof(ebuf),
-	                           "%s",
-	                           "GET /non_exist HTTP/1.1\r\n\r\n")) != NULL);
+	ASSERT((conn = httplib_download("localhost", port, use_ssl, ebuf, sizeof(ebuf), "%s", "GET /non_exist HTTP/1.1\r\n\r\n")) != NULL);
 	ASSERT(strcmp(conn->request_info.request_method, "HTTP/1.1") == 0);
 	ASSERT(strcmp(conn->request_info.uri, "404") == 0);
 	ASSERT(strcmp(conn->request_info.http_version, "Not Found") == 0);
-	mg_close_connection(conn);
+	httplib_close_connection(conn);
 
 	if (use_ssl) {
 #ifndef NO_SSL
 		/* Test SSL redirect */
-		ASSERT((conn = mg_download("localhost",
-		                           atoi(HTTP_REDIRECT_PORT),
-		                           0,
-		                           ebuf,
-		                           sizeof(ebuf),
-		                           "%s",
-		                           "GET /data/4711 HTTP/1.1\r\n\r\n")) != NULL);
+		ASSERT((conn = httplib_download("localhost", atoi(HTTP_REDIRECT_PORT), 0, ebuf, sizeof(ebuf), "%s", "GET /data/4711 HTTP/1.1\r\n\r\n")) != NULL);
 		ASSERT(strcmp(conn->request_info.uri, "302") == 0);
-		h = mg_get_header(conn, "Location");
+		h = httplib_get_header(conn, "Location");
 		ASSERT(h != NULL);
 		ASSERT(strcmp(h, "https://127.0.0.1:" HTTPS_PORT "/data/4711") == 0);
-		mg_close_connection(conn);
+		httplib_close_connection(conn);
 #endif
 	}
 
 	/* Test new API */
 	ebuf[0] = 1;
-	conn = mg_connect_client("localhost", port, use_ssl, ebuf, sizeof(ebuf));
+	conn = httplib_connect_client("localhost", port, use_ssl, ebuf, sizeof(ebuf));
 	ASSERT(conn != NULL);
 	ASSERT(ebuf[0] == 0);
-	ri = mg_get_request_info(conn);
+	ri = httplib_get_request_info(conn);
 	ASSERT(ri->content_length == 0);
-	i = mg_get_response(conn, ebuf, sizeof(ebuf), 1000);
+	i = httplib_get_response(conn, ebuf, sizeof(ebuf), 1000);
 	ASSERT(ebuf[0] != 0);
-	ri = mg_get_request_info(conn);
+	ri = httplib_get_request_info(conn);
 	ASSERT(ri->content_length == -1);
-	mg_printf(conn, "GET /index.html HTTP/1.1\r\n");
-	mg_printf(conn, "Host: www.example.com\r\n");
-	mg_printf(conn, "\r\n");
-	i = mg_get_response(conn, ebuf, sizeof(ebuf), 1000);
+	httplib_printf(conn, "GET /index.html HTTP/1.1\r\n");
+	httplib_printf(conn, "Host: www.example.com\r\n");
+	httplib_printf(conn, "\r\n");
+	i = httplib_get_response(conn, ebuf, sizeof(ebuf), 1000);
 	ASSERT(ebuf[0] == 0);
-	ri = mg_get_request_info(conn);
+	ri = httplib_get_request_info(conn);
 	ASSERT(ri->content_length > 0);
-	mg_read(conn, ebuf, sizeof(ebuf));
+	httplib_read(conn, ebuf, sizeof(ebuf));
 	ASSERT(!strncmp(ebuf, "Error 404", 9));
 
-	mg_close_connection(conn);
+	httplib_close_connection(conn);
 
 	/* Stop the test server */
-	ut_mg_stop(ctx);
+	ut_httplib_stop(ctx);
 }
 
-static int websocket_data_handler(const struct mg_connection *conn,
-                                  int flags,
-                                  char *data,
-                                  size_t data_len,
-                                  void *cbdata)
+static int websocket_data_handler(const struct httplib_connection *conn, int flags, char *data, size_t data_len, void *cbdata)
 {
 	(void)conn;
 	(void)flags;
@@ -764,43 +698,43 @@ static int websocket_data_handler(const struct mg_connection *conn,
 	return 1;
 }
 
-static void test_mg_websocket_client_connect(int use_ssl)
+static void test_httplib_websocket_client_connect(int use_ssl)
 {
-	struct mg_connection *conn;
+	struct httplib_connection *conn;
 	char ebuf[100];
 	int port;
-	struct mg_context *ctx;
+	struct httplib_context *ctx;
 
 	if (use_ssl)
 		port = atoi(HTTPS_PORT);
 	else
 		port = atoi(HTTP_PORT);
-	ASSERT((ctx = mg_start(&CALLBACKS, NULL, OPTIONS)) != NULL);
+	ASSERT((ctx = httplib_start(&CALLBACKS, NULL, OPTIONS)) != NULL);
 
 	/* Try to connect to our own server */
 	/* Invalid port test */
-	conn = mg_connect_websocket_client("localhost",
+	conn = httplib_connect_websocket_client("localhost",
 	                                   0,
 	                                   use_ssl,
 	                                   ebuf,
 	                                   sizeof(ebuf),
 	                                   "/",
 	                                   "http://localhost",
-	                                   (mg_websocket_data_handler)websocket_data_handler,
+	                                   (httplib_websocket_data_handler)websocket_data_handler,
 	                                   NULL,
 	                                   NULL);
 	ASSERT(conn == NULL);
 
 	/* Should succeed, the default civetweb server should complete the handshake
 	 */
-	conn = mg_connect_websocket_client("localhost",
+	conn = httplib_connect_websocket_client("localhost",
 	                                   port,
 	                                   use_ssl,
 	                                   ebuf,
 	                                   sizeof(ebuf),
 	                                   "/",
 	                                   "http://localhost",
-	                                   (mg_websocket_data_handler)websocket_data_handler,
+	                                   (httplib_websocket_data_handler)websocket_data_handler,
 	                                   NULL,
 	                                   NULL);
 	ASSERT(conn != NULL);
@@ -812,45 +746,45 @@ static void test_mg_websocket_client_connect(int use_ssl)
 	}
 
 	/* Not a websocket server path */
-	conn = mg_connect_websocket_client("websocket.org",
+	conn = httplib_connect_websocket_client("websocket.org",
 	                                   port,
 	                                   use_ssl,
 	                                   ebuf,
 	                                   sizeof(ebuf),
 	                                   "/",
 	                                   "http://websocket.org",
-	                                   (mg_websocket_data_handler)websocket_data_handler,
+	                                   (httplib_websocket_data_handler)websocket_data_handler,
 	                                   NULL,
 	                                   NULL);
 	ASSERT(conn == NULL);
 
 	/* Invalid port test */
-	conn = mg_connect_websocket_client("echo.websocket.org",
+	conn = httplib_connect_websocket_client("echo.websocket.org",
 	                                   0,
 	                                   use_ssl,
 	                                   ebuf,
 	                                   sizeof(ebuf),
 	                                   "/",
 	                                   "http://websocket.org",
-	                                   (mg_websocket_data_handler)websocket_data_handler,
+	                                   (httplib_websocket_data_handler)websocket_data_handler,
 	                                   NULL,
 	                                   NULL);
 	ASSERT(conn == NULL);
 
 	/* Should succeed, echo.websocket.org echos the data back */
-	conn = mg_connect_websocket_client("echo.websocket.org",
+	conn = httplib_connect_websocket_client("echo.websocket.org",
 	                                   port,
 	                                   use_ssl,
 	                                   ebuf,
 	                                   sizeof(ebuf),
 	                                   "/",
 	                                   "http://websocket.org",
-	                                   (mg_websocket_data_handler)websocket_data_handler,
+	                                   (httplib_websocket_data_handler)websocket_data_handler,
 	                                   NULL,
 	                                   NULL);
 	ASSERT(conn != NULL);
 
-	ut_mg_stop(ctx);
+	ut_httplib_stop(ctx);
 }
 
 static int alloc_printf(char **out_buf, char *buf, size_t size, char *fmt, ...)
@@ -863,19 +797,19 @@ static int alloc_printf(char **out_buf, char *buf, size_t size, char *fmt, ...)
 	return ret;
 }
 
-static void test_mg_upload(void)
+static void test_httplib_upload(void)
 {
 	static const char *boundary = "OOO___MY_BOUNDARY___OOO";
-	struct mg_context *ctx;
+	struct httplib_context *ctx;
 #if 0
-    struct mg_connection *conn;
+    struct httplib_connection *conn;
     char ebuf[100], buf[20], *file2_data;
     int file2_len;
 #endif
 	char *file_data, *post_data;
 	int file_len, post_data_len;
 
-	ASSERT((ctx = mg_start(&CALLBACKS, NULL, OPTIONS)) != NULL);
+	ASSERT((ctx = httplib_start(&CALLBACKS, NULL, OPTIONS)) != NULL);
 
 	/* Upload one file */
 	ASSERT((file_data = read_file("unit_test.c", &file_len)) != NULL);
@@ -897,7 +831,7 @@ static void test_mg_upload(void)
 	ASSERT(post_data_len > 0);
 
 #if 0 /* TODO (bel): ... */
-    ASSERT((conn = mg_download("localhost", atoi(HTTPS_PORT), 1,
+    ASSERT((conn = httplib_download("localhost", atoi(HTTPS_PORT), 1,
         ebuf, sizeof(ebuf),
         "POST /upload?1 HTTP/1.1\r\n"
         "Content-Length: %d\r\n"
@@ -905,10 +839,10 @@ static void test_mg_upload(void)
         "boundary=%s\r\n\r\n"
         "%.*s", post_data_len, boundary,
         post_data_len, post_data)) != NULL);
-    mg_free(file_data), mg_free(post_data);
-    ASSERT(mg_read(conn, buf, sizeof(buf)) == (int) strlen(upload_ok_message));
+    httplib_free(file_data), httplib_free(post_data);
+    ASSERT(httplib_read(conn, buf, sizeof(buf)) == (int) strlen(upload_ok_message));
     ASSERT(memcmp(buf, upload_ok_message, strlen(upload_ok_message)) == 0);
-    mg_close_connection(conn);
+    httplib_close_connection(conn);
 
     /* Upload two files */
     ASSERT((file_data = read_file("include/civetweb.h", &file_len)) != NULL);
@@ -937,7 +871,7 @@ static void test_mg_upload(void)
         file2_len, file2_data,
         boundary);
     ASSERT(post_data_len > 0);
-    ASSERT((conn = mg_download("localhost", atoi(HTTPS_PORT), 1,
+    ASSERT((conn = httplib_download("localhost", atoi(HTTPS_PORT), 1,
         ebuf, sizeof(ebuf),
         "POST /upload?2 HTTP/1.1\r\n"
         "Content-Length: %d\r\n"
@@ -945,13 +879,13 @@ static void test_mg_upload(void)
         "boundary=%s\r\n\r\n"
         "%.*s", post_data_len, boundary,
         post_data_len, post_data)) != NULL);
-    mg_free(file_data), mg_free(file2_data), mg_free(post_data);
-    ASSERT(mg_read(conn, buf, sizeof(buf)) == (int) strlen(upload_ok_message));
+    httplib_free(file_data), httplib_free(file2_data), httplib_free(post_data);
+    ASSERT(httplib_read(conn, buf, sizeof(buf)) == (int) strlen(upload_ok_message));
     ASSERT(memcmp(buf, upload_ok_message, strlen(upload_ok_message)) == 0);
-    mg_close_connection(conn);
+    httplib_close_connection(conn);
 #endif
 
-	ut_mg_stop(ctx);
+	ut_httplib_stop(ctx);
 }
 
 static void test_base64_encode(void)
@@ -967,29 +901,29 @@ static void test_base64_encode(void)
 	}
 }
 
-static void test_mg_get_var(void)
+static void test_httplib_get_var(void)
 {
 	static const char *post[] = {"a=1&&b=2&d&=&c=3%20&e=",
 	                             "q=&st=2012%2F11%2F13+17%3A05&et=&team_id=",
 	                             NULL};
 	char buf[20];
 
-	ASSERT(mg_get_var(post[0], strlen(post[0]), "a", buf, sizeof(buf)) == 1);
+	ASSERT(httplib_get_var(post[0], strlen(post[0]), "a", buf, sizeof(buf)) == 1);
 	ASSERT(buf[0] == '1' && buf[1] == '\0');
-	ASSERT(mg_get_var(post[0], strlen(post[0]), "b", buf, sizeof(buf)) == 1);
+	ASSERT(httplib_get_var(post[0], strlen(post[0]), "b", buf, sizeof(buf)) == 1);
 	ASSERT(buf[0] == '2' && buf[1] == '\0');
-	ASSERT(mg_get_var(post[0], strlen(post[0]), "c", buf, sizeof(buf)) == 2);
+	ASSERT(httplib_get_var(post[0], strlen(post[0]), "c", buf, sizeof(buf)) == 2);
 	ASSERT(buf[0] == '3' && buf[1] == ' ' && buf[2] == '\0');
-	ASSERT(mg_get_var(post[0], strlen(post[0]), "e", buf, sizeof(buf)) == 0);
+	ASSERT(httplib_get_var(post[0], strlen(post[0]), "e", buf, sizeof(buf)) == 0);
 	ASSERT(buf[0] == '\0');
 
-	ASSERT(mg_get_var(post[0], strlen(post[0]), "d", buf, sizeof(buf)) == -1);
-	ASSERT(mg_get_var(post[0], strlen(post[0]), "c", buf, 2) == -2);
+	ASSERT(httplib_get_var(post[0], strlen(post[0]), "d", buf, sizeof(buf)) == -1);
+	ASSERT(httplib_get_var(post[0], strlen(post[0]), "c", buf, 2) == -2);
 
-	ASSERT(mg_get_var(post[0], strlen(post[0]), "x", NULL, 10) == -2);
-	ASSERT(mg_get_var(post[0], strlen(post[0]), "x", buf, 0) == -2);
-	ASSERT(mg_get_var(post[1], strlen(post[1]), "st", buf, 16) == -2);
-	ASSERT(mg_get_var(post[1], strlen(post[1]), "st", buf, 17) == 16);
+	ASSERT(httplib_get_var(post[0], strlen(post[0]), "x", NULL, 10) == -2);
+	ASSERT(httplib_get_var(post[0], strlen(post[0]), "x", buf, 0) == -2);
+	ASSERT(httplib_get_var(post[1], strlen(post[1]), "st", buf, 16) == -2);
+	ASSERT(httplib_get_var(post[1], strlen(post[1]), "st", buf, 17) == 16);
 }
 
 static void test_set_throttle(void)
@@ -1027,7 +961,7 @@ static void check_lua_expr(lua_State *L, const char *expr, const char *value)
 	const char *v, *var_name = "myVar";
 	char buf[100];
 
-	mg_snprintf(buf, sizeof(buf), "%s = %s", var_name, expr);
+	httplib_snprintf(buf, sizeof(buf), "%s = %s", var_name, expr);
 	(void)luaL_dostring(L, buf);
 	lua_getglobal(L, var_name);
 	v = lua_tostring(L, -1);
@@ -1037,8 +971,8 @@ static void check_lua_expr(lua_State *L, const char *expr, const char *value)
 
 static void test_lua(void)
 {
-	static struct mg_connection conn;
-	static struct mg_context ctx;
+	static struct httplib_connection conn;
+	static struct httplib_context ctx;
 
 	char http_request[] = "POST /foo/bar HTTP/1.1\r\n"
 	                      "Content-Length: 12\r\n"
@@ -1069,11 +1003,11 @@ static void test_lua(void)
 }
 #endif
 
-static void test_mg_stat(void)
+static void test_httplib_stat(void)
 {
-	static struct mg_context ctx;
+	static struct httplib_context ctx;
 	struct file file = STRUCT_FILE_INITIALIZER;
-	ASSERT(!mg_stat(fc(&ctx), " does not exist ", &file));
+	ASSERT(!httplib_stat(fc(&ctx), " does not exist ", &file));
 }
 
 static void test_skip_quoted(void)
@@ -1106,15 +1040,15 @@ static void test_alloc_vprintf(void)
 	/* Pass small buffer, make sure alloc_printf allocates */
 	ASSERT(alloc_printf(&p, buf, 1, "%s", "hello") == 5);
 	ASSERT(p != buf);
-	mg_free(p);
+	httplib_free(p);
 }
 
 static void test_request_replies(void)
 {
 	char ebuf[100];
 	int i;
-	struct mg_connection *conn;
-	struct mg_context *ctx;
+	struct httplib_connection *conn;
+	struct httplib_context *ctx;
 	static struct {
 		const char *request, *reply_regex;
 	} tests[] = {
@@ -1123,36 +1057,24 @@ static void test_request_replies(void)
 	    {NULL, NULL},
 	};
 
-	ASSERT((ctx = mg_start(&CALLBACKS, NULL, OPTIONS)) != NULL);
+	ASSERT((ctx = httplib_start(&CALLBACKS, NULL, OPTIONS)) != NULL);
 	for (i = 0; tests[i].request != NULL; i++) {
-		ASSERT((conn = mg_download("localhost",
-		                           atoi(HTTP_PORT),
-		                           0,
-		                           ebuf,
-		                           sizeof(ebuf),
-		                           "%s",
-		                           tests[i].request)) != NULL);
-		mg_close_connection(conn);
+		ASSERT((conn = httplib_download("localhost", atoi(HTTP_PORT), 0, ebuf, sizeof(ebuf), "%s", tests[i].request)) != NULL);
+		httplib_close_connection(conn);
 	}
-	ut_mg_stop(ctx);
+	ut_httplib_stop(ctx);
 
 #ifndef NO_SSL
-	ASSERT((ctx = mg_start(&CALLBACKS, NULL, OPTIONS)) != NULL);
+	ASSERT((ctx = httplib_start(&CALLBACKS, NULL, OPTIONS)) != NULL);
 	for (i = 0; tests[i].request != NULL; i++) {
-		ASSERT((conn = mg_download("localhost",
-		                           atoi(HTTPS_PORT),
-		                           1,
-		                           ebuf,
-		                           sizeof(ebuf),
-		                           "%s",
-		                           tests[i].request)) != NULL);
-		mg_close_connection(conn);
+		ASSERT((conn = httplib_download("localhost", atoi(HTTPS_PORT), 1, ebuf, sizeof(ebuf), "%s", tests[i].request)) != NULL);
+		httplib_close_connection(conn);
 	}
-	ut_mg_stop(ctx);
+	ut_httplib_stop(ctx);
 #endif
 }
 
-static int request_test_handler(struct mg_connection *conn, void *cbdata)
+static int request_test_handler(struct httplib_connection *conn, void *cbdata)
 {
 	int i;
 	char chunk_data[32];
@@ -1160,18 +1082,18 @@ static int request_test_handler(struct mg_connection *conn, void *cbdata)
 	ASSERT(cbdata == (void *)7);
 	strcpy(chunk_data, "123456789A123456789B123456789C");
 
-	mg_printf(conn,
+	httplib_printf(conn,
 	          "HTTP/1.1 200 OK\r\n"
 	          "Transfer-Encoding: chunked\r\n"
 	          "Content-Type: text/plain\r\n\r\n");
 
 	for (i = 0; i < 20; i++) {
-		mg_printf(conn, "%x\r\n", i);
-		mg_write(conn, chunk_data, i);
-		mg_printf(conn, "\r\n");
+		httplib_printf(conn, "%x\r\n", i);
+		httplib_write(conn, chunk_data, i);
+		httplib_printf(conn, "\r\n");
 	}
 
-	mg_printf(conn, "0\r\n\r\n");
+	httplib_printf(conn, "0\r\n\r\n");
 
 	return 1;
 }
@@ -1180,139 +1102,132 @@ static int request_test_handler(struct mg_connection *conn, void *cbdata)
 static void test_request_handlers(void)
 {
 	char ebuf[100];
-	struct mg_context *ctx;
-	struct mg_connection *conn;
+	struct httplib_context *ctx;
+	struct httplib_connection *conn;
 	char uri[64];
 	int i;
 	const char *request = "GET /U7 HTTP/1.0\r\n\r\n";
 
-	ctx = mg_start(NULL, NULL, OPTIONS);
+	ctx = httplib_start(NULL, NULL, OPTIONS);
 	ASSERT(ctx != NULL);
 
 	for (i = 0; i < 1000; i++) {
 		sprintf(uri, "/U%u", i);
-		mg_set_request_handler(ctx, uri, request_test_handler, NULL);
+		httplib_set_request_handler(ctx, uri, request_test_handler, NULL);
 	}
 	for (i = 500; i < 800; i++) {
 		sprintf(uri, "/U%u", i);
-		mg_set_request_handler(ctx, uri, NULL, (void *)1);
+		httplib_set_request_handler(ctx, uri, NULL, (void *)1);
 	}
 	for (i = 600; i >= 0; i--) {
 		sprintf(uri, "/U%u", i);
-		mg_set_request_handler(ctx, uri, NULL, (void *)2);
+		httplib_set_request_handler(ctx, uri, NULL, (void *)2);
 	}
 	for (i = 750; i <= 1000; i++) {
 		sprintf(uri, "/U%u", i);
-		mg_set_request_handler(ctx, uri, NULL, (void *)3);
+		httplib_set_request_handler(ctx, uri, NULL, (void *)3);
 	}
 	for (i = 5; i < 9; i++) {
 		sprintf(uri, "/U%u", i);
-		mg_set_request_handler(ctx, uri, request_test_handler, (void *)(intptr_t)i);
+		httplib_set_request_handler(ctx, uri, request_test_handler, (void *)(intptr_t)i);
 	}
 
-	conn = mg_download(
-	    "localhost", atoi(HTTP_PORT), 0, ebuf, sizeof(ebuf), "%s", request);
+	conn = httplib_download( "localhost", atoi(HTTP_PORT), 0, ebuf, sizeof(ebuf), "%s", request);
 	ASSERT(conn != NULL);
-	mg_sleep(1000);
-	mg_close_connection(conn);
+	httplib_sleep(1000);
+	httplib_close_connection(conn);
 
-	ut_mg_stop(ctx);
+	ut_httplib_stop(ctx);
 }
 
-static int api_callback(struct mg_connection *conn)
+static int api_callback(struct httplib_connection *conn)
 {
-	const struct mg_request_info *ri = mg_get_request_info(conn);
+	const struct httplib_request_info *ri = httplib_get_request_info(conn);
 	char post_data[100] = "";
 
 	ASSERT(ri->user_data == (void *)123);
 	ASSERT(ri->num_headers == 2);
-	ASSERT(strcmp(mg_get_header(conn, "host"), "blah.com") == 0);
-	ASSERT(mg_read(conn, post_data, sizeof(post_data)) == 3);
+	ASSERT(strcmp(httplib_get_header(conn, "host"), "blah.com") == 0);
+	ASSERT(httplib_read(conn, post_data, sizeof(post_data)) == 3);
 	ASSERT(memcmp(post_data, "b=1", 3) == 0);
 	ASSERT(ri->query_string != NULL);
 	ASSERT(ri->remote_addr[0] != 0);
 	ASSERT(ri->remote_port > 0);
 	ASSERT(strcmp(ri->http_version, "1.0") == 0);
 
-	mg_printf(conn, "HTTP/1.0 200 OK\r\n\r\n");
+	httplib_printf(conn, "HTTP/1.0 200 OK\r\n\r\n");
 	return 1;
 }
 
 static void test_api_calls(void)
 {
 	char ebuf[100];
-	struct mg_callbacks callbacks;
-	struct mg_connection *conn;
-	struct mg_context *ctx;
+	struct httplib_callbacks callbacks;
+	struct httplib_connection *conn;
+	struct httplib_context *ctx;
 	static const char *request =
 	    "POST /?a=%20&b=&c=xx HTTP/1.0\r\n"
 	    "Host:  blah.com\n"     /* More spaces before */
 	    "content-length: 3\r\n" /* Lower case header name */
-	    "\r\nb=123456"; /* Content size > content-length, test for mg_read() */
+	    "\r\nb=123456"; /* Content size > content-length, test for httplib_read() */
 
 	memset(&callbacks, 0, sizeof(callbacks));
 	callbacks.begin_request = api_callback;
-	ASSERT((ctx = mg_start(&callbacks, (void *)123, OPTIONS)) != NULL);
-	ASSERT((conn = mg_download("localhost",
-	                           atoi(HTTP_PORT),
-	                           0,
-	                           ebuf,
-	                           sizeof(ebuf),
-	                           "%s",
-	                           request)) != NULL);
-	mg_close_connection(conn);
-	ut_mg_stop(ctx);
+	ASSERT((ctx = httplib_start(&callbacks, (void *)123, OPTIONS)) != NULL);
+	ASSERT((conn = httplib_download("localhost", atoi(HTTP_PORT), 0, ebuf, sizeof(ebuf), "%s", request)) != NULL);
+	httplib_close_connection(conn);
+	ut_httplib_stop(ctx);
 }
 
 static void test_url_decode(void)
 {
 	char buf[100];
 
-	ASSERT(mg_url_decode("foo", 3, buf, 3, 0) == -1); /* No space for \0 */
-	ASSERT(mg_url_decode("foo", 3, buf, 4, 0) == 3);
+	ASSERT(httplib_url_decode("foo", 3, buf, 3, 0) == -1); /* No space for \0 */
+	ASSERT(httplib_url_decode("foo", 3, buf, 4, 0) == 3);
 	ASSERT(strcmp(buf, "foo") == 0);
 
-	ASSERT(mg_url_decode("a+", 2, buf, sizeof(buf), 0) == 2);
+	ASSERT(httplib_url_decode("a+", 2, buf, sizeof(buf), 0) == 2);
 	ASSERT(strcmp(buf, "a+") == 0);
 
-	ASSERT(mg_url_decode("a+", 2, buf, sizeof(buf), 1) == 2);
+	ASSERT(httplib_url_decode("a+", 2, buf, sizeof(buf), 1) == 2);
 	ASSERT(strcmp(buf, "a ") == 0);
 
-	ASSERT(mg_url_decode("%61", 1, buf, sizeof(buf), 1) == 1);
+	ASSERT(httplib_url_decode("%61", 1, buf, sizeof(buf), 1) == 1);
 	ASSERT(strcmp(buf, "%") == 0);
 
-	ASSERT(mg_url_decode("%61", 2, buf, sizeof(buf), 1) == 2);
+	ASSERT(httplib_url_decode("%61", 2, buf, sizeof(buf), 1) == 2);
 	ASSERT(strcmp(buf, "%6") == 0);
 
-	ASSERT(mg_url_decode("%61", 3, buf, sizeof(buf), 1) == 1);
+	ASSERT(httplib_url_decode("%61", 3, buf, sizeof(buf), 1) == 1);
 	ASSERT(strcmp(buf, "a") == 0);
 }
 
-static void test_mg_strcasestr(void)
+static void test_httplib_strcasestr(void)
 {
 	static const char *big1 = "abcdef";
-	ASSERT(mg_strcasestr("Y", "X") == NULL);
-	ASSERT(mg_strcasestr("Y", "y") != NULL);
-	ASSERT(mg_strcasestr(big1, "X") == NULL);
-	ASSERT(mg_strcasestr(big1, "CD") == big1 + 2);
-	ASSERT(mg_strcasestr("aa", "AAB") == NULL);
+	ASSERT(httplib_strcasestr("Y", "X") == NULL);
+	ASSERT(httplib_strcasestr("Y", "y") != NULL);
+	ASSERT(httplib_strcasestr(big1, "X") == NULL);
+	ASSERT(httplib_strcasestr(big1, "CD") == big1 + 2);
+	ASSERT(httplib_strcasestr("aa", "AAB") == NULL);
 }
 
-static void test_mg_get_cookie(void)
+static void test_httplib_get_cookie(void)
 {
 	char buf[20];
 
-	ASSERT(mg_get_cookie("", "foo", NULL, sizeof(buf)) == -2);
-	ASSERT(mg_get_cookie("", "foo", buf, 0) == -2);
-	ASSERT(mg_get_cookie("", "foo", buf, sizeof(buf)) == -1);
-	ASSERT(mg_get_cookie("", NULL, buf, sizeof(buf)) == -1);
-	ASSERT(mg_get_cookie("a=1; b=2; c; d", "a", buf, sizeof(buf)) == 1);
+	ASSERT(httplib_get_cookie("", "foo", NULL, sizeof(buf)) == -2);
+	ASSERT(httplib_get_cookie("", "foo", buf, 0) == -2);
+	ASSERT(httplib_get_cookie("", "foo", buf, sizeof(buf)) == -1);
+	ASSERT(httplib_get_cookie("", NULL, buf, sizeof(buf)) == -1);
+	ASSERT(httplib_get_cookie("a=1; b=2; c; d", "a", buf, sizeof(buf)) == 1);
 	ASSERT(strcmp(buf, "1") == 0);
-	ASSERT(mg_get_cookie("a=1; b=2; c; d", "b", buf, sizeof(buf)) == 1);
+	ASSERT(httplib_get_cookie("a=1; b=2; c; d", "b", buf, sizeof(buf)) == 1);
 	ASSERT(strcmp(buf, "2") == 0);
-	ASSERT(mg_get_cookie("a=1; b=123", "b", buf, sizeof(buf)) == 3);
+	ASSERT(httplib_get_cookie("a=1; b=123", "b", buf, sizeof(buf)) == 3);
 	ASSERT(strcmp(buf, "123") == 0);
-	ASSERT(mg_get_cookie("a=1; b=2; c; d", "c", buf, sizeof(buf)) == -1);
+	ASSERT(httplib_get_cookie("a=1; b=2; c; d", "c", buf, sizeof(buf)) == -1);
 }
 
 static void test_strtoll(void)
@@ -1392,7 +1307,7 @@ static void test_md5(void)
 	        md5_val[15]);
 	ASSERT(strcmp(md5_str, "d41d8cd98f00b204e9800998ecf8427e") == 0);
 
-	mg_md5(md5_str, "", NULL);
+	httplib_md5(md5_str, "", NULL);
 	ASSERT(strcmp(md5_str, "d41d8cd98f00b204e9800998ecf8427e") == 0);
 
 	md5_init(&md5_state);
@@ -1418,10 +1333,10 @@ static void test_md5(void)
 	        md5_val[15]);
 	ASSERT(strcmp(md5_str, "9e107d9d372bb6826bd81d3542a419d6") == 0);
 
-	mg_md5(md5_str, test_str, NULL);
+	httplib_md5(md5_str, test_str, NULL);
 	ASSERT(strcmp(md5_str, "9e107d9d372bb6826bd81d3542a419d6") == 0);
 
-	mg_md5(md5_str,
+	httplib_md5(md5_str,
 	       "The",
 	       " ",
 	       "quick brown fox",
@@ -1433,7 +1348,7 @@ static void test_md5(void)
 	       NULL);
 	ASSERT(strcmp(md5_str, "9e107d9d372bb6826bd81d3542a419d6") == 0);
 
-	mg_md5(md5_str, "civetweb", NULL);
+	httplib_md5(md5_str, "civetweb", NULL);
 	ASSERT(strcmp(md5_str, "95c098bd85b619b24a83d9cea5e8ba54") == 0);
 }
 
@@ -1442,11 +1357,11 @@ int __cdecl main(void)
 
 	char buffer[512];
 	FILE *f;
-	struct mg_context *ctx;
+	struct httplib_context *ctx;
 	int i;
 
 	/* print headline */
-	printf("Civetweb %s unit test\n", mg_version());
+	printf("Civetweb %s unit test\n", httplib_version());
 #if defined(_WIN32)
 	GetCurrentDirectoryA(sizeof(buffer), buffer);
 #else
@@ -1469,48 +1384,48 @@ int __cdecl main(void)
 
 	/* test local functions */
 	test_parse_port_string();
-	test_mg_strcasestr();
+	test_httplib_strcasestr();
 	test_alloc_vprintf();
 	test_base64_encode();
 	test_match_prefix();
 	test_remove_double_dots();
 	test_should_keep_alive();
 	test_parse_http_message();
-	test_mg_get_var();
+	test_httplib_get_var();
 	test_set_throttle();
 	test_next_option();
-	test_mg_stat();
+	test_httplib_stat();
 	test_skip_quoted();
 	test_url_decode();
-	test_mg_get_cookie();
+	test_httplib_get_cookie();
 	test_strtoll();
 	test_md5();
 
 	/* start stop server */
-	ctx = mg_start(NULL, NULL, OPTIONS);
+	ctx = httplib_start(NULL, NULL, OPTIONS);
 	REQUIRE(ctx != NULL);
-	mg_sleep(1000);
-	ut_mg_stop(ctx);
+	httplib_sleep(1000);
+	ut_httplib_stop(ctx);
 
 	/* create test data */
-	fetch_data = (char *)mg_malloc(fetch_data_size);
+	fetch_data = (char *)httplib_malloc(fetch_data_size);
 	for (i = 0; i < fetch_data_size; i++) {
 		fetch_data[i] = 'a' + i % 10;
 	}
 
 	/* tests with network access */
 	init_CALLBACKS();
-	test_mg_download(0);
+	test_httplib_download(0);
 #ifndef NO_SSL
-	test_mg_download(1);
+	test_httplib_download(1);
 #endif
 
-	test_mg_websocket_client_connect(0);
+	test_httplib_websocket_client_connect(0);
 #ifndef NO_SSL
-	test_mg_websocket_client_connect(1);
+	test_httplib_websocket_client_connect(1);
 #endif
 
-	test_mg_upload();
+	test_httplib_upload();
 	test_request_replies();
 	test_api_calls();
 	test_request_handlers();
@@ -1520,16 +1435,16 @@ int __cdecl main(void)
 #endif
 
 	/* test completed */
-	mg_free(fetch_data);
+	httplib_free(fetch_data);
 
 #ifdef MEMORY_DEBUGGING
 	{
-		extern unsigned long mg_memory_debug_blockCount;
-		extern unsigned long mg_memory_debug_totalMemUsed;
+		extern unsigned long httplib_memory_debug_blockCount;
+		extern unsigned long httplib_memory_debug_totalMemUsed;
 
 		printf("MEMORY DEBUGGING: %lu %lu\n",
-		       mg_memory_debug_blockCount,
-		       mg_memory_debug_totalMemUsed);
+		       httplib_memory_debug_blockCount,
+		       httplib_memory_debug_totalMemUsed);
 	}
 #endif
 

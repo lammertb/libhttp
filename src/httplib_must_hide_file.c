@@ -24,7 +24,7 @@
 
 #include "httplib_main.h"
 
-int XX_httplib_must_hide_file( struct mg_connection *conn, const char *path ) {
+int XX_httplib_must_hide_file( struct httplib_connection *conn, const char *path ) {
 
 	if (conn && conn->ctx) {
 		const char *pw_pattern = "**" PASSWORDS_FILE_NAME "$";

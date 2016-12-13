@@ -26,19 +26,19 @@
 #include "httplib_string.h"
 
 /*
- * void XX_httplib_redirect_to_https_port( struct mg_connection *conn, int ssl_index );
+ * void XX_httplib_redirect_to_https_port( struct httplib_connection *conn, int ssl_index );
  *
  * The function XX_httplib_redirect_to_https_port() redirects a request to an
  * encrypted connection over HTTPS.
  */
 
-void XX_httplib_redirect_to_https_port( struct mg_connection *conn, int ssl_index ) {
+void XX_httplib_redirect_to_https_port( struct httplib_connection *conn, int ssl_index ) {
 
 	char host[1025];
 	const char *host_header;
 	size_t hostlen;
 
-	host_header = mg_get_header(conn, "Host");
+	host_header = httplib_get_header(conn, "Host");
 	hostlen = sizeof(host);
 	if (host_header != NULL) {
 		char *pos;
@@ -55,7 +55,7 @@ void XX_httplib_redirect_to_https_port( struct mg_connection *conn, int ssl_inde
 
 	/* Send host, port, uri and (if it exists) ?query_string */
 	if (conn) {
-		mg_printf(conn,
+		httplib_printf(conn,
 		          "HTTP/1.1 302 Found\r\nLocation: https://%s:%d%s%s%s\r\n\r\n",
 		          host,
 #if defined(USE_IPV6)

@@ -25,7 +25,7 @@
 #include "httplib_main.h"
 
 /*
- * int XX_httplib_is_not_modified( const struct mg_connection *conn, const struct file *filep );
+ * int XX_httplib_is_not_modified( const struct httplib_connection *conn, const struct file *filep );
  *
  * The function XX_httplib_is_not_modified() returns true, if a resource has
  * not been modified sinze a given datetime and a 304 response should therefore
@@ -34,15 +34,15 @@
 
 #if !defined(NO_CACHING)
 
-int XX_httplib_is_not_modified( const struct mg_connection *conn, const struct file *filep ) {
+int XX_httplib_is_not_modified( const struct httplib_connection *conn, const struct file *filep ) {
 
 	char etag[64];
-	const char *ims = mg_get_header( conn, "If-Modified-Since" );
-	const char *inm = mg_get_header( conn, "If-None-Match"     );
+	const char *ims = httplib_get_header( conn, "If-Modified-Since" );
+	const char *inm = httplib_get_header( conn, "If-None-Match"     );
 
 	XX_httplib_construct_etag( etag, sizeof(etag), filep );
 	if ( filep == NULL ) return 0;
-	return (inm != NULL && !mg_strcasecmp(etag, inm)) || (ims != NULL && (filep->last_modified <= XX_httplib_parse_date_string(ims)));
+	return (inm != NULL && !httplib_strcasecmp(etag, inm)) || (ims != NULL && (filep->last_modified <= XX_httplib_parse_date_string(ims)));
 
 }  /* XX_httplib_is_not_modified */
 

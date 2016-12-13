@@ -58,8 +58,8 @@ void *XX_httplib_master_thread( void *thread_func_param ) {
 
 static void master_thread_run(void *thread_func_param) {
 
-	struct mg_context *ctx = (struct mg_context *)thread_func_param;
-	struct mg_workerTLS tls;
+	struct httplib_context *ctx = (struct httplib_context *)thread_func_param;
+	struct httplib_workerTLS tls;
 	struct pollfd *pfd;
 	unsigned int i;
 	unsigned int workerthreadcount;
@@ -122,7 +122,7 @@ static void master_thread_run(void *thread_func_param) {
 
 	/* Here stop_flag is 1 - Initiate shutdown. */
 
-	/* Stop signal received: somebody called mg_stop. Quit. */
+	/* Stop signal received: somebody called httplib_stop. Quit. */
 	XX_httplib_close_all_listening_sockets(ctx);
 
 	/* Wakeup workers that are waiting for connections to handle. */
@@ -158,7 +158,7 @@ static void master_thread_run(void *thread_func_param) {
 #endif
 	pthread_setspecific(XX_httplib_sTlsKey, NULL);
 
-	/* Signal mg_stop() that we're done.
+	/* Signal httplib_stop() that we're done.
 	 * WARNING: This must be the very last thing this
 	 * thread does, as ctx becomes invalid after this line. */
 	ctx->stop_flag = 2;

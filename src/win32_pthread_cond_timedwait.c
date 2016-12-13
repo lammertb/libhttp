@@ -29,8 +29,8 @@
 
 int pthread_cond_timedwait( pthread_cond_t *cv, pthread_mutex_t *mutex, const struct timespec *abstime ) {
 
-	struct mg_workerTLS **ptls;
-	struct mg_workerTLS *tls = (struct mg_workerTLS *)pthread_getspecific(XX_httplib_sTlsKey);
+	struct httplib_workerTLS **ptls;
+	struct httplib_workerTLS *tls = (struct httplib_workerTLS *)pthread_getspecific(XX_httplib_sTlsKey);
 	int ok;
 	struct timespec tsnow;
 	int64_t nsnow;

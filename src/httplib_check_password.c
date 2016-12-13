@@ -36,9 +36,9 @@ int XX_httplib_check_password( const char *method, const char *ha1, const char *
 	/* NOTE(lsm): due to a bug in MSIE, we do not compare the URI */
 	if (strlen(response) != 32) return 0;
 
-	mg_md5(ha2, method, ":", uri, NULL);
-	mg_md5(expected_response, ha1, ":", nonce, ":", nc, ":", cnonce, ":", qop, ":", ha2, NULL);
+	httplib_md5(ha2, method, ":", uri, NULL);
+	httplib_md5(expected_response, ha1, ":", nonce, ":", nc, ":", cnonce, ":", qop, ":", ha2, NULL);
 
-	return mg_strcasecmp(response, expected_response) == 0;
+	return httplib_strcasecmp(response, expected_response) == 0;
 
 }  /* XX_httplib_check_password */

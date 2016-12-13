@@ -531,7 +531,7 @@ is an example for a plain Lua script.
 is an example for a Lua Server Page.
 
 Both examples show the content of the `mg.request_info` object as the page
-content. Please refer to `struct mg_request_info` definition in
+content. Please refer to `struct httplib_request_info` definition in
 [libhttp.h](https://github.com/lammertb/libhttp/blob/master/include/libhttp.h)
 to see additional information on the elements of the `mg.request_info` object.
 

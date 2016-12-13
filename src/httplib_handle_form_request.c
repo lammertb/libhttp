@@ -24,14 +24,14 @@
 #include "httplib_main.h"
 #include "httplib_memory.h"
 
-static int url_encoded_field_found(const struct mg_connection *conn,
+static int url_encoded_field_found(const struct httplib_connection *conn,
                         const char *key,
                         size_t key_len,
                         const char *filename,
                         size_t filename_len,
                         char *path,
                         size_t path_len,
-                        struct mg_form_data_handler *fdh) {
+                        struct httplib_form_data_handler *fdh) {
 
 	char key_dec[1024];
 	char filename_dec[1024];
@@ -39,17 +39,17 @@ static int url_encoded_field_found(const struct mg_connection *conn,
 	int filename_dec_len;
 	int ret;
 
-	key_dec_len = mg_url_decode(key, (int)key_len, key_dec, (int)sizeof(key_dec), 1);
+	key_dec_len = httplib_url_decode(key, (int)key_len, key_dec, (int)sizeof(key_dec), 1);
 
 	if (((size_t)key_dec_len >= (size_t)sizeof(key_dec)) || (key_dec_len < 0)) return FORM_FIELD_STORAGE_SKIP;
 
 	if (filename) {
-		filename_dec_len = mg_url_decode(filename, (int)filename_len, filename_dec, (int)sizeof(filename_dec), 1);
+		filename_dec_len = httplib_url_decode(filename, (int)filename_len, filename_dec, (int)sizeof(filename_dec), 1);
 
 		if (((size_t)filename_dec_len >= (size_t)sizeof(filename_dec))
 		    || (filename_dec_len < 0)) {
 			/* Log error message and skip this field. */
-			mg_cry(conn, "%s: Cannot decode filename", __func__);
+			httplib_cry(conn, "%s: Cannot decode filename", __func__);
 			return FORM_FIELD_STORAGE_SKIP;
 		}
 
@@ -60,13 +60,13 @@ static int url_encoded_field_found(const struct mg_connection *conn,
 
 	if ((ret & 0xF) == FORM_FIELD_STORAGE_GET) {
 		if (fdh->field_get == NULL) {
-			mg_cry(conn, "%s: Function \"Get\" not available", __func__);
+			httplib_cry(conn, "%s: Function \"Get\" not available", __func__);
 			return FORM_FIELD_STORAGE_SKIP;
 		}
 	}
 	if ((ret & 0xF) == FORM_FIELD_STORAGE_STORE) {
 		if (fdh->field_store == NULL) {
-			mg_cry(conn, "%s: Function \"Store\" not available", __func__);
+			httplib_cry(conn, "%s: Function \"Store\" not available", __func__);
 			return FORM_FIELD_STORAGE_SKIP;
 		}
 	}
@@ -75,12 +75,12 @@ static int url_encoded_field_found(const struct mg_connection *conn,
 }
 
 
-static int url_encoded_field_get(const struct mg_connection *conn,
+static int url_encoded_field_get(const struct httplib_connection *conn,
                       const char *key,
                       size_t key_len,
                       const char *value,
                       size_t value_len,
-                      struct mg_form_data_handler *fdh) {
+                      struct httplib_form_data_handler *fdh) {
 
 	char key_dec[1024];
 
@@ -89,13 +89,13 @@ static int url_encoded_field_get(const struct mg_connection *conn,
 
 	if (!value_dec) {
 		/* Log error message and stop parsing the form data. */
-		mg_cry(conn, "%s: Not enough memory (required: %lu)", __func__, (unsigned long)(value_len + 1));
+		httplib_cry(conn, "%s: Not enough memory (required: %lu)", __func__, (unsigned long)(value_len + 1));
 		return FORM_FIELD_STORAGE_ABORT;
 	}
 
-	mg_url_decode(key, (int)key_len, key_dec, (int)sizeof(key_dec), 1);
+	httplib_url_decode(key, (int)key_len, key_dec, (int)sizeof(key_dec), 1);
 
-	value_dec_len = mg_url_decode(value, (int)value_len, value_dec, (int)value_len + 1, 1);
+	value_dec_len = httplib_url_decode(value, (int)value_len, value_dec, (int)value_len + 1, 1);
 
 	ret = fdh->field_get(key_dec, value_dec, (size_t)value_dec_len, fdh->user_data); 
 	XX_httplib_free(value_dec);
@@ -104,28 +104,27 @@ static int url_encoded_field_get(const struct mg_connection *conn,
 }
 
 
-static int
-unencoded_field_get(const struct mg_connection *conn,
+static int unencoded_field_get(const struct httplib_connection *conn,
                     const char *key,
                     size_t key_len,
                     const char *value,
                     size_t value_len,
-                    struct mg_form_data_handler *fdh) {
+                    struct httplib_form_data_handler *fdh) {
 
 	char key_dec[1024];
 	(void)conn;
 
-	mg_url_decode(key, (int)key_len, key_dec, (int)sizeof(key_dec), 1);
+	httplib_url_decode(key, (int)key_len, key_dec, (int)sizeof(key_dec), 1);
 
 	return fdh->field_get(key_dec, value, value_len, fdh->user_data);
 }
 
 
-static int field_stored(const struct mg_connection *conn, const char *path, long long file_size, struct mg_form_data_handler *fdh) {
+static int field_stored(const struct httplib_connection *conn, const char *path, long long file_size, struct httplib_form_data_handler *fdh) {
 
-	/* Equivalent to "upload" callback of "mg_upload". */
+	/* Equivalent to "upload" callback of "httplib_upload". */
 
-	(void)conn; /* we do not need mg_cry here, so conn is currently unused */
+	(void)conn; /* we do not need httplib_cry here, so conn is currently unused */
 
 	return fdh->field_store(path, file_size, fdh->user_data);
 }
@@ -149,7 +148,7 @@ static const char * search_boundary(const char *buf, size_t buf_len, const char 
 }
 
 
-int mg_handle_form_request(struct mg_connection *conn, struct mg_form_data_handler *fdh) {
+int httplib_handle_form_request(struct httplib_connection *conn, struct httplib_form_data_handler *fdh) {
 
 	const char *content_type;
 	char path[512];
@@ -186,7 +185,7 @@ int mg_handle_form_request(struct mg_connection *conn, struct mg_form_data_handl
 
 		/* GET request: form data is in the query string. */
 		/* The entire data has already been loaded, so there is no nead to
-		 * call mg_read. We just need to split the query string into key-value
+		 * call httplib_read. We just need to split the query string into key-value
 		 * pairs. */
 		data = conn->request_info.query_string;
 		if (!data) {
@@ -243,7 +242,7 @@ int mg_handle_form_request(struct mg_connection *conn, struct mg_form_data_handl
 					size_t n =
 					    (size_t)fwrite(val, 1, (size_t)vallen, fstore.fp);
 					if ((n != (size_t)vallen) || (ferror(fstore.fp))) {
-						mg_cry(conn, "%s: Cannot write file %s", __func__, path);
+						httplib_cry(conn, "%s: Cannot write file %s", __func__, path);
 						fclose(fstore.fp);
 						fstore.fp = NULL;
 						XX_httplib_remove_bad_file(conn, path);
@@ -256,13 +255,13 @@ int mg_handle_form_request(struct mg_connection *conn, struct mg_form_data_handl
 							/* stored successfully */
 							field_stored(conn, path, file_size, fdh);
 						} else {
-							mg_cry(conn, "%s: Error saving file %s", __func__, path);
+							httplib_cry(conn, "%s: Error saving file %s", __func__, path);
 							XX_httplib_remove_bad_file(conn, path);
 						}
 						fstore.fp = NULL;
 					}
 
-				} else mg_cry(conn, "%s: Cannot create file %s", __func__, path);
+				} else httplib_cry(conn, "%s: Cannot create file %s", __func__, path);
 			}
 
 			/* if (field_storage == FORM_FIELD_STORAGE_READ) { */
@@ -290,11 +289,11 @@ int mg_handle_form_request(struct mg_connection *conn, struct mg_form_data_handl
 		return field_count;
 	}
 
-	content_type = mg_get_header(conn, "Content-Type");
+	content_type = httplib_get_header(conn, "Content-Type");
 
 	if (!content_type
-	    || !mg_strcasecmp(content_type, "APPLICATION/X-WWW-FORM-URLENCODED")
-	    || !mg_strcasecmp(content_type, "APPLICATION/WWW-FORM-URLENCODED")) {
+	    || !httplib_strcasecmp(content_type, "APPLICATION/X-WWW-FORM-URLENCODED")
+	    || !httplib_strcasecmp(content_type, "APPLICATION/WWW-FORM-URLENCODED")) {
 		/* The form data is in the request body data, encoded in key/value
 		 * pairs. */
 		int all_data_read = 0;
@@ -315,7 +314,7 @@ int mg_handle_form_request(struct mg_connection *conn, struct mg_form_data_handl
 			if ((size_t)buf_fill < (sizeof(buf) - 1)) {
 
 				size_t to_read = sizeof(buf) - 1 - (size_t)buf_fill;
-				r = mg_read(conn, buf + (size_t)buf_fill, to_read);
+				r = httplib_read(conn, buf + (size_t)buf_fill, to_read);
 				if (r < 0) {
 					/* read error */
 					return -1;
@@ -355,7 +354,7 @@ int mg_handle_form_request(struct mg_connection *conn, struct mg_form_data_handl
 			if (field_storage == FORM_FIELD_STORAGE_STORE) {
 				if (XX_httplib_fopen(conn, path, "wb", &fstore) == 0) fstore.fp = NULL;
 				file_size = 0;
-				if (!fstore.fp) mg_cry(conn, "%s: Cannot create file %s", __func__, path);
+				if (!fstore.fp) httplib_cry(conn, "%s: Cannot create file %s", __func__, path);
 			}
 
 			get_block = 0;
@@ -393,7 +392,7 @@ int mg_handle_form_request(struct mg_connection *conn, struct mg_form_data_handl
 				if (fstore.fp) {
 					size_t n = (size_t)fwrite(val, 1, (size_t)vallen, fstore.fp);
 					if ((n != (size_t)vallen) || (ferror(fstore.fp))) {
-						mg_cry(conn, "%s: Cannot write file %s", __func__, path);
+						httplib_cry(conn, "%s: Cannot write file %s", __func__, path);
 						fclose(fstore.fp);
 						fstore.fp = NULL;
 						XX_httplib_remove_bad_file(conn, path);
@@ -408,7 +407,7 @@ int mg_handle_form_request(struct mg_connection *conn, struct mg_form_data_handl
 					if ((size_t)buf_fill < (sizeof(buf) - 1)) {
 
 						size_t to_read = sizeof(buf) - 1 - (size_t)buf_fill;
-						r = mg_read(conn, buf + (size_t)buf_fill, to_read);
+						r = httplib_read(conn, buf + (size_t)buf_fill, to_read);
 						if (r < 0) {
 							/* read error */
 							return -1;
@@ -436,7 +435,7 @@ int mg_handle_form_request(struct mg_connection *conn, struct mg_form_data_handl
 					/* stored successfully */
 					field_stored(conn, path, file_size, fdh);
 				} else {
-					mg_cry(conn, "%s: Error saving file %s", __func__, path);
+					httplib_cry(conn, "%s: Error saving file %s", __func__, path);
 					XX_httplib_remove_bad_file(conn, path);
 				}
 				fstore.fp = NULL;
@@ -451,14 +450,14 @@ int mg_handle_form_request(struct mg_connection *conn, struct mg_form_data_handl
 		return field_count;
 	}
 
-	if (!mg_strncasecmp(content_type, "MULTIPART/FORM-DATA;", 20)) {
+	if (!httplib_strncasecmp(content_type, "MULTIPART/FORM-DATA;", 20)) {
 		/* The form data is in the request body data, encoded as multipart
 		 * content (see https://www.ietf.org/rfc/rfc1867.txt,
 		 * https://www.ietf.org/rfc/rfc2388.txt). */
 		const char *boundary;
 		size_t bl;
 		ptrdiff_t used;
-		struct mg_request_info part_header;
+		struct httplib_request_info part_header;
 		char *hbuf;
 		char *hend;
 		char *fbeg;
@@ -475,7 +474,7 @@ int mg_handle_form_request(struct mg_connection *conn, struct mg_form_data_handl
 		while (content_type[bl] == ' ') bl++;
 
 		/* There has to be a BOUNDARY definition in the Content-Type header */
-		if (mg_strncasecmp(content_type + bl, "BOUNDARY=", 9)) {
+		if (httplib_strncasecmp(content_type + bl, "BOUNDARY=", 9)) {
 			/* Malformed request */
 			return -1;
 		}
@@ -499,7 +498,7 @@ int mg_handle_form_request(struct mg_connection *conn, struct mg_form_data_handl
 			size_t towrite, n;
 			int get_block;
 
-			r = mg_read(conn, buf + (size_t)buf_fill, sizeof(buf) - 1 - (size_t)buf_fill);
+			r = httplib_read(conn, buf + (size_t)buf_fill, sizeof(buf) - 1 - (size_t)buf_fill);
 			if (r < 0) {
 				/* read error */
 				return -1;
@@ -600,7 +599,7 @@ int mg_handle_form_request(struct mg_connection *conn, struct mg_form_data_handl
 				if (XX_httplib_fopen(conn, path, "wb", &fstore) == 0) fstore.fp = NULL;
 				file_size = 0;
 
-				if (!fstore.fp) mg_cry(conn, "%s: Cannot create file %s", __func__, path);
+				if (!fstore.fp) httplib_cry(conn, "%s: Cannot create file %s", __func__, path);
 			}
 
 			get_block = 0;
@@ -631,7 +630,7 @@ int mg_handle_form_request(struct mg_connection *conn, struct mg_form_data_handl
 						/* Store the content of the buffer. */
 						n = (size_t)fwrite(hend, 1, towrite, fstore.fp);
 						if ((n != towrite) || (ferror(fstore.fp))) {
-							mg_cry(conn, "%s: Cannot write file %s", __func__, path);
+							httplib_cry(conn, "%s: Cannot write file %s", __func__, path);
 							fclose(fstore.fp);
 							fstore.fp = NULL;
 							XX_httplib_remove_bad_file(conn, path);
@@ -645,7 +644,7 @@ int mg_handle_form_request(struct mg_connection *conn, struct mg_form_data_handl
 				hend = buf;
 
 				/* Read new data */
-				r = mg_read(conn, buf + (size_t)buf_fill, sizeof(buf) - 1 - (size_t)buf_fill);
+				r = httplib_read(conn, buf + (size_t)buf_fill, sizeof(buf) - 1 - (size_t)buf_fill);
 				if (r < 0) {
 					/* read error */
 					return -1;
@@ -679,7 +678,7 @@ int mg_handle_form_request(struct mg_connection *conn, struct mg_form_data_handl
 				if (fstore.fp) {
 					n = (size_t)fwrite(hend, 1, towrite, fstore.fp);
 					if ((n != towrite) || (ferror(fstore.fp))) {
-						mg_cry(conn, "%s: Cannot write file %s", __func__, path);
+						httplib_cry(conn, "%s: Cannot write file %s", __func__, path);
 						fclose(fstore.fp);
 						fstore.fp = NULL;
 						XX_httplib_remove_bad_file(conn, path);
@@ -696,7 +695,7 @@ int mg_handle_form_request(struct mg_connection *conn, struct mg_form_data_handl
 						/* stored successfully */
 						field_stored(conn, path, file_size, fdh);
 					} else {
-						mg_cry(conn, "%s: Error saving file %s", __func__, path);
+						httplib_cry(conn, "%s: Error saving file %s", __func__, path);
 						XX_httplib_remove_bad_file(conn, path);
 					}
 					fstore.fp = NULL;

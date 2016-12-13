@@ -41,7 +41,7 @@
  * is_put_or_delete_request:	out: put/delete file?
  */
 
-void XX_httplib_interpret_uri( struct mg_connection *conn, char *filename, size_t filename_buf_len, struct file *filep, int *is_found, int *is_script_resource, int *is_websocket_request, int *is_put_or_delete_request ) {
+void XX_httplib_interpret_uri( struct httplib_connection *conn, char *filename, size_t filename_buf_len, struct file *filep, int *is_found, int *is_script_resource, int *is_websocket_request, int *is_put_or_delete_request ) {
 
 /* TODO (high): Restructure this function */
 
@@ -141,7 +141,7 @@ void XX_httplib_interpret_uri( struct mg_connection *conn, char *filename, size_
 	 * to indicate that the response need to have the content-
 	 * encoding: gzip header.
 	 * We can only do this if the browser declares support. */
-	if ((accept_encoding = mg_get_header(conn, "Accept-Encoding")) != NULL) {
+	if ((accept_encoding = httplib_get_header(conn, "Accept-Encoding")) != NULL) {
 		if (strstr(accept_encoding, "gzip") != NULL) {
 			XX_httplib_snprintf( conn, &truncated, gz_path, sizeof(gz_path), "%s.gz", filename);
 

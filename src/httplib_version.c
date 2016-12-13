@@ -25,14 +25,14 @@
 #include "httplib_main.h"
 
 /*
- *  const char *mg_version( void );
+ *  const char *httplib_version( void );
  *
- *  The function mg_version() returns the version of the current library as a
+ *  The function httplib_version() returns the version of the current library as a
  *  NULL terminated string.
  */
 
-const char *mg_version( void ) {
+const char *httplib_version( void ) {
 
 	return LIBHTTP_VERSION;
 
-}  /* mg_version */
+}  /* httplib_version */

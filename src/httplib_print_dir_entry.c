@@ -52,9 +52,9 @@ void XX_httplib_print_dir_entry( struct de *de ) {
 		XX_httplib_strlcpy(mod, "01-Jan-1970 00:00", sizeof(mod));
 		mod[sizeof(mod) - 1] = '\0';
 	}
-	mg_url_encode(de->file_name, href, sizeof(href));
+	httplib_url_encode(de->file_name, href, sizeof(href));
 	de->conn->num_bytes_sent +=
-	    mg_printf(de->conn,
+	    httplib_printf(de->conn,
 	              "<tr><td><a href=\"%s%s%s\">%s%s</a></td>"
 	              "<td>&nbsp;%s</td><td>&nbsp;&nbsp;%s</td></tr>\n",
 	              de->conn->request_info.local_uri,

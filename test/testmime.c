@@ -56,7 +56,7 @@ int main( void ) {
 
 		if ( p1 == NULL  || p2 == NULL ) break;
 
-		if ( mg_strcasecmp( p1, p2 ) >= 0 ) {
+		if ( httplib_strcasecmp( p1, p2 ) >= 0 ) {
 			
 			printf( "Compare ERROR: \"%s\" not less than \"%s\"\n", p1, p2 );
 			problems++;

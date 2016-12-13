@@ -25,15 +25,15 @@
 #include "httplib_main.h"
 
 /*
- * void mg_set_websocket_handler();
+ * void httplib_set_websocket_handler();
  *
- * the function mg_set_websocket_handler() sets callback functions for the
+ * the function httplib_set_websocket_handler() sets callback functions for the
  * processing of events from a websocket.
  */
 
-void mg_set_websocket_handler( struct mg_context *ctx, const char *uri, mg_websocket_connect_handler connect_handler, mg_websocket_ready_handler ready_handler, mg_websocket_data_handler data_handler, mg_websocket_close_handler close_handler, void *cbdata ) {
+void httplib_set_websocket_handler( struct httplib_context *ctx, const char *uri, httplib_websocket_connect_handler connect_handler, httplib_websocket_ready_handler ready_handler, httplib_websocket_data_handler data_handler, httplib_websocket_close_handler close_handler, void *cbdata ) {
 
 	int is_delete_request = (connect_handler == NULL) && (ready_handler == NULL) && (data_handler == NULL) && (close_handler == NULL);
 	XX_httplib_set_handler_type(ctx, uri, WEBSOCKET_HANDLER, is_delete_request, NULL, connect_handler, ready_handler, data_handler, close_handler, NULL, cbdata);
 
-}  /* mg_set_websocket_handler */
+}  /* httplib_set_websocket_handler */

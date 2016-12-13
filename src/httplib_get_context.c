@@ -24,8 +24,8 @@
 
 #include "httplib_main.h"
 
-struct mg_context * mg_get_context(const struct mg_connection *conn) {
+struct httplib_context * httplib_get_context(const struct httplib_connection *conn) {
 
-	return (conn == NULL) ? (struct mg_context *)NULL : (conn->ctx);
+	return (conn == NULL) ? (struct httplib_context *)NULL : (conn->ctx);
 
-}  /* mg_get_context */
+}  /* httplib_get_context */

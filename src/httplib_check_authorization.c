@@ -26,7 +26,7 @@
 #include "httplib_string.h"
 
 /* Return 1 if request is authorised, 0 otherwise. */
-int XX_httplib_check_authorization( struct mg_connection *conn, const char *path ) {
+int XX_httplib_check_authorization( struct httplib_connection *conn, const char *path ) {
 
 	char fname[PATH_MAX];
 	struct vec uri_vec;
@@ -44,7 +44,7 @@ int XX_httplib_check_authorization( struct mg_connection *conn, const char *path
 			XX_httplib_snprintf(conn, &truncated, fname, sizeof(fname), "%.*s", (int)filename_vec.len, filename_vec.ptr);
 
 			if (truncated || !XX_httplib_fopen(conn, fname, "r", &file)) {
-				mg_cry(conn, "%s: cannot open %s: %s", __func__, fname, strerror(errno));
+				httplib_cry(conn, "%s: cannot open %s: %s", __func__, fname, strerror(errno));
 			}
 			break;
 		}

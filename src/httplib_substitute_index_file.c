@@ -26,7 +26,7 @@
 #include "httplib_string.h"
 
 /*
- * int XX_httplib_substitute_index_file( struct mg_connection *conn, char *path, size_t path_len, struct file *filep );
+ * int XX_httplib_substitute_index_file( struct httplib_connection *conn, char *path, size_t path_len, struct file *filep );
  *
  * The function XX_httplib_substiture_index_file() tries to find an index file
  * matching a given directory path. The function returns 1 of an index file has
@@ -36,7 +36,7 @@
 
 #if !defined(NO_FILES)
 
-int XX_httplib_substitute_index_file( struct mg_connection *conn, char *path, size_t path_len, struct file *filep ) {
+int XX_httplib_substitute_index_file( struct httplib_connection *conn, char *path, size_t path_len, struct file *filep ) {
 
 	if ( conn == NULL  ||  conn->ctx == NULL ) return 0;
 

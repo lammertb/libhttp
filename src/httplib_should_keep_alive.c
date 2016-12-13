@@ -27,13 +27,13 @@
 /* HTTP 1.1 assumes keep alive if "Connection:" header is not set
  * This function must tolerate situations when connection info is not
  * set up, for example if request parsing failed. */
-int XX_httplib_should_keep_alive( const struct mg_connection *conn ) {
+int XX_httplib_should_keep_alive( const struct httplib_connection *conn ) {
 
 	if (conn != NULL) {
 		const char *http_version = conn->request_info.http_version;
-		const char *header = mg_get_header(conn, "Connection");
+		const char *header = httplib_get_header(conn, "Connection");
 		if (conn->must_close || conn->internal_error || conn->status_code == 401
-		    || mg_strcasecmp(conn->ctx->config[ENABLE_KEEP_ALIVE], "yes") != 0
+		    || httplib_strcasecmp(conn->ctx->config[ENABLE_KEEP_ALIVE], "yes") != 0
 		    || (header != NULL && !XX_httplib_header_has_option(header, "keep-alive"))
 		    || (header == NULL && http_version
 		        && 0 != strcmp(http_version, "1.1"))) {

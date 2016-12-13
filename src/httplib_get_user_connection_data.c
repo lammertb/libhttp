@@ -24,10 +24,10 @@
 
 #include "httplib_main.h"
 
-void * mg_get_user_connection_data(const struct mg_connection *conn) {
+void * httplib_get_user_connection_data(const struct httplib_connection *conn) {
 
 	if (conn != NULL) return conn->request_info.conn_data;
 
 	return NULL;
 
-}  /* mg_get_user_connection_data */
+}  /* httplib_get_user_connection_data */

@@ -3,9 +3,9 @@
 #include "civetweb.h"
 
 // This function will be called by civetweb on every new request.
-static int begin_request_handler(struct mg_connection *conn)
+static int begin_request_handler(struct httplib_connection *conn)
 {
-    const struct mg_request_info *request_info = mg_get_request_info(conn);
+    const struct httplib_request_info *request_info = httplib_get_request_info(conn);
     char content[100];
 
     // Prepare the message we're going to send
@@ -14,7 +14,7 @@ static int begin_request_handler(struct mg_connection *conn)
                                   request_info->remote_port);
 
     // Send HTTP reply to the client
-    mg_printf(conn,
+    httplib_printf(conn,
               "HTTP/1.1 200 OK\r\n"
               "Content-Type: text/plain\r\n"
               "Content-Length: %d\r\n"        // Always set Content-Length
@@ -29,8 +29,8 @@ static int begin_request_handler(struct mg_connection *conn)
 
 int main(void)
 {
-    struct mg_context *ctx;
-    struct mg_callbacks callbacks;
+    struct httplib_context *ctx;
+    struct httplib_callbacks callbacks;
 
     // List of options. Last element must be NULL.
     const char *options[] = {"listening_ports", "8080", NULL};
@@ -40,14 +40,14 @@ int main(void)
     callbacks.begin_request = begin_request_handler;
 
     // Start the web server.
-    ctx = mg_start(&callbacks, NULL, options);
+    ctx = httplib_start(&callbacks, NULL, options);
 
     // Wait until user hits "enter". Server is running in separate thread.
     // Navigating to http://localhost:8080 will invoke begin_request_handler().
     getchar();
 
     // Stop the server.
-    mg_stop(ctx);
+    httplib_stop(ctx);
 
     return 0;
 }

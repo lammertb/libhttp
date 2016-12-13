@@ -25,7 +25,7 @@
 #include "httplib_main.h"
 
 /* Send len bytes from the opened file to the client. */
-void XX_httplib_send_file_data( struct mg_connection *conn, struct file *filep, int64_t offset, int64_t len ) {
+void XX_httplib_send_file_data( struct httplib_connection *conn, struct file *filep, int64_t offset, int64_t len ) {
 
 	char buf[MG_BUF_LEN];
 	int to_read;
@@ -44,14 +44,13 @@ void XX_httplib_send_file_data( struct mg_connection *conn, struct file *filep, 
 		if (len > size - offset) {
 			len = size - offset;
 		}
-		mg_write(conn, filep->membuf + offset, (size_t)len);
+		httplib_write(conn, filep->membuf + offset, (size_t)len);
 	} else if (len > 0 && filep->fp != NULL) {
 /* file stored on disk */
 #if defined(__linux__)
 		/* sendfile is only available for Linux */
 		if ((conn->ssl == 0) && (conn->throttle == 0)
-		    && (!mg_strcasecmp(conn->ctx->config[ALLOW_SENDFILE_CALL],
-		                       "yes"))) {
+		    && (!httplib_strcasecmp(conn->ctx->config[ALLOW_SENDFILE_CALL], "yes"))) {
 			off_t sf_offs = (off_t)offset;
 			ssize_t sf_sent;
 			int sf_file = fileno(filep->fp);
@@ -93,7 +92,7 @@ void XX_httplib_send_file_data( struct mg_connection *conn, struct file *filep, 
 		}
 #endif
 		if ((offset > 0) && (fseeko(filep->fp, offset, SEEK_SET) != 0)) {
-			mg_cry(conn, "%s: fseeko() failed: %s", __func__, strerror(ERRNO));
+			httplib_cry(conn, "%s: fseeko() failed: %s", __func__, strerror(ERRNO));
 			XX_httplib_send_http_error( conn, 500, "%s", "Error: Unable to access file at requested position.");
 		} else {
 			while (len > 0) {
@@ -107,7 +106,7 @@ void XX_httplib_send_file_data( struct mg_connection *conn, struct file *filep, 
 				if ((num_read = (int)fread(buf, 1, (size_t)to_read, filep->fp)) <= 0) break;
 
 				/* Send read bytes to the client, exit the loop on error */
-				if ((num_written = mg_write(conn, buf, (size_t)num_read)) != num_read) break;
+				if ((num_written = httplib_write(conn, buf, (size_t)num_read)) != num_read) break;
 
 				/* Both read and were successful, adjust counters */
 				conn->num_bytes_sent += num_written;

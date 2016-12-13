@@ -25,17 +25,17 @@
 #include "httplib_main.h"
 
 /*
- * int mg_websocket_write( struct mg_connection *conn, int opcode, const char *data, size_t dataLen );
+ * int httplib_websocket_write( struct httplib_connection *conn, int opcode, const char *data, size_t dataLen );
  *
- * The function mg_websocket_write() writes data over a websocket connection.
+ * The function httplib_websocket_write() writes data over a websocket connection.
  */
 
 #if defined(USE_WEBSOCKET)
 
-int mg_websocket_write( struct mg_connection *conn, int opcode, const char *data, size_t dataLen ) {
+int httplib_websocket_write( struct httplib_connection *conn, int opcode, const char *data, size_t dataLen ) {
 
 	return XX_httplib_websocket_write_exec( conn, opcode, data, dataLen, 0 );
 
-}  /* mg_websocket_write */
+}  /* httplib_websocket_write */
 
 #endif /* USE_WEBSOCKET */

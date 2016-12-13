@@ -24,14 +24,14 @@
 
 #include "httplib_main.h"
 
-void XX_httplib_fclose_on_exec( struct file *filep, struct mg_connection *conn ) {
+void XX_httplib_fclose_on_exec( struct file *filep, struct httplib_connection *conn ) {
 
 	if (filep != NULL && filep->fp != NULL) {
 #ifdef _WIN32
 		(void)conn; /* Unused. */
 #else
 		if (fcntl(fileno(filep->fp), F_SETFD, FD_CLOEXEC) != 0) {
-			mg_cry(conn, "%s: fcntl(F_SETFD FD_CLOEXEC) failed: %s", __func__, strerror(ERRNO));
+			httplib_cry(conn, "%s: fcntl(F_SETFD FD_CLOEXEC) failed: %s", __func__, strerror(ERRNO));
 		}
 #endif
 	}

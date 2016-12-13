@@ -25,7 +25,7 @@
 #include "httplib_main.h"
 
 /*
- * int XX_httplib_parse_http_headers( char **buf, struct mg_request_info *ri );
+ * int XX_httplib_parse_http_headers( char **buf, struct httplib_request_info *ri );
  *
  * The function XX_httplib_parse_http_headers() parses the HTTP headers from
  * the given buffer. The buf pointer is advanced to the point where parsing
@@ -33,7 +33,7 @@
  * headers read is returned, or a negative value if an error occured.
  */
 
-int XX_httplib_parse_http_headers( char **buf, struct mg_request_info *ri ) {
+int XX_httplib_parse_http_headers( char **buf, struct httplib_request_info *ri ) {
 
 	int i;
 

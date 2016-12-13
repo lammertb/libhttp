@@ -24,7 +24,7 @@
 
 #include "httplib_main.h"
 
-static int mg_read_inner(struct mg_connection *conn, void *buf, size_t len) {
+static int httplib_read_inner(struct httplib_connection *conn, void *buf, size_t len) {
 
 	int64_t n;
 	int64_t buffered_len;
@@ -77,22 +77,22 @@ static int mg_read_inner(struct mg_connection *conn, void *buf, size_t len) {
 	}
 	return (int)nread;
 
-}  /* mg_read_inner */
+}  /* httplib_read_inner */
 
 
-static char mg_getc(struct mg_connection *conn) {
+static char httplib_getc(struct httplib_connection *conn) {
 
 	char c;
 	if (conn == NULL) return 0;
 
 	conn->content_len++;
-	if (mg_read_inner(conn, &c, 1) <= 0) return (char)0;
+	if (httplib_read_inner(conn, &c, 1) <= 0) return (char)0;
 	return c;
 
-}  /* mg_getc */
+}  /* httplib_getc */
 
 
-int mg_read(struct mg_connection *conn, void *buf, size_t len) {
+int httplib_read(struct httplib_connection *conn, void *buf, size_t len) {
 
 	if (len > INT_MAX) len = INT_MAX;
 
@@ -116,8 +116,7 @@ int mg_read(struct mg_connection *conn, void *buf, size_t len) {
 				                                   : (conn->chunk_remainder));
 
 				conn->content_len += (int)read_now;
-				read_ret =
-				    mg_read_inner(conn, (char *)buf + all_read, read_now);
+				read_ret = httplib_read_inner(conn, (char *)buf + all_read, read_now);
 				all_read += (size_t)read_ret;
 
 				conn->chunk_remainder -= read_now;
@@ -126,7 +125,7 @@ int mg_read(struct mg_connection *conn, void *buf, size_t len) {
 				if (conn->chunk_remainder == 0) {
 					/* the rest of the data in the current chunk has been read
 					 */
-					if ((mg_getc(conn) != '\r') || (mg_getc(conn) != '\n')) {
+					if ((httplib_getc(conn) != '\r') || (httplib_getc(conn) != '\n')) {
 						/* Protocol violation */
 						return -1;
 					}
@@ -140,7 +139,7 @@ int mg_read(struct mg_connection *conn, void *buf, size_t len) {
 				unsigned long chunkSize = 0;
 
 				for (i = 0; i < ((int)sizeof(lenbuf) - 1); i++) {
-					lenbuf[i] = mg_getc(conn);
+					lenbuf[i] = httplib_getc(conn);
 					if (i > 0 && lenbuf[i] == '\r' && lenbuf[i - 1] != '\r') {
 						continue;
 					}
@@ -172,6 +171,6 @@ int mg_read(struct mg_connection *conn, void *buf, size_t len) {
 
 		return (int)all_read;
 	}
-	return mg_read_inner(conn, buf, len);
+	return httplib_read_inner(conn, buf, len);
 
-}  /* mg_read */
+}  /* httplib_read */

@@ -25,7 +25,7 @@
 #include "httplib_main.h"
 
 #if !defined(NO_FILES)
-int XX_httplib_is_authorized_for_put( struct mg_connection *conn ) {
+int XX_httplib_is_authorized_for_put( struct httplib_connection *conn ) {
 
 	if ( conn == NULL ) return 0;
 

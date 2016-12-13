@@ -27,7 +27,7 @@
 
 /* Use the global passwords file, if specified by auth_gpass option,
  * or search for .htpasswd in the requested directory. */
-void XX_httplib_open_auth_file( struct mg_connection *conn, const char *path, struct file *filep ) {
+void XX_httplib_open_auth_file( struct httplib_connection *conn, const char *path, struct file *filep ) {
 
 	if ( conn == NULL  ||  conn->ctx == NULL ) return;
 
@@ -42,7 +42,7 @@ void XX_httplib_open_auth_file( struct mg_connection *conn, const char *path, st
 		/* Use global passwords file */
 		if (!XX_httplib_fopen(conn, gpass, "r", filep)) {
 #ifdef DEBUG
-			mg_cry(conn, "fopen(%s): %s", gpass, strerror(ERRNO));
+			httplib_cry(conn, "fopen(%s): %s", gpass, strerror(ERRNO));
 #endif
 		}
 		/* Important: using local struct file to test path for is_directory
@@ -53,7 +53,7 @@ void XX_httplib_open_auth_file( struct mg_connection *conn, const char *path, st
 
 		if (truncated || !XX_httplib_fopen(conn, name, "r", filep)) {
 #ifdef DEBUG
-			mg_cry(conn, "fopen(%s): %s", name, strerror(ERRNO));
+			httplib_cry(conn, "fopen(%s): %s", name, strerror(ERRNO));
 #endif
 		}
 	} else {
@@ -65,7 +65,7 @@ void XX_httplib_open_auth_file( struct mg_connection *conn, const char *path, st
 
 		if (truncated || !XX_httplib_fopen(conn, name, "r", filep)) {
 #ifdef DEBUG
-			mg_cry(conn, "fopen(%s): %s", name, strerror(ERRNO));
+			httplib_cry(conn, "fopen(%s): %s", name, strerror(ERRNO));
 #endif
 		}
 	}

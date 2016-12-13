@@ -80,7 +80,7 @@ struct ssl_func {
 #define SSL_library_init			(*(int (*)(void))XX_httplib_ssl_sw[10].ptr)
 #define SSL_CTX_use_PrivateKey_file		(*(int (*)(SSL_CTX *, const char *, int))XX_httplib_ssl_sw[11].ptr)
 #define SSL_CTX_use_certificate_file		(*(int (*)(SSL_CTX *, const char *, int))XX_httplib_ssl_sw[12].ptr)
-#define SSL_CTX_set_default_passwd_cb		(*(void (*)(SSL_CTX *, mg_callback_t))XX_httplib_ssl_sw[13].ptr)
+#define SSL_CTX_set_default_passwd_cb		(*(void (*)(SSL_CTX *, httplib_callback_t))XX_httplib_ssl_sw[13].ptr)
 #define SSL_CTX_free				(*(void (*)(SSL_CTX *))XX_httplib_ssl_sw[14].ptr)
 #define SSL_load_error_strings			(*(void (*)(void))XX_httplib_ssl_sw[15].ptr)
 #define SSL_CTX_use_certificate_chain_file	(*(int (*)(SSL_CTX *, const char *))XX_httplib_ssl_sw[16].ptr)
@@ -132,18 +132,18 @@ struct ssl_func {
 
 
 
-int				XX_httplib_get_first_ssl_listener_index( const struct mg_context *ctx );
-int				XX_httplib_initialize_ssl( struct mg_context *ctx );
-int				XX_httplib_set_ssl_option( struct mg_context *ctx );
+int				XX_httplib_get_first_ssl_listener_index( const struct httplib_context *ctx );
+int				XX_httplib_initialize_ssl( struct httplib_context *ctx );
+int				XX_httplib_set_ssl_option( struct httplib_context *ctx );
 const char *			XX_httplib_ssl_error( void );
-void				XX_httplib_ssl_get_client_cert_info( struct mg_connection *conn );
+void				XX_httplib_ssl_get_client_cert_info( struct httplib_connection *conn );
 long				XX_httplib_ssl_get_protocol( int version_id );
 unsigned long			XX_httplib_ssl_id_callback( void );
 void				XX_httplib_ssl_locking_callback( int mode, int mutex_num, const char *file, int line );
-int				XX_httplib_ssl_use_pem_file( struct mg_context *ctx, const char *pem );
-int				XX_httplib_sslize( struct mg_connection *conn, SSL_CTX *s, int (*func)(SSL *) );
+int				XX_httplib_ssl_use_pem_file( struct httplib_context *ctx, const char *pem );
+int				XX_httplib_sslize( struct httplib_connection *conn, SSL_CTX *s, int (*func)(SSL *) );
 void				XX_httplib_tls_dtor( void *key );
-void				XX_httplib_uninitialize_ssl( struct mg_context *ctx );
+void				XX_httplib_uninitialize_ssl( struct httplib_context *ctx );
 
 
 

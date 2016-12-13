@@ -59,19 +59,19 @@ int XX_httplib_read_auth_file( struct file *filep, struct read_auth_file_struct 
 					is_authorized = XX_httplib_read_auth_file(&fp, workdata);
 					XX_httplib_fclose(&fp);
 				} else {
-					mg_cry(workdata->conn, "%s: cannot open authorization file: %s", __func__, workdata->buf);
+					httplib_cry(workdata->conn, "%s: cannot open authorization file: %s", __func__, workdata->buf);
 				}
 				continue;
 			}
 			/* everything is invalid for the moment (might change in the
 			 * future) */
-			mg_cry(workdata->conn, "%s: syntax error in authorization file: %s", __func__, workdata->buf);
+			httplib_cry(workdata->conn, "%s: syntax error in authorization file: %s", __func__, workdata->buf);
 			continue;
 		}
 
 		workdata->f_domain = strchr(workdata->f_user, ':');
 		if (workdata->f_domain == NULL) {
-			mg_cry(workdata->conn, "%s: syntax error in authorization file: %s", __func__, workdata->buf);
+			httplib_cry(workdata->conn, "%s: syntax error in authorization file: %s", __func__, workdata->buf);
 			continue;
 		}
 		*(workdata->f_domain) = 0;
@@ -79,7 +79,7 @@ int XX_httplib_read_auth_file( struct file *filep, struct read_auth_file_struct 
 
 		workdata->f_ha1 = strchr(workdata->f_domain, ':');
 		if (workdata->f_ha1 == NULL) {
-			mg_cry(workdata->conn, "%s: syntax error in authorization file: %s", __func__, workdata->buf);
+			httplib_cry(workdata->conn, "%s: syntax error in authorization file: %s", __func__, workdata->buf);
 			continue;
 		}
 		*(workdata->f_ha1) = 0;

@@ -25,16 +25,16 @@
 #include "httplib_main.h"
 
 /*
- * void XX_httplib_remove_bad_file( const struct mg_connection *conn, const char *path );
+ * void XX_httplib_remove_bad_file( const struct httplib_connection *conn, const char *path );
  *
  * The function XX_httplib_remove_bad_file() removes an invalid file and throws
  * an error message if this does not succeed.
  */
 
-void XX_httplib_remove_bad_file( const struct mg_connection *conn, const char *path ) {
+void XX_httplib_remove_bad_file( const struct httplib_connection *conn, const char *path ) {
 
 	int r = XX_httplib_remove( conn, path );
 
-	if (r != 0) mg_cry(conn, "%s: Cannot remove invalid file %s", __func__, path);
+	if (r != 0) httplib_cry(conn, "%s: Cannot remove invalid file %s", __func__, path);
 
 }  /* XX_httplib_remove_bad_file */

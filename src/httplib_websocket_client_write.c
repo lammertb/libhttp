@@ -31,13 +31,13 @@
 static void mask_data( const char *in, size_t in_len, uint32_t masking_key, char *out );
 
 /*
- * int mg_websocket_client_write( struct mg_connection *conn, int opcode, const char *data, size_t dataLen );
+ * int httplib_websocket_client_write( struct httplib_connection *conn, int opcode, const char *data, size_t dataLen );
  *
- * The function mg_websocket_client_write() is used to write as a client to a
+ * The function httplib_websocket_client_write() is used to write as a client to a
  * websocket server.
  */
 
-int mg_websocket_client_write( struct mg_connection *conn, int opcode, const char *data, size_t dataLen ) {
+int httplib_websocket_client_write( struct httplib_connection *conn, int opcode, const char *data, size_t dataLen ) {
 
 	int retval = -1;
 	char *masked_data = XX_httplib_malloc(((dataLen + 7) / 4) * 4);
@@ -45,7 +45,7 @@ int mg_websocket_client_write( struct mg_connection *conn, int opcode, const cha
 
 	if (masked_data == NULL) {
 		/* Return -1 in an error case */
-		mg_cry(conn, "Cannot allocate buffer for masked websocket response: Out of memory");
+		httplib_cry(conn, "Cannot allocate buffer for masked websocket response: Out of memory");
 		return -1;
 	}
 
@@ -56,7 +56,7 @@ int mg_websocket_client_write( struct mg_connection *conn, int opcode, const cha
 
 	return retval;
 
-}  /* mg_websocket_client_write */
+}  /* httplib_websocket_client_write */
 
 
 

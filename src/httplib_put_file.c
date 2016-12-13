@@ -26,7 +26,7 @@
 #include "httplib_utils.h"
 
 /*
- * void XX_httplib_put_file( struct mg_connection *conn, const char *path );
+ * void XX_httplib_put_file( struct httplib_connection *conn, const char *path );
  *
  * The function XX_httplib_put_file() processes a file PUT request coming from
  * a remote client.
@@ -34,7 +34,7 @@
 
 #if !defined(NO_FILES)
 
-void XX_httplib_put_file( struct mg_connection *conn, const char *path ) {
+void XX_httplib_put_file( struct httplib_connection *conn, const char *path ) {
 
 	struct file file = STRUCT_FILE_INITIALIZER;
 	const char *range;
@@ -86,9 +86,9 @@ void XX_httplib_put_file( struct mg_connection *conn, const char *path ) {
 	if (rc == 0) {
 		/* XX_httplib_put_dir returns 0 if path is a directory */
 		XX_httplib_gmt_time_string(date, sizeof(date), &curtime);
-		mg_printf(conn, "HTTP/1.1 %d %s\r\n", conn->status_code, mg_get_response_code_text(NULL, conn->status_code));
+		httplib_printf(conn, "HTTP/1.1 %d %s\r\n", conn->status_code, httplib_get_response_code_text(NULL, conn->status_code));
 		XX_httplib_send_no_cache_header(conn);
-		mg_printf(conn, "Date: %s\r\n" "Content-Length: 0\r\n" "Connection: %s\r\n\r\n", date, XX_httplib_suggest_connection_header(conn));
+		httplib_printf(conn, "Date: %s\r\n" "Content-Length: 0\r\n" "Connection: %s\r\n\r\n", date, XX_httplib_suggest_connection_header(conn));
 
 		/* Request to create a directory has been fulfilled successfully.
 		 * No need to put a file. */
@@ -115,7 +115,7 @@ void XX_httplib_put_file( struct mg_connection *conn, const char *path ) {
 	}
 
 	XX_httplib_fclose_on_exec(&file, conn);
-	range = mg_get_header(conn, "Content-Range");
+	range = httplib_get_header(conn, "Content-Range");
 	r1 = r2 = 0;
 	if (range != NULL && XX_httplib_parse_range_header(range, &r1, &r2) > 0) {
 		conn->status_code = 206; /* Partial content */
@@ -131,9 +131,9 @@ void XX_httplib_put_file( struct mg_connection *conn, const char *path ) {
 	}
 
 	XX_httplib_gmt_time_string(date, sizeof(date), &curtime);
-	mg_printf(conn, "HTTP/1.1 %d %s\r\n", conn->status_code, mg_get_response_code_text(NULL, conn->status_code));
+	httplib_printf(conn, "HTTP/1.1 %d %s\r\n", conn->status_code, httplib_get_response_code_text(NULL, conn->status_code));
 	XX_httplib_send_no_cache_header(conn);
-	mg_printf(conn, "Date: %s\r\n" "Content-Length: 0\r\n" "Connection: %s\r\n\r\n", date, XX_httplib_suggest_connection_header(conn));
+	httplib_printf(conn, "Date: %s\r\n" "Content-Length: 0\r\n" "Connection: %s\r\n\r\n", date, XX_httplib_suggest_connection_header(conn));
 
 	XX_httplib_fclose(&file);
 

@@ -24,7 +24,7 @@
 
 #include "httplib_main.h"
 
-int mg_write( struct mg_connection *conn, const void *buf, size_t len ) {
+int httplib_write( struct httplib_connection *conn, const void *buf, size_t len ) {
 
 	time_t now;
 	int64_t n;
@@ -73,4 +73,4 @@ int mg_write( struct mg_connection *conn, const void *buf, size_t len ) {
 
 	return (int)total;
 
-}  /* mg_write */
+}  /* httplib_write */

@@ -106,13 +106,13 @@ static int alloc_vprintf( char **out_buf, char *prealloc_buf, size_t prealloc_si
 }  /* alloc_vprintf */
 
 
-int XX_httplib_vprintf( struct mg_connection *conn, const char *fmt, va_list ap ) {
+int XX_httplib_vprintf( struct httplib_connection *conn, const char *fmt, va_list ap ) {
 
 	char mem[MG_BUF_LEN];
 	char *buf = NULL;
 	int len;
 
-	if ((len = alloc_vprintf(&buf, mem, sizeof(mem), fmt, ap)) > 0) len = mg_write(conn, buf, (size_t)len);
+	if ((len = alloc_vprintf(&buf, mem, sizeof(mem), fmt, ap)) > 0) len = httplib_write(conn, buf, (size_t)len);
 	if (buf != mem && buf != NULL) XX_httplib_free(buf);
 
 	return len;

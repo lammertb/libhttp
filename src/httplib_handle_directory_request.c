@@ -26,7 +26,7 @@
 #include "httplib_memory.h"
 #include "httplib_utils.h"
 
-void XX_httplib_handle_directory_request( struct mg_connection *conn, const char *dir ) {
+void XX_httplib_handle_directory_request( struct httplib_connection *conn, const char *dir ) {
 
 	unsigned int i;
 	int sort_direction;
@@ -46,12 +46,12 @@ void XX_httplib_handle_directory_request( struct mg_connection *conn, const char
 	sort_direction = ((conn->request_info.query_string != NULL) && (conn->request_info.query_string[1] == 'd')) ? 'a' : 'd';
 
 	conn->must_close = 1;
-	mg_printf(conn, "HTTP/1.1 200 OK\r\n");
+	httplib_printf(conn, "HTTP/1.1 200 OK\r\n");
 	XX_httplib_send_static_cache_header(conn);
-	mg_printf(conn, "Date: %s\r\n" "Connection: close\r\n" "Content-Type: text/html; charset=utf-8\r\n\r\n", date);
+	httplib_printf(conn, "Date: %s\r\n" "Connection: close\r\n" "Content-Type: text/html; charset=utf-8\r\n\r\n", date);
 
 	conn->num_bytes_sent +=
-	    mg_printf(conn,
+	    httplib_printf(conn,
 	              "<html><head><title>Index of %s</title>"
 	              "<style>th {text-align: left;}</style></head>"
 	              "<body><h1>Index of %s</h1><pre><table cellpadding=\"0\">"
@@ -67,7 +67,7 @@ void XX_httplib_handle_directory_request( struct mg_connection *conn, const char
 
 	/* Print first entry - link to a parent directory */
 	conn->num_bytes_sent +=
-	    mg_printf(conn,
+	    httplib_printf(conn,
 	              "<tr><td><a href=\"%s%s\">%s</a></td>"
 	              "<td>&nbsp;%s</td><td>&nbsp;&nbsp;%s</td></tr>\n",
 	              conn->request_info.local_uri,
@@ -89,7 +89,7 @@ void XX_httplib_handle_directory_request( struct mg_connection *conn, const char
 		XX_httplib_free(data.entries);
 	}
 
-	conn->num_bytes_sent += mg_printf(conn, "%s", "</table></body></html>");
+	conn->num_bytes_sent += httplib_printf(conn, "%s", "</table></body></html>");
 	conn->status_code = 200;
 
 }  /* XX_httplib_handle_directory_request */

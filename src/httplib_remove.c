@@ -24,7 +24,7 @@
 
 #include "httplib_main.h"
 
-int XX_httplib_remove( const struct mg_connection *conn, const char *path ) {
+int XX_httplib_remove( const struct httplib_connection *conn, const char *path ) {
 
 #if defined(_WIN32)
 

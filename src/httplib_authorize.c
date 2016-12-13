@@ -25,7 +25,7 @@
 #include "httplib_main.h"
 
 /* Authorize against the opened passwords file. Return 1 if authorized. */
-int XX_httplib_authorize( struct mg_connection *conn, struct file *filep ) {
+int XX_httplib_authorize( struct httplib_connection *conn, struct file *filep ) {
 
 	struct read_auth_file_struct workdata;
 	char buf[MG_BUF_LEN];

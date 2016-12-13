@@ -25,7 +25,7 @@
 #include "httplib_main.h"
 #include "httplib_string.h"
 
-int XX_httplib_scan_directory( struct mg_connection *conn, const char *dir, void *data, void (*cb)(struct de *, void *) ) {
+int XX_httplib_scan_directory( struct httplib_connection *conn, const char *dir, void *data, void (*cb)(struct de *, void *) ) {
 
 	char path[PATH_MAX];
 	struct dirent *dp;
@@ -57,7 +57,7 @@ int XX_httplib_scan_directory( struct mg_connection *conn, const char *dir, void
 			}
 
 			if (!XX_httplib_stat(conn, path, &de.file)) {
-				mg_cry(conn, "%s: XX_httplib_stat(%s) failed: %s", __func__, path, strerror(ERRNO));
+				httplib_cry(conn, "%s: XX_httplib_stat(%s) failed: %s", __func__, path, strerror(ERRNO));
 			}
 			de.file_name = dp->d_name;
 			cb(&de, data);

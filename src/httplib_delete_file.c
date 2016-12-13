@@ -25,7 +25,7 @@
 #include "httplib_main.h"
 
 /*
- * void XX_httplib_delete_file( struct mg_connection *conn, const char *path );
+ * void XX_httplib_delete_file( struct httplib_connection *conn, const char *path );
  *
  * The function XX_httplib_delete_file() deletes a file after a request over a
  * connection.
@@ -33,7 +33,7 @@
 
 #if !defined(NO_FILES)
 
-void XX_httplib_delete_file( struct mg_connection *conn, const char *path ) {
+void XX_httplib_delete_file( struct httplib_connection *conn, const char *path ) {
 
 	struct de de;
 

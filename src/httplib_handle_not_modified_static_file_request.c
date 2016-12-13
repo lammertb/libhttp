@@ -26,7 +26,7 @@
 #include "httplib_utils.h"
 
 /*
- * void XX_httplib_handle_not_modified_static_file_request( struct mg_connection *conn, struct file *filep );
+ * void XX_httplib_handle_not_modified_static_file_request( struct httplib_connection *conn, struct file *filep );
  *
  * The function XX_httplib_handle_not_modified_static_file_request() is used to
  * send a 304 response to a client to indicate that the requested resource has
@@ -34,7 +34,7 @@
  */
 
 #if !defined(NO_CACHING)
-void XX_httplib_handle_not_modified_static_file_request( struct mg_connection *conn, struct file *filep ) {
+void XX_httplib_handle_not_modified_static_file_request( struct httplib_connection *conn, struct file *filep ) {
 
 	char date[64];
 	char lm[64];
@@ -50,9 +50,9 @@ void XX_httplib_handle_not_modified_static_file_request( struct mg_connection *c
 	XX_httplib_gmt_time_string(lm, sizeof(lm), &filep->last_modified);
 	XX_httplib_construct_etag(etag, sizeof(etag), filep);
 
-	mg_printf(conn, "HTTP/1.1 %d %s\r\n" "Date: %s\r\n", conn->status_code, mg_get_response_code_text(conn, conn->status_code), date);
+	httplib_printf(conn, "HTTP/1.1 %d %s\r\n" "Date: %s\r\n", conn->status_code, httplib_get_response_code_text(conn, conn->status_code), date);
 	XX_httplib_send_static_cache_header(conn);
-	mg_printf(conn, "Last-Modified: %s\r\n" "Etag: %s\r\n" "Connection: %s\r\n" "\r\n", lm, etag, XX_httplib_suggest_connection_header(conn));
+	httplib_printf(conn, "Last-Modified: %s\r\n" "Etag: %s\r\n" "Connection: %s\r\n" "\r\n", lm, etag, XX_httplib_suggest_connection_header(conn));
 
 }  /* XX_httplib_handle_not_modified_static_file_request */
 

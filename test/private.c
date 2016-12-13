@@ -1,4 +1,6 @@
-/* Copyright (c) 2015-2016 the Civetweb developers
+/*
+ * Copyright (c) 2016 Lammert Bies
+ * Copyright (c) 2015-2016 the Civetweb developers
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -52,7 +54,7 @@ START_TEST(test_parse_http_message)
 	/* Adapted from unit_test.c */
 	/* Copyright (c) 2013-2015 the Civetweb developers */
 	/* Copyright (c) 2004-2013 Sergey Lyubka */
-	struct mg_request_info ri;
+	struct httplib_request_info ri;
 	char empty[] = "";
 	char req1[] = "GET / HTTP/1.1\r\n\r\n";
 	char req2[] = "BLAH / HTTP/1.1\r\n\r\n";
@@ -111,8 +113,8 @@ START_TEST(test_should_keep_alive)
 	/* Adapted from unit_test.c */
 	/* Copyright (c) 2013-2015 the Civetweb developers */
 	/* Copyright (c) 2004-2013 Sergey Lyubka */
-	struct mg_connection conn;
-	struct mg_context ctx;
+	struct httplib_connection conn;
+	struct httplib_context ctx;
 	char req1[] = "GET / HTTP/1.1\r\n\r\n";
 	char req2[] = "GET / HTTP/1.0\r\n\r\n";
 	char req3[] = "GET / HTTP/1.1\r\nConnection: close\r\n\r\n";
@@ -330,19 +332,19 @@ START_TEST(test_alloc_vprintf)
 	/* Pass small buffer, make sure alloc_printf allocates */
 	ck_assert(alloc_printf(&p, 1, "%s", "hello") == 5);
 	ck_assert(p != buf);
-	mg_free(p);
+	httplib_free(p);
 	p = buf;
 
 	/* Test alternative implementation */
 	ck_assert(alloc_printf2(&p, "%s", "hello") == 5);
 	ck_assert(p != buf);
-	mg_free(p);
+	httplib_free(p);
 	p = buf;
 }
 END_TEST
 
 
-START_TEST(test_mg_vsnprintf)
+START_TEST(test_httplib_vsnprintf)
 {
 	char buf[16];
 	int trunc;
@@ -350,48 +352,48 @@ START_TEST(test_mg_vsnprintf)
 	memset(buf, 0, sizeof(buf));
 
 	trunc = 777;
-	mg_snprintf(NULL, &trunc, buf, 10, "%8i", 123);
+	httplib_snprintf(NULL, &trunc, buf, 10, "%8i", 123);
 	ck_assert_str_eq(buf, "     123");
 	ck_assert_int_eq(trunc, 0);
 
 	trunc = 777;
-	mg_snprintf(NULL, &trunc, buf, 10, "%9i", 123);
+	httplib_snprintf(NULL, &trunc, buf, 10, "%9i", 123);
 	ck_assert_str_eq(buf, "      123");
 	ck_assert_int_eq(trunc, 0);
 
 	trunc = 777;
-	mg_snprintf(NULL, &trunc, buf, 9, "%9i", 123);
+	httplib_snprintf(NULL, &trunc, buf, 9, "%9i", 123);
 	ck_assert_str_eq(buf, "      12");
 	ck_assert_int_eq(trunc, 1);
 
 	trunc = 777;
-	mg_snprintf(NULL, &trunc, buf, 8, "%9i", 123);
+	httplib_snprintf(NULL, &trunc, buf, 8, "%9i", 123);
 	ck_assert_str_eq(buf, "      1");
 	ck_assert_int_eq(trunc, 1);
 
 	trunc = 777;
-	mg_snprintf(NULL, &trunc, buf, 7, "%9i", 123);
+	httplib_snprintf(NULL, &trunc, buf, 7, "%9i", 123);
 	ck_assert_str_eq(buf, "      ");
 	ck_assert_int_eq(trunc, 1);
 
 	strcpy(buf, "1234567890");
-	mg_snprintf(NULL, &trunc, buf, 0, "%i", 543);
+	httplib_snprintf(NULL, &trunc, buf, 0, "%i", 543);
 	ck_assert_str_eq(buf, "1234567890");
 }
 END_TEST
 
 
-START_TEST(test_mg_strcasestr)
+START_TEST(test_httplib_strcasestr)
 {
 	/* Adapted from unit_test.c */
 	/* Copyright (c) 2013-2015 the Civetweb developers */
 	/* Copyright (c) 2004-2013 Sergey Lyubka */
 	static const char *big1 = "abcdef";
-	ck_assert(mg_strcasestr("Y", "X") == NULL);
-	ck_assert(mg_strcasestr("Y", "y") != NULL);
-	ck_assert(mg_strcasestr(big1, "X") == NULL);
-	ck_assert(mg_strcasestr(big1, "CD") == big1 + 2);
-	ck_assert(mg_strcasestr("aa", "AAB") == NULL);
+	ck_assert(httplib_strcasestr("Y", "X") == NULL);
+	ck_assert(httplib_strcasestr("Y", "y") != NULL);
+	ck_assert(httplib_strcasestr(big1, "X") == NULL);
+	ck_assert(httplib_strcasestr(big1, "CD") == big1 + 2);
+	ck_assert(httplib_strcasestr("aa", "AAB") == NULL);
 }
 END_TEST
 
@@ -520,32 +522,32 @@ START_TEST(test_encode_decode)
 #endif
 
 	memset(buf, 77, sizeof(buf));
-	ret = mg_url_encode(alpha, buf, sizeof(buf));
+	ret = httplib_url_encode(alpha, buf, sizeof(buf));
 	ck_assert_int_eq(ret, (int)strlen(buf));
 	ck_assert_int_eq(ret, (int)strlen(alpha));
 	ck_assert_str_eq(buf, alpha);
 
 	memset(buf, 77, sizeof(buf));
-	ret = mg_url_encode(nonalpha, buf, sizeof(buf));
+	ret = httplib_url_encode(nonalpha, buf, sizeof(buf));
 	ck_assert_int_eq(ret, (int)strlen(buf));
 	ck_assert_int_eq(ret, (int)strlen(nonalpha_url_enc1));
 	ck_assert_str_eq(buf, nonalpha_url_enc1);
 
 	memset(buf, 77, sizeof(buf));
-	ret = mg_url_decode(alpha, (int)strlen(alpha), buf, sizeof(buf), 0);
+	ret = httplib_url_decode(alpha, (int)strlen(alpha), buf, sizeof(buf), 0);
 	ck_assert_int_eq(ret, (int)strlen(buf));
 	ck_assert_int_eq(ret, (int)strlen(alpha));
 	ck_assert_str_eq(buf, alpha);
 
 	memset(buf, 77, sizeof(buf));
-	ret = mg_url_decode(
+	ret = httplib_url_decode(
 	    nonalpha_url_enc1, (int)strlen(nonalpha_url_enc1), buf, sizeof(buf), 0);
 	ck_assert_int_eq(ret, (int)strlen(buf));
 	ck_assert_int_eq(ret, (int)strlen(nonalpha));
 	ck_assert_str_eq(buf, nonalpha);
 
 	memset(buf, 77, sizeof(buf));
-	ret = mg_url_decode(
+	ret = httplib_url_decode(
 	    nonalpha_url_enc2, (int)strlen(nonalpha_url_enc2), buf, sizeof(buf), 0);
 	ck_assert_int_eq(ret, (int)strlen(buf));
 	ck_assert_int_eq(ret, (int)strlen(nonalpha));
@@ -691,9 +693,9 @@ make_private_suite(void)
 
 	tcase_add_test(tcase_internal_parse, test_next_option);
 	tcase_add_test(tcase_internal_parse, test_skip_quoted);
-	tcase_add_test(tcase_internal_parse, test_mg_strcasestr);
+	tcase_add_test(tcase_internal_parse, test_httplib_strcasestr);
 	tcase_add_test(tcase_internal_parse, test_alloc_vprintf);
-	tcase_add_test(tcase_internal_parse, test_mg_vsnprintf);
+	tcase_add_test(tcase_internal_parse, test_httplib_vsnprintf);
 	tcase_add_test(tcase_internal_parse, test_parse_port_string);
 	tcase_set_timeout(tcase_internal_parse, civetweb_min_test_timeout);
 	suite_add_tcase(suite, tcase_internal_parse);
@@ -727,7 +729,7 @@ MAIN_PRIVATE(void)
 #endif
 
 	test_alloc_vprintf(0);
-	test_mg_vsnprintf(0);
+	test_httplib_vsnprintf(0);
 	test_remove_double_dots_and_double_slashes(0);
 	test_parse_date_string(0);
 	test_parse_port_string(0);

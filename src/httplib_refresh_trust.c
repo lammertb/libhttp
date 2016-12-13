@@ -27,7 +27,7 @@
 #include "httplib_utils.h"
 
 /*
- * int XX_httplib_refresh_trust( struct mg_connection *conn );
+ * int XX_httplib_refresh_trust( struct httplib_connection *conn );
  *
  * The function XX_httplib_refresh_trust() is used to reload a certificate if
  * it only has a short trust span.
@@ -35,7 +35,7 @@
 
 #if !defined(NO_SSL)
 
-int XX_httplib_refresh_trust( struct mg_connection *conn ) {
+int XX_httplib_refresh_trust( struct httplib_connection *conn ) {
 
 	static int reload_lock = 0;
 	static long int data_check = 0;
@@ -59,7 +59,7 @@ int XX_httplib_refresh_trust( struct mg_connection *conn ) {
 
 		should_verify_peer =
 		    (conn->ctx->config[SSL_DO_VERIFY_PEER] != NULL)
-		    && (mg_strcasecmp(conn->ctx->config[SSL_DO_VERIFY_PEER], "yes")
+		    && (httplib_strcasecmp(conn->ctx->config[SSL_DO_VERIFY_PEER], "yes")
 		        == 0);
 
 		if (should_verify_peer) {
@@ -67,7 +67,7 @@ int XX_httplib_refresh_trust( struct mg_connection *conn ) {
 			char *ca_file = conn->ctx->config[SSL_CA_FILE];
 			if (SSL_CTX_load_verify_locations(conn->ctx->ssl_ctx, ca_file, ca_path) != 1) {
 
-				mg_cry( XX_httplib_fc(conn->ctx),
+				httplib_cry( XX_httplib_fc(conn->ctx),
 				       "SSL_CTX_load_verify_locations error: %s "
 				       "ssl_verify_peer requires setting "
 				       "either ssl_ca_path or ssl_ca_file. Is any of them "

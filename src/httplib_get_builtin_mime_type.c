@@ -570,14 +570,14 @@ const char *httplib_get_builtin_mime_type( const char *path ) {
 	while ( eind-start > 1 ) {
 
 		midden = (start+eind) >> 1;
-		retval = mg_strcasecmp( ext, builtin_mime_types[midden].extension );
+		retval = httplib_strcasecmp( ext, builtin_mime_types[midden].extension );
 
 		if      ( retval == 0 ) return builtin_mime_types[midden].mime_type;
 		else if ( retval <  0 ) eind  = midden;
 		else                    start = midden;
 	}
 
-	if ( ! mg_strcasecmp( ext, builtin_mime_types[start].extension ) ) return builtin_mime_types[start].mime_type;
+	if ( ! httplib_strcasecmp( ext, builtin_mime_types[start].extension ) ) return builtin_mime_types[start].mime_type;
 
 	return "text/plain";
 

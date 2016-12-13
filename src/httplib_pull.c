@@ -28,7 +28,7 @@
 
 /* Read from IO channel - opened file descriptor, socket, or SSL descriptor.
  * Return negative value on error, or number of bytes read on success. */
-int XX_httplib_pull( FILE *fp, struct mg_connection *conn, char *buf, int len, double timeout ) {
+int XX_httplib_pull( FILE *fp, struct httplib_connection *conn, char *buf, int len, double timeout ) {
 
 	int nread;
 	int err;

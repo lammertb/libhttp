@@ -27,7 +27,7 @@
 #if defined(_WIN32)
 
 /* conn parameter may be NULL */
-void XX_httplib_set_close_on_exec( SOCKET sock, struct mg_connection *conn ) {
+void XX_httplib_set_close_on_exec( SOCKET sock, struct httplib_connection *conn ) {
 
 	(void)conn; /* Unused. */
 #if defined(_WIN32_WCE)
@@ -42,10 +42,10 @@ void XX_httplib_set_close_on_exec( SOCKET sock, struct mg_connection *conn ) {
 #else
 
 /* conn may be NULL */
-void XX_httplib_set_close_on_exec( SOCKET fd, struct mg_connection *conn ) {
+void XX_httplib_set_close_on_exec( SOCKET fd, struct httplib_connection *conn ) {
 
 	if (fcntl(fd, F_SETFD, FD_CLOEXEC) != 0) {
-		if (conn) { mg_cry(conn, "%s: fcntl(F_SETFD FD_CLOEXEC) failed: %s", __func__, strerror(ERRNO)); }
+		if (conn) { httplib_cry(conn, "%s: fcntl(F_SETFD FD_CLOEXEC) failed: %s", __func__, strerror(ERRNO)); }
 	}
 
 }  /* XX_httplib_set_close_on_exec */

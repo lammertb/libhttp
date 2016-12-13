@@ -26,7 +26,7 @@
 #include "httplib_string.h"
 #include "httplib_utils.h"
 
-void XX_httplib_send_http_error( struct mg_connection *conn, int status, const char *fmt, ... ) {
+void XX_httplib_send_http_error( struct httplib_connection *conn, int status, const char *fmt, ... ) {
 
 	char buf[MG_BUF_LEN];
 	va_list ap;
@@ -42,7 +42,7 @@ void XX_httplib_send_http_error( struct mg_connection *conn, int status, const c
 	struct file error_page_file = STRUCT_FILE_INITIALIZER;
 	const char *error_page_file_ext, *tstr;
 
-	const char *status_text = mg_get_response_code_text(conn, status);
+	const char *status_text = httplib_get_response_code_text(conn, status);
 
 	if (conn == NULL) return;
 
@@ -107,20 +107,20 @@ void XX_httplib_send_http_error( struct mg_connection *conn, int status, const c
 		has_body = (status > 199 && status != 204 && status != 304);
 
 		conn->must_close = 1;
-		mg_printf(conn, "HTTP/1.1 %d %s\r\n", status, status_text);
+		httplib_printf(conn, "HTTP/1.1 %d %s\r\n", status, status_text);
 		XX_httplib_send_no_cache_header(conn);
-		if (has_body) mg_printf(conn, "%s", "Content-Type: text/plain; charset=utf-8\r\n");
-		mg_printf(conn, "Date: %s\r\n" "Connection: close\r\n\r\n", date);
+		if (has_body) httplib_printf(conn, "%s", "Content-Type: text/plain; charset=utf-8\r\n");
+		httplib_printf(conn, "Date: %s\r\n" "Connection: close\r\n\r\n", date);
 
 		/* Errors 1xx, 204 and 304 MUST NOT send a body */
 		if (has_body) {
-			mg_printf(conn, "Error %d: %s\n", status, status_text);
+			httplib_printf(conn, "Error %d: %s\n", status, status_text);
 
 			if (fmt != NULL) {
 				va_start(ap, fmt);
 				XX_httplib_vsnprintf(conn, NULL, buf, sizeof(buf), fmt, ap);
 				va_end(ap);
-				mg_write(conn, buf, strlen(buf));
+				httplib_write(conn, buf, strlen(buf));
 			}
 
 		} else {

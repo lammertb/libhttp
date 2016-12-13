@@ -27,7 +27,7 @@
 #include "httplib_utils.h"
 
 /*
- * int XX_httplib_send_websocket_handshake( struct mg_connection *conn, const char *websock_key );
+ * int XX_httplib_send_websocket_handshake( struct httplib_connection *conn, const char *websock_key );
  *
  * The function XX_httplib_send_websocket_handshake() sends a handshake over
  * a websocket connection.
@@ -35,7 +35,7 @@
 
 #if defined(USE_WEBSOCKET)
 
-int XX_httplib_send_websocket_handshake( struct mg_connection *conn, const char *websock_key ) {
+int XX_httplib_send_websocket_handshake( struct httplib_connection *conn, const char *websock_key ) {
 
 	static const char *magic = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
 	const char *protocol = NULL;
@@ -57,13 +57,13 @@ int XX_httplib_send_websocket_handshake( struct mg_connection *conn, const char 
 	SHA1Final((unsigned char *)sha, &sha_ctx);
 
 	XX_httplib_base64_encode((unsigned char *)sha, sizeof(sha), b64_sha);
-	mg_printf(conn,
+	httplib_printf(conn,
 	          "HTTP/1.1 101 Switching Protocols\r\n"
 	          "Upgrade: websocket\r\n"
 	          "Connection: Upgrade\r\n"
 	          "Sec-WebSocket-Accept: %s\r\n",
 	          b64_sha);
-	protocol = mg_get_header(conn, "Sec-WebSocket-Protocol");
+	protocol = httplib_get_header(conn, "Sec-WebSocket-Protocol");
 	if (protocol) {
 		/* The protocol is a comma seperated list of names. */
 		/* The server must only return one value from this list. */
@@ -71,7 +71,7 @@ int XX_httplib_send_websocket_handshake( struct mg_connection *conn, const char 
 		const char *sep = strchr(protocol, ',');
 		if (sep == NULL) {
 			/* Just a single protocol -> accept it. */
-			mg_printf(conn, "Sec-WebSocket-Protocol: %s\r\n\r\n", protocol);
+			httplib_printf(conn, "Sec-WebSocket-Protocol: %s\r\n\r\n", protocol);
 		} else {
 			/* Multiple protocols -> accept the first one. */
 			/* This is just a quick fix if the client offers multiple
@@ -83,12 +83,12 @@ int XX_httplib_send_websocket_handshake( struct mg_connection *conn, const char 
 			 * handshake by not returning a Sec-Websocket-Protocol header if
 			 * no subprotocol is acceptable.
 			 */
-			mg_printf(conn, "Sec-WebSocket-Protocol: %.*s\r\n\r\n", (int)(sep - protocol), protocol);
+			httplib_printf(conn, "Sec-WebSocket-Protocol: %.*s\r\n\r\n", (int)(sep - protocol), protocol);
 		}
 		/* TODO: Real subprotocol negotiation instead of just taking the first
 		 * websocket subprotocol suggested by the client. */
 	}
-	else mg_printf(conn, "%s", "\r\n");
+	else httplib_printf(conn, "%s", "\r\n");
 
 	return 1;
 

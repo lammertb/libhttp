@@ -61,7 +61,7 @@ static int dlclose( void *handle ) {
 
 
 /*
- * XX_httplib_load_dll( struct mg_context *ctx, const char *dll_name, struct ssl_func *sw );
+ * XX_httplib_load_dll( struct httplib_context *ctx, const char *dll_name, struct ssl_func *sw );
  *
  * The function XX_httplib_load_dll() is used to load the SSL library in a
  * dynamic way. The function returns either a handle to the dll, or NULL if an
@@ -71,7 +71,7 @@ static int dlclose( void *handle ) {
 #if !defined(NO_SSL)
 
 #if !defined(NO_SSL_DL)
-void *XX_httplib_load_dll( struct mg_context *ctx, const char *dll_name, struct ssl_func *sw ) {
+void *XX_httplib_load_dll( struct httplib_context *ctx, const char *dll_name, struct ssl_func *sw ) {
 
 	union {
 		void *p;
@@ -81,7 +81,7 @@ void *XX_httplib_load_dll( struct mg_context *ctx, const char *dll_name, struct 
 	struct ssl_func *fp;
 
 	if ((dll_handle = dlopen(dll_name, RTLD_LAZY)) == NULL) {
-		mg_cry( XX_httplib_fc(ctx), "%s: cannot load %s", __func__, dll_name);
+		httplib_cry( XX_httplib_fc(ctx), "%s: cannot load %s", __func__, dll_name);
 		return NULL;
 	}
 
@@ -96,7 +96,7 @@ void *XX_httplib_load_dll( struct mg_context *ctx, const char *dll_name, struct 
 		u.p = dlsym(dll_handle, fp->name);
 #endif /* _WIN32 */
 		if (u.fp == NULL) {
-			mg_cry( XX_httplib_fc(ctx), "%s: %s: cannot find %s", __func__, dll_name, fp->name);
+			httplib_cry( XX_httplib_fc(ctx), "%s: %s: cannot find %s", __func__, dll_name, fp->name);
 			dlclose(dll_handle);
 			return NULL;
 		} else fp->ptr = u.fp;

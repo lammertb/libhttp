@@ -33,9 +33,9 @@
  * sets callback handlers to uri's.
  */
 
-void XX_httplib_set_handler_type( struct mg_context *ctx, const char *uri, int handler_type, int is_delete_request, mg_request_handler handler, mg_websocket_connect_handler connect_handler, mg_websocket_ready_handler ready_handler, mg_websocket_data_handler data_handler, mg_websocket_close_handler close_handler, mg_authorization_handler auth_handler, void *cbdata ) {
+void XX_httplib_set_handler_type( struct httplib_context *ctx, const char *uri, int handler_type, int is_delete_request, httplib_request_handler handler, httplib_websocket_connect_handler connect_handler, httplib_websocket_ready_handler ready_handler, httplib_websocket_data_handler data_handler, httplib_websocket_close_handler close_handler, httplib_authorization_handler auth_handler, void *cbdata ) {
 
-	struct mg_handler_info *tmp_rh, **lastref;
+	struct httplib_handler_info *tmp_rh, **lastref;
 	size_t urilen = strlen(uri);
 
 	if (handler_type == WEBSOCKET_HANDLER) {
@@ -69,7 +69,7 @@ void XX_httplib_set_handler_type( struct mg_context *ctx, const char *uri, int h
 
 	if ( ctx == NULL ) return;
 
-	mg_lock_context(ctx);
+	httplib_lock_context(ctx);
 
 	/* first try to find an existing handler */
 	lastref = &(ctx->handlers);
@@ -95,7 +95,7 @@ void XX_httplib_set_handler_type( struct mg_context *ctx, const char *uri, int h
 					XX_httplib_free(tmp_rh->uri);
 					XX_httplib_free(tmp_rh);
 				}
-				mg_unlock_context(ctx);
+				httplib_unlock_context(ctx);
 				return;
 			}
 		}
@@ -105,22 +105,21 @@ void XX_httplib_set_handler_type( struct mg_context *ctx, const char *uri, int h
 	if (is_delete_request) {
 		/* no handler to set, this was a remove request to a non-existing
 		 * handler */
-		mg_unlock_context(ctx);
+		httplib_unlock_context(ctx);
 		return;
 	}
 
-	tmp_rh =
-	    (struct mg_handler_info *)XX_httplib_calloc(sizeof(struct mg_handler_info), 1);
+	tmp_rh = (struct httplib_handler_info *)XX_httplib_calloc(sizeof(struct httplib_handler_info), 1);
 	if (tmp_rh == NULL) {
-		mg_unlock_context(ctx);
-		mg_cry( XX_httplib_fc(ctx), "%s", "Cannot create new request handler struct, OOM");
+		httplib_unlock_context(ctx);
+		httplib_cry( XX_httplib_fc(ctx), "%s", "Cannot create new request handler struct, OOM");
 		return;
 	}
 	tmp_rh->uri = XX_httplib_strdup(uri);
 	if (!tmp_rh->uri) {
-		mg_unlock_context(ctx);
+		httplib_unlock_context(ctx);
 		XX_httplib_free(tmp_rh);
-		mg_cry( XX_httplib_fc(ctx), "%s", "Cannot create new request handler struct, OOM");
+		httplib_cry( XX_httplib_fc(ctx), "%s", "Cannot create new request handler struct, OOM");
 		return;
 	}
 	tmp_rh->uri_len = urilen;
@@ -139,6 +138,6 @@ void XX_httplib_set_handler_type( struct mg_context *ctx, const char *uri, int h
 	tmp_rh->next = NULL;
 
 	*lastref = tmp_rh;
-	mg_unlock_context(ctx);
+	httplib_unlock_context(ctx);
 
 }  /* XX_httplib_set_handler_type */

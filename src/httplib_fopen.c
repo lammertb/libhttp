@@ -29,7 +29,7 @@
  * The input parameter mode is the same as for fopen.
  * Either fp or membuf will be set in the output struct filep.
  * The function returns 1 on success, 0 on error. */
-int XX_httplib_fopen( const struct mg_connection *conn, const char *path, const char *mode, struct file *filep ) {
+int XX_httplib_fopen( const struct httplib_connection *conn, const char *path, const char *mode, struct file *filep ) {
 
 	struct stat st;
 

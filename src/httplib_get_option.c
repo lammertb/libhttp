@@ -24,7 +24,7 @@
 
 #include "httplib_main.h"
 
-const char *mg_get_option(const struct mg_context *ctx, const char *name) {
+const char *httplib_get_option(const struct httplib_context *ctx, const char *name) {
 
 	int i;
 
@@ -32,4 +32,4 @@ const char *mg_get_option(const struct mg_context *ctx, const char *name) {
 	else if ( ctx == NULL  ||  ctx->config[i] == NULL       ) return "";
 	else                                                      return ctx->config[i];
 
-}  /* mg_get_option */
+}  /* httplib_get_option */

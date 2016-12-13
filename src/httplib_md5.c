@@ -40,7 +40,7 @@ static void bin2str(char *to, const unsigned char *p, size_t len) {
 
 
 /* Return stringified MD5 hash for list of strings. Buffer must be 33 bytes. */
-char * mg_md5(char buf[33], ...) {
+char * httplib_md5(char buf[33], ...) {
 
 	md5_byte_t hash[16];
 	const char *p;
@@ -57,4 +57,4 @@ char * mg_md5(char buf[33], ...) {
 	bin2str(buf, hash, sizeof(hash));
 	return buf;
 
-}  /* mg_md5 */
+}  /* httplib_md5 */

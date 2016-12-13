@@ -24,7 +24,7 @@
 
 #include "httplib_main.h"
 
-int mg_get_server_ports(const struct mg_context *ctx, int size, struct mg_server_ports *ports) {
+int httplib_get_server_ports(const struct httplib_context *ctx, int size, struct httplib_server_ports *ports) {
 
 	int i;
 	int cnt = 0;
@@ -59,4 +59,4 @@ int mg_get_server_ports(const struct mg_context *ctx, int size, struct mg_server
 
 	return cnt;
 
-}  /* mg_get_server_ports */
+}  /* httplib_get_server_ports */

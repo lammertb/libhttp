@@ -25,13 +25,13 @@
 #include "httplib_main.h"
 
 /*
- * uint32_t XX_httplib_get_remote_ip( const struct mg_connection *conn );
+ * uint32_t XX_httplib_get_remote_ip( const struct httplib_connection *conn );
  *
  * The function XX_httplib_get_remote_ip() returns the IPv4 address of the
  * remote peer.
  */
 
-uint32_t XX_httplib_get_remote_ip( const struct mg_connection *conn ) {
+uint32_t XX_httplib_get_remote_ip( const struct httplib_connection *conn ) {
 
 	if ( conn == NULL ) return 0;
 

@@ -13,8 +13,8 @@
 int
 main(void)
 {
-	struct mg_context *ctx = 0;
-	struct mg_callbacks callback_funcs = {0};
+	struct httplib_context *ctx = 0;
+	struct httplib_callbacks callback_funcs = {0};
 	tWebSockContext ws_ctx;
 	char inbuf[4];
 
@@ -35,9 +35,9 @@ main(void)
 	callback_funcs.init_context = websock_init_lib;
 	callback_funcs.exit_context = websock_exit_lib;
 
-	ctx = mg_start(&callback_funcs, &ws_ctx, server_options);
+	ctx = httplib_start(&callback_funcs, &ws_ctx, server_options);
 
-	mg_set_websocket_handler(ctx,
+	httplib_set_websocket_handler(ctx,
 	                         "/MyWebSock",
 	                         NULL,
 	                         websocket_ready_handler,
@@ -46,7 +46,7 @@ main(void)
 	                         NULL);
 
 	printf("Connect to localhost:%s/websock.htm\n",
-	       mg_get_option(ctx, "listening_ports"));
+	       httplib_get_option(ctx, "listening_ports"));
 
 	puts("Enter an (ASCII) character or * to exit:");
 	for (;;) {
@@ -59,7 +59,7 @@ main(void)
 		websock_send_broadcast(ctx, inbuf, 1);
 	}
 
-	mg_stop(ctx);
+	httplib_stop(ctx);
 
 	return 0;
 }

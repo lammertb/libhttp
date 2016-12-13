@@ -28,14 +28,14 @@
 static void *ssllib_dll_handle;    /* Store the ssl library handle. */
 
 /*
- * int XX_httplib_set_ssl_option( struct mg_context *ctx );
+ * int XX_httplib_set_ssl_option( struct httplib_context *ctx );
  *
  * The function XX_httplib_set_ssl_option() loads the SSL library in a dynamic
  * way.
  */
 
 #if !defined(NO_SSL)
-int XX_httplib_set_ssl_option( struct mg_context *ctx ) {
+int XX_httplib_set_ssl_option( struct httplib_context *ctx ) {
 
 	const char *pem;
 	int callback_ret;
@@ -70,7 +70,7 @@ int XX_httplib_set_ssl_option( struct mg_context *ctx ) {
 	SSL_load_error_strings();
 
 	if ((ctx->ssl_ctx = SSL_CTX_new(SSLv23_server_method())) == NULL) {
-		mg_cry( XX_httplib_fc(ctx), "SSL_CTX_new (server) error: %s", XX_httplib_ssl_error());
+		httplib_cry( XX_httplib_fc(ctx), "SSL_CTX_new (server) error: %s", XX_httplib_ssl_error());
 		return 0;
 	}
 
@@ -88,7 +88,7 @@ int XX_httplib_set_ssl_option( struct mg_context *ctx ) {
 	 * If it returns 1, LibHTTP assumes the calback already did this.
 	 * If it returns -1, initializing ssl fails. */
 	if (callback_ret < 0) {
-		mg_cry( XX_httplib_fc(ctx), "SSL callback returned error: %i", callback_ret);
+		httplib_cry( XX_httplib_fc(ctx), "SSL callback returned error: %i", callback_ret);
 		return 0;
 	}
 	if (callback_ret > 0) {
@@ -117,18 +117,18 @@ int XX_httplib_set_ssl_option( struct mg_context *ctx ) {
 
 	should_verify_peer =
 	    (ctx->config[SSL_DO_VERIFY_PEER] != NULL)
-	    && (mg_strcasecmp(ctx->config[SSL_DO_VERIFY_PEER], "yes") == 0);
+	    && (httplib_strcasecmp(ctx->config[SSL_DO_VERIFY_PEER], "yes") == 0);
 
 	use_default_verify_paths =
 	    (ctx->config[SSL_DEFAULT_VERIFY_PATHS] != NULL)
-	    && (mg_strcasecmp(ctx->config[SSL_DEFAULT_VERIFY_PATHS], "yes") == 0);
+	    && (httplib_strcasecmp(ctx->config[SSL_DEFAULT_VERIFY_PATHS], "yes") == 0);
 
 	if (should_verify_peer) {
 		ca_path = ctx->config[SSL_CA_PATH];
 		ca_file = ctx->config[SSL_CA_FILE];
 		if (SSL_CTX_load_verify_locations(ctx->ssl_ctx, ca_file, ca_path)
 		    != 1) {
-			mg_cry( XX_httplib_fc(ctx),
+			httplib_cry( XX_httplib_fc(ctx),
 			       "SSL_CTX_load_verify_locations error: %s "
 			       "ssl_verify_peer requires setting "
 			       "either ssl_ca_path or ssl_ca_file. Is any of them "
@@ -144,7 +144,7 @@ int XX_httplib_set_ssl_option( struct mg_context *ctx ) {
 
 		if (use_default_verify_paths
 		    && SSL_CTX_set_default_verify_paths(ctx->ssl_ctx) != 1) {
-			mg_cry( XX_httplib_fc(ctx), "SSL_CTX_set_default_verify_paths error: %s", XX_httplib_ssl_error());
+			httplib_cry( XX_httplib_fc(ctx), "SSL_CTX_set_default_verify_paths error: %s", XX_httplib_ssl_error());
 			return 0;
 		}
 
@@ -156,7 +156,7 @@ int XX_httplib_set_ssl_option( struct mg_context *ctx ) {
 
 	if (ctx->config[SSL_CIPHER_LIST] != NULL) {
 		if (SSL_CTX_set_cipher_list(ctx->ssl_ctx, ctx->config[SSL_CIPHER_LIST]) != 1) {
-			mg_cry( XX_httplib_fc(ctx), "SSL_CTX_set_cipher_list error: %s", XX_httplib_ssl_error());
+			httplib_cry( XX_httplib_fc(ctx), "SSL_CTX_set_cipher_list error: %s", XX_httplib_ssl_error());
 		}
 	}
 

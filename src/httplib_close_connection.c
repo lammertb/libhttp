@@ -28,13 +28,13 @@
 #include "httplib_ssl.h"
 
 /*
- * void XX_httplib_close_connection( struct mg_connection *conn );
+ * void XX_httplib_close_connection( struct httplib_connection *conn );
  *
  * The function XX_httplib_close_connection() is the internal function which
  * does the heavy lifting to close a connection.
  */
 
-void XX_httplib_close_connection( struct mg_connection *conn ) {
+void XX_httplib_close_connection( struct httplib_connection *conn ) {
 
 	if ( conn == NULL  ||  conn->ctx == NULL ) return;
 
@@ -43,7 +43,7 @@ void XX_httplib_close_connection( struct mg_connection *conn ) {
 		conn->ctx->callbacks.connection_close(conn);
 	}
 
-	mg_lock_connection( conn );
+	httplib_lock_connection( conn );
 
 	conn->must_close = 1;
 
@@ -65,23 +65,23 @@ void XX_httplib_close_connection( struct mg_connection *conn ) {
 		conn->client.sock = INVALID_SOCKET;
 	}
 
-	mg_unlock_connection( conn );
+	httplib_unlock_connection( conn );
 
 }  /* XX_httplib_close_connection */
 
 
 
 /*
- * void mg_close_connection( struct mg_connection *conn );
+ * void httplib_close_connection( struct httplib_connection *conn );
  *
- * The function mg_close_connection() closes the connection passed as a
+ * The function httplib_close_connection() closes the connection passed as a
  * parameter to this function. The function does not return a success or
  * failure value.
  */
 
-void mg_close_connection( struct mg_connection *conn ) {
+void httplib_close_connection( struct httplib_connection *conn ) {
 
-	struct mg_context *client_ctx = NULL;
+	struct httplib_context *client_ctx = NULL;
 	unsigned int i;
 
 	if ( conn == NULL ) return;
@@ -109,4 +109,4 @@ void mg_close_connection( struct mg_connection *conn ) {
 		XX_httplib_free(conn);
 	}
 
-}  /* mg_close_connection */
+}  /* httplib_close_connection */

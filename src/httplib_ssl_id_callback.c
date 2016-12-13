@@ -57,11 +57,11 @@ unsigned long XX_httplib_ssl_id_callback( void ) {
 	if (sizeof(pthread_t) > sizeof(unsigned long)) {
 		/* This is the problematic case for CRYPTO_set_id_callback:
 		 * The OS pthread_t can not be cast to unsigned long. */
-		struct mg_workerTLS *tls = (struct mg_workerTLS *)pthread_getspecific(XX_httplib_sTlsKey);
+		struct httplib_workerTLS *tls = (struct httplib_workerTLS *)pthread_getspecific(XX_httplib_sTlsKey);
 		if (tls == NULL) {
 			/* SSL called from an unknown thread: Create some thread index.
 			 */
-			tls = (struct mg_workerTLS *)XX_httplib_malloc(sizeof(struct mg_workerTLS));
+			tls = (struct httplib_workerTLS *)XX_httplib_malloc(sizeof(struct httplib_workerTLS));
 			tls->is_master = -2; /* -2 means "3rd party thread" */
 			tls->thread_idx = (unsigned)XX_httplib_atomic_inc(&XX_httplib_thread_idx_max);
 			pthread_setspecific(XX_httplib_sTlsKey, tls);

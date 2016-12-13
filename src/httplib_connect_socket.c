@@ -36,7 +36,7 @@
  * may not be null for this function to succeed.
  */
 
-int XX_httplib_connect_socket( struct mg_context *ctx, const char *host, int port, int use_ssl, char *ebuf, size_t ebuf_len, SOCKET *sock, union usa *sa ) {
+int XX_httplib_connect_socket( struct httplib_context *ctx, const char *host, int port, int use_ssl, char *ebuf, size_t ebuf_len, SOCKET *sock, union usa *sa ) {
 
 	int ip_ver = 0;
 

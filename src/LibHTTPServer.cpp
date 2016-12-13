@@ -16,7 +16,7 @@
 #endif
 
 bool
-CivetHandler::handleGet(CivetServer *server, struct mg_connection *conn)
+CivetHandler::handleGet(CivetServer *server, struct httplib_connection *conn)
 {
 	UNUSED_PARAMETER(server);
 	UNUSED_PARAMETER(conn);
@@ -24,7 +24,7 @@ CivetHandler::handleGet(CivetServer *server, struct mg_connection *conn)
 }
 
 bool
-CivetHandler::handlePost(CivetServer *server, struct mg_connection *conn)
+CivetHandler::handlePost(CivetServer *server, struct httplib_connection *conn)
 {
 	UNUSED_PARAMETER(server);
 	UNUSED_PARAMETER(conn);
@@ -32,7 +32,7 @@ CivetHandler::handlePost(CivetServer *server, struct mg_connection *conn)
 }
 
 bool
-CivetHandler::handleHead(CivetServer *server, struct mg_connection *conn)
+CivetHandler::handleHead(CivetServer *server, struct httplib_connection *conn)
 {
 	UNUSED_PARAMETER(server);
 	UNUSED_PARAMETER(conn);
@@ -40,7 +40,7 @@ CivetHandler::handleHead(CivetServer *server, struct mg_connection *conn)
 }
 
 bool
-CivetHandler::handlePut(CivetServer *server, struct mg_connection *conn)
+CivetHandler::handlePut(CivetServer *server, struct httplib_connection *conn)
 {
 	UNUSED_PARAMETER(server);
 	UNUSED_PARAMETER(conn);
@@ -48,7 +48,7 @@ CivetHandler::handlePut(CivetServer *server, struct mg_connection *conn)
 }
 
 bool
-CivetHandler::handlePatch(CivetServer *server, struct mg_connection *conn)
+CivetHandler::handlePatch(CivetServer *server, struct httplib_connection *conn)
 {
 	UNUSED_PARAMETER(server);
 	UNUSED_PARAMETER(conn);
@@ -56,7 +56,7 @@ CivetHandler::handlePatch(CivetServer *server, struct mg_connection *conn)
 }
 
 bool
-CivetHandler::handleDelete(CivetServer *server, struct mg_connection *conn)
+CivetHandler::handleDelete(CivetServer *server, struct httplib_connection *conn)
 {
 	UNUSED_PARAMETER(server);
 	UNUSED_PARAMETER(conn);
@@ -64,7 +64,7 @@ CivetHandler::handleDelete(CivetServer *server, struct mg_connection *conn)
 }
 
 bool
-CivetHandler::handleOptions(CivetServer *server, struct mg_connection *conn)
+CivetHandler::handleOptions(CivetServer *server, struct httplib_connection *conn)
 {
 	UNUSED_PARAMETER(server);
 	UNUSED_PARAMETER(conn);
@@ -72,8 +72,7 @@ CivetHandler::handleOptions(CivetServer *server, struct mg_connection *conn)
 }
 
 bool
-CivetWebSocketHandler::handleConnection(CivetServer *server,
-                                        const struct mg_connection *conn)
+CivetWebSocketHandler::handleConnection(CivetServer *server, const struct httplib_connection *conn)
 {
 	UNUSED_PARAMETER(server);
 	UNUSED_PARAMETER(conn);
@@ -81,8 +80,7 @@ CivetWebSocketHandler::handleConnection(CivetServer *server,
 }
 
 void
-CivetWebSocketHandler::handleReadyState(CivetServer *server,
-                                        struct mg_connection *conn)
+CivetWebSocketHandler::handleReadyState(CivetServer *server, struct httplib_connection *conn)
 {
 	UNUSED_PARAMETER(server);
 	UNUSED_PARAMETER(conn);
@@ -90,11 +88,7 @@ CivetWebSocketHandler::handleReadyState(CivetServer *server,
 }
 
 bool
-CivetWebSocketHandler::handleData(CivetServer *server,
-                                  struct mg_connection *conn,
-                                  int bits,
-                                  char *data,
-                                  size_t data_len)
+CivetWebSocketHandler::handleData(CivetServer *server, struct httplib_connection *conn, int bits, char *data, size_t data_len)
 {
 	UNUSED_PARAMETER(server);
 	UNUSED_PARAMETER(conn);
@@ -105,8 +99,7 @@ CivetWebSocketHandler::handleData(CivetServer *server,
 }
 
 void
-CivetWebSocketHandler::handleClose(CivetServer *server,
-                                   const struct mg_connection *conn)
+CivetWebSocketHandler::handleClose(CivetServer *server, const struct httplib_connection *conn)
 {
 	UNUSED_PARAMETER(server);
 	UNUSED_PARAMETER(conn);
@@ -114,9 +107,9 @@ CivetWebSocketHandler::handleClose(CivetServer *server,
 }
 
 int
-CivetServer::requestHandler(struct mg_connection *conn, void *cbdata)
+CivetServer::requestHandler(struct httplib_connection *conn, void *cbdata)
 {
-	const struct mg_request_info *request_info = mg_get_request_info(conn);
+	const struct httplib_request_info *request_info = httplib_get_request_info(conn);
 	assert(request_info != NULL);
 	CivetServer *me = (CivetServer *)(request_info->user_data);
 	assert(me != NULL);
@@ -125,9 +118,9 @@ CivetServer::requestHandler(struct mg_connection *conn, void *cbdata)
 	if (me->context == NULL)
 		return 0;
 
-	mg_lock_context(me->context);
+	httplib_lock_context(me->context);
 	me->connections[conn] = CivetConnection();
-	mg_unlock_context(me->context);
+	httplib_unlock_context(me->context);
 
 	CivetHandler *handler = (CivetHandler *)cbdata;
 
@@ -153,9 +146,9 @@ CivetServer::requestHandler(struct mg_connection *conn, void *cbdata)
 }
 
 int
-CivetServer::authHandler(struct mg_connection *conn, void *cbdata)
+CivetServer::authHandler(struct httplib_connection *conn, void *cbdata)
 {
-	const struct mg_request_info *request_info = mg_get_request_info(conn);
+	const struct httplib_request_info *request_info = httplib_get_request_info(conn);
 	assert(request_info != NULL);
 	CivetServer *me = (CivetServer *)(request_info->user_data);
 	assert(me != NULL);
@@ -164,9 +157,9 @@ CivetServer::authHandler(struct mg_connection *conn, void *cbdata)
 	if (me->context == NULL)
 		return 0;
 
-	mg_lock_context(me->context);
+	httplib_lock_context(me->context);
 	me->connections[conn] = CivetConnection();
-	mg_unlock_context(me->context);
+	httplib_unlock_context(me->context);
 
 	CivetAuthHandler *handler = (CivetAuthHandler *)cbdata;
 
@@ -178,10 +171,9 @@ CivetServer::authHandler(struct mg_connection *conn, void *cbdata)
 }
 
 int
-CivetServer::webSocketConnectionHandler(const struct mg_connection *conn,
-                                        void *cbdata)
+CivetServer::webSocketConnectionHandler(const struct httplib_connection *conn, void *cbdata)
 {
-	const struct mg_request_info *request_info = mg_get_request_info(conn);
+	const struct httplib_request_info *request_info = httplib_get_request_info(conn);
 	assert(request_info != NULL);
 	CivetServer *me = (CivetServer *)(request_info->user_data);
 	assert(me != NULL);
@@ -200,9 +192,9 @@ CivetServer::webSocketConnectionHandler(const struct mg_connection *conn,
 }
 
 void
-CivetServer::webSocketReadyHandler(struct mg_connection *conn, void *cbdata)
+CivetServer::webSocketReadyHandler(struct httplib_connection *conn, void *cbdata)
 {
-	const struct mg_request_info *request_info = mg_get_request_info(conn);
+	const struct httplib_request_info *request_info = httplib_get_request_info(conn);
 	assert(request_info != NULL);
 	CivetServer *me = (CivetServer *)(request_info->user_data);
 	assert(me != NULL);
@@ -219,13 +211,9 @@ CivetServer::webSocketReadyHandler(struct mg_connection *conn, void *cbdata)
 }
 
 int
-CivetServer::webSocketDataHandler(struct mg_connection *conn,
-                                  int bits,
-                                  char *data,
-                                  size_t data_len,
-                                  void *cbdata)
+CivetServer::webSocketDataHandler(struct httplib_connection *conn, int bits, char *data, size_t data_len, void *cbdata)
 {
-	const struct mg_request_info *request_info = mg_get_request_info(conn);
+	const struct httplib_request_info *request_info = httplib_get_request_info(conn);
 	assert(request_info != NULL);
 	CivetServer *me = (CivetServer *)(request_info->user_data);
 	assert(me != NULL);
@@ -244,10 +232,9 @@ CivetServer::webSocketDataHandler(struct mg_connection *conn,
 }
 
 void
-CivetServer::webSocketCloseHandler(const struct mg_connection *conn,
-                                   void *cbdata)
+CivetServer::webSocketCloseHandler(const struct httplib_connection *conn, void *cbdata)
 {
-	const struct mg_request_info *request_info = mg_get_request_info(conn);
+	const struct httplib_request_info *request_info = httplib_get_request_info(conn);
 	assert(request_info != NULL);
 	CivetServer *me = (CivetServer *)(request_info->user_data);
 	assert(me != NULL);
@@ -281,7 +268,7 @@ CivetServer::CivetServer(const char **options,
 		userCloseHandler = NULL;
 	}
 	callbacks.connection_close = closeHandler;
-	context = mg_start(&callbacks, this, options);
+	context = httplib_start(&callbacks, this, options);
 	if (context == NULL)
 		throw CivetException("null context when constructing CivetServer. "
 		                     "Possible problem binding to port.");
@@ -307,7 +294,7 @@ CivetServer::CivetServer(std::vector<std::string> options,
 	}
 	pointers.push_back(0);
 
-	context = mg_start(&callbacks, this, &pointers[0]);
+	context = httplib_start(&callbacks, this, &pointers[0]);
 	if (context == NULL)
 		throw CivetException("null context when constructing CivetServer. "
 		                     "Possible problem binding to port.");
@@ -319,9 +306,9 @@ CivetServer::~CivetServer()
 }
 
 void
-CivetServer::closeHandler(const struct mg_connection *conn)
+CivetServer::closeHandler(const struct httplib_connection *conn)
 {
-	const struct mg_request_info *request_info = mg_get_request_info(conn);
+	const struct httplib_request_info *request_info = httplib_get_request_info(conn);
 	assert(request_info != NULL);
 	CivetServer *me = (CivetServer *)(request_info->user_data);
 	assert(me != NULL);
@@ -332,22 +319,22 @@ CivetServer::closeHandler(const struct mg_connection *conn)
 
 	if (me->userCloseHandler)
 		me->userCloseHandler(conn);
-	mg_lock_context(me->context);
-	me->connections.erase(const_cast<struct mg_connection *>(conn));
-	mg_unlock_context(me->context);
+	httplib_lock_context(me->context);
+	me->connections.erase(const_cast<struct httplib_connection *>(conn));
+	httplib_unlock_context(me->context);
 }
 
 void
 CivetServer::addHandler(const std::string &uri, CivetHandler *handler)
 {
-	mg_set_request_handler(context, uri.c_str(), requestHandler, handler);
+	httplib_set_request_handler(context, uri.c_str(), requestHandler, handler);
 }
 
 void
 CivetServer::addWebSocketHandler(const std::string &uri,
                                  CivetWebSocketHandler *handler)
 {
-	mg_set_websocket_handler(context,
+	httplib_set_websocket_handler(context,
 	                         uri.c_str(),
 	                         webSocketConnectionHandler,
 	                         webSocketReadyHandler,
@@ -359,60 +346,55 @@ CivetServer::addWebSocketHandler(const std::string &uri,
 void
 CivetServer::addAuthHandler(const std::string &uri, CivetAuthHandler *handler)
 {
-	mg_set_auth_handler(context, uri.c_str(), authHandler, handler);
+	httplib_set_auth_handler(context, uri.c_str(), authHandler, handler);
 }
 
 void
 CivetServer::removeHandler(const std::string &uri)
 {
-	mg_set_request_handler(context, uri.c_str(), NULL, NULL);
+	httplib_set_request_handler(context, uri.c_str(), NULL, NULL);
 }
 
 void
 CivetServer::removeWebSocketHandler(const std::string &uri)
 {
-	mg_set_websocket_handler(
-	    context, uri.c_str(), NULL, NULL, NULL, NULL, NULL);
+	httplib_set_websocket_handler( context, uri.c_str(), NULL, NULL, NULL, NULL, NULL);
 }
 
 void
 CivetServer::removeAuthHandler(const std::string &uri)
 {
-	mg_set_auth_handler(context, uri.c_str(), NULL, NULL);
+	httplib_set_auth_handler(context, uri.c_str(), NULL, NULL);
 }
 
 void
 CivetServer::close()
 {
 	if (context) {
-		mg_stop(context);
+		httplib_stop(context);
 		context = 0;
 	}
 }
 
 int
-CivetServer::getCookie(struct mg_connection *conn,
+CivetServer::getCookie(struct httplib_connection *conn,
                        const std::string &cookieName,
                        std::string &cookieValue)
 {
 	// Maximum cookie length as per microsoft is 4096.
 	// http://msdn.microsoft.com/en-us/library/ms178194.aspx
 	char _cookieValue[4096];
-	const char *cookie = mg_get_header(conn, "Cookie");
-	int lRead = mg_get_cookie(cookie,
-	                          cookieName.c_str(),
-	                          _cookieValue,
-	                          sizeof(_cookieValue));
+	const char *cookie = httplib_get_header(conn, "Cookie");
+	int lRead = httplib_get_cookie(cookie, cookieName.c_str(), _cookieValue, sizeof(_cookieValue));
 	cookieValue.clear();
 	cookieValue.append(_cookieValue);
 	return lRead;
 }
 
 const char *
-CivetServer::getHeader(struct mg_connection *conn,
-                       const std::string &headerName)
-{
-	return mg_get_header(conn, headerName.c_str());
+CivetServer::getHeader(struct httplib_connection *conn, const std::string &headerName) {
+
+	return httplib_get_header(conn, headerName.c_str());
 }
 
 void
@@ -450,25 +432,22 @@ CivetServer::urlDecode(const char *src,
 }
 
 bool
-CivetServer::getParam(struct mg_connection *conn,
-                      const char *name,
-                      std::string &dst,
-                      size_t occurrence)
+CivetServer::getParam(struct httplib_connection *conn, const char *name, std::string &dst, size_t occurrence)
 {
 	const char *formParams = NULL;
-	const struct mg_request_info *ri = mg_get_request_info(conn);
+	const struct httplib_request_info *ri = httplib_get_request_info(conn);
 	assert(ri != NULL);
 	CivetServer *me = (CivetServer *)(ri->user_data);
 	assert(me != NULL);
-	mg_lock_context(me->context);
+	httplib_lock_context(me->context);
 	CivetConnection &conobj = me->connections[conn];
-	mg_lock_connection(conn);
-	mg_unlock_context(me->context);
+	httplib_lock_connection(conn);
+	httplib_unlock_context(me->context);
 
 	if (conobj.postData != NULL) {
 		formParams = conobj.postData;
 	} else {
-		const char *con_len_str = mg_get_header(conn, "Content-Length");
+		const char *con_len_str = httplib_get_header(conn, "Content-Length");
 		if (con_len_str) {
 			unsigned long con_len = atoi(con_len_str);
 			if (con_len > 0) {
@@ -479,7 +458,7 @@ CivetServer::getParam(struct mg_connection *conn,
 				conobj.postData = (char *)malloc(con_len + 1);
 				if (conobj.postData != NULL) {
 					// malloc may fail for huge requests
-					mg_read(conn, conobj.postData, con_len);
+					httplib_read(conn, conobj.postData, con_len);
 					conobj.postData[con_len] = 0;
 					formParams = conobj.postData;
 					conobj.postDataLen = con_len;
@@ -492,7 +471,7 @@ CivetServer::getParam(struct mg_connection *conn,
 		// query_string
 		formParams = ri->query_string;
 	}
-	mg_unlock_connection(conn);
+	httplib_unlock_connection(conn);
 
 	if (formParams != NULL) {
 		return getParam(formParams, strlen(formParams), name, dst, occurrence);
@@ -521,7 +500,7 @@ CivetServer::getParam(const char *data,
 	// data is "var1=val1&var2=val2...". Find variable first
 	for (p = data; p + name_len < e; p++) {
 		if ((p == data || p[-1] == '&') && p[name_len] == '='
-		    && !mg_strncasecmp(name, p, name_len) && 0 == occurrence--) {
+		    && !httplib_strncasecmp(name, p, name_len) && 0 == occurrence--) {
 
 			// Point p to variable value
 			p += name_len + 1;
@@ -576,7 +555,7 @@ CivetServer::getListeningPorts()
 {
 	std::vector<int> ports(10);
 	std::vector<int> ssl(10);
-	size_t size = mg_get_ports(context, ports.size(), &ports[0], &ssl[0]);
+	size_t size = httplib_get_ports(context, ports.size(), &ports[0], &ssl[0]);
 	ports.resize(size);
 	ssl.resize(size);
 	return ports;

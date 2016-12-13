@@ -40,10 +40,10 @@ const size_t websocket_goodbye_msg_len = 14 /* strlen(websocket_goodbye_msg) */;
 /*************************************************************************************/
 #if defined(MG_LEGACY_INTERFACE)
 int
-websock_server_connect(const struct mg_connection *conn)
+websock_server_connect(const struct httplib_connection *conn)
 #else
 int
-websocket_server_connect(const struct mg_connection *conn, void *_ignored)
+websocket_server_connect(const struct httplib_connection *conn, void *_ignored)
 #endif
 {
 	printf("Server: Websocket connected\n");
@@ -53,33 +53,33 @@ websocket_server_connect(const struct mg_connection *conn, void *_ignored)
 
 #if defined(MG_LEGACY_INTERFACE)
 void
-websocket_server_ready(struct mg_connection *conn)
+websocket_server_ready(struct httplib_connection *conn)
 #else
 void
-websocket_server_ready(struct mg_connection *conn, void *_ignored)
+websocket_server_ready(struct httplib_connection *conn, void *_ignored)
 #endif
 {
 	printf("Server: Websocket ready\n");
 
 	/* Send websocket welcome message */
-	mg_lock_connection(conn);
-	mg_websocket_write(conn,
+	httplib_lock_connection(conn);
+	httplib_websocket_write(conn,
 	                   WEBSOCKET_OPCODE_TEXT,
 	                   websocket_welcome_msg,
 	                   websocket_welcome_msg_len);
-	mg_unlock_connection(conn);
+	httplib_unlock_connection(conn);
 }
 
 
 #if defined(MG_LEGACY_INTERFACE)
 int
-websocket_server_data(struct mg_connection *conn,
+websocket_server_data(struct httplib_connection *conn,
                       int bits,
                       char *data,
                       size_t data_len)
 #else
 int
-websocket_server_data(struct mg_connection *conn,
+websocket_server_data(struct httplib_connection *conn,
                       int bits,
                       char *data,
                       size_t data_len,
@@ -93,20 +93,20 @@ websocket_server_data(struct mg_connection *conn,
 
 	if (data_len < 3 || 0 != memcmp(data, "bye", 3)) {
 		/* Send websocket acknowledge message */
-		mg_lock_connection(conn);
-		mg_websocket_write(conn,
+		httplib_lock_connection(conn);
+		httplib_websocket_write(conn,
 		                   WEBSOCKET_OPCODE_TEXT,
 		                   websocket_acknowledge_msg,
 		                   websocket_acknowledge_msg_len);
-		mg_unlock_connection(conn);
+		httplib_unlock_connection(conn);
 	} else {
 		/* Send websocket acknowledge message */
-		mg_lock_connection(conn);
-		mg_websocket_write(conn,
+		httplib_lock_connection(conn);
+		httplib_websocket_write(conn,
 		                   WEBSOCKET_OPCODE_TEXT,
 		                   websocket_goodbye_msg,
 		                   websocket_goodbye_msg_len);
-		mg_unlock_connection(conn);
+		httplib_unlock_connection(conn);
 	}
 
 	return 1; /* return 1 to keep the connetion open */
@@ -115,10 +115,10 @@ websocket_server_data(struct mg_connection *conn,
 
 #if defined(MG_LEGACY_INTERFACE)
 void
-websocket_server_connection_close(const struct mg_connection *conn)
+websocket_server_connection_close(const struct httplib_connection *conn)
 #else
 void
-websocket_server_connection_close(const struct mg_connection *conn,
+websocket_server_connection_close(const struct httplib_connection *conn,
                                   void *_ignored)
 #endif
 {
@@ -129,7 +129,7 @@ websocket_server_connection_close(const struct mg_connection *conn,
 }
 
 
-struct mg_context *
+struct httplib_context *
 start_websocket_server()
 {
 	const char *options[] = {"document_root",
@@ -141,8 +141,8 @@ start_websocket_server()
 	                         "request_timeout_ms",
 	                         "5000",
 	                         0};
-	struct mg_callbacks callbacks;
-	struct mg_context *ctx;
+	struct httplib_callbacks callbacks;
+	struct httplib_context *ctx;
 
 	memset(&callbacks, 0, sizeof(callbacks));
 
@@ -153,12 +153,12 @@ start_websocket_server()
 	callbacks.websocket_data = websocket_server_data;
 	callbacks.connection_close = websocket_server_connection_close;
 
-	ctx = mg_start(&callbacks, 0, options);
+	ctx = httplib_start(&callbacks, 0, options);
 #else
 	/* New interface: */
-	ctx = mg_start(&callbacks, 0, options);
+	ctx = httplib_start(&callbacks, 0, options);
 
-	mg_set_websocket_handler(ctx,
+	httplib_set_websocket_handler(ctx,
 	                         "/websocket",
 	                         websocket_server_connect,
 	                         websocket_server_ready,
@@ -181,15 +181,11 @@ struct tclient_data {
 };
 
 static int
-websocket_client_data_handler(struct mg_connection *conn,
-                              int flags,
-                              char *data,
-                              size_t data_len,
-                              void *user_data)
-{
-	struct mg_context *ctx = mg_get_context(conn);
+websocket_client_data_handler(struct httplib_connection *conn, int flags, char *data, size_t data_len, void *user_data) {
+
+	struct httplib_context *ctx = httplib_get_context(conn);
 	struct tclient_data *pclient_data =
-	    (struct tclient_data *)mg_get_user_data(ctx);
+	    (struct tclient_data *)httplib_get_user_data(ctx);
 
 	printf("Client received data from server: ");
 	fwrite(data, 1, data_len, stdout);
@@ -204,12 +200,12 @@ websocket_client_data_handler(struct mg_connection *conn,
 }
 
 static void
-websocket_client_close_handler(const struct mg_connection *conn,
+websocket_client_close_handler(const struct httplib_connection *conn,
                                void *user_data)
 {
-	struct mg_context *ctx = mg_get_context(conn);
+	struct httplib_context *ctx = httplib_get_context(conn);
 	struct tclient_data *pclient_data =
-	    (struct tclient_data *)mg_get_user_data(ctx);
+	    (struct tclient_data *)httplib_get_user_data(ctx);
 
 	printf("Client: Close handler\n");
 	pclient_data->closed++;
@@ -219,13 +215,13 @@ websocket_client_close_handler(const struct mg_connection *conn,
 int
 main(int argc, char *argv[])
 {
-	struct mg_context *ctx = NULL;
+	struct httplib_context *ctx = NULL;
 	struct tclient_data client1_data = {NULL, 0, 0};
 	struct tclient_data client2_data = {NULL, 0, 0};
 	struct tclient_data client3_data = {NULL, 0, 0};
-	struct mg_connection *newconn1 = NULL;
-	struct mg_connection *newconn2 = NULL;
-	struct mg_connection *newconn3 = NULL;
+	struct httplib_connection *newconn1 = NULL;
+	struct httplib_connection *newconn2 = NULL;
+	struct httplib_connection *newconn3 = NULL;
 	char ebuf[100] = {0};
 
 	assert(websocket_welcome_msg_len == strlen(websocket_welcome_msg));
@@ -236,7 +232,7 @@ main(int argc, char *argv[])
 	printf("Server init\n\n");
 
 	/* Then connect a first client */
-	newconn1 = mg_connect_websocket_client("localhost",
+	newconn1 = httplib_connect_websocket_client("localhost",
 	                                       atoi(PORT),
 	                                       0,
 	                                       ebuf,
@@ -266,7 +262,7 @@ main(int argc, char *argv[])
 	client1_data.data = NULL;
 	client1_data.len = 0;
 
-	mg_websocket_client_write(newconn1, WEBSOCKET_OPCODE_TEXT, "data1", 5);
+	httplib_websocket_client_write(newconn1, WEBSOCKET_OPCODE_TEXT, "data1", 5);
 
 	sleep(1); /* Should get the acknowledge message */
 	assert(client1_data.closed == 0);
@@ -283,7 +279,7 @@ main(int argc, char *argv[])
 	client1_data.len = 0;
 
 	/* Now connect a second client */
-	newconn2 = mg_connect_websocket_client("localhost",
+	newconn2 = httplib_connect_websocket_client("localhost",
 	                                       atoi(PORT),
 	                                       0,
 	                                       ebuf,
@@ -313,7 +309,7 @@ main(int argc, char *argv[])
 	client2_data.data = NULL;
 	client2_data.len = 0;
 
-	mg_websocket_client_write(newconn1, WEBSOCKET_OPCODE_TEXT, "data2", 5);
+	httplib_websocket_client_write(newconn1, WEBSOCKET_OPCODE_TEXT, "data2", 5);
 
 	sleep(1); /* Should get the acknowledge message */
 	assert(client1_data.closed == 0);
@@ -329,7 +325,7 @@ main(int argc, char *argv[])
 	client1_data.data = NULL;
 	client1_data.len = 0;
 
-	mg_websocket_client_write(newconn1, WEBSOCKET_OPCODE_TEXT, "bye", 3);
+	httplib_websocket_client_write(newconn1, WEBSOCKET_OPCODE_TEXT, "bye", 3);
 
 	sleep(1); /* Should get the goodbye message */
 	assert(client1_data.closed == 0);
@@ -345,7 +341,7 @@ main(int argc, char *argv[])
 	client1_data.data = NULL;
 	client1_data.len = 0;
 
-	mg_close_connection(newconn1);
+	httplib_close_connection(newconn1);
 
 	sleep(1); /* Won't get any message */
 	assert(client1_data.closed == 1);
@@ -355,7 +351,7 @@ main(int argc, char *argv[])
 	assert(client2_data.data == NULL);
 	assert(client2_data.len == 0);
 
-	mg_websocket_client_write(newconn2, WEBSOCKET_OPCODE_TEXT, "bye", 3);
+	httplib_websocket_client_write(newconn2, WEBSOCKET_OPCODE_TEXT, "bye", 3);
 
 	sleep(1); /* Should get the goodbye message */
 	assert(client1_data.closed == 1);
@@ -371,7 +367,7 @@ main(int argc, char *argv[])
 	client2_data.data = NULL;
 	client2_data.len = 0;
 
-	mg_close_connection(newconn2);
+	httplib_close_connection(newconn2);
 
 	sleep(1); /* Won't get any message */
 	assert(client1_data.closed == 1);
@@ -382,7 +378,7 @@ main(int argc, char *argv[])
 	assert(client2_data.len == 0);
 
 	/* Connect client 3 */
-	newconn3 = mg_connect_websocket_client("localhost",
+	newconn3 = httplib_connect_websocket_client("localhost",
 	                                       atoi(PORT),
 	                                       0,
 	                                       ebuf,
@@ -410,7 +406,7 @@ main(int argc, char *argv[])
 	client3_data.data = NULL;
 	client3_data.len = 0;
 
-	mg_stop(ctx);
+	httplib_stop(ctx);
 	printf("Server shutdown\n");
 
 	sleep(10);

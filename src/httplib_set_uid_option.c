@@ -25,7 +25,7 @@
 #include "httplib_main.h"
 
 /*
- * int XX_httplib_set_uid_option( struct mg_contect *ctx );
+ * int XX_httplib_set_uid_option( struct httplib_contect *ctx );
  *
  * The function XX_httplib_set_uid_option() runs on systems which support it
  * the context in the security environment of a specific user.
@@ -33,7 +33,7 @@
 
 #if !defined(_WIN32)
 
-int XX_httplib_set_uid_option( struct mg_context *ctx ) {
+int XX_httplib_set_uid_option( struct httplib_context *ctx ) {
 
 	struct passwd *pw;
 
@@ -44,10 +44,10 @@ int XX_httplib_set_uid_option( struct mg_context *ctx ) {
 
 		if (uid == NULL) success = 1;
 		else {
-			if      ( (pw = getpwnam(uid)) == NULL ) mg_cry( XX_httplib_fc(ctx), "%s: unknown user [%s]", __func__, uid                  );
-			else if ( setgid(pw->pw_gid)   == -1   ) mg_cry( XX_httplib_fc(ctx), "%s: setgid(%s): %s",    __func__, uid, strerror(errno) );
-			else if ( setgroups(0, NULL)           ) mg_cry( XX_httplib_fc(ctx), "%s: setgroups(): %s",   __func__,      strerror(errno) );
-			else if ( setuid(pw->pw_uid)   == -1   ) mg_cry( XX_httplib_fc(ctx), "%s: setuid(%s): %s",    __func__, uid, strerror(errno) );
+			if      ( (pw = getpwnam(uid)) == NULL ) httplib_cry( XX_httplib_fc(ctx), "%s: unknown user [%s]", __func__, uid                  );
+			else if ( setgid(pw->pw_gid)   == -1   ) httplib_cry( XX_httplib_fc(ctx), "%s: setgid(%s): %s",    __func__, uid, strerror(errno) );
+			else if ( setgroups(0, NULL)           ) httplib_cry( XX_httplib_fc(ctx), "%s: setgroups(): %s",   __func__,      strerror(errno) );
+			else if ( setuid(pw->pw_uid)   == -1   ) httplib_cry( XX_httplib_fc(ctx), "%s: setuid(%s): %s",    __func__, uid, strerror(errno) );
 			else success = 1;
 		}
 

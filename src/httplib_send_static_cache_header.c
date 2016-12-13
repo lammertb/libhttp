@@ -24,7 +24,7 @@
 
 #include "httplib_main.h"
 
-int XX_httplib_send_static_cache_header(struct mg_connection *conn) {
+int XX_httplib_send_static_cache_header(struct httplib_connection *conn) {
 
 #if !defined(NO_CACHING)
 	/* Read the server config to check how long a file may be cached.
@@ -46,7 +46,7 @@ int XX_httplib_send_static_cache_header(struct mg_connection *conn) {
 	 * year to 31622400 seconds. For the moment, we just send whatever has
 	 * been configured, still the behavior for >1 year should be considered
 	 * as undefined. */
-	return mg_printf(conn, "Cache-Control: max-age=%u\r\n", (unsigned)max_age);
+	return httplib_printf(conn, "Cache-Control: max-age=%u\r\n", (unsigned)max_age);
 #else  /* NO_CACHING */
 	return XX_httplib_send_no_cache_header(conn);
 #endif /* !NO_CACHING */

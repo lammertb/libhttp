@@ -25,12 +25,12 @@
 #include "httplib_main.h"
 
 /* Return HTTP header value, or NULL if not found. */
-const char *XX_httplib_get_header( const struct mg_request_info *ri, const char *name ) {
+const char *XX_httplib_get_header( const struct httplib_request_info *ri, const char *name ) {
 
 	int i;
 	if (ri) {
 		for (i = 0; i < ri->num_headers; i++) {
-			if (!mg_strcasecmp(name, ri->http_headers[i].name)) return ri->http_headers[i].value;
+			if (!httplib_strcasecmp(name, ri->http_headers[i].name)) return ri->http_headers[i].value;
 		}
 	}
 
@@ -39,10 +39,10 @@ const char *XX_httplib_get_header( const struct mg_request_info *ri, const char 
 }  /* XX_httplib_get_header */
 
 
-const char *mg_get_header( const struct mg_connection *conn, const char *name ) {
+const char *httplib_get_header( const struct httplib_connection *conn, const char *name ) {
 
 	if ( conn == NULL ) return NULL;
 
 	return XX_httplib_get_header( & conn->request_info, name );
 
-}  /* mg_get_header */
+}  /* httplib_get_header */

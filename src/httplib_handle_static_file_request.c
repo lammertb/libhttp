@@ -33,7 +33,7 @@
  * request for a static file.
  */
 
-void XX_httplib_handle_static_file_request( struct mg_connection *conn, const char *path, struct file *filep, const char *mime_type, const char *additional_headers ) {
+void XX_httplib_handle_static_file_request( struct httplib_connection *conn, const char *path, struct file *filep, const char *mime_type, const char *additional_headers ) {
 
 	char date[64];
 	char lm[64];
@@ -92,7 +92,7 @@ void XX_httplib_handle_static_file_request( struct mg_connection *conn, const ch
 
 	/* If Range: header specified, act accordingly */
 	r1 = r2 = 0;
-	hdr = mg_get_header(conn, "Range");
+	hdr = httplib_get_header(conn, "Range");
 	if (hdr != NULL && (n = XX_httplib_parse_range_header(hdr, &r1, &r2)) > 0 && r1 >= 0
 	    && r2 >= 0) {
 		/* actually, range requests don't play well with a pre-gzipped
@@ -115,7 +115,7 @@ void XX_httplib_handle_static_file_request( struct mg_connection *conn, const ch
 		msg = "Partial Content";
 	}
 
-	hdr = mg_get_header(conn, "Origin");
+	hdr = httplib_get_header(conn, "Origin");
 	if (hdr) {
 		/* Cross-origin resource sharing (CORS), see
 		 * http://www.html5rocks.com/en/tutorials/cors/,
@@ -134,9 +134,9 @@ void XX_httplib_handle_static_file_request( struct mg_connection *conn, const ch
 	XX_httplib_gmt_time_string(lm, sizeof(lm), &filep->last_modified);
 	XX_httplib_construct_etag(etag, sizeof(etag), filep);
 
-	mg_printf(conn, "HTTP/1.1 %d %s\r\n" "%s%s%s" "Date: %s\r\n", conn->status_code, msg, cors1, cors2, cors3, date);
+	httplib_printf(conn, "HTTP/1.1 %d %s\r\n" "%s%s%s" "Date: %s\r\n", conn->status_code, msg, cors1, cors2, cors3, date);
 	XX_httplib_send_static_cache_header(conn);
-	mg_printf(conn,
+	httplib_printf(conn,
 	                "Last-Modified: %s\r\n"
 	                "Etag: %s\r\n"
 	                "Content-Type: %.*s\r\n"
@@ -157,8 +157,8 @@ void XX_httplib_handle_static_file_request( struct mg_connection *conn, const ch
 	 * sure no one of the additional_headers is included twice */
 
 	if (additional_headers != NULL) {
-		mg_printf(conn, "%.*s\r\n\r\n", (int)strlen(additional_headers), additional_headers);
-	} else mg_printf(conn, "\r\n");
+		httplib_printf(conn, "%.*s\r\n\r\n", (int)strlen(additional_headers), additional_headers);
+	} else httplib_printf(conn, "\r\n");
 
 	if (strcmp(conn->request_info.request_method, "HEAD") != 0) XX_httplib_send_file_data(conn, filep, r1, cl);
 	XX_httplib_fclose(filep);

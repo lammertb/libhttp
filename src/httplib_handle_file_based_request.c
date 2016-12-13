@@ -25,14 +25,14 @@
 #include "httplib_main.h"
 
 /*
- * void XX_httplib_handle_file_based_request( struct mg_connection *conn, const char *path, struct file *file );
+ * void XX_httplib_handle_file_based_request( struct httplib_connection *conn, const char *path, struct file *file );
  *
  * The function XX_httplib_handle_file_based_request() handles a request which
  * involves a file. This can either be a CGI request, an SSI request of a
  * request for a static file.
  */
 
-void XX_httplib_handle_file_based_request( struct mg_connection *conn, const char *path, struct file *file ) {
+void XX_httplib_handle_file_based_request( struct httplib_connection *conn, const char *path, struct file *file ) {
 
 	if ( conn == NULL  ||  conn->ctx == NULL ) return;
 

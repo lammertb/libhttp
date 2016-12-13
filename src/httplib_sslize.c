@@ -26,14 +26,14 @@
 #include "httplib_ssl.h"
 
 /*
- * int XX_httplib_sslize( struct mg_connection *conn, SSL_CTX *s, int (*func)(SSL *) );
+ * int XX_httplib_sslize( struct httplib_connection *conn, SSL_CTX *s, int (*func)(SSL *) );
  *
  * The fucntion XX_httplib_sslize() initiates SSL on a connection.
  */
 
 #if !defined(NO_SSL)
 
-int XX_httplib_sslize( struct mg_connection *conn, SSL_CTX *s, int (*func)(SSL *) ) {
+int XX_httplib_sslize( struct httplib_connection *conn, SSL_CTX *s, int (*func)(SSL *) ) {
 
 	int ret;
 	int err;
@@ -42,7 +42,7 @@ int XX_httplib_sslize( struct mg_connection *conn, SSL_CTX *s, int (*func)(SSL *
 
 	if ( conn == NULL ) return 0;
 
-	short_trust = (conn->ctx->config[SSL_SHORT_TRUST] != NULL) && (mg_strcasecmp(conn->ctx->config[SSL_SHORT_TRUST], "yes") == 0);
+	short_trust = (conn->ctx->config[SSL_SHORT_TRUST] != NULL) && (httplib_strcasecmp(conn->ctx->config[SSL_SHORT_TRUST], "yes") == 0);
 
 	if (short_trust) {
 		int trust_ret = XX_httplib_refresh_trust(conn);
@@ -74,7 +74,7 @@ int XX_httplib_sslize( struct mg_connection *conn, SSL_CTX *s, int (*func)(SSL *
 			if ((err == SSL_ERROR_WANT_CONNECT)
 			    || (err == SSL_ERROR_WANT_ACCEPT)) {
 				/* Retry */
-				mg_sleep(i);
+				httplib_sleep(i);
 
 			} else break; /* This is an error. TODO: set some error message */
 

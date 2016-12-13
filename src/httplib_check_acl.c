@@ -25,7 +25,7 @@
 #include "httplib_main.h"
 
 /*
- * int XX_httplib_check_acl( struct mg_context *ctx, uint32_t remote_ip );
+ * int XX_httplib_check_acl( struct httplib_context *ctx, uint32_t remote_ip );
  *
  * The function XX_httplib_check_acl() is used to check of the socket address
  * of a connection is allowed according to the access control list. The
@@ -33,7 +33,7 @@
  * allowed and 1 if the address is allowed.
  */
 
-int XX_httplib_check_acl( struct mg_context *ctx, uint32_t remote_ip ) {
+int XX_httplib_check_acl( struct httplib_context *ctx, uint32_t remote_ip ) {
 
 	int allowed;
 	int flag;
@@ -50,7 +50,7 @@ int XX_httplib_check_acl( struct mg_context *ctx, uint32_t remote_ip ) {
 		while ((list = XX_httplib_next_option(list, &vec, NULL)) != NULL) {
 			flag = vec.ptr[0];
 			if ((flag != '+' && flag != '-') || XX_httplib_parse_net(&vec.ptr[1], &net, &mask) == 0) {
-				mg_cry( XX_httplib_fc(ctx), "%s: subnet must be [+|-]x.x.x.x[/x]", __func__);
+				httplib_cry( XX_httplib_fc(ctx), "%s: subnet must be [+|-]x.x.x.x[/x]", __func__);
 				return -1;
 			}
 

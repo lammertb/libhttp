@@ -137,12 +137,12 @@ $SIG{PIPE} = 'IGNORE';
 $SIG{ALRM} = sub { die "timeout\n" };
 #local $| =1;
 
-# Make sure we export only symbols that start with "mg_", and keep local
+# Make sure we export only symbols that start with "httplib_", and keep local
 # symbols static.
 if ($^O =~ /darwin|bsd|linux/) {
   my $out = `(cc -c src/civetweb.c && nm src/civetweb.o) | grep ' T '`;
   foreach (split /\n/, $out) {
-    /T\s+_?mg_.+/ or fail("Exported symbol $_")
+    /T\s+_?httplib_.+/ or fail("Exported symbol $_")
   }
 }
 

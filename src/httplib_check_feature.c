@@ -25,13 +25,13 @@
 #include "httplib_main.h"
 
 /*
- * unsigned mg_check_feature( unsigned feature );
+ * unsigned httplib_check_feature( unsigned feature );
  *
- * The function mg_check_feature returns an integer indicating if a specific
+ * The function httplib_check_feature returns an integer indicating if a specific
  * functionality has been compiled in at compile time.
  */
 
-unsigned mg_check_feature( unsigned feature ) {
+unsigned httplib_check_feature( unsigned feature ) {
 
 	static const unsigned feature_set = 0
 /* Set bits for available features according to API documentation.
@@ -71,4 +71,4 @@ unsigned mg_check_feature( unsigned feature ) {
 	    ;
 	return (feature & feature_set);
 
-}  /* mg_check_feature */
+}  /* httplib_check_feature */

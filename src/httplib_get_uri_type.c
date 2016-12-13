@@ -95,7 +95,7 @@ int XX_httplib_get_uri_type( const char *uri ) {
 	 * addressing the current server. So LibHTTP can also be used
 	 * as a proxy server. */
 	for (i = 0; XX_httplib_abs_uri_protocols[i].proto != NULL; i++) {
-		if (mg_strncasecmp(uri, XX_httplib_abs_uri_protocols[i].proto, XX_httplib_abs_uri_protocols[i].proto_len) == 0) { 
+		if (httplib_strncasecmp(uri, XX_httplib_abs_uri_protocols[i].proto, XX_httplib_abs_uri_protocols[i].proto_len) == 0) { 
 
 			hostend = strchr(uri + XX_httplib_abs_uri_protocols[i].proto_len, '/');
 			if (!hostend) return 0;

@@ -26,7 +26,7 @@
 #include "httplib_pthread.h"
 #include "httplib_utils.h"
 
-void XX_httplib_send_authorization_request( struct mg_connection *conn ) {
+void XX_httplib_send_authorization_request( struct httplib_connection *conn ) {
 
 	char date[64];
 	time_t curtime;
@@ -48,9 +48,9 @@ void XX_httplib_send_authorization_request( struct mg_connection *conn ) {
 
 	XX_httplib_gmt_time_string(date, sizeof(date), &curtime);
 
-	mg_printf(conn, "HTTP/1.1 401 Unauthorized\r\n");
+	httplib_printf(conn, "HTTP/1.1 401 Unauthorized\r\n");
 	XX_httplib_send_no_cache_header(conn);
-	mg_printf(conn,
+	httplib_printf(conn,
 	          "Date: %s\r\n"
 	          "Connection: %s\r\n"
 	          "Content-Length: 0\r\n"

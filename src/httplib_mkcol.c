@@ -26,14 +26,14 @@
 #include "httplib_utils.h"
 
 /*
- * void XX_httplib_mkcol( struct mg_connection *conn, const char *path );
+ * void XX_httplib_mkcol( struct httplib_connection *conn, const char *path );
  *
  * The function XX_httplib_mkcol() handles a MKCOL command from a remote
  * client.
  */
 
 #if !defined(NO_FILES)
-void XX_httplib_mkcol( struct mg_connection *conn, const char *path ) {
+void XX_httplib_mkcol( struct httplib_connection *conn, const char *path ) {
 
 	int rc;
 	int body_len;
@@ -49,7 +49,7 @@ void XX_httplib_mkcol( struct mg_connection *conn, const char *path ) {
 
 	memset(&de.file, 0, sizeof(de.file));
 	if (!XX_httplib_stat(conn, path, &de.file)) {
-		mg_cry(conn, "%s: XX_httplib_stat(%s) failed: %s", __func__, path, strerror(ERRNO));
+		httplib_cry(conn, "%s: XX_httplib_stat(%s) failed: %s", __func__, path, strerror(ERRNO));
 	}
 
 	if (de.file.last_modified) {
@@ -70,9 +70,9 @@ void XX_httplib_mkcol( struct mg_connection *conn, const char *path ) {
 
 		conn->status_code = 201;
 		XX_httplib_gmt_time_string(date, sizeof(date), &curtime);
-		mg_printf(conn, "HTTP/1.1 %d Created\r\n" "Date: %s\r\n", conn->status_code, date);
+		httplib_printf(conn, "HTTP/1.1 %d Created\r\n" "Date: %s\r\n", conn->status_code, date);
 		XX_httplib_send_static_cache_header(conn);
-		mg_printf(conn, "Content-Length: 0\r\n" "Connection: %s\r\n\r\n", XX_httplib_suggest_connection_header(conn));
+		httplib_printf(conn, "Content-Length: 0\r\n" "Connection: %s\r\n\r\n", XX_httplib_suggest_connection_header(conn));
 	}
 	
 	else if (rc == -1) {

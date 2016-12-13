@@ -24,8 +24,8 @@
 
 #include "httplib_main.h"
 
-const struct mg_option *mg_get_valid_options(void) {
+const struct httplib_option *httplib_get_valid_options(void) {
 
 	return XX_httplib_config_options;
 
-}  /* mg_get_valid_options */
+}  /* httplib_get_valid_options */

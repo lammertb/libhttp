@@ -25,18 +25,18 @@
 #include "httplib_main.h"
 
 /*
- * void mg_stop( struct mg_context *ctx );
+ * void httplib_stop( struct httplib_context *ctx );
  *
- * The function mg_stop() is used to stop an instance of a LibHTTP server
+ * The function httplib_stop() is used to stop an instance of a LibHTTP server
  * completely and return all its resources.
  */
 
-void mg_stop( struct mg_context *ctx ) {
+void httplib_stop( struct httplib_context *ctx ) {
 
 	pthread_t mt;
 
 	if ( ctx == NULL ) return; 
-	/* We don't use a lock here. Calling mg_stop with the same ctx from
+	/* We don't use a lock here. Calling httplib_stop with the same ctx from
 	 * two threads is not allowed. */
 	mt = ctx->masterthreadid;
 	if ( mt == 0 ) return;
@@ -47,7 +47,7 @@ void mg_stop( struct mg_context *ctx ) {
 	ctx->stop_flag = 1;
 
 	/* Wait until everything has stopped. */
-	while ( ctx->stop_flag != 2 ) mg_sleep(10);
+	while ( ctx->stop_flag != 2 ) httplib_sleep(10);
 
 	XX_httplib_join_thread(mt);
 	XX_httplib_free_context(ctx);
@@ -56,4 +56,4 @@ void mg_stop( struct mg_context *ctx ) {
 	WSACleanup();
 #endif /* _WIN32 */
 
-}  /* mg_stop */
+}  /* httplib_stop */

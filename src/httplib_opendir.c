@@ -28,7 +28,7 @@
 #if defined(_WIN32)
 
 /* Implementation of POSIX opendir/closedir/readdir for Windows. */
-DIR *XX_httplib_opendir( const struct mg_connection *conn, const char *name ) {
+DIR *XX_httplib_opendir( const struct httplib_connection *conn, const char *name ) {
 
 	DIR *dir = NULL;
 	wchar_t wpath[PATH_MAX];

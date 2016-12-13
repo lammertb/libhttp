@@ -59,7 +59,7 @@ void XX_httplib_addenv( struct cgi_environment *env, const char *fmt, ... ) {
 			added = (char *)XX_httplib_realloc(env->buf, n);
 			if (!added) {
 				/* Out of memory */
-				mg_cry(env->conn, "%s: Cannot allocate memory for CGI variable [%s]", __func__, fmt);
+				httplib_cry(env->conn, "%s: Cannot allocate memory for CGI variable [%s]", __func__, fmt);
 				return;
 			}
 			env->buf = added;
@@ -90,7 +90,7 @@ void XX_httplib_addenv( struct cgi_environment *env, const char *fmt, ... ) {
 	/* Now update the variable index */
 	space = (env->varlen - env->varused);
 	if (space < 2) {
-		mg_cry(env->conn, "%s: Cannot register CGI variable [%s]", __func__, fmt);
+		httplib_cry(env->conn, "%s: Cannot register CGI variable [%s]", __func__, fmt);
 		return;
 	}
 

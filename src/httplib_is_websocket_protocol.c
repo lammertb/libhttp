@@ -26,13 +26,13 @@
 #include "httplib_string.h"
 
 /*
- * int XX_httplib_is_websocket_protocol( const struct mg_connection *conn );
+ * int XX_httplib_is_websocket_protocol( const struct httplib_connection *conn );
  *
  * The function XX_httplib_is_websocket_protocol() checks the request headers
  * to see if the connection is a valid websocket protocol.
  */
 
-int XX_httplib_is_websocket_protocol( const struct mg_connection *conn ) {
+int XX_httplib_is_websocket_protocol( const struct httplib_connection *conn ) {
 
 #if defined(USE_WEBSOCKET)
 	const char *upgrade;
@@ -44,12 +44,12 @@ int XX_httplib_is_websocket_protocol( const struct mg_connection *conn ) {
 	 * Upgrade: Websocket
 	 */
 
-	upgrade = mg_get_header(conn, "Upgrade");
+	upgrade = httplib_get_header(conn, "Upgrade");
 	if (upgrade == NULL) return 0; /* fail early, don't waste time checking other header * fields */
 
 	if (!XX_httplib_strcasestr(upgrade, "websocket")) return 0;
 
-	connection = mg_get_header(conn, "Connection");
+	connection = httplib_get_header(conn, "Connection");
 	if (connection == NULL) return 0;
 
 	if (!XX_httplib_strcasestr(connection, "upgrade")) return 0;

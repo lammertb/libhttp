@@ -24,7 +24,7 @@
 
 #include "httplib_main.h"
 
-void XX_httplib_discard_unread_request_data( struct mg_connection *conn ) {
+void XX_httplib_discard_unread_request_data( struct httplib_connection *conn ) {
 
 	char buf[MG_BUF_LEN];
 	size_t to_read;
@@ -40,10 +40,8 @@ void XX_httplib_discard_unread_request_data( struct mg_connection *conn ) {
 		/* Chunked encoding: 1=chunk not read completely, 2=chunk read
 		 * completely */
 		while (conn->is_chunked == 1) {
-			nread = mg_read(conn, buf, to_read);
-			if (nread <= 0) {
-				break;
-			}
+			nread = httplib_read(conn, buf, to_read);
+			if (nread <= 0) break;
 		}
 
 	} else {
@@ -54,7 +52,7 @@ void XX_httplib_discard_unread_request_data( struct mg_connection *conn ) {
 				to_read = (size_t)(conn->content_len - conn->consumed_content);
 			}
 
-			nread = mg_read(conn, buf, to_read);
+			nread = httplib_read(conn, buf, to_read);
 			if (nread <= 0) break;
 		}
 	}

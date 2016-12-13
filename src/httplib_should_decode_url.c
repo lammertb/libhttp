@@ -24,10 +24,10 @@
 
 #include "httplib_main.h"
 
-int XX_httplib_should_decode_url( const struct mg_connection *conn ) {
+int XX_httplib_should_decode_url( const struct httplib_connection *conn ) {
 
 	if ( conn == NULL  ||  conn->ctx == NULL ) return 0;
 
-	return (mg_strcasecmp(conn->ctx->config[DECODE_URL], "yes") == 0);
+	return (httplib_strcasecmp(conn->ctx->config[DECODE_URL], "yes") == 0);
 
 }  /* XX_httplib_should_decode_url */

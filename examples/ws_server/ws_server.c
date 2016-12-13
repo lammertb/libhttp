@@ -12,7 +12,7 @@
 
 // simple structure for keeping track of websocket connection
 struct ws_connection {
-    struct mg_connection    *conn;
+    struct httplib_connection    *conn;
     int     update;
     int     closing;
 };
@@ -36,7 +36,7 @@ static struct ws_connection ws_conn[CONNECTIONS];
 static void *ws_server_thread(void *parm)
 {
     int wsd = (long)parm;
-    struct mg_connection    *conn = ws_conn[wsd].conn;
+    struct httplib_connection    *conn = ws_conn[wsd].conn;
     int timer = 0;
     char tstr[32];
     int i;
@@ -61,7 +61,7 @@ static void *ws_server_thread(void *parm)
             meter[i].value = meter[i].limit;
         sprintf(tstr, "meter%d:%d,%d", i+1,
                 meter[i].value, meter[i].limit);
-        mg_websocket_write(conn, WEBSOCKET_OPCODE_TEXT, tstr, strlen(tstr));
+        httplib_websocket_write(conn, WEBSOCKET_OPCODE_TEXT, tstr, strlen(tstr));
     }
 
     /* While the connection is open, send periodic updates */
@@ -83,7 +83,7 @@ static void *ws_server_thread(void *parm)
                     if (!ws_conn[wsd].closing) {
                         sprintf(tstr, "meter%d:%d,%d", i+1,
                                 meter[i].value, meter[i].limit);
-                        mg_websocket_write(conn, WEBSOCKET_OPCODE_TEXT, tstr, strlen(tstr));
+                        httplib_websocket_write(conn, WEBSOCKET_OPCODE_TEXT, tstr, strlen(tstr));
                     }
                 }
             }
@@ -91,7 +91,7 @@ static void *ws_server_thread(void *parm)
 
         /* Send periodic PING to assure websocket remains connected, except if we are closing */
         if (timer%100 == 0 && !ws_conn[wsd].closing)
-            mg_websocket_write(conn, WEBSOCKET_OPCODE_PING, NULL, 0);
+            httplib_websocket_write(conn, WEBSOCKET_OPCODE_PING, NULL, 0);
     }
 
     fprintf(stderr, "ws_server_thread %d exiting\n", wsd);
@@ -108,7 +108,7 @@ static void *ws_server_thread(void *parm)
 // On new client connection, find next available server connection and store
 // new connection information. If no more server connections are available
 // tell civetweb to not accept the client request.
-static int websocket_connect_handler(const struct mg_connection *conn)
+static int websocket_connect_handler(const struct httplib_connection *conn)
 {
     int i;
 
@@ -117,7 +117,7 @@ static int websocket_connect_handler(const struct mg_connection *conn)
     for(i=0; i < CONNECTIONS; ++i) {
         if (ws_conn[i].conn == NULL) {
             fprintf(stderr, "...prep for server %d\n", i);
-            ws_conn[i].conn = (struct mg_connection *)conn;
+            ws_conn[i].conn = (struct httplib_connection *)conn;
             ws_conn[i].closing = 0;
             ws_conn[i].update = 0;
             break;
@@ -133,7 +133,7 @@ static int websocket_connect_handler(const struct mg_connection *conn)
 
 // websocket_ready_handler()
 // Once websocket negotiation is complete, start a server for the connection
-static void websocket_ready_handler(struct mg_connection *conn)
+static void websocket_ready_handler(struct httplib_connection *conn)
 {
     int i;
 
@@ -142,7 +142,7 @@ static void websocket_ready_handler(struct mg_connection *conn)
     for(i=0; i < CONNECTIONS; ++i) {
         if (ws_conn[i].conn == conn) {
             fprintf(stderr, "...start server %d\n", i);
-            mg_start_thread(ws_server_thread, (void *)(long)i);
+            httplib_start_thread(ws_server_thread, (void *)(long)i);
             break;
         }
     }
@@ -150,7 +150,7 @@ static void websocket_ready_handler(struct mg_connection *conn)
 
 // websocket_close_handler()
 // When websocket is closed, tell the associated server to shut down
-static void websocket_close_handler(struct mg_connection *conn)
+static void websocket_close_handler(struct httplib_connection *conn)
 {
     int i;
 
@@ -168,8 +168,7 @@ static void websocket_close_handler(struct mg_connection *conn)
 //   flags: first byte of websocket frame, see websocket RFC,
 //          http://tools.ietf.org/html/rfc6455, section 5.2
 //   data, data_len: payload data. Mask, if any, is already applied.
-static int websocket_data_handler(struct mg_connection *conn, int flags,
-                                  char *data, size_t data_len)
+static int websocket_data_handler(struct httplib_connection *conn, int flags, char *data, size_t data_len)
 {
     int i;
     int wsd;
@@ -198,12 +197,12 @@ static int websocket_data_handler(struct mg_connection *conn, int flags,
                 /* turn on updates */
                 ws_conn[wsd].update = 1;
                 /* echo back */
-                mg_websocket_write(conn, WEBSOCKET_OPCODE_TEXT, data, data_len);
+                httplib_websocket_write(conn, WEBSOCKET_OPCODE_TEXT, data, data_len);
             } else if (strncmp("update off", data, data_len)== 0) {
                 /* turn off updates */
                 ws_conn[wsd].update = 0;
                 /* echo back */
-                mg_websocket_write(conn, WEBSOCKET_OPCODE_TEXT, data, data_len);
+                httplib_websocket_write(conn, WEBSOCKET_OPCODE_TEXT, data, data_len);
             }
             break;
         case WEBSOCKET_OPCODE_BINARY:
@@ -213,14 +212,14 @@ static int websocket_data_handler(struct mg_connection *conn, int flags,
             fprintf(stderr, "CLOSE...\n");
             /* If client initiated close, respond with close message in acknowlegement */
             if (!ws_conn[wsd].closing) {
-                mg_websocket_write(conn, WEBSOCKET_OPCODE_CONNECTION_CLOSE, data, data_len);
+                httplib_websocket_write(conn, WEBSOCKET_OPCODE_CONNECTION_CLOSE, data, data_len);
                 ws_conn[wsd].closing = 1; /* we should not send addional messages when close requested/acknowledged */
             }
             return 0; /* time to close the connection */
             break;
         case WEBSOCKET_OPCODE_PING:
             /* client sent PING, respond with PONG */
-            mg_websocket_write(conn, WEBSOCKET_OPCODE_PONG, data, data_len);
+            httplib_websocket_write(conn, WEBSOCKET_OPCODE_PONG, data, data_len);
             break;
         case WEBSOCKET_OPCODE_PONG:
             /* received PONG to our PING, no action */
@@ -238,8 +237,8 @@ static int websocket_data_handler(struct mg_connection *conn, int flags,
 int main(void)
 {
     char server_name[40];
-    struct mg_context *ctx;
-    struct mg_callbacks callbacks;
+    struct httplib_context *ctx;
+    struct httplib_callbacks callbacks;
     const char *options[] = {
         "listening_ports", "8080",
         "document_root", "docroot",
@@ -247,9 +246,7 @@ int main(void)
     };
 
     /* get simple greeting for the web server */
-    snprintf(server_name, sizeof(server_name),
-             "Civetweb websocket server v. %s",
-             mg_version());
+    snprintf(server_name, sizeof(server_name), "Civetweb websocket server v. %s", httplib_version());
 
     memset(&callbacks, 0, sizeof(callbacks));
     callbacks.websocket_connect = websocket_connect_handler;
@@ -257,15 +254,15 @@ int main(void)
     callbacks.websocket_data = websocket_data_handler;
     callbacks.connection_close = websocket_close_handler;
 
-    ctx = mg_start(&callbacks, NULL, options);
+    ctx = httplib_start(&callbacks, NULL, options);
 
     /* show the greeting and some basic information */
     printf("%s started on port(s) %s with web root [%s]\n",
-           server_name, mg_get_option(ctx, "listening_ports"),
-           mg_get_option(ctx, "document_root"));
+           server_name, httplib_get_option(ctx, "listening_ports"),
+           httplib_get_option(ctx, "document_root"));
 
     getchar();  // Wait until user hits "enter"
-    mg_stop(ctx);
+    httplib_stop(ctx);
 
     return 0;
 }

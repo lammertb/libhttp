@@ -27,7 +27,7 @@
 
 /* Return null terminated string of given maximum length.
  * Report errors if length is exceeded. */
-void XX_httplib_vsnprintf( const struct mg_connection *conn, int *truncated, char *buf, size_t buflen, const char *fmt, va_list ap ) {
+void XX_httplib_vsnprintf( const struct httplib_connection *conn, int *truncated, char *buf, size_t buflen, const char *fmt, va_list ap ) {
 
 	int n;
 	int ok;
@@ -52,7 +52,7 @@ void XX_httplib_vsnprintf( const struct mg_connection *conn, int *truncated, cha
 		if (truncated) *truncated = 0;
 	} else {
 		if (truncated) *truncated = 1;
-		mg_cry(conn, "truncating vsnprintf buffer: [%.*s]", (int)((buflen > 200) ? 200 : (buflen - 1)), buf);
+		httplib_cry(conn, "truncating vsnprintf buffer: [%.*s]", (int)((buflen > 200) ? 200 : (buflen - 1)), buf);
 		n = (int)buflen - 1;
 	}
 	buf[n] = '\0';

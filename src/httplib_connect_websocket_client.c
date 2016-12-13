@@ -27,28 +27,28 @@
 #include "httplib_string.h"
 
 /*
- * struct mg_connection *mg_connect_websocket_client();
+ * struct httplib_connection *httplib_connect_websocket_client();
  *
- * The function mg_connect_websocket_client() connects as a client to a
+ * The function httplib_connect_websocket_client() connects as a client to a
  * websocket on another server. If this succeeds a connection pointer is
  * returned, otherwise NULL.
  */
 
-struct mg_connection *mg_connect_websocket_client(const char *host,
+struct httplib_connection *httplib_connect_websocket_client(const char *host,
                             int port,
                             int use_ssl,
                             char *error_buffer,
                             size_t error_buffer_size,
                             const char *path,
                             const char *origin,
-                            mg_websocket_data_handler data_func,
-                            mg_websocket_close_handler close_func,
+                            httplib_websocket_data_handler data_func,
+                            httplib_websocket_close_handler close_func,
                             void *user_data)
 {
-	struct mg_connection *conn = NULL;
+	struct httplib_connection *conn = NULL;
 
 #if defined(USE_WEBSOCKET)
-	struct mg_context *newctx = NULL;
+	struct httplib_context *newctx = NULL;
 	struct websocket_client_thread_data *thread_data;
 	static const char *magic = "x3JJHMbDL1EzLkh9GBhXDw==";
 	static const char *handshake_req;
@@ -73,7 +73,7 @@ struct mg_connection *mg_connect_websocket_client(const char *host,
 	}
 
 	/* Establish the client connection and request upgrade */
-	conn = mg_download(host, port, use_ssl, error_buffer, error_buffer_size, handshake_req, path, host, magic, origin);
+	conn = httplib_download(host, port, use_ssl, error_buffer, error_buffer_size, handshake_req, path, host, magic, origin);
 
 	/* Connection object will be null if something goes wrong */
 	if (conn == NULL || (strcmp(conn->request_info.request_uri, "101") != 0)) {
@@ -89,10 +89,10 @@ struct mg_connection *mg_connect_websocket_client(const char *host,
 		return conn;
 	}
 
-	/* For client connections, mg_context is fake. Since we need to set a
+	/* For client connections, httplib_context is fake. Since we need to set a
 	 * callback function, we need to create a copy and modify it. */
-	newctx = (struct mg_context *)XX_httplib_malloc(sizeof(struct mg_context));
-	memcpy(newctx, conn->ctx, sizeof(struct mg_context));
+	newctx = (struct httplib_context *)XX_httplib_malloc(sizeof(struct httplib_context));
+	memcpy(newctx, conn->ctx, sizeof(struct httplib_context));
 	newctx->user_data = user_data;
 	newctx->context_type = 2;       /* client context type */
 	newctx->cfg_worker_threads = 1; /* one worker thread will be created */
@@ -105,7 +105,7 @@ struct mg_connection *mg_connect_websocket_client(const char *host,
 	thread_data->callback_data = NULL;
 
 	/* Start a thread to read the websocket client connection
-	 * This thread will automatically stop when mg_disconnect is
+	 * This thread will automatically stop when httplib_disconnect is
 	 * called on the client connection */
 	if (XX_httplib_start_thread_with_id( XX_httplib_websocket_client_thread, (void *)thread_data, newctx->workerthreadids) != 0) {
 
@@ -131,4 +131,4 @@ struct mg_connection *mg_connect_websocket_client(const char *host,
 
 	return conn;
 
-}  /* mg_connect_websocket_client */
+}  /* httplib_connect_websocket_client */

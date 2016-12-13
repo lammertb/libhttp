@@ -25,7 +25,7 @@
 #include "httplib_main.h"
 #include "httplib_string.h"
 
-int XX_httplib_remove_directory( struct mg_connection *conn, const char *dir ) {
+int XX_httplib_remove_directory( struct httplib_connection *conn, const char *dir ) {
 
 	char path[PATH_MAX];
 	struct dirent *dp;
@@ -60,7 +60,7 @@ int XX_httplib_remove_directory( struct mg_connection *conn, const char *dir ) {
 			}
 
 			if (!XX_httplib_stat(conn, path, &de.file)) {
-				mg_cry(conn, "%s: XX_httplib_stat(%s) failed: %s", __func__, path, strerror(ERRNO));
+				httplib_cry(conn, "%s: XX_httplib_stat(%s) failed: %s", __func__, path, strerror(ERRNO));
 				ok = 0;
 			}
 			if (de.file.membuf == NULL) {

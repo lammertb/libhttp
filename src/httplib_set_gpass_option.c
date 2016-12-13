@@ -25,13 +25,13 @@
 #include "httplib_main.h"
 
 /*
- * int XX_httplib_set_gpass_option( struct mg_context *ctx );
+ * int XX_httplib_set_gpass_option( struct httplib_context *ctx );
  *
  * The function XX_httplib_set_gpass_option() sets the global password file
  * oprion for a context.
  */
 
-int XX_httplib_set_gpass_option( struct mg_context *ctx ) {
+int XX_httplib_set_gpass_option( struct httplib_context *ctx ) {
 
 	if ( ctx == NULL ) return 0;
 
@@ -40,7 +40,7 @@ int XX_httplib_set_gpass_option( struct mg_context *ctx ) {
 
 	if (path != NULL && !XX_httplib_stat( XX_httplib_fc(ctx), path, &file)) {
 
-		mg_cry( XX_httplib_fc(ctx), "Cannot open %s: %s", path, strerror(ERRNO));
+		httplib_cry( XX_httplib_fc(ctx), "Cannot open %s: %s", path, strerror(ERRNO));
 		return 0;
 	}
 	return 1;

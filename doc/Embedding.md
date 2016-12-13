@@ -55,11 +55,11 @@ By default, the server will automatically serve up files like a normal HTTP serv
 
 ### C
   - Include the C interface ```libhttp.h```.
-  - Use `mg_start()` to start the server.
+  - Use `httplib_start()` to start the server.
       - Use *options* to select the port and document root among other things.
       - Use *callbacks* to add your own hooks.
-  - Use `mg_set_request_handler()` to easily add your own request handlers.
-  - Use `mg_stop()` to stop the server.
+  - Use `httplib_set_request_handler()` to easily add your own request handlers.
+  - Use `httplib_stop()` to stop the server.
 
 ### C++
   - Note that LibHTTP is Clean C, and C++ interface ```LibHTTPServer.h``` is only a wrapper layer around the C interface.
@@ -136,8 +136,8 @@ LibHTTP can be built with server side JavaScript support by including the Duktap
 LibHTTP internals
 ------
 
-LibHTTP is multithreaded web server. `mg_start()` function allocates
-web server context (`struct mg_context`), which holds all information
+LibHTTP is multithreaded web server. `httplib_start()` function allocates
+web server context (`struct httplib_context`), which holds all information
 about web server instance:
 
 - configuration options. Note that LibHTTP makes internal copies of
@@ -148,14 +148,14 @@ about web server instance:
 - a queue for accepted sockets
 - mutexes and condition variables for inter-thread synchronization
 
-When `mg_start()` returns, all initialization is guaranteed to be complete
-(e.g. listening ports are opened, SSL is initialized, etc). `mg_start()` starts
+When `httplib_start()` returns, all initialization is guaranteed to be complete
+(e.g. listening ports are opened, SSL is initialized, etc). `httplib_start()` starts
 some threads: a master thread, that accepts new connections, and several
 worker threads, that process accepted connections. The number of worker threads
 is configurable via `num_threads` configuration option. That number puts a
 limit on number of simultaneous requests that can be handled by LibHTTP.
 If you embed LibHTTP into a program that uses SSL outside LibHTTP as well,
-you may need to initialize SSL before calling `mg_start()`, and set the pre-
+you may need to initialize SSL before calling `httplib_start()`, and set the pre-
 processor define SSL_ALREADY_INITIALIZED. This is not required if SSL is used
 only within LibHTTP.
 

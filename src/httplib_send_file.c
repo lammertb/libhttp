@@ -24,28 +24,28 @@
 
 #include "httplib_main.h"
 
-void mg_send_file( struct mg_connection *conn, const char *path ) {
+void httplib_send_file( struct httplib_connection *conn, const char *path ) {
 
-	mg_send_mime_file( conn, path, NULL );
+	httplib_send_mime_file( conn, path, NULL );
 
-}  /* mg_send_file */
-
-
-void mg_send_mime_file( struct mg_connection *conn, const char *path, const char *mime_type ) {
-
-	mg_send_mime_file2( conn, path, mime_type, NULL );
-
-}  /* mg_send_mime_file */
+}  /* httplib_send_file */
 
 
-void mg_send_mime_file2( struct mg_connection *conn, const char *path, const char *mime_type, const char *additional_headers ) {
+void httplib_send_mime_file( struct httplib_connection *conn, const char *path, const char *mime_type ) {
+
+	httplib_send_mime_file2( conn, path, mime_type, NULL );
+
+}  /* httplib_send_mime_file */
+
+
+void httplib_send_mime_file2( struct httplib_connection *conn, const char *path, const char *mime_type, const char *additional_headers ) {
 
 	struct file file = STRUCT_FILE_INITIALIZER;
 
 	if (XX_httplib_stat(conn, path, &file)) {
 		if (file.is_directory) {
 			if ( conn == NULL ) return;
-			if (!mg_strcasecmp(conn->ctx->config[ENABLE_DIRECTORY_LISTING], "yes")) {
+			if (!httplib_strcasecmp(conn->ctx->config[ENABLE_DIRECTORY_LISTING], "yes")) {
 				XX_httplib_handle_directory_request(conn, path);
 			} else {
 				XX_httplib_send_http_error(conn, 403, "%s", "Error: Directory listing denied");
@@ -55,4 +55,4 @@ void mg_send_mime_file2( struct mg_connection *conn, const char *path, const cha
 		}
 	} else XX_httplib_send_http_error(conn, 404, "%s", "Error: File not found");
 
-}  /* mg_send_mime_file2 */
+}  /* httplib_send_mime_file2 */

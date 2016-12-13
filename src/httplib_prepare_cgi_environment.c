@@ -29,7 +29,7 @@
 #include "httplib_utils.h"
 
 /*
- * void XX_httplib_prepare_cgi_environment( struct mg_connection *conn, const char *prog, struct cgi_environment *env );
+ * void XX_httplib_prepare_cgi_environment( struct httplib_connection *conn, const char *prog, struct cgi_environment *env );
  *
  * The function XX_httplib_prepare_cgi_environment() is used to prepare all
  * environment variables before a CGI script is called.
@@ -37,7 +37,7 @@
 
 #if !defined(NO_CGI)
 
-void XX_httplib_prepare_cgi_environment( struct mg_connection *conn, const char *prog, struct cgi_environment *env ) {
+void XX_httplib_prepare_cgi_environment( struct httplib_connection *conn, const char *prog, struct cgi_environment *env ) {
 
 	const char *s;
 	struct vec var_vec;
@@ -60,7 +60,7 @@ void XX_httplib_prepare_cgi_environment( struct mg_connection *conn, const char 
 	XX_httplib_addenv( env, "SERVER_NAME=%s",                   conn->ctx->config[AUTHENTICATION_DOMAIN] );
 	XX_httplib_addenv( env, "SERVER_ROOT=%s",                   conn->ctx->config[DOCUMENT_ROOT]         );
 	XX_httplib_addenv( env, "DOCUMENT_ROOT=%s",                 conn->ctx->config[DOCUMENT_ROOT]         );
-	XX_httplib_addenv( env, "SERVER_SOFTWARE=%s/%s", "LibHTTP", mg_version()                             );
+	XX_httplib_addenv( env, "SERVER_SOFTWARE=%s/%s", "LibHTTP", httplib_version()                             );
 
 	/* Prepare the environment block */
 	XX_httplib_addenv( env, "%s", "GATEWAY_INTERFACE=CGI/1.1" );
@@ -98,9 +98,9 @@ void XX_httplib_prepare_cgi_environment( struct mg_connection *conn, const char 
 
 	XX_httplib_addenv(env, "HTTPS=%s", (conn->ssl == NULL) ? "off" : "on");
 
-	if ( (s = mg_get_header( conn, "Content-Type" ) )   != NULL ) XX_httplib_addenv( env, "CONTENT_TYPE=%s",   s                               );
+	if ( (s = httplib_get_header( conn, "Content-Type" ) )   != NULL ) XX_httplib_addenv( env, "CONTENT_TYPE=%s",   s                               );
 	if ( conn->request_info.query_string                != NULL ) XX_httplib_addenv( env, "QUERY_STRING=%s",   conn->request_info.query_string );
-	if ( (s = mg_get_header( conn, "Content-Length" ) ) != NULL ) XX_httplib_addenv( env, "CONTENT_LENGTH=%s", s                               );
+	if ( (s = httplib_get_header( conn, "Content-Length" ) ) != NULL ) XX_httplib_addenv( env, "CONTENT_LENGTH=%s", s                               );
 	if ( (s = getenv( "PATH" ))                         != NULL ) XX_httplib_addenv( env, "PATH=%s",           s                               );
 	if ( conn->path_info                                != NULL ) XX_httplib_addenv( env, "PATH_INFO=%s",      conn->path_info                 );
 
@@ -132,7 +132,7 @@ void XX_httplib_prepare_cgi_environment( struct mg_connection *conn, const char 
 		XX_httplib_snprintf(conn, &truncated, http_var_name, sizeof(http_var_name), "HTTP_%s", conn->request_info.http_headers[i].name);
 
 		if (truncated) {
-			mg_cry(conn, "%s: HTTP header variable too long [%s]", __func__, conn->request_info.http_headers[i].name);
+			httplib_cry(conn, "%s: HTTP header variable too long [%s]", __func__, conn->request_info.http_headers[i].name);
 			continue;
 		}
 

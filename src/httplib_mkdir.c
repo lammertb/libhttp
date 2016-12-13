@@ -26,7 +26,7 @@
 
 #if defined(_WIN32)
 
-int XX_httplib_mkdir( const struct mg_connection *conn, const char *path, int mode ) {
+int XX_httplib_mkdir( const struct httplib_connection *conn, const char *path, int mode ) {
 
 	wchar_t wbuf[PATH_MAX];
 

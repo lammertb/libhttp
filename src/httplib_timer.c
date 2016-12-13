@@ -46,7 +46,7 @@ struct ttimers {
 	unsigned timer_count;             /* Current size of timer list */
 };
 
-static int timer_add( struct mg_context *ctx, double next_time, double period, int is_relative, taction action, void *arg ) {
+static int timer_add( struct httplib_context *ctx, double next_time, double period, int is_relative, taction action, void *arg ) {
 
 	unsigned u;
 	unsigned v;
@@ -100,14 +100,14 @@ static int timer_add( struct mg_context *ctx, double next_time, double period, i
 
 static void timer_thread_run( void *thread_func_param ) {
 
-	struct mg_context *ctx = (struct mg_context *)thread_func_param;
+	struct httplib_context *ctx = (struct httplib_context *)thread_func_param;
 	struct timespec now;
 	double d;
 	unsigned u;
 	int re_schedule;
 	struct ttimer t;
 
-	mg_set_thread_name("timer");
+	httplib_set_thread_name("timer");
 
 	if (ctx->callbacks.init_thread) {
 		/* Timer thread */
@@ -142,7 +142,7 @@ static void timer_thread_run( void *thread_func_param ) {
 		} else {
 			pthread_mutex_unlock(&ctx->timers->mutex);
 		}
-		mg_sleep(1);
+		httplib_sleep(1);
 		clock_gettime(CLOCK_MONOTONIC, &now);
 		d = (double)now.tv_sec + (double)now.tv_nsec * 1.0E-9;
 	}
@@ -169,23 +169,23 @@ static void * timer_thread( void *thread_func_param ) {
 
 #endif /* _WIN32 */
 
-static int timers_init( struct mg_context *ctx ) {
+static int timers_init( struct httplib_context *ctx ) {
 
-	ctx->timers = (struct ttimers *)mg_calloc(sizeof(struct ttimers), 1);
+	ctx->timers = (struct ttimers *)httplib_calloc(sizeof(struct ttimers), 1);
 	pthread_mutex_init(&ctx->timers->mutex, NULL);
 
 	/* Start timer thread */
-	mg_start_thread_with_id(timer_thread, ctx, &ctx->timers->threadid);
+	httplib_start_thread_with_id(timer_thread, ctx, &ctx->timers->threadid);
 
 	return 0;
 
 }  /* timers_init */
 
-static void timers_exit( struct mg_context *ctx ) {
+static void timers_exit( struct httplib_context *ctx ) {
 
 	if (ctx->timers) {
 		(void)pthread_mutex_destroy(&ctx->timers->mutex);
-		mg_free(ctx->timers);
+httplib:_free(ctx->timers);
 	}
 
 }  /* timers_exit */

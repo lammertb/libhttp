@@ -26,15 +26,15 @@
 #include "httplib_string.h"
 
 /*
- * struct mg_connection *mg_download();
+ * struct httplib_connection *httplib_download();
  *
- * The function mg_download() is used to download a file from a remote location
+ * The function httplib_download() is used to download a file from a remote location
  * and returns a pointer to the connection on success, or NULL on error.
  */
 
-struct mg_connection * mg_download( const char *host, int port, int use_ssl, char *ebuf, size_t ebuf_len, const char *fmt, ... ) {
+struct httplib_connection * httplib_download( const char *host, int port, int use_ssl, char *ebuf, size_t ebuf_len, const char *fmt, ... ) {
 
-	struct mg_connection *conn;
+	struct httplib_connection *conn;
 	va_list ap;
 	int i;
 	int reqerr;
@@ -43,7 +43,7 @@ struct mg_connection * mg_download( const char *host, int port, int use_ssl, cha
 	ebuf[0] = '\0';
 
 	/* open a connection */
-	conn = mg_connect_client(host, port, use_ssl, ebuf, ebuf_len);
+	conn = httplib_connect_client(host, port, use_ssl, ebuf, ebuf_len);
 
 	if (conn != NULL) {
 		i = XX_httplib_vprintf(conn, fmt, ap);
@@ -60,11 +60,11 @@ struct mg_connection * mg_download( const char *host, int port, int use_ssl, cha
 
 	/* if an error occured, close the connection */
 	if (ebuf[0] != '\0' && conn != NULL) {
-		mg_close_connection(conn);
+		httplib_close_connection(conn);
 		conn = NULL;
 	}
 
 	va_end(ap);
 	return conn;
 
-}  /* mg_download */
+}  /* httplib_download */

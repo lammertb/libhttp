@@ -26,13 +26,13 @@
 #include "httplib_ssl.h"
 
 /*
- * void XX_httplib_accept_new_connection( const struct socket *lostener, struct mg_context *ctx );
+ * void XX_httplib_accept_new_connection( const struct socket *lostener, struct httplib_context *ctx );
  *
  * The function XX_httplib_accept_new_connection() is used to process new
  * incoming connections to the server.
  */
 
-void XX_httplib_accept_new_connection( const struct socket *listener, struct mg_context *ctx ) {
+void XX_httplib_accept_new_connection( const struct socket *listener, struct httplib_context *ctx ) {
 
 	struct socket so;
 	char src_addr[IP_ADDR_STR_LEN];
@@ -46,7 +46,7 @@ void XX_httplib_accept_new_connection( const struct socket *listener, struct mg_
 	    == INVALID_SOCKET) {
 	} else if (!XX_httplib_check_acl(ctx, ntohl(*(uint32_t *)&so.rsa.sin.sin_addr))) {
 		XX_httplib_sockaddr_to_string(src_addr, sizeof(src_addr), &so.rsa);
-		mg_cry( XX_httplib_fc(ctx), "%s: %s is not allowed to connect", __func__, src_addr);
+		httplib_cry( XX_httplib_fc(ctx), "%s: %s is not allowed to connect", __func__, src_addr);
 		closesocket(so.sock);
 		so.sock = INVALID_SOCKET;
 	} else {
@@ -55,7 +55,7 @@ void XX_httplib_accept_new_connection( const struct socket *listener, struct mg_
 		so.is_ssl = listener->is_ssl;
 		so.ssl_redir = listener->ssl_redir;
 		if (getsockname(so.sock, &so.lsa.sa, &len) != 0) {
-			mg_cry( XX_httplib_fc(ctx), "%s: getsockname() failed: %s", __func__, strerror(ERRNO));
+			httplib_cry( XX_httplib_fc(ctx), "%s: getsockname() failed: %s", __func__, strerror(ERRNO));
 		}
 
 		/* Set TCP keep-alive. This is needed because if HTTP-level
@@ -67,7 +67,7 @@ void XX_httplib_accept_new_connection( const struct socket *listener, struct mg_
 		 * Thanks to Igor Klopov who suggested the patch. */
 		if (setsockopt(so.sock, SOL_SOCKET, SO_KEEPALIVE, (SOCK_OPT_TYPE)&on, sizeof(on)) != 0) {
 
-			mg_cry( XX_httplib_fc(ctx), "%s: setsockopt(SOL_SOCKET SO_KEEPALIVE) failed: %s", __func__, strerror(ERRNO));
+			httplib_cry( XX_httplib_fc(ctx), "%s: setsockopt(SOL_SOCKET SO_KEEPALIVE) failed: %s", __func__, strerror(ERRNO));
 		}
 
 		/* Disable TCP Nagle's algorithm. Normally TCP packets are coalesced
@@ -80,7 +80,7 @@ void XX_httplib_accept_new_connection( const struct socket *listener, struct mg_
 		if ((ctx != NULL) && (ctx->config[CONFIG_TCP_NODELAY] != NULL)
 		    && (!strcmp(ctx->config[CONFIG_TCP_NODELAY], "1"))) {
 			if (XX_httplib_set_tcp_nodelay(so.sock, 1) != 0) {
-				mg_cry( XX_httplib_fc(ctx), "%s: setsockopt(IPPROTO_TCP TCP_NODELAY) failed: %s", __func__, strerror(ERRNO));
+				httplib_cry( XX_httplib_fc(ctx), "%s: setsockopt(IPPROTO_TCP TCP_NODELAY) failed: %s", __func__, strerror(ERRNO));
 			}
 		}
 

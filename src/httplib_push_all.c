@@ -28,7 +28,7 @@
 
 /* Write data to the IO channel - opened file descriptor, socket or SSL
  * descriptor. Return number of bytes written. */
-static int push(struct mg_context *ctx, FILE *fp, SOCKET sock, SSL *ssl, const char *buf, int len, double timeout) {
+static int push(struct httplib_context *ctx, FILE *fp, SOCKET sock, SSL *ssl, const char *buf, int len, double timeout) {
 
 	struct timespec start;
 	struct timespec now;
@@ -113,7 +113,7 @@ static int push(struct mg_context *ctx, FILE *fp, SOCKET sock, SSL *ssl, const c
 }
 
 
-int64_t XX_httplib_push_all(struct mg_context *ctx, FILE *fp, SOCKET sock, SSL *ssl, const char *buf, int64_t len) {
+int64_t XX_httplib_push_all(struct httplib_context *ctx, FILE *fp, SOCKET sock, SSL *ssl, const char *buf, int64_t len) {
 
 	double timeout = -1.0;
 	int64_t n;

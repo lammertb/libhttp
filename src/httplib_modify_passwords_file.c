@@ -24,7 +24,7 @@
 
 #include "httplib_main.h"
 
-int mg_modify_passwords_file( const char *fname, const char *domain, const char *user, const char *pass ) {
+int httplib_modify_passwords_file( const char *fname, const char *domain, const char *user, const char *pass ) {
 
 	int found, i;
 	char line[512];
@@ -90,7 +90,7 @@ int mg_modify_passwords_file( const char *fname, const char *domain, const char 
 		if (!strcmp(u, user) && !strcmp(d, domain)) {
 			found++;
 			if (pass != NULL) {
-				mg_md5(ha1, user, ":", domain, ":", pass, NULL);
+				httplib_md5(ha1, user, ":", domain, ":", pass, NULL);
 				fprintf(fp2, "%s:%s:%s\n", user, domain, ha1);
 			}
 		} else {
@@ -100,7 +100,7 @@ int mg_modify_passwords_file( const char *fname, const char *domain, const char 
 
 	/* If new user, just add it */
 	if (!found && pass != NULL) {
-		mg_md5(ha1, user, ":", domain, ":", pass, NULL);
+		httplib_md5(ha1, user, ":", domain, ":", pass, NULL);
 		fprintf(fp2, "%s:%s:%s\n", user, domain, ha1);
 	}
 
@@ -114,4 +114,4 @@ int mg_modify_passwords_file( const char *fname, const char *domain, const char 
 
 	return 1;
 
-}  /* mg_modify_passwords_file */
+}  /* httplib_modify_passwords_file */

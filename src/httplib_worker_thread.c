@@ -63,9 +63,9 @@ void *XX_httplib_worker_thread( void *thread_func_param ) {
 
 static void *worker_thread_run( struct worker_thread_args *thread_args ) {
 
-	struct mg_context *ctx = thread_args->ctx;
-	struct mg_connection *conn;
-	struct mg_workerTLS tls;
+	struct httplib_context *ctx = thread_args->ctx;
+	struct httplib_connection *conn;
+	struct httplib_workerTLS tls;
 
 	XX_httplib_set_thread_name("worker");
 
@@ -81,9 +81,9 @@ static void *worker_thread_run( struct worker_thread_args *thread_args ) {
 	}
 
 	conn =
-	    (struct mg_connection *)XX_httplib_calloc(1, sizeof(*conn) + MAX_REQUEST_SIZE);
+	    (struct httplib_connection *)XX_httplib_calloc(1, sizeof(*conn) + MAX_REQUEST_SIZE);
 	if (conn == NULL) {
-		mg_cry( XX_httplib_fc(ctx), "%s", "Cannot create new connection struct, OOM");
+		httplib_cry( XX_httplib_fc(ctx), "%s", "Cannot create new connection struct, OOM");
 	} else {
 		pthread_setspecific(XX_httplib_sTlsKey, &tls);
 		conn->buf_size = MAX_REQUEST_SIZE;

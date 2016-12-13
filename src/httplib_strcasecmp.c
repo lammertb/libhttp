@@ -25,7 +25,7 @@
 #include "httplib_main.h"
 #include "httplib_utils.h"
 
-int mg_strcasecmp(const char *s1, const char *s2) {
+int httplib_strcasecmp(const char *s1, const char *s2) {
 
 	int diff;
 
@@ -35,4 +35,4 @@ int mg_strcasecmp(const char *s1, const char *s2) {
 
 	return diff;
 
-}  /* mg_strcasecmp */
+}  /* httplib_strcasecmp */

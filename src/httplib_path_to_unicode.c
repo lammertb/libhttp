@@ -50,7 +50,7 @@ static void change_slashes_to_backslashes( char *path ) {
 
 
 
-static int mg_wcscasecmp( const wchar_t *s1, const wchar_t *s2 ) {
+static int httplib_wcscasecmp( const wchar_t *s1, const wchar_t *s2 ) {
 
 	int diff;
 
@@ -62,19 +62,19 @@ static int mg_wcscasecmp( const wchar_t *s1, const wchar_t *s2 ) {
 
 	return diff;
 
-}  /* mg_wcscasecmp */
+}  /* httplib_wcscasecmp */
 
 
 /* Encode 'path' which is assumed UTF-8 string, into UNICODE string.
  * wbuf and wbuf_len is a target buffer and its length. */
-void XX_httplib_path_to_unicode( const struct mg_connection *conn, const char *path, wchar_t *wbuf, size_t wbuf_len ) {
+void XX_httplib_path_to_unicode( const struct httplib_connection *conn, const char *path, wchar_t *wbuf, size_t wbuf_len ) {
 
 	char buf[PATH_MAX];
 	char buf2[PATH_MAX];
 	wchar_t wbuf2[MAX_PATH + 1];
 	DWORD long_len;
 	DWORD err;
-	int (*fcompare)(const wchar_t *, const wchar_t *) = mg_wcscasecmp;
+	int (*fcompare)(const wchar_t *, const wchar_t *) = httplib_wcscasecmp;
 
 	XX_httplib_strlcpy(buf, path, sizeof(buf));
 	change_slashes_to_backslashes(buf);

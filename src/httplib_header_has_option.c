@@ -36,7 +36,7 @@ int XX_httplib_header_has_option( const char *header, const char *option ) {
 	assert(option[0] != '\0');
 
 	while ((header = XX_httplib_next_option(header, &opt_vec, &eq_vec)) != NULL) {
-		if (mg_strncasecmp(option, opt_vec.ptr, opt_vec.len) == 0) return 1;
+		if (httplib_strncasecmp(option, opt_vec.ptr, opt_vec.len) == 0) return 1;
 	}
 
 	return 0;

@@ -35,7 +35,7 @@
 
 void XX_httplib_tls_dtor( void *key ) {
 
-	struct mg_workerTLS *tls = (struct mg_workerTLS *)key;
+	struct httplib_workerTLS *tls = (struct httplib_workerTLS *)key;
 	/* key == pthread_getspecific(XX_httplib_sTlsKey); */
 
 	if (tls) {

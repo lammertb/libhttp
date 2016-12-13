@@ -29,7 +29,7 @@ typedef __int64 int64_t;
 
 
 /* callback: used to generate all content */
-static int begin_request_handler(struct mg_connection *conn)
+static int begin_request_handler(struct httplib_connection *conn)
 {
     const char * tempPath = ".";
 #ifdef _WIN32
@@ -40,10 +40,10 @@ static int begin_request_handler(struct mg_connection *conn)
     tempPath = "/tmp";
 #endif
 
-    if (!strcmp(mg_get_request_info(conn)->uri, "/handle_post_request")) {
+    if (!strcmp(httplib_get_request_info(conn)->uri, "/handle_post_request")) {
 
-        mg_printf(conn, "%s", "HTTP/1.0 200 OK\r\n\r\n");
-        mg_upload(conn, tempPath);
+        httplib_printf(conn, "%s", "HTTP/1.0 200 OK\r\n\r\n");
+        httplib_upload(conn, tempPath);
     } else {
         /* Show HTML form. */
         /* See http://www.w3.org/TR/html401/interact/forms.html#h-17.13.4.1 */
@@ -60,7 +60,7 @@ static int begin_request_handler(struct mg_connection *conn)
             ""
             "</body></html>";
 
-        mg_printf(conn, "HTTP/1.0 200 OK\r\n"
+        httplib_printf(conn, "HTTP/1.0 200 OK\r\n"
                   "Content-Length: %d\r\n"
                   "Content-Type: text/html\r\n\r\n%s",
                   (int) strlen(html_form), html_form);
@@ -72,9 +72,9 @@ static int begin_request_handler(struct mg_connection *conn)
 
 
 /* callback: called after uploading a file is completed */
-static void upload_handler(struct mg_connection *conn, const char *path)
+static void upload_handler(struct httplib_connection *conn, const char *path)
 {
-    mg_printf(conn, "Saved [%s]", path);
+    httplib_printf(conn, "Saved [%s]", path);
 }
 
 
@@ -85,11 +85,11 @@ int main(void)
     const char * PORT = "8080";
 
     /* Startup options for the server */
-    struct mg_context *ctx;
+    struct httplib_context *ctx;
     const char *options[] = {
         "listening_ports", PORT,
         NULL};
-    struct mg_callbacks callbacks;
+    struct httplib_callbacks callbacks;
 
     memset(&callbacks, 0, sizeof(callbacks));
     callbacks.begin_request = begin_request_handler;
@@ -100,11 +100,11 @@ int main(void)
     printf("Open http://localhost:%s/ in your browser.\n\n", PORT);
 
     /* Start the server */
-    ctx = mg_start(&callbacks, NULL, options);
+    ctx = httplib_start(&callbacks, NULL, options);
 
     /* Wait until thr user hits "enter", then stop the server */
     getchar();
-    mg_stop(ctx);
+    httplib_stop(ctx);
 
     return 0;
 }

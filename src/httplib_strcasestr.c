@@ -33,7 +33,7 @@ const char * XX_httplib_strcasestr( const char *big_str, const char *small_str )
 
 	if (big_len >= small_len) {
 		for (i = 0; i <= (big_len - small_len); i++) {
-			if (mg_strncasecmp(big_str + i, small_str, small_len) == 0) return big_str + i;
+			if (httplib_strncasecmp(big_str + i, small_str, small_len) == 0) return big_str + i;
 		}
 	}
 

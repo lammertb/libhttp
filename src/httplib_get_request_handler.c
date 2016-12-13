@@ -31,18 +31,18 @@
  * for a connection.
  */
 
-int XX_httplib_get_request_handler( struct mg_connection *conn, int handler_type, mg_request_handler *handler, mg_websocket_connect_handler *connect_handler, mg_websocket_ready_handler *ready_handler, mg_websocket_data_handler *data_handler, mg_websocket_close_handler *close_handler, mg_authorization_handler *auth_handler, void **cbdata ) {
-	const struct mg_request_info *request_info = mg_get_request_info(conn);
+int XX_httplib_get_request_handler( struct httplib_connection *conn, int handler_type, httplib_request_handler *handler, httplib_websocket_connect_handler *connect_handler, httplib_websocket_ready_handler *ready_handler, httplib_websocket_data_handler *data_handler, httplib_websocket_close_handler *close_handler, httplib_authorization_handler *auth_handler, void **cbdata ) {
+	const struct httplib_request_info *request_info = httplib_get_request_info(conn);
 
 	if ( request_info == NULL ) return 0;
 
 	const char *uri = request_info->local_uri;
 	size_t urilen = strlen(uri);
-	struct mg_handler_info *tmp_rh;
+	struct httplib_handler_info *tmp_rh;
 
 	if ( conn == NULL  ||  conn->ctx == NULL ) return 0;
 
-	mg_lock_context(conn->ctx);
+	httplib_lock_context(conn->ctx);
 
 	/* first try for an exact match */
 	for (tmp_rh = conn->ctx->handlers; tmp_rh != NULL;
@@ -60,7 +60,7 @@ int XX_httplib_get_request_handler( struct mg_connection *conn, int handler_type
 					*auth_handler = tmp_rh->auth_handler;
 				}
 				*cbdata = tmp_rh->cbdata;
-				mg_unlock_context(conn->ctx);
+				httplib_unlock_context(conn->ctx);
 				return 1;
 			}
 		}
@@ -83,7 +83,7 @@ int XX_httplib_get_request_handler( struct mg_connection *conn, int handler_type
 					*auth_handler = tmp_rh->auth_handler;
 				}
 				*cbdata = tmp_rh->cbdata;
-				mg_unlock_context(conn->ctx);
+				httplib_unlock_context(conn->ctx);
 				return 1;
 			}
 		}
@@ -105,13 +105,13 @@ int XX_httplib_get_request_handler( struct mg_connection *conn, int handler_type
 					*auth_handler = tmp_rh->auth_handler;
 				}
 				*cbdata = tmp_rh->cbdata;
-				mg_unlock_context(conn->ctx);
+				httplib_unlock_context(conn->ctx);
 				return 1;
 			}
 		}
 	}
 
-	mg_unlock_context(conn->ctx);
+	httplib_unlock_context(conn->ctx);
 
 	return 0; /* none found */
 

@@ -26,7 +26,7 @@
 
 /* Look at the "path" extension and figure what mime type it has.
  * Store mime type in the vector. */
-void XX_httplib_get_mime_type( struct mg_context *ctx, const char *path, struct vec *vec ) {
+void XX_httplib_get_mime_type( struct httplib_context *ctx, const char *path, struct vec *vec ) {
 
 	struct vec ext_vec;
 	struct vec mime_vec;
@@ -44,7 +44,7 @@ void XX_httplib_get_mime_type( struct mg_context *ctx, const char *path, struct 
 	while ((list = XX_httplib_next_option(list, &ext_vec, &mime_vec)) != NULL) {
 		/* ext now points to the path suffix */
 		ext = path + path_len - ext_vec.len;
-		if (mg_strncasecmp(ext, ext_vec.ptr, ext_vec.len) == 0) {
+		if (httplib_strncasecmp(ext, ext_vec.ptr, ext_vec.len) == 0) {
 			*vec = mime_vec;
 			return;
 		}

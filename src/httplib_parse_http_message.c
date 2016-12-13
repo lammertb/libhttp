@@ -25,21 +25,21 @@
 #include "httplib_main.h"
 
 /*
- * int XX_httplib_parse_http_message( char *buf, int len, struct mg_request_info *ri );
+ * int XX_httplib_parse_http_message( char *buf, int len, struct httplib_request_info *ri );
  *
  * The function XX_httplib_parse_http_message() parses an HTTP request and
- * fills in the mg_request_info structure. This function modifies the buffer by
+ * fills in the httplib_request_info structure. This function modifies the buffer by
  * NUL terminating HTTP request components, header names and header values.
  * Parameters:
  * 	buf (in/out)	pointer to the HTTP header to parse and split
  * 	len (in)	length of the HTTP header buffer
- * 	ri  (out)	parsed header as a mg_request_info structure
+ * 	ri  (out)	parsed header as a httplib_request_info structure
  * The parameters buf and ri must be valid pointers (not NULL) with a length
  * larger than zero. On error the function return a negative value, otherwise
  * the length of the request is returned.
  */
 
-int XX_httplib_parse_http_message( char *buf, int len, struct mg_request_info *ri ) {
+int XX_httplib_parse_http_message( char *buf, int len, struct httplib_request_info *ri ) {
 
 	int is_request;
 	int request_length;

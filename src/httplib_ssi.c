@@ -26,10 +26,10 @@
 #include "httplib_string.h"
 #include "httplib_utils.h"
 
-static void send_ssi_file(struct mg_connection *, const char *, struct file *, int);
+static void send_ssi_file(struct httplib_connection *, const char *, struct file *, int);
 
 
-static void do_ssi_include(struct mg_connection *conn, const char *ssi, char *tag, int include_level) {
+static void do_ssi_include(struct httplib_connection *conn, const char *ssi, char *tag, int include_level) {
 
 	char file_name[MG_BUF_LEN];
 	char path[512];
@@ -67,17 +67,17 @@ static void do_ssi_include(struct mg_connection *conn, const char *ssi, char *ta
 		}
 
 	} else {
-		mg_cry(conn, "Bad SSI #include: [%s]", tag);
+		httplib_cry(conn, "Bad SSI #include: [%s]", tag);
 		return;
 	}
 
 	if (truncated) {
-		mg_cry(conn, "SSI #include path length overflow: [%s]", tag);
+		httplib_cry(conn, "SSI #include path length overflow: [%s]", tag);
 		return;
 	}
 
 	if (!XX_httplib_fopen(conn, path, "rb", &file)) {
-		mg_cry(conn, "Cannot open SSI #include: [%s]: fopen(%s): %s", tag, path, strerror(ERRNO));
+		httplib_cry(conn, "Cannot open SSI #include: [%s]: fopen(%s): %s", tag, path, strerror(ERRNO));
 	} else {
 		XX_httplib_fclose_on_exec(&file, conn);
 		if (XX_httplib_match_prefix(conn->ctx->config[SSI_EXTENSIONS], strlen(conn->ctx->config[SSI_EXTENSIONS]), path) > 0) {
@@ -92,17 +92,17 @@ static void do_ssi_include(struct mg_connection *conn, const char *ssi, char *ta
 
 
 #if !defined(NO_POPEN)
-static void do_ssi_exec(struct mg_connection *conn, char *tag) {
+static void do_ssi_exec(struct httplib_connection *conn, char *tag) {
 
 	char cmd[1024] = "";
 	struct file file = STRUCT_FILE_INITIALIZER;
 
 	if (sscanf(tag, " \"%1023[^\"]\"", cmd) != 1) {
-		mg_cry(conn, "Bad SSI #exec: [%s]", tag);
+		httplib_cry(conn, "Bad SSI #exec: [%s]", tag);
 	} else {
 		cmd[1023] = 0;
 		if ((file.fp = popen(cmd, "r")) == NULL) {
-			mg_cry(conn, "Cannot SSI #exec: [%s]: %s", cmd, strerror(ERRNO));
+			httplib_cry(conn, "Cannot SSI #exec: [%s]: %s", cmd, strerror(ERRNO));
 		} else {
 			XX_httplib_send_file_data(conn, &file, 0, INT64_MAX);
 			pclose(file.fp);
@@ -112,7 +112,7 @@ static void do_ssi_exec(struct mg_connection *conn, char *tag) {
 #endif /* !NO_POPEN */
 
 
-static int mg_fgetc( struct file *filep, int offset ) {
+static int httplib_fgetc( struct file *filep, int offset ) {
 
 	if ( filep         == NULL                                                              ) return EOF;
 	if ( filep->membuf != NULL  &&  offset >= 0  &&  ((unsigned int)(offset)) < filep->size ) return ((const unsigned char *)filep->membuf)[offset];
@@ -120,10 +120,10 @@ static int mg_fgetc( struct file *filep, int offset ) {
 
 	return EOF;
 
-}  /* mg_fgetc */
+}  /* httplib_fgetc */
 
 
-static void send_ssi_file( struct mg_connection *conn, const char *path, struct file *filep, int include_level ) {
+static void send_ssi_file( struct httplib_connection *conn, const char *path, struct file *filep, int include_level ) {
 
 	char buf[MG_BUF_LEN];
 	int ch;
@@ -132,12 +132,12 @@ static void send_ssi_file( struct mg_connection *conn, const char *path, struct 
 	int in_ssi_tag;
 
 	if (include_level > 10) {
-		mg_cry(conn, "SSI #include level is too deep (%s)", path);
+		httplib_cry(conn, "SSI #include level is too deep (%s)", path);
 		return;
 	}
 
 	in_ssi_tag = len = offset = 0;
-	while ((ch = mg_fgetc(filep, offset)) != EOF) {
+	while ((ch = httplib_fgetc(filep, offset)) != EOF) {
 		if (in_ssi_tag && ch == '>') {
 			in_ssi_tag = 0;
 			buf[len++] = (char)ch;
@@ -146,7 +146,7 @@ static void send_ssi_file( struct mg_connection *conn, const char *path, struct 
 			if (len > (int)sizeof(buf)) break;
 			if (len < 6 || memcmp(buf, "<!--#", 5) != 0) {
 				/* Not an SSI tag, pass it */
-				mg_write( conn, buf, (size_t)len );
+				httplib_write( conn, buf, (size_t)len );
 			} else {
 				if (!memcmp(buf + 5, "include", 7)) {
 					do_ssi_include(conn, path, buf + 12, include_level);
@@ -154,7 +154,7 @@ static void send_ssi_file( struct mg_connection *conn, const char *path, struct 
 				} else if (!memcmp(buf + 5, "exec", 4)) {
 					do_ssi_exec(conn, buf + 9);
 #endif /* !NO_POPEN */
-				} else mg_cry(conn, "%s: unknown SSI " "command: \"%s\"", path, buf);
+				} else httplib_cry(conn, "%s: unknown SSI " "command: \"%s\"", path, buf);
 			}
 			len = 0;
 		} else if (in_ssi_tag) {
@@ -162,32 +162,32 @@ static void send_ssi_file( struct mg_connection *conn, const char *path, struct 
 				/* Not an SSI tag */
 				in_ssi_tag = 0;
 			} else if (len == (int)sizeof(buf) - 2) {
-				mg_cry(conn, "%s: SSI tag is too large", path);
+				httplib_cry(conn, "%s: SSI tag is too large", path);
 				len = 0;
 			}
 			buf[len++] = (char)(ch & 0xff);
 		} else if (ch == '<') {
 			in_ssi_tag = 1;
 			if (len > 0) {
-				mg_write(conn, buf, (size_t)len);
+				httplib_write(conn, buf, (size_t)len);
 			}
 			len = 0;
 			buf[len++] = (char)(ch & 0xff);
 		} else {
 			buf[len++] = (char)(ch & 0xff);
 			if (len == (int)sizeof(buf)) {
-				mg_write(conn, buf, (size_t)len);
+				httplib_write(conn, buf, (size_t)len);
 				len = 0;
 			}
 		}
 	}
 
 	/* Send the rest of buffered data */
-	if (len > 0) mg_write(conn, buf, (size_t)len);
+	if (len > 0) httplib_write(conn, buf, (size_t)len);
 }
 
 
-void XX_httplib_handle_ssi_file_request( struct mg_connection *conn, const char *path, struct file *filep ) {
+void XX_httplib_handle_ssi_file_request( struct httplib_connection *conn, const char *path, struct file *filep ) {
 
 	char date[64];
 	time_t curtime;
@@ -199,7 +199,7 @@ void XX_httplib_handle_ssi_file_request( struct mg_connection *conn, const char 
 
 	curtime = time( NULL );
 
-	if (mg_get_header(conn, "Origin")) {
+	if (httplib_get_header(conn, "Origin")) {
 		/* Cross-origin resource sharing (CORS). */
 		cors1 = "Access-Control-Allow-Origin: ";
 		cors2 = conn->ctx->config[ACCESS_CONTROL_ALLOW_ORIGIN];
@@ -218,9 +218,9 @@ void XX_httplib_handle_ssi_file_request( struct mg_connection *conn, const char 
 		conn->must_close = 1;
 		XX_httplib_gmt_time_string(date, sizeof(date), &curtime);
 		XX_httplib_fclose_on_exec(filep, conn);
-		mg_printf(conn, "HTTP/1.1 200 OK\r\n");
+		httplib_printf(conn, "HTTP/1.1 200 OK\r\n");
 		XX_httplib_send_no_cache_header(conn);
-		mg_printf(conn,
+		httplib_printf(conn,
 		          "%s%s%s"
 		          "Date: %s\r\n"
 		          "Content-Type: text/html\r\n"

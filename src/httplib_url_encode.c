@@ -24,7 +24,7 @@
 
 #include "httplib_main.h"
 
-int mg_url_encode( const char *src, char *dst, size_t dst_len ) {
+int httplib_url_encode( const char *src, char *dst, size_t dst_len ) {
 
 	static const char *dont_escape = "._-$,;~()";
 	static const char *hex = "0123456789abcdef";
@@ -46,4 +46,4 @@ int mg_url_encode( const char *src, char *dst, size_t dst_len ) {
 	*pos = '\0';
 	return (*src == '\0') ? (int)(pos - dst) : -1;
 
-}  /* mg_url_encode */
+}  /* httplib_url_encode */

@@ -49,7 +49,7 @@ static void trim_trailing_whitespaces( char *s ) {
 }  /* trim_trailing_whitespaces */
 
 
-pid_t XX_httplib_spawn_process( struct mg_connection *conn, const char *prog, char *envblk, char *envp[], int fdin[2], int fdout[2], int fderr[2], const char *dir ) {
+pid_t XX_httplib_spawn_process( struct httplib_connection *conn, const char *prog, char *envblk, char *envp[], int fdin[2], int fdout[2], int fderr[2], const char *dir ) {
 
 	HANDLE me;
 	char *p;
@@ -129,8 +129,7 @@ pid_t XX_httplib_spawn_process( struct mg_connection *conn, const char *prog, ch
 	}
 
 	if (CreateProcessA(NULL, cmdline, NULL, NULL, TRUE, CREATE_NEW_PROCESS_GROUP, envblk, NULL, &si, &pi) == 0) {
-		mg_cry(
-		    conn, "%s: CreateProcess(%s): %ld", __func__, cmdline, (long)ERRNO);
+		httplib_cry( conn, "%s: CreateProcess(%s): %ld", __func__, cmdline, (long)ERRNO);
 		pi.hProcess = (pid_t)-1;
 		/* goto spawn_cleanup; */
 	}
@@ -151,7 +150,7 @@ spawn_cleanup:
 #else
 
 #ifndef NO_CGI
-pid_t XX_httplib_spawn_process( struct mg_connection *conn, const char *prog, char *envblk, char *envp[], int fdin[2], int fdout[2], int fderr[2], const char *dir ) {
+pid_t XX_httplib_spawn_process( struct httplib_connection *conn, const char *prog, char *envblk, char *envp[], int fdin[2], int fdout[2], int fderr[2], const char *dir ) {
 
 	pid_t pid;
 	const char *interp;
@@ -165,10 +164,10 @@ pid_t XX_httplib_spawn_process( struct mg_connection *conn, const char *prog, ch
 		XX_httplib_send_http_error(conn, 500, "Error: Creating CGI process\nfork(): %s", strerror(ERRNO));
 	} else if (pid == 0) {
 		/* Child */
-		if      ( chdir( dir        ) !=  0 ) mg_cry(conn, "%s: chdir(%s): %s", __func__,   dir,      strerror(ERRNO));
-		else if ( dup2( fdin[0], 0  ) == -1 ) mg_cry(conn, "%s: dup2(%d, 0): %s", __func__, fdin[0],  strerror(ERRNO));
-		else if ( dup2( fdout[1], 1 ) == -1 ) mg_cry(conn, "%s: dup2(%d, 1): %s", __func__, fdout[1], strerror(ERRNO));
-		else if ( dup2( fderr[1], 2 ) == -1 ) mg_cry(conn, "%s: dup2(%d, 2): %s", __func__, fderr[1], strerror(ERRNO));
+		if      ( chdir( dir        ) !=  0 ) httplib_cry(conn, "%s: chdir(%s): %s", __func__,   dir,      strerror(ERRNO));
+		else if ( dup2( fdin[0], 0  ) == -1 ) httplib_cry(conn, "%s: dup2(%d, 0): %s", __func__, fdin[0],  strerror(ERRNO));
+		else if ( dup2( fdout[1], 1 ) == -1 ) httplib_cry(conn, "%s: dup2(%d, 1): %s", __func__, fdout[1], strerror(ERRNO));
+		else if ( dup2( fderr[1], 2 ) == -1 ) httplib_cry(conn, "%s: dup2(%d, 2): %s", __func__, fderr[1], strerror(ERRNO));
 		else {
 			/* Keep stderr and stdout in two different pipes.
 			 * Stdout will be sent back to the client,
@@ -191,11 +190,11 @@ pid_t XX_httplib_spawn_process( struct mg_connection *conn, const char *prog, ch
 
 			interp = conn->ctx->config[CGI_INTERPRETER];
 			if (interp == NULL) {
-				(void)execle(prog, prog, NULL, envp);
-				mg_cry(conn, "%s: execle(%s): %s", __func__, prog, strerror(ERRNO));
+				execle(prog, prog, NULL, envp);
+				httplib_cry(conn, "%s: execle(%s): %s", __func__, prog, strerror(ERRNO));
 			} else {
-				(void)execle(interp, interp, prog, NULL, envp);
-				mg_cry(conn, "%s: execle(%s %s): %s", __func__, interp, prog, strerror(ERRNO));
+				execle(interp, interp, prog, NULL, envp);
+				httplib_cry(conn, "%s: execle(%s %s): %s", __func__, interp, prog, strerror(ERRNO));
 			}
 		}
 		exit(EXIT_FAILURE);

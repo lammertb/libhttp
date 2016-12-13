@@ -25,7 +25,7 @@
 #include "httplib_main.h"
 #include "httplib_string.h"
 
-int mg_printf( struct mg_connection *conn, const char *fmt, ... ) {
+int httplib_printf( struct httplib_connection *conn, const char *fmt, ... ) {
 
 	va_list ap;
 	int result;
@@ -36,4 +36,4 @@ int mg_printf( struct mg_connection *conn, const char *fmt, ... ) {
 
 	return result;
 
-}  /* mg_printf */
+}  /* httplib_printf */

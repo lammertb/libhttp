@@ -26,12 +26,12 @@
 #include "httplib_string.h"
 
 /*
- * int XX_httplib_getreq( struct mg_connection *conn, char *ebuf, size_t ebuf_len, int *err );
+ * int XX_httplib_getreq( struct httplib_connection *conn, char *ebuf, size_t ebuf_len, int *err );
  *
  * The function XX_httplib_getreq() processes a request from a remote client.
  */
 
-int XX_httplib_getreq( struct mg_connection *conn, char *ebuf, size_t ebuf_len, int *err ) {
+int XX_httplib_getreq( struct httplib_connection *conn, char *ebuf, size_t ebuf_len, int *err ) {
 
 	const char *cl;
 
@@ -93,16 +93,13 @@ int XX_httplib_getreq( struct mg_connection *conn, char *ebuf, size_t ebuf_len, 
 			conn->request_info.content_length = conn->content_len;
 		} else if ((cl = XX_httplib_get_header(&conn->request_info, "Transfer-Encoding"))
 		               != NULL
-		           && !mg_strcasecmp(cl, "chunked")) {
+		           && !httplib_strcasecmp(cl, "chunked")) {
 			conn->is_chunked = 1;
-		} else if (!mg_strcasecmp(conn->request_info.request_method, "POST")
-		           || !mg_strcasecmp(conn->request_info.request_method,
-		                             "PUT")) {
+		} else if (!httplib_strcasecmp(conn->request_info.request_method, "POST")
+		           || !httplib_strcasecmp(conn->request_info.request_method, "PUT")) {
 			/* POST or PUT request without content length set */
 			conn->content_len = -1;
-		} else if (!mg_strncasecmp(conn->request_info.request_method,
-		                           "HTTP/",
-		                           5)) {
+		} else if (!httplib_strncasecmp(conn->request_info.request_method, "HTTP/", 5)) {
 			/* Response without content length set */
 			conn->content_len = -1;
 		} else {

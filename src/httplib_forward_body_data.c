@@ -25,14 +25,14 @@
 #include "httplib_main.h"
 
 /*
- * int XX_httplib_forward_body_data( struct mg_connection *conn, FILE *fp, SOCKET sock, SSL *ssl );
+ * int XX_httplib_forward_body_data( struct httplib_connection *conn, FILE *fp, SOCKET sock, SSL *ssl );
  *
  * The function XX_httplib_forward_body_data() forwards body data to the
  * client.
  */
 
 #if !defined(NO_CGI) || !defined(NO_FILES)
-int XX_httplib_forward_body_data( struct mg_connection *conn, FILE *fp, SOCKET sock, SSL *ssl ) {
+int XX_httplib_forward_body_data( struct httplib_connection *conn, FILE *fp, SOCKET sock, SSL *ssl ) {
 
 	const char *expect;
 	const char *body;
@@ -43,12 +43,12 @@ int XX_httplib_forward_body_data( struct mg_connection *conn, FILE *fp, SOCKET s
 	int64_t buffered_len;
 	double timeout = -1.0;
 
-	if (!conn) { return 0; }
+	if ( conn == NULL ) return 0;
 	if (conn->ctx->config[REQUEST_TIMEOUT]) {
 		timeout = atoi(conn->ctx->config[REQUEST_TIMEOUT]) / 1000.0;
 	}
 
-	expect = mg_get_header(conn, "Expect");
+	expect = httplib_get_header(conn, "Expect");
 	/* assert(fp != NULL); */
 	if (!fp) {
 		XX_httplib_send_http_error(conn, 500, "%s", "Error: NULL File");
@@ -59,12 +59,12 @@ int XX_httplib_forward_body_data( struct mg_connection *conn, FILE *fp, SOCKET s
 		/* Content length is not specified by the client. */
 		XX_httplib_send_http_error(conn, 411, "%s", "Error: Client did not specify content length");
 	} else if ((expect != NULL)
-	           && (mg_strcasecmp(expect, "100-continue") != 0)) {
+	           && (httplib_strcasecmp(expect, "100-continue") != 0)) {
 		/* Client sent an "Expect: xyz" header and xyz is not 100-continue. */
 		XX_httplib_send_http_error(conn, 417, "Error: Can not fulfill expectation %s", expect);
 	} else {
 		if (expect != NULL) {
-			(void)mg_printf(conn, "%s", "HTTP/1.1 100 Continue\r\n\r\n");
+			(void)httplib_printf(conn, "%s", "HTTP/1.1 100 Continue\r\n\r\n");
 			conn->status_code = 100;
 		} else conn->status_code = 200;
 

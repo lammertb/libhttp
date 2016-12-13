@@ -26,14 +26,14 @@
 #include "httplib_memory.h"
 
 /*
- * void XX_httplib_read_websocket( struct mg_connection *conn, mg_websocket_data_handler ws_data_handler, void *calback_data );
+ * void XX_httplib_read_websocket( struct httplib_connection *conn, httplib_websocket_data_handler ws_data_handler, void *calback_data );
  *
  * The function XX_httplib_read_websocket() reads from a websocket connection.
  */
 
 #if defined(USE_WEBSOCKET)
 
-void XX_httplib_read_websocket( struct mg_connection *conn, mg_websocket_data_handler ws_data_handler, void *callback_data ) {
+void XX_httplib_read_websocket( struct httplib_connection *conn, httplib_websocket_data_handler ws_data_handler, void *callback_data ) {
 
 	/* Pointer to the beginning of the portion of the incoming websocket
 	 * message queue.
@@ -105,7 +105,7 @@ void XX_httplib_read_websocket( struct mg_connection *conn, mg_websocket_data_ha
 				if (data == NULL) {
 					/* Allocation failed, exit the loop and then close the
 					 * connection */
-					mg_cry(conn, "websocket out of memory; closing connection");
+					httplib_cry(conn, "websocket out of memory; closing connection");
 					break;
 				}
 			}
@@ -132,7 +132,7 @@ void XX_httplib_read_websocket( struct mg_connection *conn, mg_websocket_data_ha
 					len += (size_t)n;
 				}
 				if (error) {
-					mg_cry(conn, "Websocket pull failed; closing connection");
+					httplib_cry(conn, "Websocket pull failed; closing connection");
 					break;
 				}
 				conn->data_len = conn->request_len;

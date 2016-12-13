@@ -24,7 +24,7 @@
 
 #include "httplib_main.h"
 
-int mg_url_decode( const char *src, int src_len, char *dst, int dst_len, int is_form_url_encoded ) {
+int httplib_url_decode( const char *src, int src_len, char *dst, int dst_len, int is_form_url_encoded ) {
 
 	int i;
 	int j;
@@ -49,4 +49,4 @@ int mg_url_decode( const char *src, int src_len, char *dst, int dst_len, int is_
 
 	return (i >= src_len) ? j : -1;
 
-}  /* mg_url_decode */
+}  /* httplib_url_decode */

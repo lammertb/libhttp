@@ -24,10 +24,10 @@
 
 #include "httplib_main.h"
 
-const struct mg_request_info *mg_get_request_info( const struct mg_connection *conn ) {
+const struct httplib_request_info *httplib_get_request_info( const struct httplib_connection *conn ) {
 
 	if ( conn == NULL ) return NULL;
 
 	return & conn->request_info;
 
-}  /* mg_get_request_info */
+}  /* httplib_get_request_info */

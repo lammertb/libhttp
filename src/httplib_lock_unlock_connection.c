@@ -26,28 +26,28 @@
 #include "httplib_pthread.h"
 
 /*
- * void mg_lock_connection( struct mg_connection *conn );
+ * void httplib_lock_connection( struct httplib_connection *conn );
  *
- * The function mg_lock_connection() puts a lock on a connection.
+ * The function httplib_lock_connection() puts a lock on a connection.
  */
 
-void mg_lock_connection( struct mg_connection *conn ) {
+void httplib_lock_connection( struct httplib_connection *conn ) {
 
 	if ( conn != NULL ) pthread_mutex_lock( & conn->mutex );
 
-}  /* mg_lock_connection */
+}  /* httplib_lock_connection */
 
 
 
 /*
- * void mg_unlock_connection( struct mg_connection *conn );
+ * void httplib_unlock_connection( struct httplib_connection *conn );
  *
- * The function mg_unlock_connection() removes the current lock from a
+ * The function httplib_unlock_connection() removes the current lock from a
  * connection.
  */
 
-void mg_unlock_connection( struct mg_connection *conn ) {
+void httplib_unlock_connection( struct httplib_connection *conn ) {
 
 	if ( conn != NULL ) pthread_mutex_unlock( & conn->mutex );
 
-}  /* mg_unlock_connection */
+}  /* httplib_unlock_connection */

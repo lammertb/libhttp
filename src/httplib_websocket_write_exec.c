@@ -25,7 +25,7 @@
 #include "httplib_main.h"
 
 /*
- * int XX_httplib_websocket_write_exec( struct mg_connection *conn, int opcode, const char *data, size_t dataLen, uint32_t masking_key );
+ * int XX_httplib_websocket_write_exec( struct httplib_connection *conn, int opcode, const char *data, size_t dataLen, uint32_t masking_key );
  *
  * The function XX_httplib_websocket_write_exec() does the heavy lifting in
  * writing data over a websocket connectin to a remote peer.
@@ -33,7 +33,7 @@
 
 #if defined(USE_WEBSOCKET)
 
-int XX_httplib_websocket_write_exec( struct mg_connection *conn, int opcode, const char *data, size_t dataLen, uint32_t masking_key ) {
+int XX_httplib_websocket_write_exec( struct httplib_connection *conn, int opcode, const char *data, size_t dataLen, uint32_t masking_key ) {
 
 	unsigned char header[14];
 	size_t headerLen = 1;
@@ -73,13 +73,13 @@ int XX_httplib_websocket_write_exec( struct mg_connection *conn, int opcode, con
 
 	/* Note that POSIX/Winsock's send() is threadsafe
 	 * http://stackoverflow.com/questions/1981372/are-parallel-calls-to-send-recv-on-the-same-socket-valid
-	 * but mongoose's mg_printf/mg_write is not (because of the loop in
+	 * but mongoose's httplib_printf/httplib_write is not (because of the loop in
 	 * push(), although that is only a problem if the packet is large or
 	 * outgoing buffer is full). */
-	(void)mg_lock_connection(conn);
-	retval = mg_write(conn, header, headerLen);
-	if (dataLen > 0) retval = mg_write(conn, data, dataLen);
-	mg_unlock_connection(conn);
+	httplib_lock_connection(conn);
+	retval = httplib_write(conn, header, headerLen);
+	if (dataLen > 0) retval = httplib_write(conn, data, dataLen);
+	httplib_unlock_connection(conn);
 
 	return retval;
 

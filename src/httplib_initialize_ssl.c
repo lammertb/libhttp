@@ -43,13 +43,13 @@ static void *cryptolib_dll_handle; /* Store the crypto library handle. */
 
 
 /*
- * int XX_httplib_initialize_ssl( struct mg_context *ctx );
+ * int XX_httplib_initialize_ssl( struct httplib_context *ctx );
  *
  * The function XX_httplib_initialize_ssl() initializes the use of SSL
  * encrypted communication on the given context.
  */
 
-int XX_httplib_initialize_ssl( struct mg_context *ctx ) {
+int XX_httplib_initialize_ssl( struct httplib_context *ctx ) {
 
 	int i;
 	size_t size;
@@ -70,7 +70,7 @@ int XX_httplib_initialize_ssl( struct mg_context *ctx ) {
 	if (i < 0) i = 0;
 	size = sizeof(pthread_mutex_t) * ((size_t)(i));
 	if ((XX_httplib_ssl_mutexes = (pthread_mutex_t *)XX_httplib_malloc(size)) == NULL) {
-		mg_cry( XX_httplib_fc(ctx), "%s: cannot allocate mutexes: %s", __func__, XX_httplib_ssl_error());
+		httplib_cry( XX_httplib_fc(ctx), "%s: cannot allocate mutexes: %s", __func__, XX_httplib_ssl_error());
 		return 0;
 	}
 

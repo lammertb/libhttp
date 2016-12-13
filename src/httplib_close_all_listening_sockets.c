@@ -26,13 +26,13 @@
 #include "httplib_memory.h"
 
 /*
- * void XX_httplib_close_all_listening_sockets( struct mg_context *ctx );
+ * void XX_httplib_close_all_listening_sockets( struct httplib_context *ctx );
  *
  * The function XX_httplib_close_all_listening_sockets() closes all listening
  * sockets of a given context.
  */
 
-void XX_httplib_close_all_listening_sockets( struct mg_context *ctx ) {
+void XX_httplib_close_all_listening_sockets( struct httplib_context *ctx ) {
 
 	unsigned int i;
 

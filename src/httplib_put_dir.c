@@ -25,7 +25,7 @@
 #include "httplib_main.h"
 
 /*
- * int XX_httplib_put_dir( struct mg_connection *conn, const char *path );
+ * int XX_httplib_put_dir( struct httplib_connection *conn, const char *path );
  *
  * The function XX_httplib_put_dir() creates a directory mentioned in a PUT
  * request including all intermediate subdirectories. The following values can
@@ -36,7 +36,7 @@
  * Return -2  if path can not be created.
  */
 
-int XX_httplib_put_dir( struct mg_connection *conn, const char *path ) {
+int XX_httplib_put_dir( struct httplib_connection *conn, const char *path ) {
 
 	char buf[PATH_MAX];
 	const char *s;

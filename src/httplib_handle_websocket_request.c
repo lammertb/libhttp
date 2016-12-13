@@ -33,10 +33,10 @@
 
 #if defined(USE_WEBSOCKET)
 
-void XX_httplib_handle_websocket_request( struct mg_connection *conn, const char *path, int is_callback_resource, mg_websocket_connect_handler ws_connect_handler, mg_websocket_ready_handler ws_ready_handler, mg_websocket_data_handler ws_data_handler, mg_websocket_close_handler ws_close_handler, void *cbData ) {
+void XX_httplib_handle_websocket_request( struct httplib_connection *conn, const char *path, int is_callback_resource, httplib_websocket_connect_handler ws_connect_handler, httplib_websocket_ready_handler ws_ready_handler, httplib_websocket_data_handler ws_data_handler, httplib_websocket_close_handler ws_close_handler, void *cbData ) {
 
-	const char *websock_key = mg_get_header(conn, "Sec-WebSocket-Key");
-	const char *version = mg_get_header(conn, "Sec-WebSocket-Version");
+	const char *websock_key = httplib_get_header(conn, "Sec-WebSocket-Key");
+	const char *version = httplib_get_header(conn, "Sec-WebSocket-Version");
 	int lua_websock = 0;
 
 	(void)path;
@@ -50,14 +50,14 @@ void XX_httplib_handle_websocket_request( struct mg_connection *conn, const char
 		/* It could be the hixie draft version
 		 * (http://tools.ietf.org/html/draft-hixie-thewebsocketprotocol-76).
 		 */
-		const char *key1 = mg_get_header(conn, "Sec-WebSocket-Key1");
-		const char *key2 = mg_get_header(conn, "Sec-WebSocket-Key2");
+		const char *key1 = httplib_get_header(conn, "Sec-WebSocket-Key1");
+		const char *key2 = httplib_get_header(conn, "Sec-WebSocket-Key2");
 		char key3[8];
 
 		if ((key1 != NULL) && (key2 != NULL)) {
 			/* This version uses 8 byte body data in a GET request */
 			conn->content_len = 8;
-			if (8 == mg_read(conn, key3, 8)) {
+			if (8 == httplib_read(conn, key3, 8)) {
 				/* This is the hixie version */
 				XX_httplib_send_http_error(conn, 426, "%s", "Protocol upgrade to RFC 6455 required");
 				return;

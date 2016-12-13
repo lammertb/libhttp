@@ -134,9 +134,9 @@ static const char *g_server_name;   /* Set by init_server_name() */
 static const char *g_icon_name;     /* Set by init_server_name() */
 static char g_config_file_name[PATH_MAX] =
     "";                          /* Set by process_command_line_arguments() */
-static struct mg_context *g_ctx; /* Set by start_libhttp() */
+static struct httplib_context *g_ctx; /* Set by start_libhttp() */
 static struct tuser_data
-    g_user_data; /* Passed to mg_start() by start_libhttp() */
+    g_user_data; /* Passed to httplib_start() by start_libhttp() */
 
 #if !defined(CONFIG_FILE)
 #define CONFIG_FILE "libhttp.conf"
@@ -153,7 +153,7 @@ static struct tuser_data
 
 enum { OPTION_TITLE, OPTION_ICON, NUM_MAIN_OPTIONS };
 
-static struct mg_option main_config_options[] = {
+static struct httplib_option main_config_options[] = {
     {"title", CONFIG_TYPE_STRING, NULL},
     {"icon", CONFIG_TYPE_STRING, NULL},
     {NULL, CONFIG_TYPE_UNKNOWN, NULL}};
@@ -198,13 +198,13 @@ show_server_name(void)
 	(void)MakeConsole();
 #endif  /* WIN32 */
 
-	fprintf(stderr, "LibHTTP v%s, built on %s\n", mg_version(), __DATE__);
+	fprintf(stderr, "LibHTTP v%s, built on %s\n", httplib_version(), __DATE__);
 }
 
 
 static NO_RETURN void show_usage_and_exit(const char *exeName) {
 
-	const struct mg_option *options;
+	const struct httplib_option *options;
 	int i;
 
 	if (exeName == 0 || *exeName == 0) {
@@ -227,7 +227,7 @@ static NO_RETURN void show_usage_and_exit(const char *exeName) {
 	fprintf(stderr, "    %s -R <htpasswd_file> <realm> <user>\n", exeName);
 	fprintf(stderr, "\nOPTIONS:\n");
 
-	options = mg_get_valid_options();
+	options = httplib_get_valid_options();
 	for (i = 0; options[i].name != NULL; i++) {
 		fprintf(stderr,
 		        "  -%s %s\n",
@@ -260,10 +260,10 @@ static const char *config_file_top_comment =
     "# To make a change, remove leading '#', modify option's value,\n"
     "# save this file and then restart LibHTTP.\n\n";
 
-static const char * get_url_to_first_open_port(const struct mg_context *ctx) {
+static const char * get_url_to_first_open_port(const struct httplib_context *ctx) {
 
 	static char url[100];
-	const char *open_ports = mg_get_option(ctx, "listening_ports");
+	const char *open_ports = httplib_get_option(ctx, "listening_ports");
 	int a;
 	int b;
 	int c;
@@ -284,9 +284,9 @@ static const char * get_url_to_first_open_port(const struct mg_context *ctx) {
 
 
 #ifdef ENABLE_CREATE_CONFIG_FILE
-static void create_config_file(const struct mg_context *ctx, const char *path) {
+static void create_config_file(const struct httplib_context *ctx, const char *path) {
 
-	const struct mg_option *options;
+	const struct httplib_option *options;
 	const char *value;
 	FILE *fp;
 	int i;
@@ -296,9 +296,9 @@ static void create_config_file(const struct mg_context *ctx, const char *path) {
 		fclose(fp);
 	} else if ((fp = fopen(path, "a+")) != NULL) {
 		fprintf(fp, "%s", config_file_top_comment);
-		options = mg_get_valid_options();
+		options = httplib_get_valid_options();
 		for (i = 0; options[i].name != NULL; i++) {
-			value = mg_get_option(ctx, options[i].name);
+			value = httplib_get_option(ctx, options[i].name);
 			fprintf( fp, "# %s %s\n", options[i].name, (value) ? value : "<value>" );
 		}
 		fclose( fp );
@@ -348,7 +348,7 @@ static int set_option(char **options, const char *name, const char *value) {
 
 	int i;
 	int type;
-	const struct mg_option *default_options = mg_get_valid_options();
+	const struct httplib_option *default_options = httplib_get_valid_options();
 
 	for (i = 0; main_config_options[i].name != NULL; i++) {
 		if (0 == strcmp(name, main_config_options[i].name)) {
@@ -577,11 +577,11 @@ static void init_server_name(int argc, const char *argv[]) {
 	int i;
 	assert(sizeof(main_config_options) / sizeof(main_config_options[0])
 	       == NUM_MAIN_OPTIONS + 1);
-	assert((strlen(mg_version()) + 12) < sizeof(g_server_base_name));
+	assert((strlen(httplib_version()) + 12) < sizeof(g_server_base_name));
 	snprintf(g_server_base_name,
 	         sizeof(g_server_base_name),
 	         "LibHTTP V%s",
-	         mg_version());
+	         httplib_version());
 
 	g_server_name = g_server_base_name;
 	for (i = 0; i < argc - 1; i++) {
@@ -602,10 +602,10 @@ static void init_server_name(int argc, const char *argv[]) {
 }
 
 
-static int log_message(const struct mg_connection *conn, const char *message) {
+static int log_message(const struct httplib_connection *conn, const char *message) {
 
-	const struct mg_context *ctx = mg_get_context(conn);
-	struct tuser_data *ud = (struct tuser_data *)mg_get_user_data(ctx);
+	const struct httplib_context *ctx = httplib_get_context(conn);
+	struct tuser_data *ud = (struct tuser_data *)httplib_get_user_data(ctx);
 
 	fprintf(stderr, "%s\n", message);
 
@@ -704,7 +704,7 @@ static void set_absolute_path(char *options[], const char *option_name, const ch
 
 static void start_libhttp(int argc, char *argv[]) {
 
-	struct mg_callbacks callbacks;
+	struct httplib_callbacks callbacks;
 	char *options[2 * MAX_OPTIONS + 1];
 	int i;
 
@@ -712,7 +712,7 @@ static void start_libhttp(int argc, char *argv[]) {
 	 * Show system information and exit
 	 * This is very useful for diagnosis. */
 	if (argc > 1 && !strcmp(argv[1], "-I")) {
-		const char *version = mg_version();
+		const char *version = httplib_version();
 #if defined(_WIN32)
 		DWORD dwVersion      = 0;
 		DWORD dwMajorVersion = 0;
@@ -757,12 +757,12 @@ static void start_libhttp(int argc, char *argv[]) {
 
 
 		fprintf( stdout, "Features:" );
-		if ( mg_check_feature(  1 ) ) fprintf( stdout, " Files"      );
-		if ( mg_check_feature(  2 ) ) fprintf( stdout, " HTTPS"      );
-		if ( mg_check_feature(  4 ) ) fprintf( stdout, " CGI"        );
-		if ( mg_check_feature(  8 ) ) fprintf( stdout, " IPv6"       );
-		if ( mg_check_feature( 16 ) ) fprintf( stdout, " WebSockets" );
-		if ( mg_check_feature( 32 ) ) fprintf( stdout, " Lua"        );
+		if ( httplib_check_feature(  1 ) ) fprintf( stdout, " Files"      );
+		if ( httplib_check_feature(  2 ) ) fprintf( stdout, " HTTPS"      );
+		if ( httplib_check_feature(  4 ) ) fprintf( stdout, " CGI"        );
+		if ( httplib_check_feature(  8 ) ) fprintf( stdout, " IPv6"       );
+		if ( httplib_check_feature( 16 ) ) fprintf( stdout, " WebSockets" );
+		if ( httplib_check_feature( 32 ) ) fprintf( stdout, " Lua"        );
 		fprintf( stdout, "\n" );
 
 		fprintf(stdout, "Version: %s\n", version);
@@ -816,9 +816,7 @@ static void start_libhttp(int argc, char *argv[]) {
 		if (argc != 6) {
 			show_usage_and_exit(argv[0]);
 		}
-		exit(mg_modify_passwords_file(argv[2], argv[3], argv[4], argv[5])
-		         ? EXIT_SUCCESS
-		         : EXIT_FAILURE);
+		exit(httplib_modify_passwords_file(argv[2], argv[3], argv[4], argv[5]) ? EXIT_SUCCESS : EXIT_FAILURE);
 	}
 
 	/* Edit passwords file: Remove user, if -R option is specified */
@@ -826,9 +824,7 @@ static void start_libhttp(int argc, char *argv[]) {
 		if (argc != 5) {
 			show_usage_and_exit(argv[0]);
 		}
-		exit(mg_modify_passwords_file(argv[2], argv[3], argv[4], NULL)
-		         ? EXIT_SUCCESS
-		         : EXIT_FAILURE);
+		exit(httplib_modify_passwords_file(argv[2], argv[3], argv[4], NULL) ? EXIT_SUCCESS : EXIT_FAILURE);
 	}
 
 	/* Show usage if -h or --help options are specified */
@@ -869,15 +865,15 @@ static void start_libhttp(int argc, char *argv[]) {
 	/* Start LibHTTP */
 	memset(&callbacks, 0, sizeof(callbacks));
 	callbacks.log_message = &log_message;
-	g_ctx = mg_start(&callbacks, &g_user_data, (const char **)options);
+	g_ctx = httplib_start(&callbacks, &g_user_data, (const char **)options);
 
-	/* mg_start copies all options to an internal buffer.
+	/* httplib_start copies all options to an internal buffer.
 	 * The options data field here is not required anymore. */
 	for (i = 0; options[i] != NULL; i++) {
 		free(options[i]);
 	}
 
-	/* If mg_start fails, it returns NULL */
+	/* If httplib_start fails, it returns NULL */
 	if (g_ctx == NULL) {
 		die("Failed to start %s:\n%s",
 		    g_server_name,
@@ -889,7 +885,7 @@ static void start_libhttp(int argc, char *argv[]) {
 
 static void stop_libhttp(void) {
 
-	mg_stop(g_ctx);
+	httplib_stop(g_ctx);
 	free(g_user_data.first_message);
 	g_user_data.first_message = NULL;
 }
@@ -995,19 +991,16 @@ static void save_config(HWND hDlg, FILE *fp) {
 
 	char value[2000] = "";
 	const char *default_value;
-	const struct mg_option *options;
+	const struct httplib_option *options;
 	int i;
 	int id;
 
 	fprintf(fp, "%s", config_file_top_comment);
-	options = mg_get_valid_options();
+	options = httplib_get_valid_options();
 	for (i = 0; options[i].name != NULL; i++) {
 		id = ID_CONTROLS + i;
 		if (options[i].type == CONFIG_TYPE_BOOLEAN) {
-			snprintf(value,
-			         sizeof(value) - 1,
-			         "%s",
-			         IsDlgButtonChecked(hDlg, id) ? "yes" : "no");
+			snprintf(value, sizeof(value) - 1, "%s", IsDlgButtonChecked(hDlg, id) ? "yes" : "no");
 			value[sizeof(value) - 1] = 0;
 		} else {
 			GetDlgItemText(hDlg, id, value, sizeof(value));
@@ -1028,7 +1021,7 @@ static INT_PTR CALLBACK SettingsDlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPAR
 	int i, j;
 	const char *name;
 	const char *value;
-	const struct mg_option *default_options = mg_get_valid_options();
+	const struct httplib_option *default_options = httplib_get_valid_options();
 	char *file_options[MAX_OPTIONS * 2 + 1] = {0};
 	char *title;
 	(void)lParam;
@@ -1084,10 +1077,7 @@ static INT_PTR CALLBACK SettingsDlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPAR
 					value = "";
 				}
 				if (default_options[i].type == CONFIG_TYPE_BOOLEAN) {
-					CheckDlgButton(hDlg,
-					               ID_CONTROLS + i,
-					               !strcmp(value, "yes") ? BST_CHECKED
-					                                     : BST_UNCHECKED);
+					CheckDlgButton(hDlg, ID_CONTROLS + i, !strcmp(value, "yes") ? BST_CHECKED : BST_UNCHECKED);
 				} else {
 					SetWindowText(GetDlgItem(hDlg, ID_CONTROLS + i), value);
 				}
@@ -1101,16 +1091,11 @@ static INT_PTR CALLBACK SettingsDlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPAR
 		case ID_RESET_ACTIVE:
 			for (i = 0; default_options[i].name != NULL; i++) {
 				name = default_options[i].name;
-				value = mg_get_option(g_ctx, name);
+				value = httplib_get_option(g_ctx, name);
 				if (default_options[i].type == CONFIG_TYPE_BOOLEAN) {
-					CheckDlgButton(hDlg,
-					               ID_CONTROLS + i,
-					               !strcmp(value, "yes") ? BST_CHECKED
-					                                     : BST_UNCHECKED);
+					CheckDlgButton(hDlg, ID_CONTROLS + i, !strcmp(value, "yes") ? BST_CHECKED : BST_UNCHECKED);
 				} else {
-					SetDlgItemText(hDlg,
-					               ID_CONTROLS + i,
-					               value == NULL ? "" : value);
+					SetDlgItemText(hDlg, ID_CONTROLS + i, value == NULL ? "" : value);
 				}
 			}
 			break;
@@ -1130,9 +1115,8 @@ static INT_PTR CALLBACK SettingsDlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPAR
 				of.hwndOwner = (HWND)hDlg;
 				of.lpstrFile = path;
 				of.nMaxFile = sizeof(path);
-				of.lpstrInitialDir = mg_get_option(g_ctx, "document_root");
-				of.Flags =
-				    OFN_CREATEPROMPT | OFN_NOCHANGEDIR | OFN_HIDEREADONLY;
+				of.lpstrInitialDir = httplib_get_option(g_ctx, "document_root");
+				of.Flags = OFN_CREATEPROMPT | OFN_NOCHANGEDIR | OFN_HIDEREADONLY;
 
 				memset(&bi, 0, sizeof(bi));
 				bi.hwndOwner = (HWND)hDlg;
@@ -1375,7 +1359,7 @@ PasswordDlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lP)
 			              domain,
 			              sizeof(domain));
 			if (get_password(user, domain, password, sizeof(password))) {
-				mg_modify_passwords_file(passfile, domain, user, password);
+				httplib_modify_passwords_file(passfile, domain, user, password);
 				EndDialog(hDlg, IDOK);
 			}
 		} else if ((ctrlId >= (ID_CONTROLS + ID_FILE_BUTTONS_DELTA * 3))
@@ -1388,7 +1372,7 @@ PasswordDlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lP)
 			              domain,
 			              sizeof(domain));
 			if (get_password(user, domain, password, sizeof(password))) {
-				mg_modify_passwords_file(passfile, domain, user, password);
+				httplib_modify_passwords_file(passfile, domain, user, password);
 				EndDialog(hDlg, IDOK);
 			}
 		} else if ((ctrlId >= (ID_CONTROLS + ID_FILE_BUTTONS_DELTA * 2))
@@ -1400,7 +1384,7 @@ PasswordDlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lP)
 			GetWindowText(GetDlgItem(hDlg, ctrlId - ID_FILE_BUTTONS_DELTA),
 			              domain,
 			              sizeof(domain));
-			mg_modify_passwords_file(passfile, domain, user, NULL);
+			httplib_modify_passwords_file(passfile, domain, user, NULL);
 			EndDialog(hDlg, IDOK);
 		}
 		break;
@@ -1472,7 +1456,7 @@ show_settings_dialog()
 #define LABEL_WIDTH (90)
 
 	unsigned char mem[16 * 1024], *p;
-	const struct mg_option *options;
+	const struct httplib_option *options;
 	DWORD style;
 	DLGTEMPLATE *dia = (DLGTEMPLATE *)mem;
 	WORD i, cl, nelems = 0;
@@ -1507,7 +1491,7 @@ show_settings_dialog()
 	(void)memcpy(mem, &dialog_header, sizeof(dialog_header));
 	p = mem + sizeof(dialog_header);
 
-	options = mg_get_valid_options();
+	options = httplib_get_valid_options();
 	for (i = 0; options[i].name != NULL; i++) {
 		style = WS_CHILD | WS_VISIBLE | WS_TABSTOP;
 		x = 10 + (WIDTH / 2) * (nelems % 2);
@@ -1573,7 +1557,7 @@ change_password_file()
 	short y, nelems;
 	unsigned char mem[4096], *p;
 	DLGTEMPLATE *dia = (DLGTEMPLATE *)mem;
-	const char *domain = mg_get_option(g_ctx, "authentication_domain");
+	const char *domain = httplib_get_option(g_ctx, "authentication_domain");
 
 	static struct {
 		DLGTEMPLATE template; /* 18 bytes */
@@ -1581,8 +1565,7 @@ change_password_file()
 		wchar_t caption[1];
 		WORD fontsiz;
 		wchar_t fontface[7];
-	} dialog_header = {{WS_CAPTION | WS_POPUP | WS_SYSMENU | WS_VISIBLE
-	                        | DS_SETFONT | WS_DLGFRAME,
+	} dialog_header = {{WS_CAPTION | WS_POPUP | WS_SYSMENU | WS_VISIBLE | DS_SETFONT | WS_DLGFRAME,
 	                    WS_EX_TOOLWINDOW,
 	                    0,
 	                    200,
@@ -1606,7 +1589,7 @@ change_password_file()
 	of.hwndOwner = (HWND)hDlg;
 	of.lpstrFile = path;
 	of.nMaxFile = sizeof(path);
-	of.lpstrInitialDir = mg_get_option(g_ctx, "document_root");
+	of.lpstrInitialDir = httplib_get_option(g_ctx, "document_root");
 	of.Flags = OFN_CREATEPROMPT | OFN_NOCHANGEDIR | OFN_HIDEREADONLY;
 
 	if (IDOK != GetSaveFileName(&of)) {
@@ -2113,8 +2096,8 @@ main(int argc, char *argv[])
 	fprintf(stdout,
 	        "%s started on port(s) %s with web root [%s]\n",
 	        g_server_name,
-	        mg_get_option(g_ctx, "listening_ports"),
-	        mg_get_option(g_ctx, "document_root"));
+	        httplib_get_option(g_ctx, "listening_ports"),
+	        httplib_get_option(g_ctx, "document_root"));
 	while (g_exit_flag == 0) {
 		sleep(1);
 	}

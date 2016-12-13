@@ -27,8 +27,8 @@
 
 #if defined(MEMORY_DEBUGGING)
 
-unsigned long mg_memory_debug_blockCount   = 0;
-unsigned long mg_memory_debug_totalMemUsed = 0;
+unsigned long httplib_memory_debug_blockCount   = 0;
+unsigned long httplib_memory_debug_totalMemUsed = 0;
 
 
 void *XX_httplib_malloc_ex( size_t size, const char *file, unsigned line ) {
@@ -39,8 +39,8 @@ void *XX_httplib_malloc_ex( size_t size, const char *file, unsigned line ) {
 
 	if (data) {
 		*(size_t *)data = size;
-		mg_memory_debug_totalMemUsed += size;
-		mg_memory_debug_blockCount++;
+		httplib_memory_debug_totalMemUsed += size;
+		httplib_memory_debug_blockCount++;
 		memory = (void *)(((char *)data) + sizeof(size_t));
 	}
 
@@ -67,8 +67,8 @@ void XX_httplib_free_ex( void *memory, const char *file, unsigned line ) {
 
 	if (memory) {
 		size = *(size_t *)data;
-		mg_memory_debug_totalMemUsed -= size;
-		mg_memory_debug_blockCount--;
+		httplib_memory_debug_totalMemUsed -= size;
+		httplib_memory_debug_blockCount--;
 
 		free(data);
 	}
@@ -90,8 +90,8 @@ void *XX_httplib_realloc_ex( void *memory, size_t newsize, const char *file, uns
 			_realloc = realloc(data, newsize + sizeof(size_t));
 			if (_realloc) {
 				data = _realloc;
-				mg_memory_debug_totalMemUsed -= oldsize;
-				mg_memory_debug_totalMemUsed += newsize;
+				httplib_memory_debug_totalMemUsed -= oldsize;
+				httplib_memory_debug_totalMemUsed += newsize;
 				*(size_t *)data = newsize;
 				data = (void *)(((char *)data) + sizeof(size_t));
 			} else {

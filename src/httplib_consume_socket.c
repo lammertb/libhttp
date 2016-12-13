@@ -26,7 +26,7 @@
 #include "httplib_pthread.h"
 
 /*
- * int XX_httplib_consume_socket( struct mg_context *ctx, struct socket *sp, int thread_index );
+ * int XX_httplib_consume_socket( struct httplib_context *ctx, struct socket *sp, int thread_index );
  *
  * The function XX_httplib_consume_socket() takes an accepted socket from the
  * queue for further processing.
@@ -34,7 +34,7 @@
 
 #if defined(ALTERNATIVE_QUEUE)
 
-int XX_httplib_consume_socket( struct mg_context *ctx, struct socket *sp, int thread_index ) {
+int XX_httplib_consume_socket( struct httplib_context *ctx, struct socket *sp, int thread_index ) {
 
 	ctx->client_socks[thread_index].in_use = 0;
 	event_wait(ctx->client_wait_events[thread_index]);
@@ -47,7 +47,7 @@ int XX_httplib_consume_socket( struct mg_context *ctx, struct socket *sp, int th
 #else /* ALTERNATIVE_QUEUE */
 
 /* Worker threads take accepted socket from the queue */
-int XX_httplib_consume_socket( struct mg_context *ctx, struct socket *sp, int thread_index ) {
+int XX_httplib_consume_socket( struct httplib_context *ctx, struct socket *sp, int thread_index ) {
 
 #define QUEUE_SIZE(ctx) ((int)(ARRAY_SIZE(ctx->queue)))
 

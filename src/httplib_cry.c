@@ -26,7 +26,7 @@
 #include "httplib_ssl.h"
 
 /* Print error message to the opened error log stream. */
-void mg_cry(const struct mg_connection *conn, const char *fmt, ...) {
+void httplib_cry(const struct httplib_connection *conn, const char *fmt, ...) {
 
 	char buf[MG_BUF_LEN];
 	char src_addr[IP_ADDR_STR_LEN];
@@ -82,4 +82,4 @@ void mg_cry(const struct mg_connection *conn, const char *fmt, ...) {
 		}
 	}
 
-}  /* mg_cry */
+}  /* httplib_cry */

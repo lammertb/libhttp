@@ -25,7 +25,7 @@
 #include "httplib_main.h"
 
 /* Config option name, config types, default value */
-struct mg_option XX_httplib_config_options[] = {
+struct httplib_option XX_httplib_config_options[] = {
 	{ "cgi_pattern",                 CONFIG_TYPE_EXT_PATTERN, "**.cgi$|**.pl$|**.php$"                                           },
 	{ "cgi_environment",             CONFIG_TYPE_STRING,      NULL                                                               },
 	{ "put_delete_auth_file",        CONFIG_TYPE_FILE,        NULL                                                               },
@@ -81,4 +81,4 @@ struct mg_option XX_httplib_config_options[] = {
  * Check if the XX_httplib_config_options and the corresponding enum have
  * compatible sizes
  */
-mg_static_assert((sizeof(XX_httplib_config_options) / sizeof(XX_httplib_config_options[0])) == (NUM_OPTIONS + 1), "XX_httplib_config_options and enum not sync");
+httplib_static_assert((sizeof(XX_httplib_config_options) / sizeof(XX_httplib_config_options[0])) == (NUM_OPTIONS + 1), "XX_httplib_config_options and enum not sync");

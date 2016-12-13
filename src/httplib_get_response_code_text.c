@@ -25,13 +25,13 @@
 #include "httplib_main.h"
 
 /*
- * const char *mg_get_response_code_text( struct mg_connection *conn, int response_code );
+ * const char *httplib_get_response_code_text( struct httplib_connection *conn, int response_code );
  *
- * The function mg_get_response_code_text() returns a text associated with an
+ * The function httplib_get_response_code_text() returns a text associated with an
  * HTTP response code.
  */
 
-const char *mg_get_response_code_text( struct mg_connection *conn, int response_code ) {
+const char *httplib_get_response_code_text( struct httplib_connection *conn, int response_code ) {
 
 	/* See IANA HTTP status code assignment:
 	 * http://www.iana.org/assignments/http-status-codes/http-status-codes.xhtml
@@ -111,7 +111,7 @@ const char *mg_get_response_code_text( struct mg_connection *conn, int response_
 
 	default:
 		/* This error code is unknown. This should not happen. */
-		if ( conn !=  NULL) mg_cry( conn, "Unknown HTTP response code: %u", response_code );
+		if ( conn !=  NULL) httplib_cry( conn, "Unknown HTTP response code: %u", response_code );
 
 		/* Return at least a category according to RFC 2616 Section 10. */
 		if (response_code >= 100 && response_code < 200) return "Information";
@@ -123,4 +123,4 @@ const char *mg_get_response_code_text( struct mg_connection *conn, int response_
 		return "";
 	}
 
-}  /* mg_get_response_code_text */
+}  /* httplib_get_response_code_text */

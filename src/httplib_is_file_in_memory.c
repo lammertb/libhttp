@@ -24,7 +24,7 @@
 
 #include "httplib_main.h"
 
-int XX_httplib_is_file_in_memory( const struct mg_connection *conn, const char *path, struct file *filep ) {
+int XX_httplib_is_file_in_memory( const struct httplib_connection *conn, const char *path, struct file *filep ) {
 
 	size_t size = 0;
 

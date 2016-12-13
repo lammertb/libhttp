@@ -26,7 +26,7 @@
 #include "httplib_utils.h"
 
 /*
- * void XX_httplib_send_options( struct mg_connection *conn );
+ * void XX_httplib_send_options( struct httplib_connection *conn );
  *
  * The function XX_httplib_send_options() sends a list of allowed options a
  * client can use to connect to the server.
@@ -34,7 +34,7 @@
 
 #if !defined(NO_FILES)
 
-void XX_httplib_send_options( struct mg_connection *conn ) {
+void XX_httplib_send_options( struct httplib_connection *conn ) {
 
 	char date[64];
 	time_t curtime;
@@ -46,7 +46,7 @@ void XX_httplib_send_options( struct mg_connection *conn ) {
 	conn->must_close  = 1;
 	XX_httplib_gmt_time_string( date, sizeof(date), &curtime );
 
-	mg_printf(conn,
+	httplib_printf(conn,
 	          "HTTP/1.1 200 OK\r\n"
 	          "Date: %s\r\n"
 	          /* TODO: "Cache-Control" (?) */

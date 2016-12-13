@@ -28,65 +28,64 @@
 #include "httplib_ssl.h"
 #include "httplib_string.h"
 
-static struct mg_connection *	mg_connect_client_impl( const struct mg_client_options *client_options, int use_ssl, char *ebuf, size_t ebuf_len );
+static struct httplib_connection *	httplib_connect_client_impl( const struct httplib_client_options *client_options, int use_ssl, char *ebuf, size_t ebuf_len );
 
 
 
 /*
- * struct mg_connection *mg_connect_client_secure( const struct mg_client_options *client options, char *error buffer, size_t error_buffer_size );
+ * struct httplib_connection *httplib_connect_client_secure( const struct httplib_client_options *client options, char *error buffer, size_t error_buffer_size );
  *
- * The function mg_connect_client_secure() creates a secure connection as a
+ * The function httplib_connect_client_secure() creates a secure connection as a
  * client to a remote server and returns a pointer to the connection
  * information, or NULL if an error occured.
  */
 
-CIVETWEB_API struct mg_connection *mg_connect_client_secure( const struct mg_client_options *client_options, char *error_buffer, size_t error_buffer_size ) {
+CIVETWEB_API struct httplib_connection *httplib_connect_client_secure( const struct httplib_client_options *client_options, char *error_buffer, size_t error_buffer_size ) {
 
-	return mg_connect_client_impl( client_options, 1, error_buffer, error_buffer_size );
+	return httplib_connect_client_impl( client_options, 1, error_buffer, error_buffer_size );
 
-}  /* mg_connect_client_secure */
+}  /* httplib_connect_client_secure */
 
 
 
 /*
- * struct mg_connection *mg_connect_client( const char *host, int port, int use_ssl, char *error_buffer, size_t error_buffer_size );
+ * struct httplib_connection *httplib_connect_client( const char *host, int port, int use_ssl, char *error_buffer, size_t error_buffer_size );
  *
- * The function mg_connect_client() connects to a remote server as a client
+ * The function httplib_connect_client() connects to a remote server as a client
  * with the options of the connection provided as parameters.
  */
 
-struct mg_connection * mg_connect_client( const char *host, int port, int use_ssl, char *error_buffer, size_t error_buffer_size ) {
+struct httplib_connection * httplib_connect_client( const char *host, int port, int use_ssl, char *error_buffer, size_t error_buffer_size ) {
 
-	struct mg_client_options opts;
+	struct httplib_client_options opts;
 
 	memset( &opts, 0, sizeof(opts) );
 	opts.host = host;
 	opts.port = port;
 
-	return mg_connect_client_impl( &opts, use_ssl, error_buffer, error_buffer_size );
+	return httplib_connect_client_impl( &opts, use_ssl, error_buffer, error_buffer_size );
 
-}  /* mg_connect_client */
+}  /* httplib_connect_client */
 
 
 
 /*
- * static struct mg_connection *mg_connect_client_impl( const struct mg_client_options *client_options, int use_ssl, char *ebuf, size_t ebuf_len );
+ * static struct httplib_connection *httplib_connect_client_impl( const struct httplib_client_options *client_options, int use_ssl, char *ebuf, size_t ebuf_len );
  *
- * The function mg_connect_client_impl() is the background function doing the
+ * The function httplib_connect_client_impl() is the background function doing the
  * heavy lifting to make connections as a client to remote servers.
  */
 
-static struct mg_connection *mg_connect_client_impl( const struct mg_client_options *client_options, int use_ssl, char *ebuf, size_t ebuf_len ) {
+static struct httplib_connection *httplib_connect_client_impl( const struct httplib_client_options *client_options, int use_ssl, char *ebuf, size_t ebuf_len ) {
 
-	static struct mg_context fake_ctx;
-	struct mg_connection *conn = NULL;
+	static struct httplib_context fake_ctx;
+	struct httplib_connection *conn = NULL;
 	SOCKET sock;
 	union usa sa;
 
 	if (!XX_httplib_connect_socket(&fake_ctx, client_options->host, client_options->port, use_ssl, ebuf, ebuf_len, &sock, &sa)) {
 		;
-	} else if ((conn = (struct mg_connection *)
-	                XX_httplib_calloc(1, sizeof(*conn) + MAX_REQUEST_SIZE)) == NULL) {
+	} else if ((conn = (struct httplib_connection *) XX_httplib_calloc(1, sizeof(*conn) + MAX_REQUEST_SIZE)) == NULL) {
 		XX_httplib_snprintf(NULL, NULL, ebuf, ebuf_len, "calloc(): %s", strerror(ERRNO));
 		closesocket(sock);
 #ifndef NO_SSL
@@ -114,7 +113,7 @@ static struct mg_connection *mg_connect_client_impl( const struct mg_client_opti
 		conn->client.sock = sock;
 		conn->client.lsa  = sa;
 
-		if (getsockname(sock, psa, &len) != 0) mg_cry(conn, "%s: getsockname() failed: %s", __func__, strerror(ERRNO));
+		if (getsockname(sock, psa, &len) != 0) httplib_cry(conn, "%s: getsockname() failed: %s", __func__, strerror(ERRNO));
 
 		conn->client.is_ssl = use_ssl ? 1 : 0;
 		pthread_mutex_init(&conn->mutex, &XX_httplib_pthread_mutex_attr);
@@ -161,4 +160,4 @@ static struct mg_connection *mg_connect_client_impl( const struct mg_client_opti
 
 	return conn;
 
-}  /* mg_connect_client_impl */
+}  /* httplib_connect_client_impl */

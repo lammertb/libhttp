@@ -24,8 +24,8 @@
 
 #include "httplib_main.h"
 
-void * mg_get_user_data(const struct mg_context *ctx) {
+void * httplib_get_user_data(const struct httplib_context *ctx) {
 
 	return (ctx == NULL) ? NULL : ctx->user_data;
 
-}  /* mg_get_user_data */
+}  /* httplib_get_user_data */

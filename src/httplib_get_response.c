@@ -26,19 +26,19 @@
 #include "httplib_string.h"
 
 /*
- * int mg_get_response( struct mg_connection *conn, char *ebuf, size_t ebuf_len, int timeout );
+ * int httplib_get_response( struct httplib_connection *conn, char *ebuf, size_t ebuf_len, int timeout );
  *
- * The function mg_get_response tries to get a response from a remote peer.
+ * The function httplib_get_response tries to get a response from a remote peer.
  */
 
-int mg_get_response( struct mg_connection *conn, char *ebuf, size_t ebuf_len, int timeout ) {
+int httplib_get_response( struct httplib_connection *conn, char *ebuf, size_t ebuf_len, int timeout ) {
 
 	if ( conn == NULL ) return -1;
 
 	/* Implementation of API function for HTTP clients */
 	int err, ret;
-	struct mg_context *octx = conn->ctx;
-	struct mg_context rctx = *(conn->ctx);
+	struct httplib_context *octx = conn->ctx;
+	struct httplib_context rctx = *(conn->ctx);
 	char txt[32]; /* will not overflow */
 
 	if (timeout >= 0) {
@@ -61,4 +61,4 @@ int mg_get_response( struct mg_connection *conn, char *ebuf, size_t ebuf_len, in
 	 * For the first test use <0 for error and >0 for OK */
 	return (ret == 0) ? -1 : +1;
 
-}  /* mg_get_response */
+}  /* httplib_get_response */

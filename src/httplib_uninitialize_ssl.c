@@ -29,14 +29,14 @@
 #include "httplib_utils.h"
 
 /*
- * void XX_httplib_unitialize_ssl( struct mg_context *ctx );
+ * void XX_httplib_unitialize_ssl( struct httplib_context *ctx );
  *
  * The function XX_httplib_unititialize_ssl() is used to properly stop the SSL
  * subsystem.
  */
 
 #if !defined(NO_SSL)
-void XX_httplib_uninitialize_ssl( struct mg_context *ctx ) {
+void XX_httplib_uninitialize_ssl( struct httplib_context *ctx ) {
 
 	int i;
 	(void)ctx;

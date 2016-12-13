@@ -26,7 +26,7 @@
 
 #if defined(_WIN32)
 
-int mg_start_thread(mg_thread_func_t f, void *p) {
+int httplib_start_thread(httplib_thread_func_t f, void *p) {
 
 #if defined(USE_STACK_SIZE) && (USE_STACK_SIZE > 1)
 	/* Compile-time option to control stack size, e.g. -DUSE_STACK_SIZE=16384
@@ -36,11 +36,11 @@ int mg_start_thread(mg_thread_func_t f, void *p) {
 	return ( (_beginthread((void(__cdecl *)(void *))f, 0, p) == ((uintptr_t)(-1L))) ? -1 : 0);
 #endif /* defined(USE_STACK_SIZE) && (USE_STACK_SIZE > 1) */
 
-}  /* mg_start_thread */
+}  /* httplib_start_thread */
 
 #else
 
-int mg_start_thread(mg_thread_func_t func, void *param) {
+int httplib_start_thread(httplib_thread_func_t func, void *param) {
 
 	pthread_t thread_id;
 	pthread_attr_t attr;
@@ -59,6 +59,6 @@ int mg_start_thread(mg_thread_func_t func, void *param) {
 	pthread_attr_destroy(&attr);
 
 	return result;
-}  /* mg_start_thread */
+}  /* httplib_start_thread */
 
 #endif /* _WIN32 */

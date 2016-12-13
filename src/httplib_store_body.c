@@ -25,12 +25,12 @@
 #include "httplib_main.h"
 
 /*
- * long long mg_store_body( struct mg_connection *conn, const char *path );
+ * long long httplib_store_body( struct httplib_connection *conn, const char *path );
  *
- * The function mg_store_body() stores in incoming body for future processing.
+ * The function httplib_store_body() stores in incoming body for future processing.
  */
 
-long long mg_store_body( struct mg_connection *conn, const char *path ) {
+long long httplib_store_body( struct httplib_connection *conn, const char *path ) {
 
 	char buf[MG_BUF_LEN];
 	long long len = 0;
@@ -39,7 +39,7 @@ long long mg_store_body( struct mg_connection *conn, const char *path ) {
 	struct file fi;
 
 	if (conn->consumed_content != 0) {
-		mg_cry(conn, "%s: Contents already consumed", __func__);
+		httplib_cry(conn, "%s: Contents already consumed", __func__);
 		return -11;
 	}
 
@@ -56,7 +56,7 @@ long long mg_store_body( struct mg_connection *conn, const char *path ) {
 
 	if (XX_httplib_fopen(conn, path, "w", &fi) == 0) return -12;
 
-	ret = mg_read(conn, buf, sizeof(buf));
+	ret = httplib_read(conn, buf, sizeof(buf));
 	while (ret > 0) {
 		n = (int)fwrite(buf, 1, (size_t)ret, fi.fp);
 		if (n != ret) {
@@ -64,7 +64,7 @@ long long mg_store_body( struct mg_connection *conn, const char *path ) {
 			XX_httplib_remove_bad_file(conn, path);
 			return -13;
 		}
-		ret = mg_read(conn, buf, sizeof(buf));
+		ret = httplib_read(conn, buf, sizeof(buf));
 	}
 
 	/* TODO: XX_httplib_fclose should return an error,
@@ -76,4 +76,4 @@ long long mg_store_body( struct mg_connection *conn, const char *path ) {
 
 	return len;
 
-}  /* mg_store_body */
+}  /* httplib_store_body */

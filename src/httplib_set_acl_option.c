@@ -25,12 +25,12 @@
 #include "httplib_main.h"
 
 /*
- * int XX_httplib_set_acl_option( struct mg_context *ctx );
+ * int XX_httplib_set_acl_option( struct httplib_context *ctx );
  *
  * The function XX_httplib_set_acl_option() sets the ACL option for a context.
  */
 
-int XX_httplib_set_acl_option( struct mg_context *ctx ) {
+int XX_httplib_set_acl_option( struct httplib_context *ctx ) {
 
 	return XX_httplib_check_acl( ctx, (uint32_t)0x7f000001UL ) != -1;
 

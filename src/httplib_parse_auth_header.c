@@ -26,7 +26,7 @@
 #include "httplib_string.h"
 
 /* Return 1 on success. Always initializes the ah structure. */
-int XX_httplib_parse_auth_header(struct mg_connection *conn, char *buf, size_t buf_size, struct ah *ah) {
+int XX_httplib_parse_auth_header(struct httplib_connection *conn, char *buf, size_t buf_size, struct ah *ah) {
 
 	char *name;
 	char *value;
@@ -37,7 +37,7 @@ int XX_httplib_parse_auth_header(struct mg_connection *conn, char *buf, size_t b
 	if (!ah || !conn) return 0;
 
 	memset(ah, 0, sizeof(*ah));
-	if ((auth_header = mg_get_header(conn, "Authorization")) == NULL || mg_strncasecmp(auth_header, "Digest ", 7) != 0) return 0;
+	if ((auth_header = httplib_get_header(conn, "Authorization")) == NULL || httplib_strncasecmp(auth_header, "Digest ", 7) != 0) return 0;
 
 	/* Make modifiable copy of the auth header */
 	XX_httplib_strlcpy(buf, auth_header + 7, buf_size);

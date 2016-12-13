@@ -29,13 +29,13 @@
 #if !defined(NO_FILES)
 
 /*
- * static void print_props( struct mg_connection *conn, const char *uri, struct file *filep );
+ * static void print_props( struct httplib_connection *conn, const char *uri, struct file *filep );
  *
  * The function print_props() writes the PROPFIND properties for a collection
  * event.
  */
 
-static void print_props( struct mg_connection *conn, const char *uri, struct file *filep ) {
+static void print_props( struct httplib_connection *conn, const char *uri, struct file *filep ) {
 
 	char mtime[64];
 
@@ -43,7 +43,7 @@ static void print_props( struct mg_connection *conn, const char *uri, struct fil
 
 	XX_httplib_gmt_time_string(mtime, sizeof(mtime), &filep->last_modified);
 	conn->num_bytes_sent +=
-	    mg_printf(conn,
+	    httplib_printf(conn,
 	              "<d:response>"
 	              "<d:href>%s</d:href>"
 	              "<d:propstat>"
@@ -77,13 +77,13 @@ static void print_dav_dir_entry( struct de *de, void *data ) {
 	char href_encoded[PATH_MAX * 3 /* worst case */];
 	int truncated;
 
-	struct mg_connection *conn = (struct mg_connection *)data;
+	struct httplib_connection *conn = (struct httplib_connection *)data;
 	if (!de || !conn) return;
 
 	XX_httplib_snprintf(conn, &truncated, href, sizeof(href), "%s%s", conn->request_info.local_uri, de->file_name);
 
 	if (!truncated) {
-		mg_url_encode(href, href_encoded, PATH_MAX * 3);
+		httplib_url_encode(href, href_encoded, PATH_MAX * 3);
 		print_props(conn, href_encoded, &de->file);
 	}
 
@@ -92,14 +92,14 @@ static void print_dav_dir_entry( struct de *de, void *data ) {
 
 
 /*
- * void XX_httplib_handle_propfind( struct mg_connection *conn, const char *path, struct file *filep );
+ * void XX_httplib_handle_propfind( struct httplib_connection *conn, const char *path, struct file *filep );
  *
  * The function XX_httlib_handle_propfind() handles a propfind request.
  */
 
-void XX_httplib_handle_propfind( struct mg_connection *conn, const char *path, struct file *filep ) {
+void XX_httplib_handle_propfind( struct httplib_connection *conn, const char *path, struct file *filep ) {
 
-	const char *depth = mg_get_header(conn, "Depth");
+	const char *depth = httplib_get_header(conn, "Depth");
 	char date[64];
 	time_t curtime = time(NULL);
 
@@ -109,23 +109,23 @@ void XX_httplib_handle_propfind( struct mg_connection *conn, const char *path, s
 
 	conn->must_close = 1;
 	conn->status_code = 207;
-	mg_printf(conn, "HTTP/1.1 207 Multi-Status\r\n" "Date: %s\r\n", date);
+	httplib_printf(conn, "HTTP/1.1 207 Multi-Status\r\n" "Date: %s\r\n", date);
 	XX_httplib_send_static_cache_header(conn);
-	mg_printf(conn, "Connection: %s\r\n" "Content-Type: text/xml; charset=utf-8\r\n\r\n", XX_httplib_suggest_connection_header(conn));
+	httplib_printf(conn, "Connection: %s\r\n" "Content-Type: text/xml; charset=utf-8\r\n\r\n", XX_httplib_suggest_connection_header(conn));
 
-	conn->num_bytes_sent += mg_printf(conn, "<?xml version=\"1.0\" encoding=\"utf-8\"?>" "<d:multistatus xmlns:d='DAV:'>\n");
+	conn->num_bytes_sent += httplib_printf(conn, "<?xml version=\"1.0\" encoding=\"utf-8\"?>" "<d:multistatus xmlns:d='DAV:'>\n");
 
 	/* Print properties for the requested resource itself */
 	print_props(conn, conn->request_info.local_uri, filep);
 
 	/* If it is a directory, print directory entries too if Depth is not 0 */
 	if (filep && filep->is_directory
-	    && !mg_strcasecmp(conn->ctx->config[ENABLE_DIRECTORY_LISTING], "yes")
+	    && !httplib_strcasecmp(conn->ctx->config[ENABLE_DIRECTORY_LISTING], "yes")
 	    && (depth == NULL || strcmp(depth, "0") != 0)) {
 		XX_httplib_scan_directory(conn, path, conn, &print_dav_dir_entry);
 	}
 
-	conn->num_bytes_sent += mg_printf(conn, "%s\n", "</d:multistatus>");
+	conn->num_bytes_sent += httplib_printf(conn, "%s\n", "</d:multistatus>");
 
 }  /* XX_httplib_handle_propfind */
 

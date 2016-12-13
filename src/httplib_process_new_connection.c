@@ -27,17 +27,17 @@
 #include "httplib_string.h"
 
 /*
- * void XX_httplib_process_new_connection( struct mg_connection *conn );
+ * void XX_httplib_process_new_connection( struct httplib_connection *conn );
  *
  * The function XX_httplib_process_new_connection() is used to process a new
  * incoming connection on a socket.
  */
 
-void XX_httplib_process_new_connection( struct mg_connection *conn ) {
+void XX_httplib_process_new_connection( struct httplib_connection *conn ) {
 
 	if ( conn == NULL  ||  conn->ctx == NULL ) return;
 
-	struct mg_request_info *ri = &conn->request_info;
+	struct httplib_request_info *ri = &conn->request_info;
 	int keep_alive_enabled;
 	int keep_alive;
 	int discard_len;
