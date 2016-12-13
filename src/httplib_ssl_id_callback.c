@@ -22,14 +22,11 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
 #include "httplib_memory.h"
 #include "httplib_pthread.h"
 #include "httplib_ssl.h"
-
-
+#include "httplib_utils.h"
 
 /*
  * unsigned long XX_httplib_ssl_id_callback( void );

@@ -28,7 +28,7 @@
 #define BUFLEN		1024
 
 /*
- * void main( void );
+ * int main( void );
  *
  * The main() routine of the testmime program crawls through the list of MIME
  * types and checks if the list has been properly sorted. It also checks for
@@ -36,7 +36,7 @@
  * proper MIME type.
  */
 
-void main( void ) {
+int main( void ) {
 
 	int a;
 	int index;
@@ -84,5 +84,7 @@ void main( void ) {
 
 	if ( problems == 0 ) printf( "MIME type lookup function is working OK\n" );
 	else                 printf( "%d errors found in MIME type lookup function.\n", problems );
+
+	return ( problems > 0 );
 
 }  /* main (testmime) */

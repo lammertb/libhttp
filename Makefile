@@ -1045,6 +1045,7 @@ ${OBJDIR}httplib_ssl_id_callback${OBJEXT}				: ${SRCDIR}httplib_ssl_id_callback.
 									  ${SRCDIR}httplib_memory.h					\
 									  ${SRCDIR}httplib_pthread.h					\
 									  ${SRCDIR}httplib_ssl.h					\
+									  ${SRCDIR}httplib_utils.h					\
 									  ${SRCDIR}httplib_main.h
 
 ${OBJDIR}httplib_ssl_locking_callback${OBJEXT}				: ${SRCDIR}httplib_ssl_locking_callback.c			\

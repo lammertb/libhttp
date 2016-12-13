@@ -22,7 +22,7 @@
 
 #include "httplib_main.h"
 
-#define NUM_MIME_TYPES		(sizeof(builtin_mime_types)/sizeof(builtin_mime_types[0]))
+#define NUM_MIME_TYPES		((int)(sizeof(builtin_mime_types)/sizeof(builtin_mime_types[0])))
 
 static const struct {
 	const char *extension;
