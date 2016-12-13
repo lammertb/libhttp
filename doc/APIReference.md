@@ -11,8 +11,8 @@ LibHTTP is often used as HTTP and HTTPS library inside a larger application.  A 
 ## Structures
 
 * [`struct client_cert;`](api/client_cert.md)
-* [`struct httplib_client_options;`](api/httplib_client_options.md)
 * [`struct httplib_callbacks;`](api/httplib_callbacks.md)
+* [`struct httplib_client_options;`](api/httplib_client_options.md)
 * [`struct httplib_form_data_handler;`](api/httplib_form_data_handler.md)
 * [`struct httplib_header;`](api/httplib_header.md)
 * [`struct httplib_option;`](api/httplib_option.md)
