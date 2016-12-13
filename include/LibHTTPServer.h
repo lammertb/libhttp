@@ -51,7 +51,7 @@ class CIVETWEB_API LibHTTPHandler
 	 * @param conn - the connection information
 	 * @returns true if implemented, false otherwise
 	 */
-	virtual bool handleGet(LibHTTPServer *server, struct mg_connection *conn);
+	virtual bool handleGet(LibHTTPServer *server, struct httplib_connection *conn);
 
 	/**
 	 * Callback method for POST request.
@@ -60,7 +60,7 @@ class CIVETWEB_API LibHTTPHandler
 	 * @param conn - the connection information
 	 * @returns true if implemented, false otherwise
 	 */
-	virtual bool handlePost(LibHTTPServer *server, struct mg_connection *conn);
+	virtual bool handlePost(LibHTTPServer *server, struct httplib_connection *conn);
 
 	/**
 	 * Callback method for HEAD request.
@@ -69,7 +69,7 @@ class CIVETWEB_API LibHTTPHandler
 	 * @param conn - the connection information
 	 * @returns true if implemented, false otherwise
 	 */
-	virtual bool handleHead(LibHTTPServer *server, struct mg_connection *conn);
+	virtual bool handleHead(LibHTTPServer *server, struct httplib_connection *conn);
 
 	/**
 	 * Callback method for PUT request.
@@ -78,7 +78,7 @@ class CIVETWEB_API LibHTTPHandler
 	 * @param conn - the connection information
 	 * @returns true if implemented, false otherwise
 	 */
-	virtual bool handlePut(LibHTTPServer *server, struct mg_connection *conn);
+	virtual bool handlePut(LibHTTPServer *server, struct httplib_connection *conn);
 
 	/**
 	 * Callback method for DELETE request.
@@ -87,7 +87,7 @@ class CIVETWEB_API LibHTTPHandler
 	 * @param conn - the connection information
 	 * @returns true if implemented, false otherwise
 	 */
-	virtual bool handleDelete(LibHTTPServer *server, struct mg_connection *conn);
+	virtual bool handleDelete(LibHTTPServer *server, struct httplib_connection *conn);
 
 	/**
 	 * Callback method for OPTIONS request.
@@ -96,7 +96,7 @@ class CIVETWEB_API LibHTTPHandler
 	 * @param conn - the connection information
 	 * @returns true if implemented, false otherwise
 	 */
-	virtual bool handleOptions(LibHTTPServer *server, struct mg_connection *conn);
+	virtual bool handleOptions(LibHTTPServer *server, struct httplib_connection *conn);
 
 	/**
 	 * Callback method for PATCH request.
@@ -105,7 +105,7 @@ class CIVETWEB_API LibHTTPHandler
 	 * @param conn - the connection information
 	 * @returns true if implemented, false otherwise
 	 */
-	virtual bool handlePatch(LibHTTPServer *server, struct mg_connection *conn);
+	virtual bool handlePatch(LibHTTPServer *server, struct httplib_connection *conn);
 };
 
 /**
@@ -130,7 +130,7 @@ class CIVETWEB_API LibHTTPAuthHandler
 	 * @param conn - the connection information
 	 * @returns true if authorization succeeded, false otherwise
 	 */
-	virtual bool authorize(LibHTTPServer *server, struct mg_connection *conn) = 0;
+	virtual bool authorize(LibHTTPServer *server, struct httplib_connection *conn) = 0;
 };
 
 /**
@@ -155,8 +155,7 @@ class CIVETWEB_API LibHTTPWebSocketHandler
 	 * @param conn - the connection information
 	 * @returns true to keep socket open, false to close it
 	 */
-	virtual bool handleConnection(LibHTTPServer *server,
-	                              const struct mg_connection *conn);
+	virtual bool handleConnection(LibHTTPServer *server, const struct httplib_connection *conn);
 
 	/**
 	 * Callback method for when websocket handshake is successfully completed,
@@ -165,8 +164,7 @@ class CIVETWEB_API LibHTTPWebSocketHandler
 	 * @param server - the calling server
 	 * @param conn - the connection information
 	 */
-	virtual void handleReadyState(LibHTTPServer *server,
-	                              struct mg_connection *conn);
+	virtual void handleReadyState(LibHTTPServer *server, struct httplib_connection *conn);
 
 	/**
 	 * Callback method for when a data frame has been received from the client.
@@ -178,11 +176,7 @@ class CIVETWEB_API LibHTTPWebSocketHandler
 	 * @data, data_len: payload, with mask (if any) already applied.
 	 * @returns true to keep socket open, false to close it
 	 */
-	virtual bool handleData(LibHTTPServer *server,
-	                        struct mg_connection *conn,
-	                        int bits,
-	                        char *data,
-	                        size_t data_len);
+	virtual bool handleData(LibHTTPServer *server, struct httplib_connection *conn, int bits, char *data, size_t data_len);
 
 	/**
 	 * Callback method for when the connection is closed.
@@ -190,16 +184,15 @@ class CIVETWEB_API LibHTTPWebSocketHandler
 	 * @param server - the calling server
 	 * @param conn - the connection information
 	 */
-	virtual void handleClose(LibHTTPServer *server,
-	                         const struct mg_connection *conn);
+	virtual void handleClose(LibHTTPServer *server, const struct httplib_connection *conn);
 };
 
 /**
  * LibHTTPCallbacks
  *
- * wrapper for mg_callbacks
+ * wrapper for httplib_callbacks
  */
-struct CIVETWEB_API LibHTTPCallbacks : public mg_callbacks {
+struct CIVETWEB_API LibHTTPCallbacks : public httplib_callbacks {
 	LiBHTTPCallbacks();
 };
 
@@ -250,7 +243,7 @@ class CIVETWEB_API LibHTTPServer
 	 *
 	 * @return the context or 0 if not running.
 	 */
-	const struct mg_context *
+	const struct httplib_context *
 	getContext() const
 	{
 		return context;
@@ -353,7 +346,7 @@ class CIVETWEB_API LibHTTPServer
 	std::vector<int> getListeningPorts();
 
 	/**
-	 * getCookie(struct mg_connection *conn, const std::string &cookieName,
+	 * getCookie(struct httplib_connection *conn, const std::string &cookieName,
 	 *std::string &cookieValue)
 	 *
 	 * Puts the cookie value string that matches the cookie name in the
@@ -364,21 +357,20 @@ class CIVETWEB_API LibHTTPServer
 	 * @param cookieValue - cookie value is returned using thiis reference
 	 * @returns the size of the cookie value string read.
 	*/
-	static int getCookie(struct mg_connection *conn,
+	static int getCookie(struct httplib_connection *conn,
 	                     const std::string &cookieName,
 	                     std::string &cookieValue);
 
 	/**
-	 * getHeader(struct mg_connection *conn, const std::string &headerName)
+	 * getHeader(struct httplib_connection *conn, const std::string &headerName)
 	 * @param conn - the connection information
 	 * @param headerName - header name to get the value from
 	 * @returns a char array whcih contains the header value as string
 	*/
-	static const char *getHeader(struct mg_connection *conn,
-	                             const std::string &headerName);
+	static const char *getHeader(struct httplib_connection *conn, const std::string &headerName);
 
 	/**
-	 * getParam(struct mg_connection *conn, const char *, std::string &, size_t)
+	 * getParam(struct httplib_connection *conn, const char *, std::string &, size_t)
 	 *
 	 * Returns a query paramter contained in the supplied buffer.  The
 	 * occurance value is a zero-based index of a particular key name.  This
@@ -400,10 +392,7 @@ class CIVETWEB_API LibHTTPServer
 	 *based).
 	 * @return true if key was found
 	 */
-	static bool getParam(struct mg_connection *conn,
-	                     const char *name,
-	                     std::string &dst,
-	                     size_t occurrence = 0);
+	static bool getParam(struct httplib_connection *conn, const char *name, std::string &dst, size_t occurrence = 0);
 
 	/**
 	 * getParam(const std::string &, const char *, std::string &, size_t)
@@ -544,12 +533,12 @@ class CIVETWEB_API LibHTTPServer
 		~LibHTTPConnection();
 	};
 
-	struct mg_context *context;
-	std::map<struct mg_connection *, class LibHTTPConnection> connections;
+	struct httplib_context *context;
+	std::map<struct httplib_connection *, class LibHTTPConnection> connections;
 
   private:
 	/**
-	 * requestHandler(struct mg_connection *, void *cbdata)
+	 * requestHandler(struct httplib_connection *, void *cbdata)
 	 *
 	 * Handles the incomming request.
 	 *
@@ -557,20 +546,20 @@ class CIVETWEB_API LibHTTPServer
 	 * @param cbdata - pointer to the LibHTTPHandler instance.
 	 * @returns 0 if implemented, false otherwise
 	 */
-	static int requestHandler(struct mg_connection *conn, void *cbdata);
+	static int requestHandler(struct httplib_connection *conn, void *cbdata);
 
-	static int webSocketConnectionHandler(const struct mg_connection *conn,
+	static int webSocketConnectionHandler(const struct httplib_connection *conn,
 	                                      void *cbdata);
-	static void webSocketReadyHandler(struct mg_connection *conn, void *cbdata);
-	static int webSocketDataHandler(struct mg_connection *conn,
+	static void webSocketReadyHandler(struct httplib_connection *conn, void *cbdata);
+	static int webSocketDataHandler(struct httplib_connection *conn,
 	                                int bits,
 	                                char *data,
 	                                size_t data_len,
 	                                void *cbdata);
-	static void webSocketCloseHandler(const struct mg_connection *conn,
+	static void webSocketCloseHandler(const struct httplib_connection *conn,
 	                                  void *cbdata);
 	/**
-	 * authHandler(struct mg_connection *, void *cbdata)
+	 * authHandler(struct httplib_connection *, void *cbdata)
 	 *
 	 * Handles the authorization requests.
 	 *
@@ -578,21 +567,21 @@ class CIVETWEB_API LibHTTPServer
 	 * @param cbdata - pointer to the LibHTTPAuthHandler instance.
 	 * @returns 1 if authorized, 0 otherwise
 	 */
-	static int authHandler(struct mg_connection *conn, void *cbdata);
+	static int authHandler(struct httplib_connection *conn, void *cbdata);
 
 	/**
-	 * closeHandler(struct mg_connection *)
+	 * closeHandler(struct httplib_connection *)
 	 *
 	 * Handles closing a request (internal handler)
 	 *
 	 * @param conn - the connection information
 	 */
-	static void closeHandler(const struct mg_connection *conn);
+	static void closeHandler(const struct httplib_connection *conn);
 
 	/**
 	 * Stores the user provided close handler
 	 */
-	void (*userCloseHandler)(const struct mg_connection *conn);
+	void (*userCloseHandler)(const struct httplib_connection *conn);
 };
 
 #endif /*  __cplusplus */
