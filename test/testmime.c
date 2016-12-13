@@ -58,7 +58,7 @@ int main( void ) {
 
 		if ( mg_strcasecmp( p1, p2 ) >= 0 ) {
 			
-			printf( "Compare ERROR \"%s\" met \"%s\"\n", p1, p2 );
+			printf( "Compare ERROR: \"%s\" not less than \"%s\"\n", p1, p2 );
 			problems++;
 		}
 
@@ -78,7 +78,7 @@ int main( void ) {
 
 		if ( p1 != p2 ) {
 
-			printf( "Lookup error: %s returned as MIME type for %s\n", p2, buffer );
+			printf( "Lookup ERROR: \"%s\" instead of \"%s\" returned as MIME type for %s\n", p2, p1, buffer );
 			problems++;
 		}
 	}
