@@ -555,6 +555,8 @@ const char *httplib_get_builtin_mime_type( const char *path ) {
 	const char *ext;
 	size_t path_len;
 
+	if ( path == NULL ) return "text/plain";
+
 	path_len = strlen( path );
 	while ( path_len > 1  &&  path[path_len-1] != '.' ) path_len--;
 
