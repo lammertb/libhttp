@@ -1,6 +1,6 @@
 # LibHTTP API Reference
 
-### `mg_modify_passwords_file( passwords_file_name, domain, user, password );`
+### `httplib_modify_passwords_file( passwords_file_name, domain, user, password );`
 
 ### Parameters
 
@@ -19,7 +19,7 @@
 
 ### Description
 
-The function `mg_modify_passwords_file()` allows an application to manipulate .htpasswd files on the fly by adding, deleting and changing user records. This is one of the several ways to implement authentication on the server side.
+The function `httplib_modify_passwords_file()` allows an application to manipulate .htpasswd files on the fly by adding, deleting and changing user records. This is one of the several ways to implement authentication on the server side.
 
 If the password parameter is not `NULL` an entry is added to the password file. An existing records is modified in that case. If `NULL` is used as the password the enrty is removed from the file.
 
@@ -27,4 +27,4 @@ The function returns 1 when successful and 0 if an error occurs.
 
 ### See Also
 
-* [`mg_md5();`](mg_md5.md)
+* [`httplib_md5();`](httplib_md5.md)

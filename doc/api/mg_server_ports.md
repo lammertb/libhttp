@@ -1,6 +1,6 @@
 # LibHTTP API Reference
 
-### `struct mg_server_ports;`
+### `struct httplib_server_ports;`
 
 ### Fields
 
@@ -17,8 +17,8 @@
 
 ### Description
 
-A call to the function [`mg_get_server_ports()`](mg_get_server_ports.md) returns a list of structures with information about each running LibHTTP service. These structures are of type `struct mg_server_ports` and contain the base information of each service.
+A call to the function [`httplib_get_server_ports()`](httplib_get_server_ports.md) returns a list of structures with information about each running LibHTTP service. These structures are of type `struct httplib_server_ports` and contain the base information of each service.
 
 ### See Also
 
-* [`mg_get_server_ports();`](mg_get_server_ports.md)
+* [`httplib_get_server_ports();`](httplib_get_server_ports.md)

@@ -1,6 +1,6 @@
 # LibHTTP API Reference
 
-### `struct mg_form_data_handler;`
+### `struct httplib_form_data_handler;`
 
 ### Fields
 
@@ -12,7 +12,7 @@
 ||**`filename`** - The name of the file to upload. Please not that this parameter is only valid when the input type was set to `file`. Otherwise this parameter has the value `NULL`.|
 ||**`path`** - This is an output parameter used to store the full name of the file including the path to store an incoming file at the computer. This parameter must be provided by the application to LibHTTP when a form field of type `file` is found. Please not that together with setting this parameter, the callback function must return `FORM_FIELD_STORAGE_STORE`.i With any other return value the contents of the `path` buffer is ignored by LibHTTP.|
 ||**`pathlen`** - The length of the buffer where the output path can be stored.|
-||**`user_data`** - A pointer to the value of the field `user_data` of the structure `struct mg_form_data_handler`.|
+||**`user_data`** - A pointer to the value of the field `user_data` of the structure `struct httplib_form_data_handler`.|
 ||The callback function `field_found()` can return the following values back to LibHTTP:|
 ||**`FORM_FIELD_STORAGE_SKIP`** - Ignore the field and continue with processing the next field|
 ||**`FORM_FIELD_STORAGE_GET`** - Call the callback function `field_get()` to receive the form data|
@@ -24,13 +24,13 @@
 ||**`path`** -|
 ||**`file_size`** - The path on the server where the file was stored|
 ||**`user_data`** - The size of the stored file in bytes|
-|**`user_data`**|**`void *`** The value of the field `user_data` when the callback functions were registered with a call to `mg_handle_form_request();`|
+|**`user_data`**|**`void *`** The value of the field `user_data` when the callback functions were registered with a call to `httplib_handle_form_request();`|
 ||The `user_data` field is a user supplied argument that will be passed as parameter to each of callback functions|
 
 ### Description
 
-The structure `struct mg_form_data_handler` contains callback functions for handling form fields. Form fields give additional information back from a web page to the server which can be processed by these callback functions.
+The structure `struct httplib_form_data_handler` contains callback functions for handling form fields. Form fields give additional information back from a web page to the server which can be processed by these callback functions.
 
 ### See Also
 
-* [`mg_handle_form_request();`](mg_handle_form_request.md)
+* [`httplib_handle_form_request();`](httplib_handle_form_request.md)

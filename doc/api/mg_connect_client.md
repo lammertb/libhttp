@@ -1,6 +1,6 @@
 # LibHTTP API Reference
 
-### `mg_connect_client( host, port, use_ssl, error_buffer, error_buffer_size );`
+### `httplib_connect_client( host, port, use_ssl, error_buffer, error_buffer_size );`
 
 ### Parameters
 
@@ -16,14 +16,14 @@
 
 | Type | Description |
 | :--- | :--- |
-|`struct mg_connection *`|A pointer to the connection or NULL when an error occurs|
+|`struct httplib_connection *`|A pointer to the connection or NULL when an error occurs|
 
 ### Description
 
-The function `mg_connect_client()` connects to a TCP server as a client. This server can be a HTTP server but this is not necessary. The function returns a pointer to a connection structure when the connection is established and NULL otherwise. The host may be on IPv4 or IPv6, but IPv6 is not enabled in every LibHTTP installation. Specifically the use of IPv6 communications has to be enabled when the library is compiled. At runtime you can use the [`mg_check_feature()`](mg_check_feature.md) function with the parameter `USE_IPV6` to check if IPv6 communication is supported.
+The function `httplib_connect_client()` connects to a TCP server as a client. This server can be a HTTP server but this is not necessary. The function returns a pointer to a connection structure when the connection is established and NULL otherwise. The host may be on IPv4 or IPv6, but IPv6 is not enabled in every LibHTTP installation. Specifically the use of IPv6 communications has to be enabled when the library is compiled. At runtime you can use the [`httplib_check_feature()`](httplib_check_feature.md) function with the parameter `USE_IPV6` to check if IPv6 communication is supported.
  
 ### See Also
 
-* [`mg_check_feature();`](mg_check_feature.md)
-* [`mg_connect_client_secure();`](mg_connect_client_secure.md)
-* [`mg_connect_websocket_client();`](mg_connect_websocket_client.md)
+* [`httplib_check_feature();`](httplib_check_feature.md)
+* [`httplib_connect_client_secure();`](httplib_connect_client_secure.md)
+* [`httplib_connect_websocket_client();`](httplib_connect_websocket_client.md)

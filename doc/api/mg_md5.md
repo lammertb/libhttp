@@ -1,6 +1,6 @@
 # LibHTTP API Reference
 
-### `mg_md5( buf, ... );`
+### `httplib_md5( buf, ... );`
 
 ### Parameters
 
@@ -17,10 +17,10 @@
 
 ### Description
 
-The function `mg_md5()` caluclates the MD5 checksum of a NULL terminated list of NUL terminated ASCII strings. The MD5 checksum is returned in human readable format as an MD5 string in a caller supplied buffer.
+The function `httplib_md5()` caluclates the MD5 checksum of a NULL terminated list of NUL terminated ASCII strings. The MD5 checksum is returned in human readable format as an MD5 string in a caller supplied buffer.
 
 The function returns a pointer to the supplied result buffer.
 
 ### See Also
 
-* [`mg_modify_passwords_file();`](mg_modify_passwords_file.md)
+* [`httplib_modify_passwords_file();`](httplib_modify_passwords_file.md)

@@ -1,12 +1,12 @@
 # LibHTTP API Reference
 
-### `mg_lock_connection( conn );`
+### `httplib_lock_connection( conn );`
 
 ### Parameters
 
 | Parameter | Type | Description |
 | :--- | :--- | :--- |
-|**`conn`**|`struct mg_connection *`|The connection to retrieve a lock|
+|**`conn`**|`struct httplib_connection *`|The connection to retrieve a lock|
 
 ### Return Value
 
@@ -14,14 +14,14 @@
 
 ### Description
 
-The function `mg_lock_connection()` is specifically for websocket connections to lock connection. Using this function in combination with [`mg_unlock_connection();`](mg_unlock_connection.md) is necessary around [`mg_write()`](mg_write.md) and [`mg_printf()`](mg_printf.md) calls if the code has server-initiated communication, as well as with communication in direct response to a message.
+The function `httplib_lock_connection()` is specifically for websocket connections to lock connection. Using this function in combination with [`httplib_unlock_connection();`](httplib_unlock_connection.md) is necessary around [`httplib_write()`](httplib_write.md) and [`httplib_printf()`](httplib_printf.md) calls if the code has server-initiated communication, as well as with communication in direct response to a message.
 
 ### See Also
 
-* [`mg_lock_context();`](mg_lock_context.md)
-* [`mg_printf();`](mg_printf.md)
-* [`mg_unlock_connection();`](mg_unlock_connection.md)
-* [`mg_unlock_context();`](mg_unlock_context.md)
-* [`mg_websocket_client_write();`](mg_websocket_client_write.md)
-* [`mg_websocket_write();`](mg_websocket_write.md)
-* [`mg_write();`](mg_write.md)
+* [`httplib_lock_context();`](httplib_lock_context.md)
+* [`httplib_printf();`](httplib_printf.md)
+* [`httplib_unlock_connection();`](httplib_unlock_connection.md)
+* [`httplib_unlock_context();`](httplib_unlock_context.md)
+* [`httplib_websocket_client_write();`](httplib_websocket_client_write.md)
+* [`httplib_websocket_write();`](httplib_websocket_write.md)
+* [`httplib_write();`](httplib_write.md)

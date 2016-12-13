@@ -1,12 +1,12 @@
 # LibHTTP API Reference
 
-### `mg_get_response_code_text( conn, response_code );`
+### `httplib_get_response_code_text( conn, response_code );`
 
 ### Parameters
 
 | Parameter | Type | Description |
 | :--- | :--- | :--- |
-|**`conn`**|`struct mg_connection *`| A pointer referencing the connection |
+|**`conn`**|`struct httplib_connection *`| A pointer referencing the connection |
 |**`response_code`**|`int`| Response code for which the text is queried |
 
 ### Return Value
@@ -17,9 +17,9 @@
 
 ### Description
 
-The function `mg_get_response_code_text()` returns a pointer to a human readable text describing the HTTP response code which was provided as a parameter.
+The function `httplib_get_response_code_text()` returns a pointer to a human readable text describing the HTTP response code which was provided as a parameter.
 
 ### See Also
 
 * [`httplib_get_builtin_mime_type();`](httplib_get_builtin_mime_type.md)
-* [`mg_version();`](mg_version.md)
+* [`httplib_version();`](httplib_version.md)

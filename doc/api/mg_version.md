@@ -1,6 +1,6 @@
 # LibHTTP API Reference
 
-### `mg_version();`
+### `httplib_version();`
 
 ### Parameters
 
@@ -14,6 +14,6 @@
 
 ### Description
 
-The function `mg_version()` can be used to return the current LibHTTP version.  The function returns a pointer to a string with the current major and minor version number separated with a dot, for example "1.9".
+The function `httplib_version()` can be used to return the current LibHTTP version.  The function returns a pointer to a string with the current major and minor version number separated with a dot, for example "1.9".
 
 ### See Also

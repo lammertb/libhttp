@@ -1,6 +1,6 @@
 # LibHTTP API Reference
 
-### `struct mg_header;`
+### `struct httplib_header;`
 
 ### Fields
 
@@ -11,9 +11,9 @@
 
 ### Description
 
-The structure `mg_header` is used as a sub-structure in the [`struct mg_request_info;`](mg_request_info.md) structure to store the name and value of one HTTP request header as sent by the client.
+The structure `httplib_header` is used as a sub-structure in the [`struct httplib_request_info;`](httplib_request_info.md) structure to store the name and value of one HTTP request header as sent by the client.
 
 ### See Also
 
-* [`struct mg_request_info;`](mg_request_info.md)
-* [`mg_get_header();`](mg_get_header.md)
+* [`struct httplib_request_info;`](httplib_request_info.md)
+* [`httplib_get_header();`](httplib_get_header.md)

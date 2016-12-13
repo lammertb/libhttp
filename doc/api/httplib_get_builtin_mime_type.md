@@ -24,5 +24,5 @@ The function uses an efficient binary search algorithm, but this has implication
 
 ### See Also
 
-* [`mg_send_mime_file();`](mg_send_mime_file.md)
-* [`mg_send_mime_file2();`](mg_send_mime_file2.md)
+* [`httplib_send_mime_file();`](httplib_send_mime_file.md)
+* [`httplib_send_mime_file2();`](httplib_send_mime_file2.md)
