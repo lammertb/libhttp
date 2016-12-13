@@ -24,6 +24,7 @@
 #include <stdio.h> 
 #include "libhttp.h"
 #include "../src/httplib_main.h"
+#include "../src/httplib_string.h"
 
 #define BUFLEN		1024
 
@@ -71,7 +72,7 @@ int main( void ) {
 
 	for (a=0; a<index; a++) {
 
-		snprintf( buffer, BUFLEN, "filename%s", XX_httplib_builtin_mime_ext( a ) );
+		XX_httplib_snprintf( NULL, NULL, buffer, BUFLEN, "filename%s", XX_httplib_builtin_mime_ext( a ) );
 		p1 = XX_httplib_builtin_mime_type( a );
 		p2 = mg_get_builtin_mime_type( buffer );
 
