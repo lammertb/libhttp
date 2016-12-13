@@ -22,11 +22,7 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
-
-
 
 /*
  * void mg_stop( struct mg_context *ctx );

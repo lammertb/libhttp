@@ -22,11 +22,7 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
-
-
 
 /* Config option name, config types, default value */
 struct mg_option XX_httplib_config_options[] = {

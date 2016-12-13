@@ -22,12 +22,8 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
 #include "httplib_ssl.h"
-
-
 
 /*
  * int XX_httplib_ssl_use_pem_file( struct mg_context *ctx, const char *pem );

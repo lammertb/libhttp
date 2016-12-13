@@ -22,11 +22,7 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
-
-
 
 /*
  * int XX_httplib_set_sock_timeout( SOCKET sock, int milliseconds );

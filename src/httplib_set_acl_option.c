@@ -22,11 +22,7 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
-
-
 
 /*
  * int XX_httplib_set_acl_option( struct mg_context *ctx );

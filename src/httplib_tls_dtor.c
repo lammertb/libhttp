@@ -22,14 +22,10 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
 #include "httplib_memory.h"
 #include "httplib_pthread.h"
 #include "httplib_ssl.h"
-
-
 
 /*
  * void XX_httplib_tls_dtor( void *key );

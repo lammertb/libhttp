@@ -22,12 +22,8 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
 #include "httplib_memory.h"
-
-
 
 /*
  * void XX_httplib_close_all_listening_sockets( struct mg_context *ctx );

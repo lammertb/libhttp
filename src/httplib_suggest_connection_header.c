@@ -22,11 +22,7 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
-
-
 
 const char * XX_httplib_suggest_connection_header( const struct mg_connection *conn ) {
 

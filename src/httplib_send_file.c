@@ -22,11 +22,7 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
-
-
 
 void mg_send_file( struct mg_connection *conn, const char *path ) {
 

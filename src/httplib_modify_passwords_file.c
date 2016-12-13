@@ -22,11 +22,7 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
-
-
 
 int mg_modify_passwords_file( const char *fname, const char *domain, const char *user, const char *pass ) {
 

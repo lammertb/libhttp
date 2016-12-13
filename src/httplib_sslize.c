@@ -22,12 +22,8 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
 #include "httplib_ssl.h"
-
-
 
 /*
  * int XX_httplib_sslize( struct mg_connection *conn, SSL_CTX *s, int (*func)(SSL *) );

@@ -22,11 +22,7 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
-
-
 
 const char *mg_get_option(const struct mg_context *ctx, const char *name) {
 

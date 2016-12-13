@@ -22,12 +22,8 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
 #include "httplib_pthread.h"
-
-
 
 /*
  * void XX_httplib_produce_socket( struct mg_context *ctx, const struct socket *sp );

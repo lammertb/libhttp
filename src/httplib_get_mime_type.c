@@ -22,11 +22,7 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
-
-
 
 /* Look at the "path" extension and figure what mime type it has.
  * Store mime type in the vector. */

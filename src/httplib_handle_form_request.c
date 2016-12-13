@@ -21,12 +21,8 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
 #include "httplib_memory.h"
-
-
 
 static int url_encoded_field_found(const struct mg_connection *conn,
                         const char *key,

@@ -22,12 +22,8 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
 #include "httplib_ssl.h"
-
-
 
 /*
  * const char *XX_httplib_ssl_error( void );

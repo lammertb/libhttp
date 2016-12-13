@@ -22,12 +22,8 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
 #include "httplib_memory.h"
-
-
 
 /*
  * void XX_httplib_read_websocket( struct mg_connection *conn, mg_websocket_data_handler ws_data_handler, void *calback_data );

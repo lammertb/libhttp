@@ -22,11 +22,7 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
-
-
 
 /*
  * int mg_websocket_write( struct mg_connection *conn, int opcode, const char *data, size_t dataLen );

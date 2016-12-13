@@ -22,12 +22,8 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
 #include "httplib_pthread.h"
-
-
 
 /*
  * int XX_httplib_consume_socket( struct mg_context *ctx, struct socket *sp, int thread_index );

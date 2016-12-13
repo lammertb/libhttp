@@ -22,11 +22,7 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
-
-
 
 /* HTTP 1.1 assumes keep alive if "Connection:" header is not set
  * This function must tolerate situations when connection info is not

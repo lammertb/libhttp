@@ -22,11 +22,7 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
-
-
 
 bool XX_httplib_is_file_opened( const struct file *filep ) {
 

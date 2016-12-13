@@ -22,13 +22,9 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
 
-
 #if defined(_WIN32)
-
 
 /* Windows happily opens files with some garbage at the end of file name.
  * For example, fopen("a.cgi    ", "r") on Windows successfully opens

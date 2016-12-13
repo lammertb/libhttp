@@ -22,11 +22,7 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
-
-
 
 /*
  * int XX_httplib_parse_http_message( char *buf, int len, struct mg_request_info *ri );

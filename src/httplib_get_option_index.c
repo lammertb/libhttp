@@ -22,12 +22,7 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
-
-
-
 
 int XX_httplib_get_option_index( const char *name ) {
 

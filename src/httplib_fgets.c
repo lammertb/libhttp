@@ -22,11 +22,7 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
-
-
 
 const char *XX_httplib_fgets( char *buf, size_t size, struct file *filep, char **p ) {
 

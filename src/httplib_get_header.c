@@ -22,11 +22,7 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
-
-
 
 /* Return HTTP header value, or NULL if not found. */
 const char *XX_httplib_get_header( const struct mg_request_info *ri, const char *name ) {

@@ -30,8 +30,6 @@
 
 static void *	worker_thread_run( struct worker_thread_args *thread_args );
 
-
-
 /*
  * ... XX_httplib_worker_thread( void *thread_func_param );
  *

@@ -22,12 +22,8 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
 #include "httplib_ssl.h"
-
-
 
 /*
  * void XX_httplib_accept_new_connection( const struct socket *lostener, struct mg_context *ctx );

@@ -22,11 +22,7 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
-
-
 
 /*
  * int XX_httplib_forward_body_data( struct mg_connection *conn, FILE *fp, SOCKET sock, SSL *ssl );

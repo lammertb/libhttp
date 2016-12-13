@@ -22,12 +22,8 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
 #include "httplib_ssl.h"
-
-
 
 #ifdef _WIN32
 CRITICAL_SECTION			global_log_file_lock;

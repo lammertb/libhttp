@@ -22,14 +22,7 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
-
-
-
-
-
 
 #if !defined(NO_THREAD_NAME)
 #if defined(__linux__)

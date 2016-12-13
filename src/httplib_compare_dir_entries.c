@@ -22,11 +22,7 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
-
-
 
 /* This function is called from send_directory() and used for
  * sorting directory entries by size, or name, or modification time.

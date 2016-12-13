@@ -22,11 +22,7 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
-
-
 
 /*
  * void XX_httplib_delete_file( struct mg_connection *conn, const char *path );

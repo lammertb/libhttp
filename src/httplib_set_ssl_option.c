@@ -22,15 +22,10 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
 #include "httplib_ssl.h"
 
-
 static void *ssllib_dll_handle;    /* Store the ssl library handle. */
-
-
 
 /*
  * int XX_httplib_set_ssl_option( struct mg_context *ctx );

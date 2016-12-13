@@ -22,19 +22,13 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
 #include "httplib_pthread.h"
 #include "httplib_ssl.h"
 
-
-
 #if !defined(NO_SSL)
 
 pthread_mutex_t *XX_httplib_ssl_mutexes;
-
-
 
 /*
  * void XX_httplib_ssl_locking_callback( int mode, int mutex_num, const char *file, int line );

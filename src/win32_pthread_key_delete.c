@@ -22,11 +22,8 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
 #include "httplib_pthread.h"
-
 
 #ifdef _WIN32
 

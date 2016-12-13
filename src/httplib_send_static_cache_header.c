@@ -22,10 +22,7 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
-
 
 int XX_httplib_send_static_cache_header(struct mg_connection *conn) {
 

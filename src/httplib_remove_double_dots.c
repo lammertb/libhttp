@@ -22,11 +22,7 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
-
-
 
 /* Protect against directory disclosure attack by removing '..',
  * excessive '/' and '\' characters */

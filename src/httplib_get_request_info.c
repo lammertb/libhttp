@@ -22,11 +22,7 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
-
-
 
 const struct mg_request_info *mg_get_request_info( const struct mg_connection *conn ) {
 

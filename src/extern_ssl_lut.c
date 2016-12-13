@@ -22,12 +22,8 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
 #include "httplib_ssl.h"
-
-
 
 #if !defined(NO_SSL)  &&  !defined(NO_SSL_DL)
 

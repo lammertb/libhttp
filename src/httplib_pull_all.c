@@ -22,10 +22,7 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
-
 
 int XX_httplib_pull_all( FILE *fp, struct mg_connection *conn, char *buf, int len ) {
 

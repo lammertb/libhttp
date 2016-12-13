@@ -22,11 +22,7 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
-
-
 
 /* Authorize against the opened passwords file. Return 1 if authorized. */
 int XX_httplib_authorize( struct mg_connection *conn, struct file *filep ) {

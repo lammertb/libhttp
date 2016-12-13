@@ -22,11 +22,8 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
 #include "httplib_memory.h"
-
 
 /* Behaves like realloc(), but frees original pointer on failure */
 void *XX_httplib_realloc2( void *ptr, size_t size ) {

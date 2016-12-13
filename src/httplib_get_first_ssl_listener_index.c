@@ -22,12 +22,8 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
 #include "httplib_ssl.h"
-
-
 
 /*
  * int XX_httplib_get_first_ssl_listener_index( const struct mg_context *ctx );

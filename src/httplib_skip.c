@@ -22,11 +22,7 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
-
-
 
 /* Simplified version of XX_httplib_skip_quoted without quote char
  * and whitespace == delimiters */

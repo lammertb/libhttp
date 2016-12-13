@@ -22,11 +22,7 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
-
-
 
 /*
  * void XX_httplib_close_socket_gracefully( struct mg_connection *conn );

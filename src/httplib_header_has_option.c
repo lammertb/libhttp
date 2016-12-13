@@ -22,11 +22,7 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
-
-
 
 /* A helper function for checking if a comma separated list of values contains
  * the given option (case insensitvely).

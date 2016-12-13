@@ -22,12 +22,7 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
-
-
-
 
 /*
  * const char *XX_httplib_get_rel_url_at_current_server( const char *uri, const struct mg_connection *conn );

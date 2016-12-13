@@ -22,10 +22,7 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
-
 
 #if defined(_WIN32)  &&  !defined(HAVE_POLL)
 

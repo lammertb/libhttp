@@ -22,11 +22,7 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
-
-
 
 void * mg_get_user_data(const struct mg_context *ctx) {
 

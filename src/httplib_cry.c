@@ -22,11 +22,8 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
 #include "httplib_ssl.h"
-
 
 /* Print error message to the opened error log stream. */
 void mg_cry(const struct mg_connection *conn, const char *fmt, ...) {

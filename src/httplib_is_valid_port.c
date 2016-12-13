@@ -22,11 +22,7 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
-
-
 
 int XX_httplib_is_valid_port(unsigned long port) {
 

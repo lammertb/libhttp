@@ -22,10 +22,7 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
-
 
 /* Return fake connection structure. Used for logging, if connection
  * is not applicable at the moment of logging. */

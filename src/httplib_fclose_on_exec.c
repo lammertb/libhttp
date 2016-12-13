@@ -22,11 +22,7 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
-
-
 
 void XX_httplib_fclose_on_exec( struct file *filep, struct mg_connection *conn ) {
 

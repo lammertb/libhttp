@@ -22,11 +22,7 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
-
-
 
 /* XX_httplib_fopen will open a file either in memory or on the disk.
  * The input parameter path is a string in UTF-8 encoding.

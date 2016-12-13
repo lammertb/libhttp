@@ -22,11 +22,7 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
-
-
 
 struct mg_context * mg_get_context(const struct mg_connection *conn) {
 

@@ -22,11 +22,7 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
-
-
 
 void XX_httplib_sockaddr_to_string(char *buf, size_t len, const union usa *usa) {
 

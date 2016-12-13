@@ -22,11 +22,7 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
-
-
 
 int mg_write( struct mg_connection *conn, const void *buf, size_t len ) {
 

@@ -22,11 +22,7 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
-
-
 
 /*
  * uint32_t XX_httplib_get_remote_ip( const struct mg_connection *conn );

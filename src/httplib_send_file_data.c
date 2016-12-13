@@ -22,11 +22,7 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
-
-
 
 /* Send len bytes from the opened file to the client. */
 void XX_httplib_send_file_data( struct mg_connection *conn, struct file *filep, int64_t offset, int64_t len ) {

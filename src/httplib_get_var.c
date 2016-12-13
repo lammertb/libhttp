@@ -22,10 +22,7 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
-
 
 int mg_get_var( const char *data, size_t data_len, const char *name, char *dst, size_t dst_len ) {
 

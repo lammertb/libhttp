@@ -22,11 +22,7 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
-
-
 
 /*
  * const char *mg_get_response_code_text( struct mg_connection *conn, int response_code );

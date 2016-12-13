@@ -22,15 +22,9 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
 
-
-
 static int	isbyte( int n );
-
-
 
 /*
  * int XX_httplib_parse_net( const char *spec, uint32_t *net, uint32_t *mask );

@@ -22,12 +22,7 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
-
-
-
 
 /*
  * int XX_httplib_set_gpass_option( struct mg_context *ctx );

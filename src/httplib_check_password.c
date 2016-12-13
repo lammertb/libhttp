@@ -22,11 +22,7 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
-
-
 
 /* Check the user's password, return 1 if OK */
 int XX_httplib_check_password( const char *method, const char *ha1, const char *uri, const char *nonce, const char *nc, const char *cnonce, const char *qop, const char *response ) {

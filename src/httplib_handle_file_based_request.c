@@ -22,11 +22,7 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
-
-
 
 /*
  * void XX_httplib_handle_file_based_request( struct mg_connection *conn, const char *path, struct file *file );

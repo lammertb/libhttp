@@ -22,12 +22,8 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
 #include "httplib_string.h"
-
-
 
 void XX_httplib_snprintf( const struct mg_connection *conn, int *truncated, char *buf, size_t buflen, const char *fmt, ... ) {
 

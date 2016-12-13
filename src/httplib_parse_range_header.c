@@ -22,11 +22,7 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
-
-
 
 int XX_httplib_parse_range_header( const char *header, int64_t *a, int64_t *b ) {
 

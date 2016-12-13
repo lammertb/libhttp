@@ -22,12 +22,8 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
 #include "httplib_string.h"
-
-
 
 const char * XX_httplib_strcasestr( const char *big_str, const char *small_str ) {
 

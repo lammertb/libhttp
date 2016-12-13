@@ -22,12 +22,8 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
 #include "httplib_memory.h"
-
-
 
 /*
  * ... XX_httplib_websocket_client_thread( void *data );

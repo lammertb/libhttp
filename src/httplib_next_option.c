@@ -22,11 +22,7 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
-
-
 
 /* A helper function for traversing a comma separated list of values.
  * It returns a list pointer shifted to the next value, or NULL if the end

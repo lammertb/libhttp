@@ -22,10 +22,7 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
-
 
 int XX_httplib_is_put_or_delete_method( const struct mg_connection *conn ) {
 

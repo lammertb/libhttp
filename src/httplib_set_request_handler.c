@@ -22,11 +22,7 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
-
-
 
 /*
  * void mg_set_request_handler( struct mg_context *ctx, const char *uri, mg_request_handler handler, void *cbdata );

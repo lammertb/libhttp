@@ -22,10 +22,7 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
-
 
 #if !defined(NO_FILES)
 int XX_httplib_is_authorized_for_put( struct mg_connection *conn ) {

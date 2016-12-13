@@ -22,11 +22,7 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
-
-
 
 int XX_httplib_read_auth_file( struct file *filep, struct read_auth_file_struct *workdata ) {
 

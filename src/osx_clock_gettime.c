@@ -22,8 +22,6 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
 
 #ifdef __MACH__

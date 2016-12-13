@@ -596,7 +596,6 @@ const char *httplib_get_builtin_mime_type( const char *path ) {
 
 const char *XX_httplib_builtin_mime_ext( int index ) {
 
-
 	if ( index <  0              ) return NULL;
 	if ( index >= NUM_MIME_TYPES ) return NULL;
 

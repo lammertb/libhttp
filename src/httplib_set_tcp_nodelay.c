@@ -22,11 +22,7 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
-
-
 
 /*
  * The function XX_httplib_set_tcp_nodelay() switches on or off delays on the

@@ -30,8 +30,6 @@
 
 static void mask_data( const char *in, size_t in_len, uint32_t masking_key, char *out );
 
-
-
 /*
  * int mg_websocket_client_write( struct mg_connection *conn, int opcode, const char *data, size_t dataLen );
  *

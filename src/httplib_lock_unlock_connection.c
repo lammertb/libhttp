@@ -22,12 +22,8 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
 #include "httplib_pthread.h"
-
-
 
 /*
  * void mg_lock_connection( struct mg_connection *conn );

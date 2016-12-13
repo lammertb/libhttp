@@ -22,11 +22,7 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
-
-
 
 int mg_url_encode( const char *src, char *dst, size_t dst_len ) {
 

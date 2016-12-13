@@ -22,11 +22,7 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
-
-
 
 void XX_httplib_discard_unread_request_data( struct mg_connection *conn ) {
 

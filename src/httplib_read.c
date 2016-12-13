@@ -22,11 +22,7 @@
  * THE SOFTWARE.
  */
 
-
-
 #include "httplib_main.h"
-
-
 
 static int mg_read_inner(struct mg_connection *conn, void *buf, size_t len) {
 
