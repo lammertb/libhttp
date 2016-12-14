@@ -5,6 +5,8 @@ Release Notes v2.0 (work in progress)
 Changes
 -------
 
+- Full API documentation now available at [`www.libhttp.org/api-reference/`](http://www.libhttp.org/api-reference/)
+- Changed function and structure prefix from `mg_` to `httplib_`
 - Search in MIME types list now costs O(log(N)) instead of O(N)
 - Added several hundred MIME types
 - Prototypes an definitions split over multiple header files
