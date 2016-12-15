@@ -20,6 +20,9 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
+ *
+ * ============
+ * Release: 1.8
  */
 
 #include "httplib_main.h"
@@ -239,7 +242,7 @@ done:
 	XX_httplib_free(blk.buf);
 
 	if (pid != (pid_t)-1) {
-		XX_httplib_kill(pid, SIGKILL);
+		httplib_kill( pid, SIGKILL );
 #if !defined(_WIN32)
 		{
 			int st;

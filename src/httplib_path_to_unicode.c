@@ -20,6 +20,9 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
+ *
+ * ============
+ * Release: 1.8
  */
 
 #include "httplib_main.h"
@@ -67,7 +70,7 @@ static int httplib_wcscasecmp( const wchar_t *s1, const wchar_t *s2 ) {
 
 /* Encode 'path' which is assumed UTF-8 string, into UNICODE string.
  * wbuf and wbuf_len is a target buffer and its length. */
-void XX_httplib_path_to_unicode( const struct httplib_connection *conn, const char *path, wchar_t *wbuf, size_t wbuf_len ) {
+void XX_httplib_path_to_unicode( const char *path, wchar_t *wbuf, size_t wbuf_len ) {
 
 	char buf[PATH_MAX];
 	char buf2[PATH_MAX];
@@ -96,7 +99,6 @@ void XX_httplib_path_to_unicode( const struct httplib_connection *conn, const ch
 	    }
 	}
 	*/
-	(void)conn; /* conn is currently unused */
 
 #if !defined(_WIN32_WCE)
 	/* Only accept a full file path, not a Windows short (8.3) path. */

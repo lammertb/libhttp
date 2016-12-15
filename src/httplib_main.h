@@ -24,37 +24,52 @@
 
 
 
+#ifndef UNUSED_PARAMETER
+#define UNUSED_PARAMETER(x)	(void)(x)
+#endif  /* UNUSED_PARAMETER */
+
 #if defined(_WIN32)
+
 #if !defined(_CRT_SECURE_NO_WARNINGS)
 #define _CRT_SECURE_NO_WARNINGS /* Disable deprecation warning in VS2005 */
-#endif
+#endif  /* _CRT_SECURE_NO_WARNINGS */
+
+
 #ifndef _WIN32_WINNT /* defined for tdm-gcc so we can use getnameinfo */
 #define _WIN32_WINNT 0x0501
-#endif
-#else
+#endif  /* _WIN32_WINNT */
+
+#else  /* _WIN32 */
+
 #if defined(__GNUC__) && !defined(_GNU_SOURCE)
 #define _GNU_SOURCE /* for setgroups() */
-#endif
+#endif  /* __GNUC__  && ! _GNU_SOURCE */
+
 #if defined(__linux__) && !defined(_XOPEN_SOURCE)
 #define _XOPEN_SOURCE 600 /* For flockfile() on Linux */
-#endif
+#endif  /* __linux__  &&  ! _XOPEN_SOURCE */
+
 #ifndef _LARGEFILE_SOURCE
 #define _LARGEFILE_SOURCE /* For fseeko(), ftello() */
-#endif
+#endif  /* _LARGEFILE_SOURCE */
+
 #ifndef _FILE_OFFSET_BITS
 #define _FILE_OFFSET_BITS 64 /* Use 64-bit file offsets by default */
-#endif
+#endif  /* _FILE_OFFSET_BITS */
+
 #ifndef __STDC_FORMAT_MACROS
 #define __STDC_FORMAT_MACROS /* <inttypes.h> wants this for C++ */
-#endif
+#endif  /* __STDC_FORMAT_MACROS */
+
 #ifndef __STDC_LIMIT_MACROS
 #define __STDC_LIMIT_MACROS /* C++ wants that for INT64_MAX */
-#endif
+#endif  /* __STDC_LIMIT_MACROS */
+
 #ifdef __sun
 #define __EXTENSIONS__  /* to expose flockfile and friends in stdio.h */
 #define __inline inline /* not recognized on older compiler versions */
-#endif
-#endif
+#endif  /* __sun */
+#endif  /* _WIN32 */
 
 #if defined(_MSC_VER)
 /* 'type cast' : conversion from 'int' to 'HANDLE' of greater size */
@@ -66,7 +81,7 @@
 #pragma warning(disable : 4820)
 /* not defined as a preprocessor macro, replacing with '0' for '#if/#elif' */
 #pragma warning(disable : 4668)
-#endif
+#endif  /* _MSC_VER */
 
 
 /* This code uses static_assert to check some conditions.
@@ -78,11 +93,10 @@
 #define httplib_static_assert static_assert
 #elif defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 201112L)
 #define httplib_static_assert _Static_assert
-#else
+#else  /* _MSC_VER  &&  _MSC_VER >= 1600 */
 char static_assert_replacement[1];
-#define httplib_static_assert(cond, txt)                                            \
-	extern char static_assert_replacement[(cond) ? 1 : -1]
-#endif
+#define httplib_static_assert(cond, txt) extern char static_assert_replacement[(cond) ? 1 : -1]
+#endif  /* _MSC_VER  &&  _MSC_VER >= 1600 */
 
 httplib_static_assert(sizeof(int) == 4 || sizeof(int) == 8, "int data type size check");
 httplib_static_assert(sizeof(void *) == 4 || sizeof(void *) == 8, "pointer data type size check");
@@ -92,7 +106,7 @@ httplib_static_assert(sizeof(void *) >= sizeof(int), "data type size check");
 /* DTL -- including winsock2.h works better if lean and mean */
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
-#endif
+#endif  /* WIN32_LEAN_AND_MEAN */
 
 /* Include the header file here, so the LibHTTP interface is defined for the
  * entire implementation, including the following forward definitions. */
@@ -104,7 +118,7 @@ httplib_static_assert(sizeof(void *) >= sizeof(int), "data type size check");
 
 #ifndef IGNORE_UNUSED_RESULT
 #define IGNORE_UNUSED_RESULT(a) ((void)((a) && 1))
-#endif
+#endif  /* IGNORE_UNUSED_RESULT */
 
 #ifndef _WIN32_WCE /* Some ANSI #includes are not available on Windows CE */
 #include <sys/types.h>
@@ -140,7 +154,7 @@ httplib_static_assert(sizeof(void *) >= sizeof(int), "data type size check");
 
 #ifndef MAX_WORKER_THREADS
 #define MAX_WORKER_THREADS (1024 * 64)
-#endif
+#endif  /* MAX_WORKER_THREADS */
 
 #define SHUTDOWN_RD (0)
 #define SHUTDOWN_WR (1)
@@ -154,14 +168,6 @@ httplib_static_assert(sizeof(void *) >= sizeof(int), "data type size check");
 #include <ws2tcpip.h>
 
 typedef const char *SOCK_OPT_TYPE;
-
-#if !defined(PATH_MAX)
-#define PATH_MAX (MAX_PATH)
-#endif  /* PATH_MAX */
-
-#if !defined(PATH_MAX)
-#define PATH_MAX (4096)
-#endif  /* PATH_MAX */
 
 httplib_static_assert(PATH_MAX >= 1, "path length must be a positive number");
 
@@ -202,11 +208,11 @@ typedef long off_t;
 #define __func__ __FILE__ ":" STR(__LINE__)
 #define strtoull(x, y, z) ((unsigned __int64)_atoi64(x))
 #define strtoll(x, y, z) (_atoi64(x))
-#else
+#else  /* _MSC_VER < 1300 */
 #define __func__ __FUNCTION__
 #define strtoull(x, y, z) (_strtoui64(x, y, z))
 #define strtoll(x, y, z) (_strtoi64(x, y, z))
-#endif
+#endif  /* _MSC_VER < 1300 */
 #endif /* _MSC_VER */
 
 #define ERRNO ((int)(GetLastError()))
@@ -215,18 +221,20 @@ typedef long off_t;
 #if defined(_WIN64) || defined(__MINGW64__)
 #define SSL_LIB "ssleay64.dll"
 #define CRYPTO_LIB "libeay64.dll"
-#else
+#else  /* _WIN64  ||  __MINGW64__ */
 #define SSL_LIB "ssleay32.dll"
 #define CRYPTO_LIB "libeay32.dll"
-#endif
+#endif  /* _WIN64  ||  __MINGW64__ */
 
 #define O_NONBLOCK (0)
 #ifndef W_OK
 #define W_OK (2) /* http://msdn.microsoft.com/en-us/library/1w06ktdy.aspx */
-#endif
+#endif  /* W_OK */
+
 #if !defined(EWOULDBLOCK)
 #define EWOULDBLOCK WSAEWOULDBLOCK
 #endif /* !EWOULDBLOCK */
+
 #define _POSIX_
 #define INT64_FMT "I64d"
 #define UINT64_FMT "I64u"
@@ -239,10 +247,12 @@ typedef long off_t;
 #define pipe(x) _pipe(x, MG_BUF_LEN, _O_BINARY)
 #ifndef popen
 #define popen(x, y) (_popen(x, y))
-#endif
+#endif  /* popen */
+
 #ifndef pclose
 #define pclose(x) (_pclose(x))
-#endif
+#endif  /* pclose */
+
 #define close(x) (_close(x))
 #define dlsym(x, y) (GetProcAddress((HINSTANCE)(x), (y)))
 #define RTLD_LAZY (0)
@@ -270,59 +280,39 @@ typedef struct {
 
 #ifndef __clockid_t_defined
 typedef DWORD clockid_t;
-#endif
+#endif  /* __clockid_t_defined */
+
 #ifndef CLOCK_MONOTONIC
 #define CLOCK_MONOTONIC (1)
-#endif
+#endif  /* CLOCK_MONOTONIC */
+
 #ifndef CLOCK_REALTIME
 #define CLOCK_REALTIME (2)
-#endif
+#endif  /* CLOCK_REALTIME */
 
 #if defined(_MSC_VER) && (_MSC_VER >= 1900)
 #define _TIMESPEC_DEFINED
-#endif
+#endif  /* _MSC_VER  &&  _MSC_VER >= 1900 */
+
 #ifndef _TIMESPEC_DEFINED
 struct timespec {
 	time_t tv_sec; /* seconds */
 	long tv_nsec;  /* nanoseconds */
 };
-#endif
+#endif /* _TIMESPEC_DEFINED */
 
 #define pid_t HANDLE /* MINGW typedefs pid_t to int. Using #define here. */
-
-/* POSIX dirent interface */
-struct dirent {
-	char d_name[PATH_MAX];
-};
-
-typedef struct DIR {
-	HANDLE handle;
-	WIN32_FIND_DATAW info;
-	struct dirent result;
-} DIR;
-
-#if defined(_WIN32) && !defined(POLLIN)
-#ifndef HAVE_POLL
-struct pollfd {
-	SOCKET fd;
-	short events;
-	short revents;
-};
-#define POLLIN (0x0300)
-#endif
-#endif
 
 /* Mark required libraries */
 #if defined(_MSC_VER)
 #pragma comment(lib, "Ws2_32.lib")
-#endif
+#endif  /* _MSC_VER */
 
 #else /* defined(_WIN32) -                          \
          WINDOWS / UNIX include block */
 
 #include <sys/wait.h>
 #include <sys/socket.h>
-#include <sys/poll.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <sys/time.h>
@@ -361,11 +351,7 @@ typedef unsigned short int in_port_t;
 #define O_BINARY (0)
 #endif /* O_BINARY */
 #define closesocket(a) (close(a))
-#define httplib_mkdir(conn, path, mode) (mkdir(path, mode))
 #define httplib_sleep(x) (usleep((x)*1000))
-#define httplib_opendir(conn, x) (opendir(x))
-#define httplib_closedir(x) (closedir(x))
-#define httplib_readdir(x) (readdir(x))
 #define ERRNO (errno)
 #define INVALID_SOCKET (-1)
 #define INT64_FMT PRId64
@@ -799,9 +785,7 @@ typedef int		socklen_t;
 #define _DARWIN_UNLIMITED_SELECT
 
 #if defined(_WIN32)
-#define SIGKILL (0)
 int		clock_gettime( clockid_t clk_id, struct timespec *tp );
-int		poll( struct pollfd *pfd, unsigned int n, int milliseconds );
 #endif
 
 
@@ -818,7 +802,6 @@ int			XX_httplib_check_authorization( struct httplib_connection *conn, const cha
 int			XX_httplib_check_password( const char *method, const char *ha1, const char *uri, const char *nonce, const char *nc, const char *cnonce, const char *qop, const char *response );
 void			XX_httplib_close_all_listening_sockets( struct httplib_context *ctx );
 void			XX_httplib_close_connection( struct httplib_connection *conn );
-int			XX_httplib_closedir( DIR *dir );
 void			XX_httplib_close_socket_gracefully( struct httplib_connection *conn );
 int WINCDECL		XX_httplib_compare_dir_entries( const void *p1, const void *p2 );
 int			XX_httplib_connect_socket( struct httplib_context *ctx, const char *host, int port, int use_ssl, char *ebuf, size_t ebuf_len, SOCKET *sock, union usa *sa );
@@ -864,23 +847,20 @@ bool			XX_httplib_is_valid_http_method( const char *method );
 int			XX_httplib_is_valid_port( unsigned long port );
 int			XX_httplib_is_websocket_protocol( const struct httplib_connection *conn );
 int			XX_httplib_join_thread( pthread_t threadid );
-int			XX_httplib_kill( pid_t pid, int sig_num );
 void *			XX_httplib_load_dll( struct httplib_context *ctx, const char *dll_name, struct ssl_func *sw );
 void			XX_httplib_log_access( const struct httplib_connection *conn );
 int			XX_httplib_match_prefix(const char *pattern, size_t pattern_len, const char *str);
 void			XX_httplib_mkcol( struct httplib_connection *conn, const char *path );
-int			XX_httplib_mkdir( const struct httplib_connection *conn, const char *path, int mode );
 int			XX_httplib_must_hide_file( struct httplib_connection *conn, const char *path );
 const char *		XX_httplib_next_option( const char *list, struct vec *val, struct vec *eq_val );
 void			XX_httplib_open_auth_file( struct httplib_connection *conn, const char *path, struct file *filep );
-DIR *			XX_httplib_opendir( const struct httplib_connection *conn, const char *name );
 int			XX_httplib_parse_auth_header( struct httplib_connection *conn, char *buf, size_t buf_size, struct ah *ah );
 time_t			XX_httplib_parse_date_string( const char *datetime );
 int			XX_httplib_parse_http_headers( char **buf, struct httplib_request_info *ri );
 int			XX_httplib_parse_http_message( char *buf, int len, struct httplib_request_info *ri );
 int			XX_httplib_parse_net( const char *spec, uint32_t *net, uint32_t *mask );
 int			XX_httplib_parse_range_header( const char *header, int64_t *a, int64_t *b );
-void			XX_httplib_path_to_unicode( const struct httplib_connection *conn, const char *path, wchar_t *wbuf, size_t wbuf_len );
+void			XX_httplib_path_to_unicode( const char *path, wchar_t *wbuf, size_t wbuf_len );
 void			XX_httplib_prepare_cgi_environment( struct httplib_connection *conn, const char *prog, struct cgi_environment *env );
 void			XX_httplib_print_dir_entry( struct de *de );
 void			XX_httplib_process_new_connection( struct httplib_connection *conn );
@@ -893,7 +873,6 @@ void			XX_httplib_put_file( struct httplib_connection *conn, const char *path );
 int			XX_httplib_read_auth_file( struct file *filep, struct read_auth_file_struct *workdata );
 int			XX_httplib_read_request( FILE *fp, struct httplib_connection *conn, char *buf, int bufsiz, int *nread );
 void			XX_httplib_read_websocket( struct httplib_connection *conn, httplib_websocket_data_handler ws_data_handler, void *callback_data );
-struct dirent *		XX_httplib_readdir( DIR *dir );
 void			XX_httplib_redirect_to_https_port( struct httplib_connection *conn, int ssl_index );
 int			XX_httplib_refresh_trust( struct httplib_connection *conn );
 int			XX_httplib_remove( const struct httplib_connection *conn, const char *path );

@@ -20,40 +20,64 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
+ *
+ * ============
+ * Release: 2.0
  */
+
+#if ! defined(_WIN32)
+#include <sys/poll.h>
+#endif  /* _WIN32 */
 
 #include "httplib_main.h"
 
 #if defined(_WIN32)  &&  !defined(HAVE_POLL)
 
-int poll( struct pollfd *pfd, unsigned int n, int milliseconds ) {
+/*
+ * int httplib_poll( struct pollfd *pfd, unsigned int n, int milliseconds );
+ *
+ * The function poll() executes the Posix system call poll() when available, or
+ * en emulated version of the function on other operating systems.
+ */
+
+LIBHTTP_API int httplib_poll( struct pollfd *pfd, unsigned int n, int milliseconds ) {
+
+#if defined(_WIN32)
 
 	struct timeval tv;
 	fd_set set;
 	unsigned int i;
 	int result;
-	SOCKET maxfd = 0;
+	SOCKET maxfd;
 
-	memset(&tv, 0, sizeof(tv));
-	tv.tv_sec = milliseconds / 1000;
+	maxfd = 0;
+
+	memset( & tv, 0, sizeof(tv) );
+	tv.tv_sec  =  milliseconds / 1000;
 	tv.tv_usec = (milliseconds % 1000) * 1000;
-	FD_ZERO(&set);
+	FD_ZERO( & set );
 
-	for (i = 0; i < n; i++) {
-		FD_SET((SOCKET)pfd[i].fd, &set);
+	for (i=0; i<n; i++) {
+
+		FD_SET( (SOCKET)pfd[i].fd, &set );
 		pfd[i].revents = 0;
 
-		if (pfd[i].fd > maxfd) maxfd = pfd[i].fd;
+		if ( pfd[i].fd > maxfd ) maxfd = pfd[i].fd;
 	}
 
-	if ((result = select((int)maxfd + 1, &set, NULL, NULL, &tv)) > 0) {
-		for (i = 0; i < n; i++) {
-			if (FD_ISSET(pfd[i].fd, &set)) pfd[i].revents = POLLIN;
-		}
+	if ( (result = select( (int)maxfd + 1, &set, NULL, NULL, &tv)) > 0 ) {
+
+		for (i=0; i<n; i++) if ( FD_ISSET(pfd[i].fd, &set) ) pfd[i].revents = POLLIN;
 	}
 
 	return result;
 
-}  /* poll */
+#else  /* _WIN32 */
+
+	return poll( pfd, n, milliseconds );
+
+#endif  /* _WIN32 */
+
+}  /* httplib_poll */
 
 #endif

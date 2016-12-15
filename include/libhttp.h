@@ -22,33 +22,101 @@
  * THE SOFTWARE.
  */
 
-#ifndef CIVETWEB_HEADER_INCLUDED
-#define CIVETWEB_HEADER_INCLUDED
+#ifndef LIBHTTP_HEADER_INCLUDED
+#define LIBHTTP_HEADER_INCLUDED
 
 #define LIBHTTP_VERSION "1.9"
 
-#ifndef CIVETWEB_API
+#ifndef LIBHTTP_API
 #if defined(_WIN32)
-#if defined(CIVETWEB_DLL_EXPORTS)
-#define CIVETWEB_API __declspec(dllexport)
-#elif defined(CIVETWEB_DLL_IMPORTS)
-#define CIVETWEB_API __declspec(dllimport)
+#if defined(LIBHTTP_DLL_EXPORTS)
+#define LIBHTTP_API __declspec(dllexport)
+#elif defined(LIBHTTP_DLL_IMPORTS)
+#define LIBHTTP_API __declspec(dllimport)
 #else
-#define CIVETWEB_API
+#define LIBHTTP_API
 #endif
 #elif __GNUC__ >= 4
-#define CIVETWEB_API __attribute__((visibility("default")))
+#define LIBHTTP_API __attribute__((visibility("default")))
 #else
-#define CIVETWEB_API
+#define LIBHTTP_API
 #endif
 #endif
 
 #include <stdio.h>
 #include <stddef.h>
 
+/*
+ * For our Posix emulation functions to open and close directories we need
+ * to know the path length. If this length is not set yet, we set it here based
+ * on an educated guess.
+ */
+
+#if !defined(PATH_MAX)
+#define PATH_MAX (MAX_PATH)
+#endif  /* PATH_MAX */
+
+#if !defined(PATH_MAX)
+#define PATH_MAX (4096)
+#endif  /* PATH_MAX */
+
+#if defined(_WIN32)
+
+/*
+ * The OS does not support Posix calls, but we need some of them for the
+ * library to function properly. We therefore define some items which makes
+ * life easier in the multiple target world.
+ */
+
+#define SIGKILL (0)
+
+#else  /* _WIN32 */
+
+/*
+ * For Posix compliant systems we need to read some include files where
+ * definitions, structures and prototypes are present.
+ */
+
+#include <sys/poll.h>
+#include <sys/types.h>
+#include <dirent.h>
+#include <signal.h>
+
+#endif  /* _WIN32 */
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
+
+#if defined(_WIN32)
+/*
+ * In Windows we emulate the Posix directory functions to make the OS dependent
+ * code on the application side as small as possible.
+ */
+struct dirent {
+	char d_name[PATH_MAX];
+};
+
+typedef struct DIR {
+	HANDLE handle;
+	WIN32_FIND_DATAW info;
+	struct dirent result;
+} DIR;
+#endif
+
+#if defined(_WIN32) && !defined(POLLIN)
+/*
+ * If we are on Windows without poll(), we emulate this Posix function.
+ */
+#ifndef HAVE_POLL
+struct pollfd {
+	SOCKET fd;
+	short events;
+	short revents;
+};
+#define POLLIN (0x0300)
+#endif  /* HAVE_POLL */
+#endif  /* _WIN32  &&  ! POLLIN */
 
 
 struct httplib_context;    /* Handle for the HTTP service itself */
@@ -220,7 +288,7 @@ struct httplib_callbacks {
 
    Return:
      web server context, or NULL on error. */
-CIVETWEB_API struct httplib_context *httplib_start(const struct httplib_callbacks *callbacks, void *user_data, const char **configuration_options);
+LIBHTTP_API struct httplib_context *httplib_start(const struct httplib_callbacks *callbacks, void *user_data, const char **configuration_options);
 
 
 /* Stop the web server.
@@ -228,7 +296,7 @@ CIVETWEB_API struct httplib_context *httplib_start(const struct httplib_callback
    Must be called last, when an application wants to stop the web server and
    release all associated resources. This function blocks until all LibHTTP
    threads are stopped. Context pointer becomes invalid. */
-CIVETWEB_API void httplib_stop(struct httplib_context *);
+LIBHTTP_API void httplib_stop(struct httplib_context *);
 
 
 /* httplib_request_handler
@@ -267,7 +335,7 @@ typedef int (*httplib_request_handler)(struct httplib_connection *conn, void *cb
    to
                register it (not only a pattern match).
       cbdata: the callback data to give to the handler when it is called. */
-CIVETWEB_API void httplib_set_request_handler(struct httplib_context *ctx, const char *uri, httplib_request_handler handler, void *cbdata);
+LIBHTTP_API void httplib_set_request_handler(struct httplib_context *ctx, const char *uri, httplib_request_handler handler, void *cbdata);
 
 
 /* Callback types for websocket handlers in C/C++.
@@ -305,7 +373,7 @@ typedef void (*httplib_websocket_close_handler)(const struct httplib_connection 
 
    Set or remove handler functions for websocket connections.
    This function works similar to httplib_set_request_handler - see there. */
-CIVETWEB_API void
+LIBHTTP_API void
 httplib_set_websocket_handler(struct httplib_context *ctx,
                          const char *uri,
                          httplib_websocket_connect_handler connect_handler,
@@ -333,7 +401,7 @@ typedef int (*httplib_authorization_handler)(struct httplib_connection *conn, vo
 
    Sets or removes a URI mapping for an authorization handler.
    This function works similar to httplib_set_request_handler - see there. */
-CIVETWEB_API void httplib_set_auth_handler(struct httplib_context *ctx, const char *uri, httplib_authorization_handler handler, void *cbdata);
+LIBHTTP_API void httplib_set_auth_handler(struct httplib_context *ctx, const char *uri, httplib_authorization_handler handler, void *cbdata);
 
 
 /* Get the value of particular configuration parameter.
@@ -342,25 +410,25 @@ CIVETWEB_API void httplib_set_auth_handler(struct httplib_context *ctx, const ch
    If given parameter name is not valid, NULL is returned. For valid
    names, return value is guaranteed to be non-NULL. If parameter is not
    set, zero-length string is returned. */
-CIVETWEB_API const char *httplib_get_option(const struct httplib_context *ctx, const char *name);
+LIBHTTP_API const char *httplib_get_option(const struct httplib_context *ctx, const char *name);
 
 
 /* Get context from connection. */
-CIVETWEB_API struct httplib_context *
+LIBHTTP_API struct httplib_context *
 httplib_get_context(const struct httplib_connection *conn);
 
 
 /* Get user data passed to httplib_start from context. */
-CIVETWEB_API void *httplib_get_user_data(const struct httplib_context *ctx);
+LIBHTTP_API void *httplib_get_user_data(const struct httplib_context *ctx);
 
 
 /* Set user data for the current connection. */
-CIVETWEB_API void httplib_set_user_connection_data(struct httplib_connection *conn,
+LIBHTTP_API void httplib_set_user_connection_data(struct httplib_connection *conn,
                                               void *data);
 
 
 /* Get user data set for the current connection. */
-CIVETWEB_API void *
+LIBHTTP_API void *
 httplib_get_user_connection_data(const struct httplib_connection *conn);
 
 
@@ -385,7 +453,7 @@ enum {
 /* Return array of struct httplib_option, representing all valid configuration
    options of libhttp.c.
    The array is terminated by a NULL name option. */
-CIVETWEB_API const struct httplib_option *httplib_get_valid_options(void);
+LIBHTTP_API const struct httplib_option *httplib_get_valid_options(void);
 
 
 struct httplib_server_ports {
@@ -405,7 +473,7 @@ struct httplib_server_ports {
    The caller is responsibility to allocate the required memory.
    This function returns the number of struct httplib_server_ports elements
    filled in, or <0 in case of an error. */
-CIVETWEB_API int httplib_get_server_ports(const struct httplib_context *ctx, int size, struct httplib_server_ports *ports);
+LIBHTTP_API int httplib_get_server_ports(const struct httplib_context *ctx, int size, struct httplib_server_ports *ports);
 
 
 /* Add, edit or delete the entry in the passwords file.
@@ -420,11 +488,11 @@ CIVETWEB_API int httplib_get_server_ports(const struct httplib_context *ctx, int
 
    Return:
      1 on success, 0 on error. */
-CIVETWEB_API int httplib_modify_passwords_file(const char *passwords_file_name, const char *domain, const char *user, const char *password);
+LIBHTTP_API int httplib_modify_passwords_file(const char *passwords_file_name, const char *domain, const char *user, const char *password);
 
 
 /* Return information associated with the request. */
-CIVETWEB_API const struct httplib_request_info *httplib_get_request_info(const struct httplib_connection *);
+LIBHTTP_API const struct httplib_request_info *httplib_get_request_info(const struct httplib_connection *);
 
 
 /* Send data to the client.
@@ -432,7 +500,7 @@ CIVETWEB_API const struct httplib_request_info *httplib_get_request_info(const s
     0   when the connection has been closed
     -1  on error
     >0  number of bytes written on success */
-CIVETWEB_API int httplib_write(struct httplib_connection *, const void *buf, size_t len);
+LIBHTTP_API int httplib_write(struct httplib_connection *, const void *buf, size_t len);
 
 
 /* Send data to a websocket client wrapped in a websocket frame.  Uses
@@ -447,7 +515,7 @@ CIVETWEB_API int httplib_write(struct httplib_connection *, const void *buf, siz
     0   when the connection has been closed
     -1  on error
     >0  number of bytes written on success */
-CIVETWEB_API int httplib_websocket_write(struct httplib_connection *conn, int opcode, const char *data, size_t data_len);
+LIBHTTP_API int httplib_websocket_write(struct httplib_connection *conn, int opcode, const char *data, size_t data_len);
 
 
 /* Send data to a websocket server wrapped in a masked websocket frame.  Uses
@@ -462,7 +530,7 @@ CIVETWEB_API int httplib_websocket_write(struct httplib_connection *conn, int op
     0   when the connection has been closed
     -1  on error
     >0  number of bytes written on success */
-CIVETWEB_API int httplib_websocket_client_write(struct httplib_connection *conn, int opcode, const char *data, size_t data_len);
+LIBHTTP_API int httplib_websocket_client_write(struct httplib_connection *conn, int opcode, const char *data, size_t data_len);
 
 
 /* Blocks until unique access is obtained to this connection. Intended for use
@@ -470,14 +538,14 @@ CIVETWEB_API int httplib_websocket_client_write(struct httplib_connection *conn,
    Invoke this before httplib_write or httplib_printf when communicating with a
    websocket if your code has server-initiated communication as well as
    communication in direct response to a message. */
-CIVETWEB_API void httplib_lock_connection(struct httplib_connection *conn);
-CIVETWEB_API void httplib_unlock_connection(struct httplib_connection *conn);
+LIBHTTP_API void httplib_lock_connection(struct httplib_connection *conn);
+LIBHTTP_API void httplib_unlock_connection(struct httplib_connection *conn);
 
 
 /* Lock server context.  This lock may be used to protect resources
    that are shared between different connection/worker threads. */
-CIVETWEB_API void httplib_lock_context(struct httplib_context *ctx);
-CIVETWEB_API void httplib_unlock_context(struct httplib_context *ctx);
+LIBHTTP_API void httplib_lock_context(struct httplib_context *ctx);
+LIBHTTP_API void httplib_unlock_context(struct httplib_context *ctx);
 
 
 /* Opcodes, from http://tools.ietf.org/html/rfc6455 */
@@ -513,11 +581,11 @@ enum {
 
 /* Send data to the client using printf() semantics.
    Works exactly like httplib_write(), but allows to do message formatting. */
-CIVETWEB_API int httplib_printf(struct httplib_connection *, PRINTF_FORMAT_STRING(const char *fmt), ...) PRINTF_ARGS(2, 3);
+LIBHTTP_API int httplib_printf(struct httplib_connection *, PRINTF_FORMAT_STRING(const char *fmt), ...) PRINTF_ARGS(2, 3);
 
 
 /* Send contents of the entire file together with HTTP headers. */
-CIVETWEB_API void httplib_send_file(struct httplib_connection *conn, const char *path);
+LIBHTTP_API void httplib_send_file(struct httplib_connection *conn, const char *path);
 
 /* Send contents of the entire file together with HTTP headers.
    Parameters:
@@ -526,7 +594,7 @@ CIVETWEB_API void httplib_send_file(struct httplib_connection *conn, const char 
      mime_type: Content-Type for file.  NULL will cause the type to be
                 looked up by the file extension.
 */
-CIVETWEB_API void httplib_send_mime_file(struct httplib_connection *conn, const char *path, const char *mime_type);
+LIBHTTP_API void httplib_send_mime_file(struct httplib_connection *conn, const char *path, const char *mime_type);
 
 /* Send contents of the entire file together with HTTP headers.
    Parameters:
@@ -539,10 +607,10 @@ CIVETWEB_API void httplib_send_mime_file(struct httplib_connection *conn, const 
    included twice.
                          NULL does not append anything.
 */
-CIVETWEB_API void httplib_send_mime_file2(struct httplib_connection *conn, const char *path, const char *mime_type, const char *additional_headers);
+LIBHTTP_API void httplib_send_mime_file2(struct httplib_connection *conn, const char *path, const char *mime_type, const char *additional_headers);
 
 /* Store body data into a file. */
-CIVETWEB_API long long httplib_store_body(struct httplib_connection *conn, const char *path);
+LIBHTTP_API long long httplib_store_body(struct httplib_connection *conn, const char *path);
 /* Read entire request body and store it in a file "path".
    Return:
      < 0   Error
@@ -555,7 +623,7 @@ CIVETWEB_API long long httplib_store_body(struct httplib_connection *conn, const
      0     connection has been closed by peer. No more data could be read.
      < 0   read error. No more data could be read from the connection.
      > 0   number of bytes read into the buffer. */
-CIVETWEB_API int httplib_read(struct httplib_connection *, void *buf, size_t len);
+LIBHTTP_API int httplib_read(struct httplib_connection *, void *buf, size_t len);
 
 
 /* Get the value of particular HTTP header.
@@ -563,7 +631,7 @@ CIVETWEB_API int httplib_read(struct httplib_connection *, void *buf, size_t len
    This is a helper function. It traverses request_info->http_headers array,
    and if the header is present in the array, returns its value. If it is
    not present, NULL is returned. */
-CIVETWEB_API const char *httplib_get_header(const struct httplib_connection *, const char *name);
+LIBHTTP_API const char *httplib_get_header(const struct httplib_connection *, const char *name);
 
 
 /* Get a value of particular form variable.
@@ -585,7 +653,7 @@ CIVETWEB_API const char *httplib_get_header(const struct httplib_connection *, c
 
    Destination buffer is guaranteed to be '\0' - terminated if it is not
    NULL or zero length. */
-CIVETWEB_API int httplib_get_var(const char *data, size_t data_len, const char *var_name, char *dst, size_t dst_len);
+LIBHTTP_API int httplib_get_var(const char *data, size_t data_len, const char *var_name, char *dst, size_t dst_len);
 
 
 /* Get a value of particular form variable.
@@ -611,7 +679,7 @@ CIVETWEB_API int httplib_get_var(const char *data, size_t data_len, const char *
 
    Destination buffer is guaranteed to be '\0' - terminated if it is not
    NULL or zero length. */
-CIVETWEB_API int httplib_get_var2(const char *data, size_t data_len, const char *var_name, char *dst, size_t dst_len, size_t occurrence);
+LIBHTTP_API int httplib_get_var2(const char *data, size_t data_len, const char *var_name, char *dst, size_t dst_len, size_t occurrence);
 
 
 /* Fetch value of certain cookie variable into the destination buffer.
@@ -627,7 +695,7 @@ CIVETWEB_API int httplib_get_var2(const char *data, size_t data_len, const char 
             parameter is not found).
         -2 (destination buffer is NULL, zero length or too small to hold the
             value). */
-CIVETWEB_API int httplib_get_cookie(const char *cookie, const char *var_name, char *buf, size_t buf_len);
+LIBHTTP_API int httplib_get_cookie(const char *cookie, const char *var_name, char *buf, size_t buf_len);
 
 
 /* Download data from the remote web server.
@@ -645,7 +713,7 @@ CIVETWEB_API int httplib_get_cookie(const char *cookie, const char *var_name, ch
      conn = httplib_download("google.com", 80, 0, ebuf, sizeof(ebuf),
                         "%s", "GET / HTTP/1.0\r\nHost: google.com\r\n\r\n");
  */
-CIVETWEB_API struct httplib_connection *
+LIBHTTP_API struct httplib_connection *
 httplib_download(const char *host,
             int port,
             int use_ssl,
@@ -656,7 +724,7 @@ httplib_download(const char *host,
 
 
 /* Close the connection opened by httplib_download(). */
-CIVETWEB_API void httplib_close_connection(struct httplib_connection *conn);
+LIBHTTP_API void httplib_close_connection(struct httplib_connection *conn);
 
 
 /* This structure contains callback functions for handling form fields.
@@ -741,24 +809,24 @@ enum {
  * error. In this case a number < 0 is returned as well.
  * In any case, it is the duty of the caller to remove files once they are
  * no longer required. */
-CIVETWEB_API int httplib_handle_form_request(struct httplib_connection *conn, struct httplib_form_data_handler *fdh);
+LIBHTTP_API int httplib_handle_form_request(struct httplib_connection *conn, struct httplib_form_data_handler *fdh);
 
 
 /* Convenience function -- create detached thread.
    Return: 0 on success, non-0 on error. */
 typedef void *(*httplib_thread_func_t)(void *);
-CIVETWEB_API int httplib_start_thread(httplib_thread_func_t f, void *p);
+LIBHTTP_API int httplib_start_thread(httplib_thread_func_t f, void *p);
 
 
-CIVETWEB_API const char *	httplib_get_builtin_mime_type( const char *file_name );
+LIBHTTP_API const char *	httplib_get_builtin_mime_type( const char *file_name );
 
 
 /* Get text representation of HTTP status code. */
-CIVETWEB_API const char *httplib_get_response_code_text(struct httplib_connection *conn, int response_code);
+LIBHTTP_API const char *httplib_get_response_code_text(struct httplib_connection *conn, int response_code);
 
 
 /* Return LibHTTP version. */
-CIVETWEB_API const char *httplib_version(void);
+LIBHTTP_API const char *httplib_version(void);
 
 
 /* URL-decode input buffer into destination buffer.
@@ -767,13 +835,13 @@ CIVETWEB_API const char *httplib_version(void);
    uses '+' as character for space, see RFC 1866 section 8.2.1
    http://ftp.ics.uci.edu/pub/ietf/html/rfc1866.txt
    Return: length of the decoded data, or -1 if dst buffer is too small. */
-CIVETWEB_API int httplib_url_decode(const char *src, int src_len, char *dst, int dst_len, int is_form_url_encoded);
+LIBHTTP_API int httplib_url_decode(const char *src, int src_len, char *dst, int dst_len, int is_form_url_encoded);
 
 
 /* URL-encode input buffer into destination buffer.
    returns the length of the resulting buffer or -1
    is the buffer is too small. */
-CIVETWEB_API int httplib_url_encode(const char *src, char *dst, size_t dst_len);
+LIBHTTP_API int httplib_url_encode(const char *src, char *dst, size_t dst_len);
 
 
 /* MD5 hash given strings.
@@ -782,7 +850,7 @@ CIVETWEB_API int httplib_url_encode(const char *src, char *dst, size_t dst_len);
    MD5 hash. Example:
      char buf[33];
      httplib_md5(buf, "aa", "bb", NULL); */
-CIVETWEB_API char *httplib_md5(char buf[33], ...);
+LIBHTTP_API char *httplib_md5(char buf[33], ...);
 
 
 /* Print error message to the opened error log stream.
@@ -792,12 +860,12 @@ CIVETWEB_API char *httplib_md5(char buf[33], ...);
      ...: variable argument list
    Example:
      httplib_cry(conn,"i like %s", "logging"); */
-CIVETWEB_API void httplib_cry(const struct httplib_connection *conn, PRINTF_FORMAT_STRING(const char *fmt), ...) PRINTF_ARGS(2, 3);
+LIBHTTP_API void httplib_cry(const struct httplib_connection *conn, PRINTF_FORMAT_STRING(const char *fmt), ...) PRINTF_ARGS(2, 3);
 
 
 /* utility methods to compare two buffers, case insensitive. */
-CIVETWEB_API int httplib_strcasecmp(const char *s1, const char *s2);
-CIVETWEB_API int httplib_strncasecmp(const char *s1, const char *s2, size_t len);
+LIBHTTP_API int httplib_strcasecmp(const char *s1, const char *s2);
+LIBHTTP_API int httplib_strncasecmp(const char *s1, const char *s2, size_t len);
 
 
 /* Connect to a websocket as a client
@@ -818,7 +886,7 @@ CIVETWEB_API int httplib_strncasecmp(const char *s1, const char *s2, size_t len)
      On success, valid httplib_connection object.
      On error, NULL. Se error_buffer for details.
 */
-CIVETWEB_API struct httplib_connection *
+LIBHTTP_API struct httplib_connection *
 httplib_connect_websocket_client(const char *host,
                             int port,
                             int use_ssl,
@@ -843,7 +911,7 @@ httplib_connect_websocket_client(const char *host,
      On success, valid httplib_connection object.
      On error, NULL. Se error_buffer for details.
 */
-CIVETWEB_API struct httplib_connection *httplib_connect_client(const char *host, int port, int use_ssl, char *error_buffer, size_t error_buffer_size);
+LIBHTTP_API struct httplib_connection *httplib_connect_client(const char *host, int port, int use_ssl, char *error_buffer, size_t error_buffer_size);
 
 
 struct httplib_client_options {
@@ -855,7 +923,7 @@ struct httplib_client_options {
 };
 
 
-CIVETWEB_API struct httplib_connection *
+LIBHTTP_API struct httplib_connection *
 httplib_connect_client_secure(const struct httplib_client_options *client_options, char *error_buffer, size_t error_buffer_size);
 
 
@@ -873,7 +941,7 @@ enum { TIMEOUT_INFINITE = -1 };
      On success, >= 0
      On error/timeout, < 0
 */
-CIVETWEB_API int httplib_get_response(struct httplib_connection *conn, char *ebuf, size_t ebuf_len, int timeout);
+LIBHTTP_API int httplib_get_response(struct httplib_connection *conn, char *ebuf, size_t ebuf_len, int timeout);
 
 
 /* Check which features where set when LibHTTP has been compiled.
@@ -891,11 +959,17 @@ CIVETWEB_API int httplib_get_response(struct httplib_connection *conn, char *ebu
      If feature is available > 0
      If feature is not available = 0
 */
-CIVETWEB_API unsigned httplib_check_feature(unsigned feature);
+LIBHTTP_API unsigned httplib_check_feature(unsigned feature);
 
+LIBHTTP_API int			httplib_closedir( DIR *dir );
+LIBHTTP_API int			httplib_kill( pid_t pid, int sig_num );
+LIBHTTP_API int			httplib_mkdir( const char *path, int mode );
+LIBHTTP_API DIR *		httplib_opendir( const char *name );
+LIBHTTP_API int			httplib_poll( struct pollfd *pfd, unsigned int n, int milliseconds );
+LIBHTTP_API struct dirent *	httplib_readdir( DIR *dir );
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-#endif /* CIVETWEB_HEADER_INCLUDED */
+#endif /* LIBHTTP_HEADER_INCLUDED */

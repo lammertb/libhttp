@@ -22,53 +22,32 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
 
 /*
- * int XX_httplib_put_dir( struct httplib_connection *conn, const char *path );
+ * int httplib_kill( pid_t pid, int sig_num );
  *
- * The function XX_httplib_put_dir() creates a directory mentioned in a PUT
- * request including all intermediate subdirectories. The following values can
- * be returned:
- * Return  0  if the path itself is a directory.
- * Return  1  if the path leads to a file.
- * Return -1  for if the path is too long.
- * Return -2  if path can not be created.
+ * The functopn httplib_kill() can be used to terminate a process. The function
+ * is a wrapper around the Posix kill() function if Posix is supported on the
+ * platform, or an alternative implementation on other operating systems.
  */
 
-int XX_httplib_put_dir( struct httplib_connection *conn, const char *path ) {
+LIBHTTP_API int httplib_kill( pid_t pid, int sig_num ) {
 
-	char buf[PATH_MAX];
-	const char *s;
-	const char *p;
-	struct file file = STRUCT_FILE_INITIALIZER;
-	size_t len;
-	int res = 1;
+#if defined(_WIN32)
 
-	for (s = p = path + 2; (p = strchr(s, '/')) != NULL; s = ++p) {
-		len = (size_t)(p - path);
-		if (len >= sizeof(buf)) {
-			/* path too long */
-			res = -1;
-			break;
-		}
-		memcpy(buf, path, len);
-		buf[len] = '\0';
+	TerminateProcess( (HANDLE)pid, (UINT)sig_num );
+	CloseHandle( (HANDLE)pid );
 
-		/* Try to create intermediate directory */
-		if (!XX_httplib_stat(conn, buf, &file) && httplib_mkdir( buf, 0755) != 0) {
-			/* path does not exixt and can not be created */
-			res = -2;
-			break;
-		}
+	return 0;
 
-		/* Is path itself a directory? */
-		if (p[1] == '\0') res = 0;
-	}
+#else /* _WIN32 */
 
-	return res;
+	return kill( pid, sig_num );
 
-}  /* XX_httplib_put_dir */
+#endif
+
+}  /* httplib_kill */

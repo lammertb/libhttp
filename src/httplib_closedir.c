@@ -20,29 +20,47 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
+ *
+ * ============
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
 #include "httplib_memory.h"
 
+/*
+ * int httplib_closedir( DIR *dir );
+ *
+ * The function httplib_closedir() closes a previously opened directory. On
+ * systems which support Posix, this is done with a call to the closedir()
+ * system fuction. Otherwise the function is emulated.
+ */
+
+LIBHTTP_API int httplib_closedir( DIR *dir ) {
+
 #if defined(_WIN32)
 
-int XX_httplib_closedir( DIR *dir ) {
+	int result;
 
-	int result = 0;
+	result = 0;
 
-	if (dir != NULL) {
-		if (dir->handle != INVALID_HANDLE_VALUE)
-			result = FindClose(dir->handle) ? 0 : -1;
+	if ( dir != NULL ) {
 
-		XX_httplib_free(dir);
-	} else {
+		if ( dir->handle != INVALID_HANDLE_VALUE ) result = ( FindClose( dir->handle ) ) ? 0 : -1;
+		XX_httplib_free( dir );
+	}
+	else {
+
 		result = -1;
-		SetLastError(ERROR_BAD_ARGUMENTS);
+		SetLastError( ERROR_BAD_ARGUMENTS );
 	}
 
 	return result;
 
-}  /* XX_httplib_closedir */
+#else  /* _WIN32 */
 
-#endif /* _WIN32 */
+	return closedir( dir );
+
+#endif  /* _WIN32 */
+
+}  /* httplib_closedir */

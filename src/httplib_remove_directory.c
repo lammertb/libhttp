@@ -20,6 +20,9 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
+ *
+ * ============
+ * Release: 1.8
  */
 
 #include "httplib_main.h"
@@ -34,12 +37,12 @@ int XX_httplib_remove_directory( struct httplib_connection *conn, const char *di
 	int truncated;
 	int ok = 1;
 
-	if ((dirp = XX_httplib_opendir(conn, dir)) == NULL) {
+	if ((dirp = httplib_opendir( dir )) == NULL) {
 		return 0;
 	} else {
 		de.conn = conn;
 
-		while ((dp = XX_httplib_readdir(dirp)) != NULL) {
+		while ((dp = httplib_readdir(dirp)) != NULL) {
 			/* Do not show current dir (but show hidden files as they will
 			 * also be removed) */
 			if (!strcmp(dp->d_name, ".") || !strcmp(dp->d_name, "..")) continue;
@@ -75,7 +78,7 @@ int XX_httplib_remove_directory( struct httplib_connection *conn, const char *di
 				ok = 0;
 			}
 		}
-		XX_httplib_closedir(dirp);
+		httplib_closedir(dirp);
 
 		IGNORE_UNUSED_RESULT(rmdir(dir));
 	}

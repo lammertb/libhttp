@@ -20,6 +20,9 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
+ *
+ * ============
+ * Release: 1.8
  */
 
 #include "httplib_main.h"
@@ -64,7 +67,7 @@ void XX_httplib_mkcol( struct httplib_connection *conn, const char *path ) {
 		return;
 	}
 
-	rc = XX_httplib_mkdir( conn, path, 0755 );
+	rc = httplib_mkdir( path, 0755 );
 
 	if ( rc == 0 ) {
 

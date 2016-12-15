@@ -20,34 +20,56 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
+ *
+ * ============
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
 
+/*
+ * struct dirent *httplib_readdir( DIR *dir );
+ *
+ * The function XX_httplib_readdir() returns a pointer to the next entry in a
+ * directory or NULL if the end of the directory is reached or an error
+ * occured. Where possible the Posix readdir() system call is used. Otherwise
+ * the Posix call is emulated.
+ */
+
+LIBHTTP_API struct dirent *httplib_readdir( DIR *dir ) {
+
 #if defined(_WIN32)
 
-struct dirent *XX_httplib_readdir( DIR *dir ) {
+	struct dirent *result;
 
-	struct dirent *result = 0;
+	result = NULL;
+	
+	if ( dir == NULL ) {
 
-	if (dir) {
-		if (dir->handle != INVALID_HANDLE_VALUE) {
-			result = &dir->result;
-			WideCharToMultiByte(CP_UTF8, 0, dir->info.cFileName, -1, result->d_name, sizeof(result->d_name), NULL, NULL);
+		SetLastError( ERROR_BAD_ARGUMENTS );
+		return NULL;
+	}
 
-			if (!FindNextFileW(dir->handle, &dir->info)) {
+	if ( dir->handle != INVALID_HANDLE_VALUE ) {
 
-				FindClose(dir->handle);
-				dir->handle = INVALID_HANDLE_VALUE;
-			}
+		result = & dir->result;
+		WideCharToMultiByte( CP_UTF8, 0, dir->info.cFileName, -1, result->d_name, sizeof(result->d_name), NULL, NULL );
 
-		} else {
-			SetLastError(ERROR_FILE_NOT_FOUND);
+		if ( ! FindNextFileW( dir->handle, &dir->info ) ) {
+
+			FindClose( dir->handle );
+			dir->handle = INVALID_HANDLE_VALUE;
 		}
-	} else SetLastError(ERROR_BAD_ARGUMENTS);
+	}
+	
+	else SetLastError( ERROR_FILE_NOT_FOUND );
 
 	return result;
 
-}  /* XX_httplib_readdir */
+#else  /* _WIN32 */
 
-#endif /* _WIN32 */
+	return readdir( dir );
+
+#endif  /* _WIN32 */
+
+}  /* httplib_readdir */

@@ -20,6 +20,9 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
+ *
+ * ============
+ * Release: 1.8
  */
 
 #include "httplib_main.h"
@@ -28,18 +31,6 @@
 #if defined(_WIN32)
 
 #if !defined(NO_CGI)
-
-#define SIGKILL (0)
-
-int XX_httplib_kill(pid_t pid, int sig_num) {
-
-	TerminateProcess((HANDLE)pid, (UINT)sig_num);
-	CloseHandle((HANDLE)pid);
-
-	return 0;
-
-}  /* kill */
-
 
 static void trim_trailing_whitespaces( char *s ) {
 
@@ -147,7 +138,7 @@ spawn_cleanup:
 
 #endif /* !NO_CGI */
 
-#else
+#else  /* _WIN32 */
 
 #ifndef NO_CGI
 pid_t XX_httplib_spawn_process( struct httplib_connection *conn, const char *prog, char *envblk, char *envp[], int fdin[2], int fdout[2], int fderr[2], const char *dir ) {

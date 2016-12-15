@@ -20,6 +20,9 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
+ *
+ * ============
+ * Release: 1.8
  */
 
 #include "httplib_main.h"
@@ -40,7 +43,7 @@ static struct httplib_connection *	httplib_connect_client_impl( const struct htt
  * information, or NULL if an error occured.
  */
 
-CIVETWEB_API struct httplib_connection *httplib_connect_client_secure( const struct httplib_client_options *client_options, char *error_buffer, size_t error_buffer_size ) {
+LIBHTTP_API struct httplib_connection *httplib_connect_client_secure( const struct httplib_client_options *client_options, char *error_buffer, size_t error_buffer_size ) {
 
 	return httplib_connect_client_impl( client_options, 1, error_buffer, error_buffer_size );
 

@@ -20,20 +20,39 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
+ *
+ * ============
+ * Release: 2.0
  */
+
+#if ! defined(_WIN32)
+#include <sys/stat.h>
+#endif  /* ! _WIN32 */
 
 #include "httplib_main.h"
 
-#if defined(_WIN32)
+/*
+ * int httplib_mkdir( const char *path, int mode );
+ *
+ * The function httplib_mkdir() creates a directory. On a Posix compliant
+ * system the underlying system call mkdir() is used for this. For systems
+ * without mkdir support an emulation function is used with the same
+ * functionality.
+ */
 
-int XX_httplib_mkdir( const struct httplib_connection *conn, const char *path, int mode ) {
+LIBHTTP_API int httplib_mkdir( const char *path, int mode ) {
+
+#if defined(_WIN32)
 
 	wchar_t wbuf[PATH_MAX];
 
-	(void)mode;
-	XX_httplib_path_to_unicode(conn, path, wbuf, ARRAY_SIZE(wbuf));
-	return CreateDirectoryW(wbuf, NULL) ? 0 : -1;
+	XX_httplib_path_to_unicode( path, wbuf, ARRAY_SIZE(wbuf) );
+	return ( CreateDirectoryW( wbuf, NULL ) ) ? 0 : -1;
 
-}  /* XX_httplib_mkdir */
+#else  /* _WIN32 */
 
-#endif /* _WIN32 */
+	return mkdir( path, mode );
+
+#endif
+
+}  /* httplib_mkdir */
