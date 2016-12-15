@@ -965,7 +965,7 @@ LIBHTTP_API int			httplib_closedir( DIR *dir );
 LIBHTTP_API int			httplib_kill( pid_t pid, int sig_num );
 LIBHTTP_API int			httplib_mkdir( const char *path, int mode );
 LIBHTTP_API DIR *		httplib_opendir( const char *name );
-LIBHTTP_API int			httplib_poll( struct pollfd *pfd, unsigned int n, int milliseconds );
+LIBHTTP_API int			httplib_poll( struct pollfd *pfd, unsigned int n, int timeout );
 LIBHTTP_API struct dirent *	httplib_readdir( DIR *dir );
 
 #ifdef __cplusplus
