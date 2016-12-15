@@ -1,6 +1,6 @@
 # LibHTTP API Reference
 
-### `httplib_poll( pfd, n, timeout );`
+### `httplib_poll( pfd, nfds, timeout );`
 
 ### Parameters
 
