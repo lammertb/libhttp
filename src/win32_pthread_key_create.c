@@ -30,15 +30,12 @@
 
 #ifdef _WIN32
 
-int pthread_key_create( pthread_key_t *key, void (*_ignored)(void *) ) {
+int pthread_key_create( pthread_key_t *key, void (*destructor)(void *) ) {
 
-	(void)_ignored;
+	if ( key == NULL ) return -2;
 
-	if ((key != 0)) {
-		*key = TlsAlloc();
-		return (*key != TLS_OUT_OF_INDEXES) ? 0 : -1;
-	}
-	return -2;
+	*key = TlsAlloc();
+	return ( *key != TLS_OUT_OF_INDEXES ) ? 0 : -1;
 
 }  /* pthread_key_create */
 

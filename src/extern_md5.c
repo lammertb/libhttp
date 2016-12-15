@@ -6,6 +6,9 @@
  * The MD5_STATIC declaration was added to facilitate static
  * inclusion.
  * No Face Press, LLC
+ *
+ * ============
+ * Release: 1.8
  */
 
 /* $Id: md5.h,v 1.4 2002/04/13 19:20:28 lpd Exp $ */

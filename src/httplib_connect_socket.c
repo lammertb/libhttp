@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  *
- * ===========
- * Release 1.8
+ * ============
+ * Release: 1.8
  */
 
 #include "httplib_main.h"
