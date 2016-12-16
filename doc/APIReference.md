@@ -40,6 +40,7 @@ LibHTTP is often used as HTTP and HTTPS library inside a larger application.  A 
 
 * [`httplib_close_connection( conn );`](api/httplib_close_connection.md)
 * [`httplib_connect_client( host, port, use_ssl, error_buffer, error_buffer_size );`](api/httplib_connect_client.md)
+* [`httplib_connect_client_secure( client_options, error_buffer, error_buffer_size );`](api/httplib_connect_client_secure.md)
 * [`httplib_download( host, port, use_ssl, error_buffer, error_buffer_size, fmt, ... );`](api/httplib_download.md)
 * [`httplib_get_cookie( cookie, var_name, buf, buf_len );`](api/httplib_get_cookie.md)
 * [`httplib_get_header( conn, name );`](api/httplib_get_header.md)
