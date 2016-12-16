@@ -22,24 +22,36 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
 
-int XX_httplib_remove( const struct httplib_connection *conn, const char *path ) {
+/*
+ * int httplib_remove( const char *path );
+ *
+ * The function httplib_remove() provides a platform independent way to remove
+ * an entry from a directory. In Posix compliant environments this function is
+ * a wrapper around the Posix remove() function. On other systems the Posix
+ * remove functionality is emulated with own code.
+ *
+ * The function returns 0 when successful and -1 if an error occurs.
+ */
+
+LIBHTTP_API int httplib_remove( const char *path ) {
 
 #if defined(_WIN32)
 
 	wchar_t wbuf[PATH_MAX];
-	XX_httplib_path_to_unicode(conn, path, wbuf, ARRAY_SIZE(wbuf));
-	return DeleteFileW(wbuf) ? 0 : -1;
+
+	XX_httplib_path_to_unicode( path, wbuf, ARRAY_SIZE(wbuf) );
+
+	return ( DeleteFileW( wbuf ) ) ? 0 : -1;
 
 #else  /* _WIN32 */
 
-	(void)conn;
 	return remove( path );
 
 #endif  /* _WIN32 */
 
-}  /* XX_httplib_remove */
+}  /* httplib_remove */

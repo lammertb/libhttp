@@ -22,26 +22,36 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
 
-int XX_httplib_is_file_in_memory( const struct httplib_connection *conn, const char *path, struct file *filep ) {
+/*
+ * bool XX_httplib_is_file_in_memory( const struct httplib_connection *conn, const char *path, struct file *filep );
+ *
+ * The function XX_httplib_is_file_in_memory() returns true, if a file defined
+ * by a specific path is located in memory.
+ */
 
-	size_t size = 0;
+bool XX_httplib_is_file_in_memory( const struct httplib_connection *conn, const char *path, struct file *filep ) {
 
-	if (!conn || !filep) return 0;
+	size_t size;
 
-	if (conn->ctx->callbacks.open_file) {
-		filep->membuf = conn->ctx->callbacks.open_file(conn, path, &size);
-		if (filep->membuf != NULL) {
-			/* NOTE: override filep->size only on success. Otherwise, it might
-			 * break constructs like if (!XX_httplib_stat() || !XX_httplib_fopen()) ... */
-			filep->size = size;
-		}
+	if ( conn == NULL  ||  filep == NULL ) return false;
+
+	size = 0;
+
+	if ( conn->ctx->callbacks.open_file ) {
+
+		filep->membuf = conn->ctx->callbacks.open_file( conn, path, & size );
+
+		/* NOTE: override filep->size only on success. Otherwise, it might
+		 * break constructs like if (!XX_httplib_stat() || !XX_httplib_fopen()) ... */
+
+		if ( filep->membuf != NULL ) filep->size = size;
 	}
 
-	return filep->membuf != NULL;
+	return ( filep->membuf != NULL );
 
 }  /* XX_httplib_is_file_in_memory */

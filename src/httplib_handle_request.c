@@ -46,11 +46,11 @@ void XX_httplib_handle_request( struct httplib_connection *conn ) {
 	char path[PATH_MAX];
 	int uri_len;
 	int ssl_index;
-	int is_found                 = 0;
-	int is_script_resource       = 0;
-	int is_websocket_request     = 0;
-	int is_put_or_delete_request = 0;
-	int is_callback_resource     = 0;
+	bool is_found                 = false;
+	bool is_script_resource       = false;
+	bool is_websocket_request     = false;
+	bool is_put_or_delete_request = false;
+	bool is_callback_resource     = false;
 	int i;
 	struct file file = STRUCT_FILE_INITIALIZER;
 	httplib_request_handler callback_handler             = NULL;
@@ -58,9 +58,9 @@ void XX_httplib_handle_request( struct httplib_connection *conn ) {
 	httplib_websocket_ready_handler ws_ready_handler     = NULL;
 	httplib_websocket_data_handler ws_data_handler       = NULL;
 	httplib_websocket_close_handler ws_close_handler     = NULL;
-	void *callback_data                             = NULL;
+	void *callback_data                                  = NULL;
 	httplib_authorization_handler auth_handler           = NULL;
-	void *auth_callback_data                        = NULL;
+	void *auth_callback_data                             = NULL;
 #if !defined(NO_FILES)
 	time_t curtime = time(NULL);
 	char date[64];
@@ -149,15 +149,15 @@ void XX_httplib_handle_request( struct httplib_connection *conn ) {
 		 * handled
 		 * by a callback have to be considered as requests to a script
 		 * resource. */
-		is_callback_resource = 1;
-		is_script_resource = 1;
+		is_callback_resource = true;
+		is_script_resource   = true;
 		is_put_or_delete_request = XX_httplib_is_put_or_delete_method(conn);
 	} else {
 	no_callback_resource:
 		/* 5.2.2. No callback is responsible for this request. The URI
 		 * addresses a file based resource (static content or Lua/cgi
 		 * scripts in the file system). */
-		is_callback_resource = 0;
+		is_callback_resource = false;
 		XX_httplib_interpret_uri(conn,
 		              path,
 		              sizeof(path),

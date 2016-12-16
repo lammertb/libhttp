@@ -34,17 +34,17 @@
  * The function XX_httplib_interpret_uri() interprets an URI and decides what
  * type of request is involved. The function takes the following parameters:
  *
- * conn:		in:  The request (must be valid)
- * filename:		out: Filename
- * filename_buf_len:	in:  Size of the filename buffer
- * filep:		out: file structure
- * is_found:		out: file is found (directly)
- * is_script_resource:	out: handled by a script?
+ * conn:			in:  The request (must be valid)
+ * filename:			out: Filename
+ * filename_buf_len:		in:  Size of the filename buffer
+ * filep:			out: file structure
+ * is_found:			out: file is found (directly)
+ * is_script_resource:		out: handled by a script?
  * is_websocket_request:	out: websocket connection?
  * is_put_or_delete_request:	out: put/delete file?
  */
 
-void XX_httplib_interpret_uri( struct httplib_connection *conn, char *filename, size_t filename_buf_len, struct file *filep, int *is_found, int *is_script_resource, int *is_websocket_request, int *is_put_or_delete_request ) {
+void XX_httplib_interpret_uri( struct httplib_connection *conn, char *filename, size_t filename_buf_len, struct file *filep, bool *is_found, bool *is_script_resource, bool *is_websocket_request, bool *is_put_or_delete_request ) {
 
 /* TODO (high): Restructure this function */
 
@@ -60,15 +60,15 @@ void XX_httplib_interpret_uri( struct httplib_connection *conn, char *filename, 
 	int truncated;
 #if !defined(NO_CGI)
 	char *p;
-#endif
-#else
-	(void)filename_buf_len; /* unused if NO_FILES is defined */
-#endif
+#endif  /* !NO_CGI */
+#else  /* NO_FILES */
+	UNUSED_PARAMETER( filename_buf_len );
+#endif  /* NO_FILES */
 
 	memset(filep, 0, sizeof(*filep));
-	*filename = 0;
-	*is_found = 0;
-	*is_script_resource = 0;
+	*filename           = 0;
+	*is_found           = false;
+	*is_script_resource = false;
 	*is_put_or_delete_request = XX_httplib_is_put_or_delete_method(conn);
 
 #if defined(USE_WEBSOCKET)
@@ -79,7 +79,7 @@ void XX_httplib_interpret_uri( struct httplib_connection *conn, char *filename, 
 	}
 #endif /* !NO_FILES */
 #else  /* USE_WEBSOCKET */
-	*is_websocket_request = 0;
+	*is_websocket_request = false;
 #endif /* USE_WEBSOCKET */
 
 #if !defined(NO_FILES)
@@ -134,7 +134,7 @@ void XX_httplib_interpret_uri( struct httplib_connection *conn, char *filename, 
 			*is_script_resource = !*is_put_or_delete_request;
 		}
 #endif /* !defined(NO_CGI) */
-		*is_found = 1;
+		*is_found = true;
 		return;
 	}
 
@@ -155,7 +155,7 @@ void XX_httplib_interpret_uri( struct httplib_connection *conn, char *filename, 
 			if (XX_httplib_stat(conn, gz_path, filep)) {
 				if (filep) {
 					filep->gzipped = 1;
-					*is_found = 1;
+					*is_found      = true;
 				}
 				/* Currently gz files can not be scripts. */
 				return;
@@ -184,7 +184,7 @@ void XX_httplib_interpret_uri( struct httplib_connection *conn, char *filename, 
 				memmove(p + 2, p + 1, strlen(p + 1) + 1); /* +1 is for
 				                                           * trailing \0 */
 				p[1] = '/';
-				*is_script_resource = 1;
+				*is_script_resource = true;
 				break;
 			} else *p = '/';
 		}
@@ -196,12 +196,13 @@ void XX_httplib_interpret_uri( struct httplib_connection *conn, char *filename, 
 #if !defined(NO_FILES)
 /* Reset all outputs */
 interpret_cleanup:
-	memset(filep, 0, sizeof(*filep));
-	*filename = 0;
-	*is_found = 0;
-	*is_script_resource = 0;
-	*is_websocket_request = 0;
-	*is_put_or_delete_request = 0;
+	memset( filep, 0, sizeof(*filep) );
+
+	*filename                 = 0;
+	*is_found                 = false;
+	*is_script_resource       = false;
+	*is_websocket_request     = false;
+	*is_put_or_delete_request = false;
 #endif /* !defined(NO_FILES) */
 
 }  /* XX_httplib_interpret_uri */

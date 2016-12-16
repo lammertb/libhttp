@@ -71,7 +71,7 @@ int XX_httplib_remove_directory( struct httplib_connection *conn, const char *di
 				if (de.file.is_directory) {
 					if (XX_httplib_remove_directory(conn, path) == 0) ok = 0;
 				} else {
-					if (XX_httplib_remove(conn, path) == 0) ok = 0;
+					if (httplib_remove( path ) == 0) ok = 0;
 				}
 			} else {
 				/* file is in memory. It can not be deleted. */

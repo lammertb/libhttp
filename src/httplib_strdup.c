@@ -30,6 +30,6 @@
 
 char * XX_httplib_strdup( const char *str ) {
 
-	return XX_httplib_strndup(str, strlen(str));
+	return httplib_strndup(str, strlen( str ) );
 
 }  /* XX_httplib_strdup */

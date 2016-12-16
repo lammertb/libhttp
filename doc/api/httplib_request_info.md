@@ -14,7 +14,7 @@
 |**`remote_user`**|`const char *`| The name of the authenticated remote user, or NULL if no authentication was used |
 |**`remote addr`**|`char[48]`| The IP address of the remote client as a string. This can either represent an IPv4 or an IPv6 address. |
 |~~`remote_ip`~~|`long`| *Deprecated. Use* `remote_addr` *instead* |
-|**`content_length`**|`long long`| The content length of the request body. This value can be -1 if no content length was provided. |
+|**`content_length`**|`int64_t`| The content length of the request body. This value can be -1 if no content length was provided. |
 |**`remote_port`**|`int`| The port number at the client's side |
 |**`is_ssl`**|`int`| 1 if the connection is over SSL, and 0 if it is a plain connection |
 |**`user_data`**|`void *`| A pointer to the `user_data` information which was provided as a parameter to `httplib_start()`. |

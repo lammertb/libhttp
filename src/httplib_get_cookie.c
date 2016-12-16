@@ -59,7 +59,7 @@ int httplib_get_cookie(const char *cookie_header, const char *var_name, char *ds
 				}
 				if ((size_t)(p - s) < dst_size) {
 					len = (int)(p - s);
-					XX_httplib_strlcpy(dst, s, (size_t)len + 1);
+					httplib_strlcpy( dst, s, (size_t)len+1 );
 				} else len = -3;
 				break;
 			}

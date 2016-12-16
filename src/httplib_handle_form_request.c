@@ -123,7 +123,7 @@ static int unencoded_field_get(const struct httplib_connection *conn,
 }
 
 
-static int field_stored(const struct httplib_connection *conn, const char *path, long long file_size, struct httplib_form_data_handler *fdh) {
+static int field_stored(const struct httplib_connection *conn, const char *path, int64_t file_size, struct httplib_form_data_handler *fdh) {
 
 	/* Equivalent to "upload" callback of "httplib_upload". */
 

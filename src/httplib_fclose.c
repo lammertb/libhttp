@@ -22,13 +22,25 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
 
+/*
+ * void XX_httplib_fclose( struct file *filep );
+ *
+ * The function XX_httplib_fclose() closed a file associated with a filep
+ * structure. The function doesn't return a success or error code, but the
+ * value of the fp parameter in the filep structure is reset to NULL which
+ * prevents the old file pointer to be reused.
+ */
+
 void XX_httplib_fclose( struct file *filep ) {
 
-	if (filep != NULL && filep->fp != NULL) fclose(filep->fp);
+	if ( filep == NULL  ||  filep->fp == NULL ) return;
+
+	fclose( filep->fp );
+	filep->fp = NULL;
 
 }  /* XX_httplib_fclose */

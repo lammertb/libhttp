@@ -23,8 +23,6 @@
 
 
 void			XX_httplib_addenv( struct cgi_environment *env, PRINTF_FORMAT_STRING(const char *fmt), ... ) PRINTF_ARGS(2, 3);
-int			XX_httplib_atomic_dec( volatile int *addr );
-int			XX_httplib_atomic_inc( volatile int *addr );
 void			XX_httplib_base64_encode( const unsigned char *src, int src_len, char *dst );
 double			XX_httplib_difftimespec( const struct timespec *ts_now, const struct timespec *ts_before );
 uint64_t		XX_httplib_get_random( void );

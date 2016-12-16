@@ -249,7 +249,7 @@ field_get(const char *key, const char *value, size_t valuelen, void *user_data)
 
 
 int
-field_stored(const char *path, long long file_size, void *user_data)
+field_stored(const char *path, int64_t file_size, void *user_data)
 {
 	struct httplib_connection *conn = (struct httplib_connection *)user_data;
 
@@ -312,7 +312,7 @@ FileUploadForm(struct httplib_connection *conn, void *cbdata)
 
 struct tfile_checksum {
 	char name[128];
-	unsigned long long length;
+	uint64_t length;
 	md5_state_t chksum;
 };
 

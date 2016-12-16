@@ -27,13 +27,14 @@
 
 #include "httplib_main.h"
 
+#define HEXTOI(x) (isdigit(x) ? (x - '0') : (x - 'W'))
+
 int httplib_url_decode( const char *src, int src_len, char *dst, int dst_len, int is_form_url_encoded ) {
 
 	int i;
 	int j;
 	int a;
 	int b;
-#define HEXTOI(x) (isdigit(x) ? (x - '0') : (x - 'W'))
 
 	for (i = j = 0; (i < src_len) && (j < (dst_len - 1)); i++, j++) {
 		if (i < src_len - 2 && src[i] == '%'

@@ -22,12 +22,20 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
 
 #if defined(_WIN32_WCE)
+
+/*
+ * time_t time( time_t *ptime );
+ *
+ * On WinCE systems not all of the common system functions are available. This
+ * time() function provides an equivalent for time() based on time functions
+ * which are available in the WinCE kernel.
+ */
 
 time_t time( time_t *ptime ) {
 
@@ -35,11 +43,11 @@ time_t time( time_t *ptime ) {
 	SYSTEMTIME st;
 	FILETIME ft;
 
-	GetSystemTime(&st);
-	SystemTimeToFileTime(&st, &ft);
-	t = SYS2UNIX_TIME(ft.dwLowDateTime, ft.dwHighDateTime);
+	GetSystemTime( & st );
+	SystemTimeToFileTime( & st,  & ft );
+	t = SYS2UNIX_TIME( ft.dwLowDateTime, ft.dwHighDateTime );
 
-	if (ptime != NULL) *ptime = t;
+	if ( ptime != NULL ) *ptime = t;
 
 	return t;
 

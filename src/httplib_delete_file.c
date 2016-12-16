@@ -73,7 +73,7 @@ void XX_httplib_delete_file( struct httplib_connection *conn, const char *path )
 	}
 
 	/* Try to delete it. */
-	if (XX_httplib_remove(conn, path) == 0) {
+	if (httplib_remove( path ) == 0) {
 		/* Delete was successful: Return 204 without content. */
 		XX_httplib_send_http_error(conn, 204, "%s", "");
 	} else {

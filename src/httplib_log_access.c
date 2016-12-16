@@ -64,7 +64,7 @@ void XX_httplib_log_access( const struct httplib_connection *conn ) {
 	if (tm != NULL) {
 		strftime(date, sizeof(date), "%d/%b/%Y:%H:%M:%S %z", tm);
 	} else {
-		XX_httplib_strlcpy(date, "01/Jan/1970:00:00:00 +0000", sizeof(date));
+		httplib_strlcpy( date, "01/Jan/1970:00:00:00 +0000", sizeof(date) );
 		date[sizeof(date) - 1] = '\0';
 	}
 

@@ -147,9 +147,10 @@ class FooHandler : public CivetHandler
 	{
 		/* Handler may access the request info using httplib_get_request_info */
 		const struct httplib_request_info *req_info = httplib_get_request_info(conn);
-		long long rlen, wlen;
-		long long nlen = 0;
-		long long tlen = req_info->content_length;
+		int64_t rlen;
+		int64_t wlen;
+		int64_t nlen = 0;
+		int64_t tlen = req_info->content_length;
 		char buf[1024];
 
 		httplib_printf(conn,
@@ -191,9 +192,10 @@ class FooHandler : public CivetHandler
     {
         /* Handler may access the request info using httplib_get_request_info */
         const struct httplib_request_info *req_info = httplib_get_request_info(conn);
-        long long rlen, wlen;
-        long long nlen = 0;
-        long long tlen = req_info->content_length;
+        int64_t rlen;
+	int64_t wlen;
+        int64_t nlen = 0;
+        int64_t tlen = req_info->content_length;
         FILE * f;
         char buf[1024];
         int fail = 0;

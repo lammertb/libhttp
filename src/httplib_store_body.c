@@ -28,15 +28,15 @@
 #include "httplib_main.h"
 
 /*
- * long long httplib_store_body( struct httplib_connection *conn, const char *path );
+ * int64_t httplib_store_body( struct httplib_connection *conn, const char *path );
  *
  * The function httplib_store_body() stores in incoming body for future processing.
  */
 
-long long httplib_store_body( struct httplib_connection *conn, const char *path ) {
+int64_t httplib_store_body( struct httplib_connection *conn, const char *path ) {
 
 	char buf[MG_BUF_LEN];
-	long long len = 0;
+	int64_t len = 0;
 	int ret;
 	int n;
 	struct file fi;

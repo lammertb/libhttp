@@ -22,19 +22,36 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
 #include "httplib_memory.h"
 #include "httplib_string.h"
 
-char * XX_httplib_strndup( const char *ptr, size_t len ) {
+/*
+ * char *httplib_strndup( const char *ptr, size_t len );
+ *
+ * The function strndup() duplicates a string with a maximum given length to a
+ * new string in a newly allocated block of memory. The function is equivalent
+ * to the Posix function strndup() with the difference that LibHTTP memory
+ * allocation functions are used which allow for tracking of memory leaks
+ * through a monitor hook. The size of the allocated memory block is the given
+ * length plus one byte for the terminating NUL character.
+ *
+ * If the duplicate of the string is no longer used, the allocated memory
+ * should be returned to the heap with a call to httplib_free.
+ *
+ * If the function fails, the value NULL is returned, otherwise a pointer to
+ * the duplicate.
+ */
+
+LIBHTTP_API char *httplib_strndup( const char *ptr, size_t len ) {
 
 	char *p;
 
-	if ((p = (char *)XX_httplib_malloc(len + 1)) != NULL) XX_httplib_strlcpy(p, ptr, len + 1);
+	if ( (p = XX_httplib_malloc(len+1)) != NULL ) httplib_strlcpy( p, ptr, len+1 );
 
 	return p;
 
-}  /* XX_httplib_strndup */
+}  /* httplib_strndup */

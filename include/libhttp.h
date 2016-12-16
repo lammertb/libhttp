@@ -139,7 +139,7 @@ struct httplib_request_info {
 	                               used */
 	char remote_addr[48];       /* Client's IP address as a string. */
 
-	long long content_length; /* Length (in bytes) of the request body,
+	int64_t content_length; /* Length (in bytes) of the request body,
 	                             can be -1 if no length was given. */
 	int remote_port;          /* Client's port */
 	int is_ssl;               /* 1 if SSL-ed, 0 if not */
@@ -610,7 +610,7 @@ LIBHTTP_API void httplib_send_mime_file(struct httplib_connection *conn, const c
 LIBHTTP_API void httplib_send_mime_file2(struct httplib_connection *conn, const char *path, const char *mime_type, const char *additional_headers);
 
 /* Store body data into a file. */
-LIBHTTP_API long long httplib_store_body(struct httplib_connection *conn, const char *path);
+LIBHTTP_API int64_t httplib_store_body(struct httplib_connection *conn, const char *path);
 /* Read entire request body and store it in a file "path".
    Return:
      < 0   Error
@@ -780,7 +780,7 @@ struct httplib_form_data_handler {
 	 * Return value:
 	 *   TODO: Needs to be defined.
 	 */
-	int (*field_store)(const char *path, long long file_size, void *user_data);
+	int (*field_store)(const char *path, int64_t file_size, void *user_data);
 
 	/* User supplied argument, passed to all callback functions. */
 	void *user_data;
@@ -961,12 +961,17 @@ LIBHTTP_API int httplib_get_response(struct httplib_connection *conn, char *ebuf
 */
 LIBHTTP_API unsigned httplib_check_feature(unsigned feature);
 
+LIBHTTP_API int			httplib_atomic_dec( volatile int *addr );
+LIBHTTP_API int			httplib_atomic_inc( volatile int *addr );
 LIBHTTP_API int			httplib_closedir( DIR *dir );
 LIBHTTP_API int			httplib_kill( pid_t pid, int sig_num );
 LIBHTTP_API int			httplib_mkdir( const char *path, int mode );
 LIBHTTP_API DIR *		httplib_opendir( const char *name );
-LIBHTTP_API int			httplib_poll( struct pollfd *pfd, unsigned int n, int timeout );
+LIBHTTP_API int			httplib_poll( struct pollfd *pfd, unsigned int nfds, int timeout );
 LIBHTTP_API struct dirent *	httplib_readdir( DIR *dir );
+LIBHTTP_API int			httplib_remove( const char *path );
+LIBHTTP_API void		httplib_strlcpy( char *dst, const char *src, size_t len );
+LIBHTTP_API char *		httplib_strndup( const char *str, size_t len );
 
 #ifdef __cplusplus
 }

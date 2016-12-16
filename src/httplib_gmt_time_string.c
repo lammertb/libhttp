@@ -39,7 +39,7 @@ void XX_httplib_gmt_time_string( char *buf, size_t buf_len, time_t *t ) {
 	if (tm != NULL) {
 		strftime(buf, buf_len, "%a, %d %b %Y %H:%M:%S GMT", tm);
 	} else {
-		XX_httplib_strlcpy(buf, "Thu, 01 Jan 1970 00:00:00 GMT", buf_len);
+		httplib_strlcpy( buf, "Thu, 01 Jan 1970 00:00:00 GMT", buf_len );
 		buf[buf_len - 1] = '\0';
 	}
 

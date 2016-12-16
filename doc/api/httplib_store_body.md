@@ -13,7 +13,7 @@
 
 | Type | Description |
 | :--- | :--- |
-|`long long`|Number of bytes written to the file, or an error code|
+|`int64_t`|Number of bytes written to the file, or an error code|
 
 ### Description
 

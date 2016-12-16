@@ -44,7 +44,7 @@ void XX_httplib_uninitialize_ssl( struct httplib_context *ctx ) {
 	int i;
 	(void)ctx;
 
-	if (XX_httplib_atomic_dec(&XX_httplib_cryptolib_users) == 0) {
+	if (httplib_atomic_dec(&XX_httplib_cryptolib_users) == 0) {
 
 		/* Shutdown according to
 		 * https://wiki.openssl.org/index.php/Library_Initialization#Cleanup

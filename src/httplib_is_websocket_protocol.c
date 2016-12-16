@@ -35,7 +35,7 @@
  * to see if the connection is a valid websocket protocol.
  */
 
-int XX_httplib_is_websocket_protocol( const struct httplib_connection *conn ) {
+bool XX_httplib_is_websocket_protocol( const struct httplib_connection *conn ) {
 
 #if defined(USE_WEBSOCKET)
 	const char *upgrade;
@@ -48,14 +48,14 @@ int XX_httplib_is_websocket_protocol( const struct httplib_connection *conn ) {
 	 */
 
 	upgrade = httplib_get_header(conn, "Upgrade");
-	if (upgrade == NULL) return 0; /* fail early, don't waste time checking other header * fields */
+	if (upgrade == NULL) return false; /* fail early, don't waste time checking other header * fields */
 
-	if (!XX_httplib_strcasestr(upgrade, "websocket")) return 0;
+	if (!XX_httplib_strcasestr(upgrade, "websocket")) return false;
 
 	connection = httplib_get_header(conn, "Connection");
-	if (connection == NULL) return 0;
+	if (connection == NULL) return false;
 
-	if (!XX_httplib_strcasestr(connection, "upgrade")) return 0;
+	if (!XX_httplib_strcasestr(connection, "upgrade")) return false;
 
 	/* The headers "Host", "Sec-WebSocket-Key", "Sec-WebSocket-Protocol" and
 	 * "Sec-WebSocket-Version" are also required.
@@ -64,13 +64,13 @@ int XX_httplib_is_websocket_protocol( const struct httplib_connection *conn ) {
 	 * request). It will fail later in handle_websocket_request.
 	 */
 
-	return 1;
+	return true;
 
 #else  /* defined(USE_WEBSOCKET) */
 
-	(void)conn;
+	UNUSED_PARAMETER(conn);
 
-	return 0;
+	return false;
 
 #endif  /* defined(USE_WEBSOCKET) */
 

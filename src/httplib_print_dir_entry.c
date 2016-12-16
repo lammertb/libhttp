@@ -52,7 +52,7 @@ void XX_httplib_print_dir_entry( struct de *de ) {
 	if (tm != NULL) {
 		strftime(mod, sizeof(mod), "%d-%b-%Y %H:%M", tm);
 	} else {
-		XX_httplib_strlcpy(mod, "01-Jan-1970 00:00", sizeof(mod));
+		httplib_strlcpy( mod, "01-Jan-1970 00:00", sizeof(mod) );
 		mod[sizeof(mod) - 1] = '\0';
 	}
 	httplib_url_encode(de->file_name, href, sizeof(href));

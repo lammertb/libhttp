@@ -62,7 +62,7 @@ int XX_httplib_substitute_index_file( struct httplib_connection *conn, char *pat
 		if (filename_vec.len > path_len - (n + 2)) continue;
 
 		/* Prepare full path to the index file */
-		XX_httplib_strlcpy(path + n + 1, filename_vec.ptr, filename_vec.len + 1);
+		httplib_strlcpy( path + n + 1, filename_vec.ptr, filename_vec.len + 1 );
 
 		/* Does it exist? */
 		if (XX_httplib_stat(conn, path, &file)) {

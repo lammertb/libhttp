@@ -22,26 +22,40 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
 #include "httplib_utils.h"
 
-int XX_httplib_atomic_inc( volatile int *addr ) {
+/*
+ * int httplib_atomic_inc( volatile int *addr );
+ *
+ * The function httplib_atomic_inc() performs an atomic increment of an
+ * integer. This function can be used for inter process locking. The function
+ * returns the value of the integer after it has been incremented.
+ */
 
-	int ret;
+LIBHTTP_API int httplib_atomic_inc( volatile int *addr ) {
+
 #if defined(_WIN32)
-	/* Depending on the SDK, this function uses either
-	 * (volatile unsigned int *) or (volatile LONG *),
-	 * so whatever you use, the other SDK is likely to raise a warning. */
-	ret = InterlockedIncrement((volatile long *)addr);
-#elif defined(__GNUC__)                                                        \
-    && ((__GNUC__ > 4) || ((__GNUC__ == 4) && (__GNUC_MINOR__ > 0)))
-	ret = __sync_add_and_fetch(addr, 1);
-#else
-	ret = (++(*addr));
-#endif
-	return ret;
 
-}  /* XX_httplib_atomic_inc */
+	/*
+	 * Depending on the SDK, this function uses either
+	 * (volatile unsigned int *) or (volatile LONG *),
+	 * so whatever you use, the other SDK is likely to raise a warning.
+	 */
+
+	return InterlockedIncrement( (volatile long *)addr );
+
+#elif defined(__GNUC__)  && ((__GNUC__ > 4) || ((__GNUC__ == 4) && (__GNUC_MINOR__ > 0)))
+
+	return __sync_add_and_fetch( addr, 1 );
+
+#else
+
+	return (++(*addr));
+
+#endif
+
+}  /* httplib_atomic_inc */

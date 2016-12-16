@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
@@ -32,32 +32,33 @@
  *
  * The function XX_httplib_is_valid_http_method() checks if the method in a
  * request is a valid method.
+ *
+ * PTRACE is not supported for security reasons. Further more the following
+ * WEBDAV methods have not been implemented:
+ *
+ * PROPPATCH, COPY, MOVE, LOCK, UNLOCK (RFC 2518)
+ * + 11 methods from RFC 3253
+ * ORDERPATCH (RFC 3648)
+ * ACL (RFC 3744)
+ * SEARCH (RFC 5323)
+ * + MicroSoft extensions
+ * https://msdn.microsoft.com/en-us/library/aa142917.aspx
+ *
+ * The PATCH method is only supported for CGI and other scripts and for
+ * callbacks.
  */
 
 bool XX_httplib_is_valid_http_method( const char *method ) {
 
-	return !strcmp(method, "GET")        /* HTTP (RFC 2616) */
-	       || !strcmp(method, "POST")    /* HTTP (RFC 2616) */
-	       || !strcmp(method, "HEAD")    /* HTTP (RFC 2616) */
-	       || !strcmp(method, "PUT")     /* HTTP (RFC 2616) */
-	       || !strcmp(method, "DELETE")  /* HTTP (RFC 2616) */
-	       || !strcmp(method, "OPTIONS") /* HTTP (RFC 2616) */
-	       /* TRACE method (RFC 2616) is not supported for security reasons */
-	       || !strcmp(method, "CONNECT") /* HTTP (RFC 2616) */
-
-	       || !strcmp(method, "PROPFIND") /* WEBDAV (RFC 2518) */
-	       || !strcmp(method, "MKCOL")    /* WEBDAV (RFC 2518) */
-
-	       /* Unsupported WEBDAV Methods: */
-	       /* PROPPATCH, COPY, MOVE, LOCK, UNLOCK (RFC 2518) */
-	       /* + 11 methods from RFC 3253 */
-	       /* ORDERPATCH (RFC 3648) */
-	       /* ACL (RFC 3744) */
-	       /* SEARCH (RFC 5323) */
-	       /* + MicroSoft extensions
-	        * https://msdn.microsoft.com/en-us/library/aa142917.aspx */
-
-	       /* PATCH method only allowed for CGI/Lua/LSP and callbacks. */
-	       || !strcmp(method, "PATCH"); /* PATCH method (RFC 5789) */
+	return ( ! strcmp( method, "GET"      )  ||
+		 ! strcmp( method, "POST"     )  ||
+		 ! strcmp( method, "HEAD"     )  ||
+		 ! strcmp( method, "PUT"      )  ||
+		 ! strcmp( method, "DELETE"   )  ||
+		 ! strcmp( method, "OPTIONS"  )  ||
+		 ! strcmp( method, "CONNECT"  )  ||
+		 ! strcmp( method, "PROPFIND" )  ||
+		 ! strcmp( method, "MKCOL"    )  ||
+		 ! strcmp( method, "PATCH"    )      );
 
 }  /* XX_httplib_is_valid_http_method */

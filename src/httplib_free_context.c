@@ -96,7 +96,7 @@ void XX_httplib_free_context( struct httplib_context *ctx ) {
 	if (ctx->workerthreadids != NULL) XX_httplib_free(ctx->workerthreadids);
 
 	/* Deallocate the tls variable */
-	if (XX_httplib_atomic_dec(&XX_httplib_sTlsInit) == 0) {
+	if (httplib_atomic_dec(&XX_httplib_sTlsInit) == 0) {
 #if defined(_WIN32)
 		DeleteCriticalSection(&global_log_file_lock);
 #endif /* _WIN32 */

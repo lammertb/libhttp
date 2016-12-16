@@ -22,4 +22,5 @@ The function `httplib_url_encode()` encodes a in input buffer. Both normal URIs 
 
 ### See Also
 
+* [`httplib_base64_encode();`](htptlib_base64_encode.md)
 * [`httplib_url_decode();`](httplib_url_decode.md)

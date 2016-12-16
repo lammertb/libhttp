@@ -22,15 +22,20 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
 
+/*
+ * bool XX_httplib_is_file_opened( const struct file *filep );
+ *
+ * The function XX_httplib_is_file_opened() returns true if the file of the
+ * passed file pointer is opened and false otherwise.
+ */
+
 bool XX_httplib_is_file_opened( const struct file *filep ) {
 
-	if ( filep == NULL ) return false;
-
-	return ( filep->membuf != NULL  ||  filep->fp != NULL );
+	return ( filep != NULL  &&  ( filep->membuf != NULL  ||  filep->fp != NULL ) );
 
 }  /* XX_httplib_is_file_opened */

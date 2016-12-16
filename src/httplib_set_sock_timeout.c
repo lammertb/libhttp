@@ -22,10 +22,21 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
+
+/*
+ * We can optionally set TCP_USER_TIMEOUT
+ *
+ * TCP_USER_TIMEOUT/RFC5482 (http://tools.ietf.org/html/rfc5482):
+ * max. time waiting for the acknowledged of TCP data before the connection
+ * will be forcefully closed and ETIMEDOUT is returned to the application.
+ * If this option is not set, the default timeout of 20-30 minutes is used.
+ */
+
+// #define TCP_USER_TIMEOUT (18)
 
 /*
  * int XX_httplib_set_sock_timeout( SOCKET sock, int milliseconds );
@@ -36,41 +47,39 @@
 
 int XX_httplib_set_sock_timeout( SOCKET sock, int milliseconds ) {
 
-	int r0 = 0;
+	int r0;
 	int r1;
 	int r2;
 
 #ifdef _WIN32
-	/* Windows specific */
 
 	DWORD tv = (DWORD)milliseconds;
 
-#else
-	/* Linux, ... (not Windows) */
+#else  /* _WIN32 */
 
 	struct timeval tv;
 
-/* TCP_USER_TIMEOUT/RFC5482 (http://tools.ietf.org/html/rfc5482):
- * max. time waiting for the acknowledged of TCP data before the connection
- * will be forcefully closed and ETIMEDOUT is returned to the application.
- * If this option is not set, the default timeout of 20-30 minutes is used.
-*/
-/* #define TCP_USER_TIMEOUT (18) */
-
 #if defined(TCP_USER_TIMEOUT)
-	unsigned int uto = (unsigned int)milliseconds;
-	r0 = setsockopt(sock, 6, TCP_USER_TIMEOUT, (const void *)&uto, sizeof(uto));
-#endif
 
-	memset(&tv, 0, sizeof(tv));
-	tv.tv_sec = milliseconds / 1000;
+	unsigned int uto;
+
+	uto = (unsigned int)milliseconds;
+	r0  = setsockopt( sock, 6, TCP_USER_TIMEOUT, (const void *)&uto, sizeof(uto) );
+
+#else
+	r0  = 0;
+
+#endif  /* TCP_USER_TIMEOUT */
+
+	memset( & tv, 0, sizeof(tv) );
+	tv.tv_sec  =  milliseconds / 1000;
 	tv.tv_usec = (milliseconds * 1000) % 1000000;
 
 #endif /* _WIN32 */
 
-	r1 = setsockopt( sock, SOL_SOCKET, SO_RCVTIMEO, (SOCK_OPT_TYPE)&tv, sizeof(tv));
-	r2 = setsockopt( sock, SOL_SOCKET, SO_SNDTIMEO, (SOCK_OPT_TYPE)&tv, sizeof(tv));
+	r1 = setsockopt( sock, SOL_SOCKET, SO_RCVTIMEO, (SOCK_OPT_TYPE)&tv, sizeof(tv) );
+	r2 = setsockopt( sock, SOL_SOCKET, SO_SNDTIMEO, (SOCK_OPT_TYPE)&tv, sizeof(tv) );
 
-	return r0 || r1 || r2;
+	return (r0  ||  r1  ||  r2);
 
 }  /* XX_httplib_set_sock_timeout */

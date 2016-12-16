@@ -26,3 +26,4 @@ The `httplib_mkdir()` function returns **0** when it was successful and **-1** w
 * [`httplib_closedir();`](httplib_closedir.md)
 * [`httplib_opendir();`](httplib_opendir.md)
 * [`httplib_readdir();`](httplib_readdir.md)
+* [`httplib_remove();`](httplib_remove.md)

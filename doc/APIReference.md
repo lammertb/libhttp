@@ -71,13 +71,22 @@ LibHTTP is often used as HTTP and HTTPS library inside a larger application.  A 
 * [`httplib_modify_passwords_file( passwords_file_name, domain, user, password );`](api/httplib_modify_passwords_file.md)
 * [`httplib_set_auth_handler( ctx, uri, handler, cbdata );`](api/httplib_set_auth_handler.md)
 
-### String Data Functions
+### Data Manipulation and Comparison Functions
 
+* [`httplib_atomic_dec( addr );`](api/httplib_atomic_dec.md)
+* [`httplib_atomic_inc( addr );`](api/httplib_atomic_inc.md)
+* [`httplib_base64_encode( src, src_len, dst, dst_len );`](api/httplib_base64_encode.md)
 * [`httplib_md5( buf, ... );`](api/httplib_md5.md)
 * [`httplib_strcasecmp( s1, s2 );`](api/httplib_strcasecmp.md)
+* [`httplib_strlcpy( dst, src, len );`](api/httplib_strlcpy.md)
 * [`httplib_strncasecmp( s1, s2, len );`](api/httplib_strncasecmp.md)
+* [`httplib_strndup( str, len );`](api/httplib_strndup.md)
 * [`httplib_url_decode( src, src_len, dst, dst_len, is_form_url_encoded );`](api/httplib_url_decode.md)
 * [`httplib_url_encode( src, dst, dst_len );`](api/httplib_url_encode.md)
+
+### Memory Allocation Functions
+
+* [`httplib_free( ptr );`](api/httplib_free.md)
 
 ### Process Functions
 
@@ -89,9 +98,10 @@ LibHTTP is often used as HTTP and HTTPS library inside a larger application.  A 
 * [`httplib_unlock_connection( conn );`](api/httplib_unlock_connection.md)
 * [`httplib_unlock_context( ctx );`](api/httplib_unlock_context.md)
 
-### Directory Functions
+### File and Directory Functions
 
 * [`httplib_closedir( dir );`](httplib_closedir.md)
 * [`httplib_mkdir( path, mode );`](httplib_mkdir.md)
 * [`httplib_opendir( name );`](httplib_opendir.md)
 * [`httplib_readdir( dir );`](httplib_readdir.md)
+* [`httplib_remove( path );`](httplib_remove.md)

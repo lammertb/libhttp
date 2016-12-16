@@ -50,10 +50,10 @@ void httplib_stop( struct httplib_context *ctx ) {
 	ctx->stop_flag = 1;
 
 	/* Wait until everything has stopped. */
-	while ( ctx->stop_flag != 2 ) httplib_sleep(10);
+	while ( ctx->stop_flag != 2 ) httplib_sleep( 10 );
 
-	XX_httplib_join_thread(mt);
-	XX_httplib_free_context(ctx);
+	XX_httplib_join_thread(  mt  );
+	XX_httplib_free_context( ctx );
 
 #if defined(_WIN32)
 	WSACleanup();

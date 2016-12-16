@@ -64,7 +64,7 @@ struct httplib_context *httplib_start( const struct httplib_callbacks *callbacks
 	/* Random number generator will initialize at the first call */
 	ctx->auth_nonce_mask = (uint64_t)XX_httplib_get_random() ^ (uint64_t)(ptrdiff_t)(options);
 
-	if (XX_httplib_atomic_inc(&XX_httplib_sTlsInit) == 1) {
+	if (httplib_atomic_inc(&XX_httplib_sTlsInit) == 1) {
 
 #if defined(_WIN32)
 		InitializeCriticalSection(&global_log_file_lock);
@@ -78,7 +78,7 @@ struct httplib_context *httplib_start( const struct httplib_callbacks *callbacks
 			/* Fatal error - abort start. However, this situation should
 			 * never
 			 * occur in practice. */
-			XX_httplib_atomic_dec(&XX_httplib_sTlsInit);
+			httplib_atomic_dec(&XX_httplib_sTlsInit);
 			httplib_cry( XX_httplib_fc(ctx), "Cannot initialize thread local storage");
 			XX_httplib_free(ctx);
 			return NULL;
@@ -90,7 +90,7 @@ struct httplib_context *httplib_start( const struct httplib_callbacks *callbacks
 	}
 
 	tls.is_master  = -1;
-	tls.thread_idx = (unsigned)XX_httplib_atomic_inc(&XX_httplib_thread_idx_max);
+	tls.thread_idx = (unsigned)httplib_atomic_inc(&XX_httplib_thread_idx_max);
 #if defined(_WIN32)
 	tls.pthread_cond_helper_mutex = NULL;
 #endif

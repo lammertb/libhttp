@@ -22,13 +22,22 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
 #include "httplib_utils.h"
 
-void XX_httplib_base64_encode( const unsigned char *src, int src_len, char *dst ) {
+/*
+ * int httplib_base64_encode( const unsigned char *src, int src_len, char *dst, int dst_len );
+ *
+ * The function httplib_base64_encode() converts a binary buffer of given
+ * length to its BASE64 equivalent. If an error occurs or the receive buffer is
+ * too small, -1 is returned. Otherwise the return value is the length of the
+ * data in the receive buffer, including the terminating NUL character.
+ */
+
+LIBHTTP_API int httplib_base64_encode( const unsigned char *src, int src_len, char *dst, int dst_len ) {
 
 	static const char *b64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 	int i;
@@ -37,19 +46,38 @@ void XX_httplib_base64_encode( const unsigned char *src, int src_len, char *dst 
 	int b;
 	int c;
 
-	for (i = j = 0; i < src_len; i += 3) {
+	if ( src == NULL  ||  src_len <= 0  ||  dst == NULL  ||  dst_len < 1 ) -1;
+
+	j = 0;
+
+	for (i=0; i<src_len; i+=3) {
+
 		a = src[i];
-		b = ((i + 1) >= src_len) ? 0 : src[i + 1];
-		c = ((i + 2) >= src_len) ? 0 : src[i + 2];
+
+		b = ((i+1) >= src_len) ? 0 : src[i+1];
+		c = ((i+2) >= src_len) ? 0 : src[i+2];
 
 		dst[j++] = b64[a >> 2];
-		dst[j++] = b64[((a & 3) << 4) | (b >> 4)];
-		if (i + 1 < src_len) {
-			dst[j++] = b64[(b & 15) << 2 | (c >> 6)];
-		}
-		if (i + 2 < src_len) dst[j++] = b64[c & 63];
-	}
-	while (j % 4 != 0) dst[j++] = '=';
-	dst[j++] = '\0';
+		if ( j >= dst_len ) return -1;
 
-}  /* XX_httplib_base64_encode */
+		dst[j++] = b64[((a & 3) << 4) | (b >> 4)];
+		if ( j >= dst_len ) return -1;
+
+		if (i+1 < src_len) dst[j++] = b64[(b & 15) << 2 | (c >> 6)];
+		if ( j >= dst_len ) return -1;
+
+		if (i+2 < src_len) dst[j++] = b64[ c & 63                 ];
+		if ( j >= dst_len ) return -1;
+	}
+
+	while ( j % 4 != 0 ) {
+		
+		dst[j++] = '=';
+		if ( j >= dst_len ) return -1;
+	}
+
+	dst[j++] = 0;
+
+	return j;
+
+}  /* httplib_base64_encode */

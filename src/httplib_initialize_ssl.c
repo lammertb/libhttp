@@ -64,7 +64,7 @@ int XX_httplib_initialize_ssl( struct httplib_context *ctx ) {
 	}
 #endif /* NO_SSL_DL */
 
-	if (XX_httplib_atomic_inc(&XX_httplib_cryptolib_users) > 1) return 1;
+	if (httplib_atomic_inc(&XX_httplib_cryptolib_users) > 1) return 1;
 
 	/* Initialize locking callbacks, needed for thread safety.
 	 * http://www.openssl.org/support/faq.html#PROG1

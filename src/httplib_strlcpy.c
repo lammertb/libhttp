@@ -22,15 +22,38 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
 #include "httplib_string.h"
 
-void XX_httplib_strlcpy( register char *dst, register const char *src, size_t n ) {
+/*
+ * void httplib_strlcpy( char *dst, const char *src, size_t len );
+ *
+ * The function httplib_strlcpy() provides a platform independent safe way to
+ * copy a string from one memory location to another. The size of the receiving
+ * buffer is provided as a parameter and the function ensures that no more than
+ * the number of the characters fitting in that buffer will be copied. The
+ * function also ensures that if the destination buffer is not NULL and the
+ * size is at least one byte long that the resulting string is terminated with
+ * a NUL character.
+ *
+ * If the source string is longer than will fit in the receiving buffer, the
+ * remaining characters will be ignored.
+ */
 
-	for (; *src != '\0' && n > 1; n--) { *dst++ = *src++; }
-	*dst = '\0';
+LIBHTTP_API void httplib_strlcpy( char *dst, const char *src, size_t len ) {
 
-}  /* XX_httplib_strlcpy */
+	if ( dst == NULL  ||  len == 0 )             return;
+	if ( src == NULL               ) { *dst = 0; return; }
+
+	while ( len > 1  &&  *src ) {
+
+		*dst++ = *src++;
+		len--;
+	}
+
+	*dst = 0;
+
+}  /* httplib_strlcpy */

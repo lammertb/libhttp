@@ -22,26 +22,40 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
 #include "httplib_utils.h"
 
-int XX_httplib_atomic_dec( volatile int *addr ) {
+/*
+ * int httplib_atomic_dec( volatile int *addr );
+ *
+ * The function httplib_atomic_dec() performs an atomic decrement of an integer
+ * which can be used process interlocking. The function returns the value of
+ * the integer after decrementing.
+ */
 
-	int ret;
+LIBHTTP_API int httplib_atomic_dec( volatile int *addr ) {
+
 #if defined(_WIN32)
-	/* Depending on the SDK, this function uses either
-	 * (volatile unsigned int *) or (volatile LONG *),
-	 * so whatever you use, the other SDK is likely to raise a warning. */
-	ret = InterlockedDecrement((volatile long *)addr);
-#elif defined(__GNUC__)                                                        \
-    && ((__GNUC__ > 4) || ((__GNUC__ == 4) && (__GNUC_MINOR__ > 0)))
-	ret = __sync_sub_and_fetch(addr, 1);
-#else
-	ret = (--(*addr));
-#endif
-	return ret;
 
-}  /* XX_httplib_atomic_dec */
+	/*
+	 * Depending on the SDK, this function uses either
+	 * (volatile unsigned int *) or (volatile LONG *),
+	 * so whatever you use, the other SDK is likely to raise a warning.
+	 */
+
+	return InterlockedDecrement( (volatile long *)addr );
+
+#elif defined(__GNUC__) && ((__GNUC__ > 4) || ((__GNUC__ == 4) && (__GNUC_MINOR__ > 0)))
+
+	return __sync_sub_and_fetch( addr, 1 );
+
+#else
+
+	return (--(*addr));
+
+#endif
+
+}  /* httplib_atomic_dec */

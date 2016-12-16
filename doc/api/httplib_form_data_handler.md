@@ -19,7 +19,7 @@
 ||**`FORM_FIELD_STORAGE_STORE`** - Store a file as `path` and overwrite that file if it already exists|
 ||**`FORM_FIELD_STORAGE_ABORT`** - Stop parsing the request and ignore all remaining form fields|
 |**`field_get`**|**`int field_get( const char *key, const char *value, size_t valuelen, void *user_data );`**|
-|**`field_store`**|**`int field_store( const char *path, long long file_size, void *user_data );`**|
+|**`field_store`**|**`int field_store( const char *path, int64_t file_size, void *user_data );`**|
 ||If the callback function `field_found()` returned `FORM_FIELD_STORAGE_STORE`, LibHTTP will try to store the received data in a file. If writing the file is successful, the callback function `field_store()` is called. This function is only called after completion of a full upload, not if a file has only partly been uploaded. When only part of a file is received, LibHTTP will delete that partly upload in the background and not inform the main application through this callback. The following parameters are provided in the function call:|
 ||**`path`** -|
 ||**`file_size`** - The path on the server where the file was stored|

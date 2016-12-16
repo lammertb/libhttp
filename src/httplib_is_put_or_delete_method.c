@@ -27,9 +27,9 @@
 
 #include "httplib_main.h"
 
-int XX_httplib_is_put_or_delete_method( const struct httplib_connection *conn ) {
+bool XX_httplib_is_put_or_delete_method( const struct httplib_connection *conn ) {
 
-	if ( conn == NULL ) return 0;
+	if ( conn == NULL ) return false;
 
 	const char *s = conn->request_info.request_method;
 

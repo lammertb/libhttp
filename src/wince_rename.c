@@ -22,12 +22,21 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
 
 #if defined(_WIN32_WCE)
+
+/*
+ * int rename( const char *a, const char *b );
+ *
+ * The function rename() provides a Windows CE specific implementation to
+ * rename a file. As the kernel does not provide support for the Posix rename()
+ * function this emulation function should provide equivalent functionality.
+ * If renaming succeeds, 0 is returned, otherwise -1.
+ */
 
 int rename( const char *a, const char *b ) {
 

@@ -46,7 +46,7 @@ void XX_httplib_redirect_to_https_port( struct httplib_connection *conn, int ssl
 	if (host_header != NULL) {
 		char *pos;
 
-		XX_httplib_strlcpy(host, host_header, hostlen);
+		httplib_strlcpy( host, host_header, hostlen );
 		host[hostlen - 1] = '\0';
 		pos = strchr(host, ':');
 		if (pos != NULL) *pos = '\0';

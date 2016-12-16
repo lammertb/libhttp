@@ -22,13 +22,23 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
 
-struct httplib_context * httplib_get_context(const struct httplib_connection *conn) {
+/*
+ * struct httplib_context *httplib_get_context( const struct httplib_connection *conn );
+ *
+ * The function httplib_get_context() returns a pointer to the context
+ * associated with a connection or NULL if the connection or context could not
+ * be found.
+ */
 
-	return (conn == NULL) ? (struct httplib_context *)NULL : (conn->ctx);
+struct httplib_context *httplib_get_context( const struct httplib_connection *conn ) {
+
+	if ( conn == NULL ) return NULL;
+
+	return conn->ctx;
 
 }  /* httplib_get_context */

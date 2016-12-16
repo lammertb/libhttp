@@ -81,7 +81,7 @@ int XX_httplib_refresh_trust( struct httplib_connection *conn ) {
 			}
 		}
 
-		if (1 == XX_httplib_atomic_inc(p_reload_lock)) {
+		if (1 == httplib_atomic_inc(p_reload_lock)) {
 			if (XX_httplib_ssl_use_pem_file(conn->ctx, pem) == 0) return 0;
 			*p_reload_lock = 0;
 		}

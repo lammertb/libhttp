@@ -1767,7 +1767,7 @@ static const int myfile_content_rep = 50000;
 
 
 static int
-field_store(const char *path, long long file_size, void *user_data)
+field_store(const char *path, int64_t file_size, void *user_data)
 {
 	FILE *f;
 	ck_assert_ptr_eq(user_data, (void *)&g_field_found_return);
