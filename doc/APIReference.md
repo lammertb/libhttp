@@ -89,7 +89,7 @@ LibHTTP is often used as HTTP and HTTPS library inside a larger application.  A 
 
 * [`httplib_calloc( ptr, size );`](api/httplib_calloc.md)
 * [`httplib_free( ptr );`](api/httplib_free.md)
-* [`httplib_malloc( size );`](api_httplib_malloc.md)
+* [`httplib_malloc( size );`](api/httplib_malloc.md)
 * [`httplib_realloc( ptr, size );`](api/httplib_realloc.md)
 * [`httplib_set_alloc_callback_func( log_func );`](api/httplib_set_alloc_callback_func.md)
 
