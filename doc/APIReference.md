@@ -90,18 +90,18 @@ LibHTTP is often used as HTTP and HTTPS library inside a larger application.  A 
 
 ### Process Functions
 
-* [`httplib_kill( pid, sig );`](httplib_kill.md)
+* [`httplib_kill( pid, sig );`](api/httplib_kill.md)
 * [`httplib_lock_connection( conn );`](api/httplib_lock_connection.md)
 * [`httplib_lock_context( ctx );`](api/httplib_lock_context.md)
-* [`httplib_poll( pfd, nfds, timeout );`](httplib_pol.md)
+* [`httplib_poll( pfd, nfds, timeout );`](api/httplib_poll.md)
 * [`httplib_start_thread( f, p );`](api/httplib_start_thread.md)
 * [`httplib_unlock_connection( conn );`](api/httplib_unlock_connection.md)
 * [`httplib_unlock_context( ctx );`](api/httplib_unlock_context.md)
 
 ### File and Directory Functions
 
-* [`httplib_closedir( dir );`](httplib_closedir.md)
-* [`httplib_mkdir( path, mode );`](httplib_mkdir.md)
-* [`httplib_opendir( name );`](httplib_opendir.md)
-* [`httplib_readdir( dir );`](httplib_readdir.md)
-* [`httplib_remove( path );`](httplib_remove.md)
+* [`httplib_closedir( dir );`](api/httplib_closedir.md)
+* [`httplib_mkdir( path, mode );`](api/httplib_mkdir.md)
+* [`httplib_opendir( name );`](api/httplib_opendir.md)
+* [`httplib_readdir( dir );`](api/httplib_readdir.md)
+* [`httplib_remove( path );`](api/httplib_remove.md)
