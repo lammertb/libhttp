@@ -30,8 +30,8 @@ The callback function takes six parameters and does not return a value. The para
 |**`line`**|`unsigned`|The line in the source file where the memory allocation function is located|
 |**`action`**|`const char *`|A string indicating the source of the callback. Currently this can be either **malloc**, **free** and **realloc**. Please note that a call to `httplib_calloc()` is internally translated to a `httplib_malloc()` call and these requests are reported as **malloc** actions. Furthermore in certain situations `httplib_realloc()` may actually be converted to a plain memory allocation of free action resulting in **malloc** or **free** mentioned as `action` parameter.|
 |**`current_bytes`**|`int64_t`|The amount of bytes in the current request. A positive number indicates that memory was allocated from the heap, a negative value is returned when memory was given back to the heap. Please note that a **realloc** action can therefore both have a positive and negative `current_bytes` value.|
-|**`total_blocks`**|The total amount of currently allocated blocks|
-|**`total_bytes`**|The total amount of bytes currently allocated through the LibHTTP memory allocation functions|
+|**`total_blocks`**|`int64_t`|The total amount of currently allocated blocks|
+|**`total_bytes`**|`int64_t`|The total amount of bytes currently allocated through the LibHTTP memory allocation functions|
 
 Please note that the processing of the callback function may take an arbitrary amount of time depending on the code which it has to execute. For that reason the setting of the callback function should not be changed during operation of a server process because this may cause unexpected results when the callback function is changed halfway an ongoing callback process. It should also be noted that the memory allocation function issuing the callback will not return until the callback has been fully processed. Long processing times in the callback function may therefore negatively impact the performance of LibHTTP.
 
