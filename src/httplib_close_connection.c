@@ -106,10 +106,10 @@ void httplib_close_connection( struct httplib_connection *conn ) {
 			if (client_ctx->workerthreadids[i] != 0) XX_httplib_join_thread(client_ctx->workerthreadids[i]);
 		}
 
-		XX_httplib_free(client_ctx->workerthreadids);
-		XX_httplib_free(client_ctx);
-		pthread_mutex_destroy(&conn->mutex);
-		XX_httplib_free(conn);
+		httplib_free( client_ctx->workerthreadids );
+		httplib_free( client_ctx                  );
+		pthread_mutex_destroy( & conn->mutex );
+		httplib_free( conn );
 	}
 
 }  /* httplib_close_connection */

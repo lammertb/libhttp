@@ -50,7 +50,7 @@ LIBHTTP_API char *httplib_strndup( const char *ptr, size_t len ) {
 
 	char *p;
 
-	if ( (p = XX_httplib_malloc(len+1)) != NULL ) httplib_strlcpy( p, ptr, len+1 );
+	if ( (p = httplib_malloc( len+1 )) != NULL ) httplib_strlcpy( p, ptr, len+1 );
 
 	return p;
 

@@ -46,7 +46,7 @@ LIBHTTP_API int httplib_base64_encode( const unsigned char *src, int src_len, ch
 	int b;
 	int c;
 
-	if ( src == NULL  ||  src_len <= 0  ||  dst == NULL  ||  dst_len < 1 ) -1;
+	if ( src == NULL  ||  src_len <= 0  ||  dst == NULL  ||  dst_len < 1 ) return -1;
 
 	j = 0;
 

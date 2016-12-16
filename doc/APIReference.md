@@ -87,6 +87,7 @@ LibHTTP is often used as HTTP and HTTPS library inside a larger application.  A 
 ### Memory Allocation Functions
 
 * [`httplib_free( ptr );`](api/httplib_free.md)
+* [`httplib_set_alloc_callback_func( log_func );`](api/httplib_set_alloc_callback_func.md)
 
 ### Process Functions
 

@@ -59,9 +59,6 @@ unsigned httplib_check_feature( unsigned feature ) {
 
 /* Set some extra bits not defined in the API documentation.
  * These bits may change without further notice. */
-#if defined(MEMORY_DEBUGGING)
-	                                    | 0x0100u
-#endif
 #if defined(USE_TIMERS)
 	                                    | 0x0200u
 #endif

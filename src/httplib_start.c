@@ -59,7 +59,7 @@ struct httplib_context *httplib_start( const struct httplib_callbacks *callbacks
 #endif /* _WIN32 */
 
 	/* Allocate context and initialize reasonable general case defaults. */
-	if ((ctx = (struct httplib_context *)XX_httplib_calloc(1, sizeof(*ctx))) == NULL) return NULL;
+	if ((ctx = httplib_calloc(1, sizeof(*ctx))) == NULL) return NULL;
 
 	/* Random number generator will initialize at the first call */
 	ctx->auth_nonce_mask = (uint64_t)XX_httplib_get_random() ^ (uint64_t)(ptrdiff_t)(options);
@@ -80,7 +80,7 @@ struct httplib_context *httplib_start( const struct httplib_callbacks *callbacks
 			 * occur in practice. */
 			httplib_atomic_dec(&XX_httplib_sTlsInit);
 			httplib_cry( XX_httplib_fc(ctx), "Cannot initialize thread local storage");
-			XX_httplib_free(ctx);
+			httplib_free( ctx );
 			return NULL;
 		}
 	} else {
@@ -106,7 +106,7 @@ struct httplib_context *httplib_start( const struct httplib_callbacks *callbacks
 		/* Fatal error - abort start. However, this situation should never
 		 * occur in practice. */
 		httplib_cry( XX_httplib_fc(ctx), "Cannot initialize thread synchronization objects");
-		XX_httplib_free(ctx);
+		httplib_free( ctx );
 		pthread_setspecific(XX_httplib_sTlsKey, NULL);
 		return NULL;
 	}
@@ -133,7 +133,7 @@ struct httplib_context *httplib_start( const struct httplib_callbacks *callbacks
 		}
 		if (ctx->config[idx] != NULL) {
 			httplib_cry( XX_httplib_fc(ctx), "warning: %s: duplicate option", name);
-			XX_httplib_free(ctx->config[idx]);
+			httplib_free( ctx->config[idx] );
 		}
 		ctx->config[idx] = XX_httplib_strdup(value);
 	}
@@ -190,8 +190,7 @@ struct httplib_context *httplib_start( const struct httplib_callbacks *callbacks
 
 	if (workerthreadcount > 0) {
 		ctx->cfg_worker_threads = ((unsigned int)(workerthreadcount));
-		ctx->workerthreadids =
-		    (pthread_t *)XX_httplib_calloc(ctx->cfg_worker_threads, sizeof(pthread_t));
+		ctx->workerthreadids = httplib_calloc( ctx->cfg_worker_threads, sizeof(pthread_t) );
 		if (ctx->workerthreadids == NULL) {
 			httplib_cry( XX_httplib_fc(ctx), "Not enough memory for worker thread ID array");
 			XX_httplib_free_context(ctx);
@@ -200,8 +199,7 @@ struct httplib_context *httplib_start( const struct httplib_callbacks *callbacks
 		}
 
 #if defined(ALTERNATIVE_QUEUE)
-		ctx->client_wait_events = XX_httplib_calloc(sizeof(ctx->client_wait_events[0]),
-		                                    ctx->cfg_worker_threads);
+		ctx->client_wait_events = httplib_calloc( sizeof(ctx->client_wait_events[0]), ctx->cfg_worker_threads );
 		if (ctx->client_wait_events == NULL) {
 			httplib_cry( XX_httplib_fc(ctx), "Not enough memory for worker event array");
 			XX_httplib_free(ctx->workerthreadids);
@@ -210,8 +208,7 @@ struct httplib_context *httplib_start( const struct httplib_callbacks *callbacks
 			return NULL;
 		}
 
-		ctx->client_socks =
-		    XX_httplib_calloc(sizeof(ctx->client_socks[0]), ctx->cfg_worker_threads);
+		ctx->client_socks = httplib_calloc( sizeof(ctx->client_socks[0]), ctx->cfg_worker_threads );
 		if (ctx->client_wait_events == NULL) {
 			httplib_cry( XX_httplib_fc(ctx), "Not enough memory for worker socket array");
 			XX_httplib_free(ctx->client_socks);
@@ -252,22 +249,16 @@ struct httplib_context *httplib_start( const struct httplib_callbacks *callbacks
 
 	/* Start worker threads */
 	for (i = 0; i < ctx->cfg_worker_threads; i++) {
-		struct worker_thread_args *wta =
-		    XX_httplib_malloc(sizeof(struct worker_thread_args));
+		struct worker_thread_args *wta = httplib_malloc( sizeof(struct worker_thread_args) );
 		if (wta) {
 			wta->ctx = ctx;
 			wta->index = (int)i;
 		}
 
-		if ((wta == NULL)
-		    || (XX_httplib_start_thread_with_id(XX_httplib_worker_thread,
-		                                wta,
-		                                &ctx->workerthreadids[i]) != 0)) {
+		if ((wta == NULL) || (XX_httplib_start_thread_with_id(XX_httplib_worker_thread, wta, &ctx->workerthreadids[i]) != 0)) {
 
 			/* thread was not created */
-			if (wta != NULL) {
-				XX_httplib_free(wta);
-			}
+			if (wta != NULL) httplib_free( wta );
 
 			if (i > 0) {
 				httplib_cry( XX_httplib_fc(ctx), "Cannot start worker thread %i: error %ld", i + 1, (long)ERRNO);

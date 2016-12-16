@@ -172,7 +172,8 @@ void XX_httplib_handle_cgi_request( struct httplib_connection *conn, const char 
 	 * Do not send anything back to client, until we buffer in all
 	 * HTTP headers. */
 	data_len = 0;
-	buf = (char *)XX_httplib_malloc(buflen);
+	buf      = httplib_malloc( buflen );
+
 	if (buf == NULL) {
 		XX_httplib_send_http_error(conn, 500, "Error: Not enough memory for CGI buffer (%u bytes)", (unsigned int)buflen);
 		httplib_cry(conn, "Error: CGI program \"%s\": Not enough memory for buffer (%u " "bytes)", prog, (unsigned int)buflen);
@@ -238,8 +239,8 @@ void XX_httplib_handle_cgi_request( struct httplib_connection *conn, const char 
 	XX_httplib_send_file_data(conn, &fout, 0, INT64_MAX);
 
 done:
-	XX_httplib_free(blk.var);
-	XX_httplib_free(blk.buf);
+	httplib_free( blk.var );
+	httplib_free( blk.buf );
 
 	if (pid != (pid_t)-1) {
 		httplib_kill( pid, SIGKILL );
@@ -258,7 +259,7 @@ done:
 	if ( out != NULL ) fclose( out ); else if ( fdout[0] != -1 ) close( fdout[0] );
 	if ( err != NULL ) fclose( err ); else if ( fderr[0] != -1 ) close( fderr[0] );
 
-	if ( buf != NULL ) XX_httplib_free( buf );
+	if ( buf != NULL ) httplib_free( buf );
 
 }  /* XX_httplib_handle_cgi_request */
 

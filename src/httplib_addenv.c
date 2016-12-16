@@ -58,8 +58,8 @@ void XX_httplib_addenv( struct cgi_environment *env, const char *fmt, ... ) {
 	do {
 		if (space <= n) {
 			/* Allocate new buffer */
-			n = env->buflen + CGI_ENVIRONMENT_SIZE;
-			added = (char *)XX_httplib_realloc(env->buf, n);
+			n     = env->buflen + CGI_ENVIRONMENT_SIZE;
+			added = httplib_realloc(env->buf, n);
 			if (!added) {
 				/* Out of memory */
 				httplib_cry(env->conn, "%s: Cannot allocate memory for CGI variable [%s]", __func__, fmt);

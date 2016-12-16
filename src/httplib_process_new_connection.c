@@ -38,9 +38,7 @@
 
 void XX_httplib_process_new_connection( struct httplib_connection *conn ) {
 
-	if ( conn == NULL  ||  conn->ctx == NULL ) return;
-
-	struct httplib_request_info *ri = &conn->request_info;
+	struct httplib_request_info *ri;
 	int keep_alive_enabled;
 	int keep_alive;
 	int discard_len;
@@ -49,7 +47,10 @@ void XX_httplib_process_new_connection( struct httplib_connection *conn ) {
 	int reqerr;
 	int uri_type;
 
-	keep_alive_enabled = ! strcmp(conn->ctx->config[ENABLE_KEEP_ALIVE], "yes");
+	if ( conn == NULL  ||  conn->ctx == NULL ) return;
+
+	ri                 = & conn->request_info;
+	keep_alive_enabled = ! strcmp( conn->ctx->config[ENABLE_KEEP_ALIVE], "yes" );
 
 	/* Important: on new connection, reset the receiving buffer. Credit
 	 * goes to crule42. */
@@ -113,7 +114,7 @@ void XX_httplib_process_new_connection( struct httplib_connection *conn ) {
 		} else conn->must_close = 1;
 
 		if (ri->remote_user != NULL) {
-			XX_httplib_free((void *)ri->remote_user);
+			httplib_free( (void *) ri->remote_user );
 			/* Important! When having connections with and without auth
 			 * would cause double free and then crash */
 			ri->remote_user = NULL;

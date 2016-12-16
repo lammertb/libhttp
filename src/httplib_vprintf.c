@@ -38,10 +38,10 @@ static int alloc_vprintf2( char **buf, const char *fmt, va_list ap ) {
 
 	*buf = NULL;
 	while (len < 0) {
-		if (*buf) XX_httplib_free(*buf);
+		if (*buf) httplib_free( *buf );
 
 		size *= 4;
-		*buf = (char *)XX_httplib_malloc(size);
+		*buf = httplib_malloc( size );
 		if (!*buf) break;
 
 		va_copy(ap_copy, ap);
@@ -83,7 +83,7 @@ static int alloc_vprintf( char **out_buf, char *prealloc_buf, size_t prealloc_si
 	} else if ((size_t)(len) >= prealloc_size) {
 		/* The pre-allocated buffer not large enough. */
 		/* Allocate a new buffer. */
-		*out_buf = (char *)XX_httplib_malloc((size_t)(len) + 1);
+		*out_buf = httplib_malloc( (size_t)(len) + 1 );
 		if (!*out_buf) {
 			/* Allocation failed. Return -1 as "out of memory" error. */
 			return -1;
@@ -116,7 +116,7 @@ int XX_httplib_vprintf( struct httplib_connection *conn, const char *fmt, va_lis
 	int len;
 
 	if ((len = alloc_vprintf(&buf, mem, sizeof(mem), fmt, ap)) > 0) len = httplib_write(conn, buf, (size_t)len);
-	if (buf != mem && buf != NULL) XX_httplib_free(buf);
+	if (buf != mem && buf != NULL) httplib_free( buf );
 
 	return len;
 

@@ -87,9 +87,9 @@ void XX_httplib_handle_directory_request( struct httplib_connection *conn, const
 		      XX_httplib_compare_dir_entries);
 		for (i = 0; i < data.num_entries; i++) {
 			XX_httplib_print_dir_entry(&data.entries[i]);
-			XX_httplib_free(data.entries[i].file_name);
+			httplib_free( data.entries[i].file_name );
 		}
-		XX_httplib_free(data.entries);
+		httplib_free( data.entries );
 	}
 
 	conn->num_bytes_sent += httplib_printf(conn, "%s", "</table></body></html>");

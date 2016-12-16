@@ -72,7 +72,7 @@ int XX_httplib_initialize_ssl( struct httplib_context *ctx ) {
 	i = CRYPTO_num_locks();
 	if (i < 0) i = 0;
 	size = sizeof(pthread_mutex_t) * ((size_t)(i));
-	if ((XX_httplib_ssl_mutexes = (pthread_mutex_t *)XX_httplib_malloc(size)) == NULL) {
+	if ((XX_httplib_ssl_mutexes = httplib_malloc( size )) == NULL) {
 		httplib_cry( XX_httplib_fc(ctx), "%s: cannot allocate mutexes: %s", __func__, XX_httplib_ssl_error());
 		return 0;
 	}

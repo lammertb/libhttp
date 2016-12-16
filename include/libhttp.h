@@ -961,6 +961,18 @@ LIBHTTP_API int httplib_get_response(struct httplib_connection *conn, char *ebuf
 */
 LIBHTTP_API unsigned httplib_check_feature(unsigned feature);
 
+typedef void (*httplib_alloc_callback_func)( const char *file, unsigned line, const char *action, int64_t current_bytes, int64_t total_blocks, int64_t total_bytes );
+
+#define				httplib_calloc(a, b) XX_httplib_calloc_ex(a, b, __FILE__, __LINE__)
+#define				httplib_free(a) XX_httplib_free_ex(a, __FILE__, __LINE__)
+#define				httplib_malloc(a) XX_httplib_malloc_ex(a, __FILE__, __LINE__)
+#define				httplib_realloc(a, b) XX_httplib_realloc_ex(a, b, __FILE__, __LINE__)
+
+LIBHTTP_API void *		XX_httplib_calloc_ex( size_t count, size_t size, const char *file, unsigned line );
+LIBHTTP_API void		XX_httplib_free_ex( void *memory, const char *file, unsigned line );
+LIBHTTP_API void *		XX_httplib_malloc_ex( size_t size, const char *file, unsigned line );
+LIBHTTP_API void *		XX_httplib_realloc_ex( void *memory, size_t newsize, const char *file, unsigned line );
+
 LIBHTTP_API int			httplib_atomic_dec( volatile int *addr );
 LIBHTTP_API int			httplib_atomic_inc( volatile int *addr );
 LIBHTTP_API int			httplib_closedir( DIR *dir );
@@ -970,6 +982,7 @@ LIBHTTP_API DIR *		httplib_opendir( const char *name );
 LIBHTTP_API int			httplib_poll( struct pollfd *pfd, unsigned int nfds, int timeout );
 LIBHTTP_API struct dirent *	httplib_readdir( DIR *dir );
 LIBHTTP_API int			httplib_remove( const char *path );
+LIBHTTP_API void		httplib_set_alloc_callback_func( httplib_alloc_callback_func log_func );
 LIBHTTP_API void		httplib_strlcpy( char *dst, const char *src, size_t len );
 LIBHTTP_API char *		httplib_strndup( const char *str, size_t len );
 

@@ -55,10 +55,10 @@ void XX_httplib_prepare_cgi_environment( struct httplib_connection *conn, const 
 	env->conn    = conn;
 	env->buflen  = CGI_ENVIRONMENT_SIZE;
 	env->bufused = 0;
-	env->buf     = (char *)XX_httplib_malloc(env->buflen);
+	env->buf     = httplib_malloc( env->buflen );
 	env->varlen  = MAX_CGI_ENVIR_VARS;
 	env->varused = 0;
-	env->var     = (char **)XX_httplib_malloc(env->buflen * sizeof(char *));
+	env->var     = httplib_malloc( env->buflen * sizeof(char *) );
 
 	XX_httplib_addenv( env, "SERVER_NAME=%s",                   conn->ctx->config[AUTHENTICATION_DOMAIN] );
 	XX_httplib_addenv( env, "SERVER_ROOT=%s",                   conn->ctx->config[DOCUMENT_ROOT]         );

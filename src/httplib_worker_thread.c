@@ -49,7 +49,7 @@ void *XX_httplib_worker_thread( void *thread_func_param ) {
 
 	struct worker_thread_args *pwta = (struct worker_thread_args *)thread_func_param;
 	worker_thread_run(pwta);
-	XX_httplib_free(thread_func_param);
+	httplib_free( thread_func_param );
 
 	return 0;
 
@@ -70,9 +70,9 @@ static void *worker_thread_run( struct worker_thread_args *thread_args ) {
 	struct httplib_connection *conn;
 	struct httplib_workerTLS tls;
 
-	XX_httplib_set_thread_name("worker");
+	XX_httplib_set_thread_name( "worker" );
 
-	tls.is_master = 0;
+	tls.is_master  = 0;
 	tls.thread_idx = (unsigned)httplib_atomic_inc(&XX_httplib_thread_idx_max);
 #if defined(_WIN32)
 	tls.pthread_cond_helper_mutex = CreateEvent(NULL, FALSE, FALSE, NULL);
@@ -83,21 +83,20 @@ static void *worker_thread_run( struct worker_thread_args *thread_args ) {
 		ctx->callbacks.init_thread(ctx, 1);
 	}
 
-	conn =
-	    (struct httplib_connection *)XX_httplib_calloc(1, sizeof(*conn) + MAX_REQUEST_SIZE);
+	conn = httplib_calloc( 1, sizeof(*conn) + MAX_REQUEST_SIZE );
 	if (conn == NULL) {
 		httplib_cry( XX_httplib_fc(ctx), "%s", "Cannot create new connection struct, OOM");
 	} else {
 		pthread_setspecific(XX_httplib_sTlsKey, &tls);
-		conn->buf_size = MAX_REQUEST_SIZE;
-		conn->buf = (char *)(conn + 1);
-		conn->ctx = ctx;
-		conn->thread_index = thread_args->index;
+		conn->buf_size               = MAX_REQUEST_SIZE;
+		conn->buf                    = (char *)(conn + 1);
+		conn->ctx                    = ctx;
+		conn->thread_index           = thread_args->index;
 		conn->request_info.user_data = ctx->user_data;
 		/* Allocate a mutex for this connection to allow communication both
 		 * within the request handler and from elsewhere in the application
 		 */
-		(void)pthread_mutex_init(&conn->mutex, &XX_httplib_pthread_mutex_attr);
+		pthread_mutex_init(&conn->mutex, &XX_httplib_pthread_mutex_attr);
 
 		/* Call XX_httplib_consume_socket() even when ctx->stop_flag > 0, to let it
 		 * signal sq_empty condvar to wake up the master waiting in
@@ -129,7 +128,8 @@ static void *worker_thread_run( struct worker_thread_args *thread_args ) {
 			if (conn->client.is_ssl) {
 #ifndef NO_SSL
 				/* HTTPS connection */
-				if (XX_httplib_sslize(conn, conn->ctx->ssl_ctx, SSL_accept)) {
+				if ( XX_httplib_sslize( conn, conn->ctx->ssl_ctx, SSL_accept ) ) {
+
 					/* Get SSL client certificate information (if set) */
 					XX_httplib_ssl_get_client_cert_info(conn);
 
@@ -137,27 +137,21 @@ static void *worker_thread_run( struct worker_thread_args *thread_args ) {
 					XX_httplib_process_new_connection(conn);
 
 					/* Free client certificate info */
-					if (conn->request_info.client_cert) {
-						XX_httplib_free(
-						    (void *)(conn->request_info.client_cert->subject));
-						XX_httplib_free(
-						    (void *)(conn->request_info.client_cert->issuer));
-						XX_httplib_free(
-						    (void *)(conn->request_info.client_cert->serial));
-						XX_httplib_free(
-						    (void *)(conn->request_info.client_cert->finger));
-						conn->request_info.client_cert->subject = 0;
-						conn->request_info.client_cert->issuer = 0;
-						conn->request_info.client_cert->serial = 0;
-						conn->request_info.client_cert->finger = 0;
-						XX_httplib_free(conn->request_info.client_cert);
-						conn->request_info.client_cert = 0;
+					if ( conn->request_info.client_cert != NULL ) {
+
+						httplib_free( (void *)conn->request_info.client_cert->subject );
+						httplib_free( (void *)conn->request_info.client_cert->issuer  );
+						httplib_free( (void *)conn->request_info.client_cert->serial  );
+						httplib_free( (void *)conn->request_info.client_cert->finger  );
+						httplib_free( (void *)conn->request_info.client_cert          );
+
+						conn->request_info.client_cert = NULL;
 					}
 				}
 #endif
 			} else {
 				/* process HTTP connection */
-				XX_httplib_process_new_connection(conn);
+				XX_httplib_process_new_connection( conn );
 			}
 
 			XX_httplib_close_connection(conn);
@@ -169,7 +163,7 @@ static void *worker_thread_run( struct worker_thread_args *thread_args ) {
 	CloseHandle(tls.pthread_cond_helper_mutex);
 #endif
 	pthread_mutex_destroy(&conn->mutex);
-	XX_httplib_free(conn);
+	httplib_free( conn );
 
 	return NULL;
 

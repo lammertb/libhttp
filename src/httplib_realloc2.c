@@ -31,8 +31,8 @@
 /* Behaves like realloc(), but frees original pointer on failure */
 void *XX_httplib_realloc2( void *ptr, size_t size ) {
 
-	void *new_ptr = XX_httplib_realloc(ptr, size);
-	if (new_ptr == NULL) XX_httplib_free(ptr);
+	void *new_ptr = httplib_realloc( ptr, size );
+	if (new_ptr == NULL) httplib_free( ptr );
 
 	return new_ptr;
 

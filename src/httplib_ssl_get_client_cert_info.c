@@ -87,8 +87,7 @@ void XX_httplib_ssl_get_client_cert_info( struct httplib_connection *conn ) {
 	ASN1_digest((int (*)())i2d_X509, digest, (char *)cert, buf, &ulen);
 	if (!hexdump2string( buf, (int)ulen, str_finger, (int)sizeof(str_finger))) *str_finger = 0;
 
-	conn->request_info.client_cert =
-	    (struct client_cert *)XX_httplib_malloc(sizeof(struct client_cert));
+	conn->request_info.client_cert = httplib_malloc( sizeof(struct client_cert) );
 	if (conn->request_info.client_cert) {
 		conn->request_info.client_cert->subject = XX_httplib_strdup( str_subject );
 		conn->request_info.client_cert->issuer  = XX_httplib_strdup( str_issuer  );

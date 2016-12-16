@@ -88,7 +88,7 @@ static struct httplib_connection *httplib_connect_client_impl( const struct http
 
 	if (!XX_httplib_connect_socket(&fake_ctx, client_options->host, client_options->port, use_ssl, ebuf, ebuf_len, &sock, &sa)) {
 		;
-	} else if ((conn = (struct httplib_connection *) XX_httplib_calloc(1, sizeof(*conn) + MAX_REQUEST_SIZE)) == NULL) {
+	} else if ((conn = httplib_calloc( 1, sizeof(*conn) + MAX_REQUEST_SIZE )) == NULL ) {
 		XX_httplib_snprintf(NULL, NULL, ebuf, ebuf_len, "calloc(): %s", strerror(ERRNO));
 		closesocket(sock);
 #ifndef NO_SSL
@@ -96,7 +96,7 @@ static struct httplib_connection *httplib_connect_client_impl( const struct http
 
 		XX_httplib_snprintf(NULL, NULL, ebuf, ebuf_len, "SSL_CTX_new error");
 		closesocket(sock);
-		XX_httplib_free(conn);
+		httplib_free( conn );
 		conn = NULL;
 #endif /* NO_SSL */
 
@@ -138,7 +138,7 @@ static struct httplib_connection *httplib_connect_client_impl( const struct http
 					XX_httplib_snprintf(NULL, NULL, ebuf, ebuf_len, "Can not use SSL client certificate");
 					SSL_CTX_free(conn->client_ssl_ctx);
 					closesocket(sock);
-					XX_httplib_free(conn);
+					httplib_free( conn );
 					conn = NULL;
 				}
 			}
@@ -154,7 +154,7 @@ static struct httplib_connection *httplib_connect_client_impl( const struct http
 				XX_httplib_snprintf(NULL, NULL, ebuf, ebuf_len, "SSL connection error");
 				SSL_CTX_free(conn->client_ssl_ctx);
 				closesocket(sock);
-				XX_httplib_free(conn);
+				httplib_free( conn );
 				conn = NULL;
 			}
 		}

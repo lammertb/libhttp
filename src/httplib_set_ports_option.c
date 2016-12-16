@@ -190,7 +190,7 @@ int XX_httplib_set_ports_option( struct httplib_context *ctx ) {
 			so.lsa.sin.sin_port = usa.sin.sin_port;
 		}
 
-		if ((ptr = XX_httplib_realloc(ctx->listening_sockets, (ctx->num_listening_sockets + 1) * sizeof(ctx->listening_sockets[0]))) == NULL) {
+		if ((ptr = httplib_realloc( ctx->listening_sockets, (ctx->num_listening_sockets + 1) * sizeof(ctx->listening_sockets[0]) )) == NULL) {
 
 			httplib_cry( XX_httplib_fc(ctx), "%s", "Out of memory");
 			closesocket(so.sock);
@@ -198,7 +198,7 @@ int XX_httplib_set_ports_option( struct httplib_context *ctx ) {
 			continue;
 		}
 
-		if ((pfd = XX_httplib_realloc(
+		if ((pfd = httplib_realloc(
 		         ctx->listening_socket_fds,
 		         (ctx->num_listening_sockets + 1)
 		             * sizeof(ctx->listening_socket_fds[0]))) == NULL) {
@@ -206,7 +206,7 @@ int XX_httplib_set_ports_option( struct httplib_context *ctx ) {
 			httplib_cry( XX_httplib_fc(ctx), "%s", "Out of memory");
 			closesocket(so.sock);
 			so.sock = INVALID_SOCKET;
-			XX_httplib_free(ptr);
+			httplib_free( ptr );
 			continue;
 		}
 

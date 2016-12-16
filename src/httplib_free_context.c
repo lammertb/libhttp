@@ -75,7 +75,7 @@ void XX_httplib_free_context( struct httplib_context *ctx ) {
 #if defined(_MSC_VER)
 #pragma warning(suppress : 6001)
 #endif
-			XX_httplib_free( ctx->config[i] );
+			httplib_free( ctx->config[i] );
 		}
 	}
 
@@ -83,8 +83,8 @@ void XX_httplib_free_context( struct httplib_context *ctx ) {
 	while (ctx->handlers) {
 		tmp_rh = ctx->handlers;
 		ctx->handlers = tmp_rh->next;
-		XX_httplib_free(tmp_rh->uri);
-		XX_httplib_free(tmp_rh);
+		httplib_free( tmp_rh->uri );
+		httplib_free( tmp_rh      );
 	}
 
 #ifndef NO_SSL
@@ -93,7 +93,7 @@ void XX_httplib_free_context( struct httplib_context *ctx ) {
 #endif /* !NO_SSL */
 
 	/* Deallocate worker thread ID array */
-	if (ctx->workerthreadids != NULL) XX_httplib_free(ctx->workerthreadids);
+	if (ctx->workerthreadids != NULL) httplib_free( ctx->workerthreadids );
 
 	/* Deallocate the tls variable */
 	if (httplib_atomic_dec(&XX_httplib_sTlsInit) == 0) {
@@ -108,9 +108,9 @@ void XX_httplib_free_context( struct httplib_context *ctx ) {
 	}
 
 	/* deallocate system name string */
-	XX_httplib_free(ctx->systemName);
+	httplib_free( ctx->systemName );
 
 	/* Deallocate context itself */
-	XX_httplib_free(ctx);
+	httplib_free( ctx );
 
 }  /* XX_httplib_free_context */

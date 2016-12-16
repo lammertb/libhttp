@@ -86,7 +86,7 @@ struct httplib_connection *httplib_connect_websocket_client(const char *host,
 			XX_httplib_snprintf(conn, NULL, error_buffer, error_buffer_size, "Unexpected server reply");
 		}
 		if (conn != NULL) {
-			XX_httplib_free(conn);
+			httplib_free( conn );
 			conn = NULL;
 		}
 		return conn;
@@ -94,16 +94,17 @@ struct httplib_connection *httplib_connect_websocket_client(const char *host,
 
 	/* For client connections, httplib_context is fake. Since we need to set a
 	 * callback function, we need to create a copy and modify it. */
-	newctx = (struct httplib_context *)XX_httplib_malloc(sizeof(struct httplib_context));
+	newctx = httplib_malloc(sizeof(struct httplib_context));
 	memcpy(newctx, conn->ctx, sizeof(struct httplib_context));
-	newctx->user_data = user_data;
-	newctx->context_type = 2;       /* client context type */
+
+	newctx->user_data          = user_data;
+	newctx->context_type       = 2;       /* client context type */
 	newctx->cfg_worker_threads = 1; /* one worker thread will be created */
-	newctx->workerthreadids = (pthread_t *)XX_httplib_calloc(newctx->cfg_worker_threads, sizeof(pthread_t));
-	conn->ctx = newctx;
-	thread_data = (struct websocket_client_thread_data *) XX_httplib_calloc(sizeof(struct websocket_client_thread_data), 1);
-	thread_data->conn = conn;
-	thread_data->data_handler = data_func;
+	newctx->workerthreadids    = httplib_calloc(newctx->cfg_worker_threads, sizeof(pthread_t));
+	conn->ctx                  = newctx;
+	thread_data                = httplib_calloc(sizeof(struct websocket_client_thread_data), 1);
+	thread_data->conn          = conn;
+	thread_data->data_handler  = data_func;
 	thread_data->close_handler = close_func;
 	thread_data->callback_data = NULL;
 
@@ -112,10 +113,11 @@ struct httplib_connection *httplib_connect_websocket_client(const char *host,
 	 * called on the client connection */
 	if (XX_httplib_start_thread_with_id( XX_httplib_websocket_client_thread, (void *)thread_data, newctx->workerthreadids) != 0) {
 
-		XX_httplib_free((void *)thread_data);
-		XX_httplib_free((void *)newctx->workerthreadids);
-		XX_httplib_free((void *)newctx);
-		XX_httplib_free((void *)conn);
+		httplib_free( thread_data             );
+		httplib_free( newctx->workerthreadids );
+		httplib_free( newctx                  );
+		httplib_free( conn                    );
+
 		conn = NULL;
 	}
 #else

@@ -104,7 +104,7 @@ void XX_httplib_read_websocket( struct httplib_connection *conn, httplib_websock
 			/* Allocate space to hold websocket payload */
 			data = mem;
 			if (data_len > sizeof(mem)) {
-				data = (char *)XX_httplib_malloc(data_len);
+				data = httplib_malloc( data_len );
 				if (data == NULL) {
 					/* Allocation failed, exit the loop and then close the
 					 * connection */
@@ -167,7 +167,7 @@ void XX_httplib_read_websocket( struct httplib_connection *conn, httplib_websock
 				exit_by_callback = 1;
 			}
 
-			if (data != mem) XX_httplib_free(data);
+			if ( data != mem ) httplib_free( data );
 
 			if (exit_by_callback || ((mop & 0xf) == WEBSOCKET_OPCODE_CONNECTION_CLOSE)) {
 				/* Opcode == 8, connection close */

@@ -43,7 +43,7 @@ static void mask_data( const char *in, size_t in_len, uint32_t masking_key, char
 int httplib_websocket_client_write( struct httplib_connection *conn, int opcode, const char *data, size_t dataLen ) {
 
 	int retval = -1;
-	char *masked_data = XX_httplib_malloc(((dataLen + 7) / 4) * 4);
+	char *masked_data = httplib_malloc( ((dataLen + 7) / 4) * 4 );
 	uint32_t masking_key = (uint32_t)XX_httplib_get_random();
 
 	if (masked_data == NULL) {
@@ -55,7 +55,7 @@ int httplib_websocket_client_write( struct httplib_connection *conn, int opcode,
 	mask_data(data, dataLen, masking_key, masked_data);
 
 	retval = XX_httplib_websocket_write_exec( conn, opcode, masked_data, dataLen, masking_key );
-	XX_httplib_free(masked_data);
+	httplib_free( masked_data );
 
 	return retval;
 

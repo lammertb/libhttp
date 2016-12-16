@@ -44,7 +44,7 @@ void XX_httplib_tls_dtor( void *key ) {
 	if (tls) {
 		if (tls->is_master == 2) {
 			tls->is_master = -3; /* Mark memory as dead */
-			XX_httplib_free(tls);
+			httplib_free( tls );
 		}
 	}
 	pthread_setspecific(XX_httplib_sTlsKey, NULL);

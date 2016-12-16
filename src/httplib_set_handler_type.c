@@ -95,8 +95,8 @@ void XX_httplib_set_handler_type( struct httplib_context *ctx, const char *uri, 
 				} else {
 					/* remove existing handler */
 					*lastref = tmp_rh->next;
-					XX_httplib_free(tmp_rh->uri);
-					XX_httplib_free(tmp_rh);
+					httplib_free( tmp_rh->uri );
+					httplib_free( tmp_rh      );
 				}
 				httplib_unlock_context(ctx);
 				return;
@@ -112,8 +112,10 @@ void XX_httplib_set_handler_type( struct httplib_context *ctx, const char *uri, 
 		return;
 	}
 
-	tmp_rh = (struct httplib_handler_info *)XX_httplib_calloc(sizeof(struct httplib_handler_info), 1);
+	tmp_rh = httplib_calloc( sizeof(struct httplib_handler_info), 1 );
+
 	if (tmp_rh == NULL) {
+
 		httplib_unlock_context(ctx);
 		httplib_cry( XX_httplib_fc(ctx), "%s", "Cannot create new request handler struct, OOM");
 		return;
@@ -121,7 +123,7 @@ void XX_httplib_set_handler_type( struct httplib_context *ctx, const char *uri, 
 	tmp_rh->uri = XX_httplib_strdup(uri);
 	if (!tmp_rh->uri) {
 		httplib_unlock_context(ctx);
-		XX_httplib_free(tmp_rh);
+		httplib_free( tmp_rh );
 		httplib_cry( XX_httplib_fc(ctx), "%s", "Cannot create new request handler struct, OOM");
 		return;
 	}

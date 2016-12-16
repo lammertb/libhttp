@@ -87,7 +87,7 @@ static int url_encoded_field_get(const struct httplib_connection *conn,
 
 	char key_dec[1024];
 
-	char *value_dec = XX_httplib_malloc(value_len + 1);
+	char *value_dec = httplib_malloc( value_len+1 );
 	int value_dec_len, ret;
 
 	if (!value_dec) {
@@ -101,7 +101,7 @@ static int url_encoded_field_get(const struct httplib_connection *conn,
 	value_dec_len = httplib_url_decode(value, (int)value_len, value_dec, (int)value_len + 1, 1);
 
 	ret = fdh->field_get(key_dec, value_dec, (size_t)value_dec_len, fdh->user_data); 
-	XX_httplib_free(value_dec);
+	httplib_free( value_dec );
 
 	return ret;
 }

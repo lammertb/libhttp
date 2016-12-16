@@ -57,7 +57,7 @@ void * XX_httplib_websocket_client_thread(void *data) {
 
 	if (cdata->close_handler != NULL) cdata->close_handler(cdata->conn, cdata->callback_data);
 
-	XX_httplib_free((void *)cdata);
+	httplib_free( cdata );
 
 
 #ifdef _WIN32

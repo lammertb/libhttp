@@ -28,114 +28,133 @@
 #include "httplib_main.h"
 #include "httplib_memory.h"
 
-#if defined(MEMORY_DEBUGGING)
+static int64_t				httplib_memory_blocks_used	= 0;
+static int64_t				httplib_memory_bytes_used	= 0;
 
-unsigned long httplib_memory_debug_blockCount   = 0;
-unsigned long httplib_memory_debug_totalMemUsed = 0;
+static httplib_alloc_callback_func	alloc_log_func			= NULL;
 
+/*
+ * void *XX_httplib_malloc_ex( size_t size, const char *file, unsigned line );
+ *
+ * The function XX_httplib_malloc_ext() is a hidden function which is
+ * substituted for XX_httlib_malloc() with a macro when memory debugging is
+ * enabled. The function allocates not only memory, but also updates counters
+ * with the total amount of memory allocated. An optional hook function can be
+ * called to process information about the memory allocation in the calling
+ * program.
+ *
+ * The first part of the allocated memory is used to store the size to be used
+ * later for statistical reasons. The returned pointer is further in the block.
+ * The function XX_httplib_malloc_ext() is therefore not compatible with the
+ * system free() call to release the memory.
+ *
+ * The function returns a pointer to the allocated block, or NULL if an error
+ * occured.
+ */
 
-void *XX_httplib_malloc_ex( size_t size, const char *file, unsigned line ) {
+LIBHTTP_API void *XX_httplib_malloc_ex( size_t size, const char *file, unsigned line ) {
 
-	void *data = malloc(size + sizeof(size_t));
-	void *memory = 0;
-	char mallocStr[256];
+	size_t *data;
 
-	if (data) {
-		*(size_t *)data = size;
-		httplib_memory_debug_totalMemUsed += size;
-		httplib_memory_debug_blockCount++;
-		memory = (void *)(((char *)data) + sizeof(size_t));
-	}
+	data = malloc( size + sizeof(size_t) );
+	if ( data == NULL ) return NULL;
 
-	return memory;
+	httplib_memory_bytes_used += size;
+	httplib_memory_blocks_used++;
+
+	*data = size;
+
+	if ( alloc_log_func != NULL ) alloc_log_func( file, line, "malloc", size, httplib_memory_blocks_used, httplib_memory_bytes_used );
+
+	return (data+1);
 
 }  /* XX_httplib_malloc_ex */
 
 
-void *XX_httplib_calloc_ex( size_t count, size_t size, const char *file, unsigned line ) {
+LIBHTTP_API void *XX_httplib_calloc_ex( size_t count, size_t size, const char *file, unsigned line ) {
 
-	void *data = XX_httplib_malloc_ex(size * count, file, line);
-	if ( data != NULL ) memset( data, 0, size * count );
+	void *data;
+
+	data = XX_httplib_malloc_ex( size*count, file, line );
+	if ( data == NULL ) return NULL;
+
+	memset( data, 0x00, size*count );
 
 	return data;
 
 }  /* XX_httplib_calloc_ex */
 
 
-void XX_httplib_free_ex( void *memory, const char *file, unsigned line ) {
+LIBHTTP_API void XX_httplib_free_ex( void *memory, const char *file, unsigned line ) {
 
-	char mallocStr[256];
-	void *data = (void *)(((char *)memory) - sizeof(size_t));
-	size_t size;
+	size_t *data;
 
-	if (memory) {
-		size = *(size_t *)data;
-		httplib_memory_debug_totalMemUsed -= size;
-		httplib_memory_debug_blockCount--;
+	if ( memory == NULL ) return;
 
-		free(data);
-	}
+	data = ((size_t *)memory) - 1;
+
+	httplib_memory_bytes_used -= *data;
+	httplib_memory_blocks_used--;
+
+	if ( alloc_log_func != NULL ) alloc_log_func( file, line, "free", - ((int64_t)*data), httplib_memory_blocks_used, httplib_memory_bytes_used );
+
+	free( data );
 
 }  /* XX_httplib_free_ex */
 
 
-void *XX_httplib_realloc_ex( void *memory, size_t newsize, const char *file, unsigned line ) {
+LIBHTTP_API void *XX_httplib_realloc_ex( void *memory, size_t newsize, const char *file, unsigned line ) {
 
-	char mallocStr[256];
-	void *data;
-	void *_realloc;
+	size_t *olddata;
+	size_t *newdata;
 	size_t oldsize;
+	int64_t diff;
 
-	if (newsize) {
-		if (memory) {
-			data = (void *)(((char *)memory) - sizeof(size_t));
-			oldsize = *(size_t *)data;
-			_realloc = realloc(data, newsize + sizeof(size_t));
-			if (_realloc) {
-				data = _realloc;
-				httplib_memory_debug_totalMemUsed -= oldsize;
-				httplib_memory_debug_totalMemUsed += newsize;
-				*(size_t *)data = newsize;
-				data = (void *)(((char *)data) + sizeof(size_t));
-			} else {
-				return _realloc;
-			}
-		} else {
-			data = XX_httplib_malloc_ex(newsize, file, line);
-		}
-	} else {
-		data = 0;
-		XX_httplib_free_ex(memory, file, line);
+	if ( newsize == 0 ) {
+
+		if ( memory != NULL ) XX_httplib_free_ex( memory, file, line );
+		return NULL;
 	}
 
-	return data;
-}
+	if ( memory == NULL ) return XX_httplib_malloc_ex( newsize, file, line );
+
+	olddata = ((size_t *)memory) - 1;
+	oldsize = *olddata;
+	newdata = realloc( olddata, newsize + sizeof(size_t) );
+	if ( newdata == NULL ) return NULL;
+
+	httplib_memory_bytes_used -= oldsize;
+	httplib_memory_bytes_used += newsize;
+
+	*newdata = newsize;
+	diff     = ((int64_t)newsize) - ((int64_t)oldsize);
+
+	if ( alloc_log_func != NULL ) alloc_log_func( file, line, "realloc", diff, httplib_memory_blocks_used, httplib_memory_bytes_used );
+
+	return (newdata+1);
+
+}  /* XX_httplib_realloc_ex */
 
 
-#else  /* MEMORY_DEBUGGING */
 
-void *XX_httplib_malloc( size_t a ) {
+/*
+ * void httplib_set_alloc_callback_func( httplib_alloc_callback_func log_func );
+ *
+ * The function httplib_set_alloc_callback_func() sets a callback handler which
+ * is called each time memory is allocated from or returned to the heap. In
+ * that way the main application can keep track of memory usage and it will be
+ * easier to find memory leaks.
+ *
+ * The callback function may not call any LibHTTP library function as these
+ * functions may recursively call internal memory allocation functions causing
+ * an infinite loop consuming all available memory.
+ *
+ * If the parameter NULL is passed as callback function the existing callback
+ * is removed.
+ */
 
-	return malloc(a);
+LIBHTTP_API void httplib_set_alloc_callback_func( httplib_alloc_callback_func log_func ) {
 
-}  /* XX_httplib_malloc */
+	alloc_log_func = log_func;
 
-void *XX_httplib_calloc( size_t a, size_t b ) {
-
-	return calloc(a, b);
-
-}  /* XX_httplib_calloc */
-
-void * XX_httplib_realloc(void *a, size_t b) {
-
-	return realloc(a, b);
-
-}  /* XX_httplib_realloc */
-
-void XX_httplib_free( void *a ) {
-
-	free(a);
-
-}  /* XX_httplib_free */
-
-#endif  /* MEMORY_DEBUGGING */
+}  /* httplib_set_alloc_callback_func */
