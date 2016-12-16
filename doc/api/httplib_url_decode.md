@@ -24,5 +24,5 @@ The function `httplib_url_decode()` Decodes a in input buffer. Both normal URIs 
 
 ### See Also
 
-* [`httplib_base64_encode()`](httplib_base64_encode.md)
+* [`httplib_base64_encode();`](httplib_base64_encode.md)
 * [`httplib_url_encode();`](httplib_url_encode.md)
