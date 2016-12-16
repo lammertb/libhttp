@@ -5,6 +5,8 @@ Release Notes v2.0 (work in progress)
 Changes
 -------
 
+- Memory allocation debugging can be switched on and off dynamically
+- Memory allocation functions are available for the main application
 - Full API documentation now available at [`www.libhttp.org/api-reference/`](http://www.libhttp.org/api-reference/)
 - Changed function and structure prefix from `mg_` to `httplib_`
 - Search in MIME types list now costs O(log(N)) instead of O(N)

@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
@@ -56,8 +56,19 @@ LIBHTTP_API void *XX_httplib_malloc_ex( size_t size, const char *file, unsigned 
 
 	size_t *data;
 
+	if ( size == 0 ) {
+
+		if ( alloc_log_func != NULL ) alloc_log_func( file, line, "malloc", 0, httplib_memory_blocks_used, httplib_memory_bytes_used );
+		return NULL;
+	}
+
 	data = malloc( size + sizeof(size_t) );
-	if ( data == NULL ) return NULL;
+
+	if ( data == NULL ) {
+	
+		if ( alloc_log_func != NULL ) alloc_log_func( file, line, "malloc", 0, httplib_memory_blocks_used, httplib_memory_bytes_used );
+		return NULL;
+	}
 
 	httplib_memory_bytes_used += size;
 	httplib_memory_blocks_used++;
@@ -70,6 +81,19 @@ LIBHTTP_API void *XX_httplib_malloc_ex( size_t size, const char *file, unsigned 
 
 }  /* XX_httplib_malloc_ex */
 
+
+
+/*
+ * void *XX_httplib_calloc_ex( size_t count, size_t size, const char *file, unsigned line );
+ *
+ * The function XX_httplib_calloc_ex() is a hidden memory allocation function
+ * called through a macro which adds the filename and line number from where
+ * the function has been called.
+ *
+ * The function provided memory allocation functionality like the standard
+ * calloc() function but with added memory tracking and optional a callback
+ * to main application with logging information.
+ */
 
 LIBHTTP_API void *XX_httplib_calloc_ex( size_t count, size_t size, const char *file, unsigned line ) {
 
@@ -85,11 +109,26 @@ LIBHTTP_API void *XX_httplib_calloc_ex( size_t count, size_t size, const char *f
 }  /* XX_httplib_calloc_ex */
 
 
+
+/*
+ * void XX_httplib_free_ex( void *memory, const char *file, unsigned file );
+ *
+ * The function XX_httplib_free_ex() is a hidden function which frees a
+ * previously allocated memory object which was allocated with one of the
+ * LibHTTP allocation functions. The function has the option to do memory
+ * tracking and memory leak debugging through a callback function which can
+ * be registered by the main application.
+ */
+
 LIBHTTP_API void XX_httplib_free_ex( void *memory, const char *file, unsigned line ) {
 
 	size_t *data;
 
-	if ( memory == NULL ) return;
+	if ( memory == NULL ) {
+		
+		if ( alloc_log_func != NULL ) alloc_log_func( file, line, "free", 0, httplib_memory_blocks_used, httplib_memory_bytes_used );
+		return;
+	}
 
 	data = ((size_t *)memory) - 1;
 
@@ -102,6 +141,24 @@ LIBHTTP_API void XX_httplib_free_ex( void *memory, const char *file, unsigned li
 
 }  /* XX_httplib_free_ex */
 
+
+
+/*
+ * void *XX_httplib_realloc_ex( void *memory, size_t newsize, const char *file, unsigned line );
+ *
+ * The function XX_httplib_realloc_ex() is a hidden function used to resize
+ * a memory block which has been previously allocated from the heap. A macro is
+ * used to call this function together with the file name and line number
+ * where the call originates.
+ *
+ * The function returns a pointer to the new block, or NULL if an error occurs.
+ * If NULL is returned because there was not enough space to reallocate the
+ * block, the contents of the original block are preserved.
+ *
+ * Optionally a registered is called to signal the main application about the
+ * current and totally allocated memory. This can be used for debugging
+ * purposes and finding memory leaks.
+ */
 
 LIBHTTP_API void *XX_httplib_realloc_ex( void *memory, size_t newsize, const char *file, unsigned line ) {
 
@@ -121,7 +178,11 @@ LIBHTTP_API void *XX_httplib_realloc_ex( void *memory, size_t newsize, const cha
 	olddata = ((size_t *)memory) - 1;
 	oldsize = *olddata;
 	newdata = realloc( olddata, newsize + sizeof(size_t) );
-	if ( newdata == NULL ) return NULL;
+	if ( newdata == NULL ) {
+		
+		if ( alloc_log_func != NULL ) alloc_log_func( file, line, "realloc", 0, httplib_memory_blocks_used, httplib_memory_bytes_used );
+		return NULL;
+	}
 
 	httplib_memory_bytes_used -= oldsize;
 	httplib_memory_bytes_used += newsize;
