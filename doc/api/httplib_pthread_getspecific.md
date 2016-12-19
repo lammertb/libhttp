@@ -12,7 +12,7 @@
 
 | Type | Description |
 | :--- | :--- |
-|`void *`|Pointer to the memory area or NULL of no area could be found|
+|`void *`|Pointer to the memory area or NULL if no area could be found|
 
 ### Description
 

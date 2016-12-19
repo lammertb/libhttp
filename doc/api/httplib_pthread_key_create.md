@@ -7,7 +7,7 @@
 | Parameter | Type | Description |
 | :--- | :--- | :--- |
 |**`key`**|`pthread_key_t`|The key of the variable to set|
-|**`destructor`**|`void (*destructor)(void *)`|Pointer to destructor function to be called when the key is destroyed|
+|**`destructor`**|`void (*destructor)(void *)`|Pointer to a destructor function to be called when the key is destroyed, or NULL if no destructor functionality is needed|
 
 ### Return Value
 
