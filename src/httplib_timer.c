@@ -77,7 +77,7 @@ static int timer_add( struct httplib_context *ctx, double next_time, double peri
 	if      ( is_relative    ) next_time += dt;
 	else if ( next_time < dt ) next_time  = dt;
 
-	pthread_mutex_lock(&ctx->timers->mutex);
+	httplib_pthread_mutex_lock( & ctx->timers->mutex );
 	if (ctx->timers->timer_count == MAX_TIMERS) {
 		error = 1;
 	} else {
@@ -129,7 +129,7 @@ static void timer_thread_run( void *thread_func_param ) {
 	clock_gettime(CLOCK_MONOTONIC, &now);
 	d = (double)now.tv_sec + (double)now.tv_nsec * 1.0E-9;
 	while (ctx->stop_flag == 0) {
-		pthread_mutex_lock(&ctx->timers->mutex);
+		httplib_pthread_mutex_lock( & ctx->timers->mutex );
 		if (ctx->timers->timer_count > 0 && d >= ctx->timers->timers[0].time) {
 			t = ctx->timers->timers[0];
 			for (u = 1; u < ctx->timers->timer_count; u++) {

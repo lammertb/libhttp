@@ -121,7 +121,7 @@ void *event_create(void) {
 int event_wait(void *eventhdl) {
 
 	struct posix_event *ev = (struct posix_event *)eventhdl;
-	pthread_mutex_lock(&(ev->mutex));
+	httplib_pthread_mutex_lock( & ev->mutex );
 	pthread_cond_wait(&(ev->cond), &(ev->mutex));
 	httplib_pthread_mutex_unlock( & ev->mutex );
 	return 1;
@@ -132,7 +132,7 @@ int event_wait(void *eventhdl) {
 int event_signal(void *eventhdl) {
 
 	struct posix_event *ev = (struct posix_event *)eventhdl;
-	pthread_mutex_lock(&(ev->mutex));
+	httplib_pthread_mutex_lock( & ev->mutex );
 	pthread_cond_signal(&(ev->cond));
 	httplib_pthread_mutex_unlock( & ev->mutex );
 	return 1;

@@ -129,7 +129,7 @@ static void master_thread_run(void *thread_func_param) {
 	XX_httplib_close_all_listening_sockets(ctx);
 
 	/* Wakeup workers that are waiting for connections to handle. */
-	pthread_mutex_lock(&ctx->thread_mutex);
+	httplib_pthread_mutex_lock( & ctx->thread_mutex );
 #if defined(ALTERNATIVE_QUEUE)
 	for (i = 0; i < ctx->cfg_worker_threads; i++) {
 		event_signal(ctx->client_wait_events[i]);

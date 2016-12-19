@@ -22,18 +22,34 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
-#include "httplib_pthread.h"
+
+/*
+ * int httplib_pthread_mutex_lock( pthread_mutex_t *mutex );
+ *
+ * The platform independent function httplib_pthread_mutex_lock() starts a
+ * blocking call to lock a mutex. If the mutex is locked by another thread, the
+ * function will wait until the mutex has been released. Success is indicated
+ * with the return value 0, while another value indicates an error.
+ *
+ * On systems wshich support it, this function is implemented with a direct
+ * call to pthread_mutex_lock(). On other systems own code is used to emulate
+ * the same behaviour.
+ */
+
+int httplib_pthread_mutex_lock( pthread_mutex_t *mutex ) {
 
 #if defined(_WIN32)
 
-int pthread_mutex_lock( pthread_mutex_t *mutex ) {
+	return ( WaitForSingleObject( *mutex, INFINITE ) == WAIT_OBJECT_0 ) ? 0 : -1;
 
-	return (WaitForSingleObject(*mutex, INFINITE) == WAIT_OBJECT_0) ? 0 : -1;
+#else  /* _WIN32 */
 
-}  /* pthread_mutex_lock */
+	return pthread_mutex_lock( mutex );
 
-#endif /* _WIN32 */
+#endif  /* _WIN32 */
+
+}  /* httplib_pthread_mutex_lock */

@@ -54,9 +54,9 @@ int XX_httplib_consume_socket( struct httplib_context *ctx, struct socket *sp, i
 
 #define QUEUE_SIZE(ctx) ((int)(ARRAY_SIZE(ctx->queue)))
 
-	(void)thread_index;
+	UNUSED_PARAMETER(thread_index);
 
-	pthread_mutex_lock(&ctx->thread_mutex);
+	httplib_pthread_mutex_lock( & ctx->thread_mutex );
 
 	/* If the queue is empty, wait. We're idle at this point. */
 	while (ctx->sq_head == ctx->sq_tail && ctx->stop_flag == 0) {

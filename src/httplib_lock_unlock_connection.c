@@ -36,7 +36,7 @@
 
 void httplib_lock_connection( struct httplib_connection *conn ) {
 
-	if ( conn != NULL ) pthread_mutex_lock( & conn->mutex );
+	if ( conn != NULL ) httplib_pthread_mutex_lock( & conn->mutex );
 
 }  /* httplib_lock_connection */
 

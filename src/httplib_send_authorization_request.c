@@ -40,7 +40,7 @@ void XX_httplib_send_authorization_request( struct httplib_connection *conn ) {
 
 	uint64_t nonce = (uint64_t)(conn->ctx->start_time);
 
-	pthread_mutex_lock(&conn->ctx->nonce_mutex);
+	httplib_pthread_mutex_lock( & conn->ctx->nonce_mutex );
 	nonce += conn->ctx->nonce_count;
 	++conn->ctx->nonce_count;
 	httplib_pthread_mutex_unlock( & conn->ctx->nonce_mutex );

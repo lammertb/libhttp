@@ -24,6 +24,3 @@ The platform independent function `httplib_pthread_mutex_trylock()` is used to t
 * [`httplib_pthread_mutex_init();`](httplib_pthread_mutex_init.md)
 * [`httplib_pthread_mutex_lock();`](httplib_pthread_mutex_lock.md)
 * [`httplib_pthread_mutex_unlock();`](httplib_pthread_mutex_unlock.md)
-
-* [`httplib_pthread_getspecific();`](httplib_pthread_getspecific.md)
-* [`httplib_pthread_self();`](httplib_pthread_self.md)

@@ -62,13 +62,14 @@ void XX_httplib_produce_socket( struct httplib_context *ctx, const struct socket
 void XX_httplib_produce_socket(struct httplib_context *ctx, const struct socket *sp) {
 
 #define QUEUE_SIZE(ctx) ((int)(ARRAY_SIZE(ctx->queue)))
-	if (!ctx) return;
-	pthread_mutex_lock(&ctx->thread_mutex);
+
+	if ( ctx == NULL ) return;
+
+	httplib_pthread_mutex_lock( & ctx->thread_mutex );
 
 	/* If the queue is full, wait */
-	while (ctx->stop_flag == 0
-	       && ctx->sq_head - ctx->sq_tail >= QUEUE_SIZE(ctx)) {
-		(void)pthread_cond_wait(&ctx->sq_empty, &ctx->thread_mutex);
+	while (ctx->stop_flag == 0 && ctx->sq_head - ctx->sq_tail >= QUEUE_SIZE(ctx)) {
+		pthread_cond_wait(&ctx->sq_empty, &ctx->thread_mutex);
 	}
 
 	if (ctx->sq_head - ctx->sq_tail < QUEUE_SIZE(ctx)) {

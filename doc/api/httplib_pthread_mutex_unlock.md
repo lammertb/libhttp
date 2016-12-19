@@ -24,6 +24,3 @@ The platform independent function `httplib_pthread_mutex_unlock()` is used to re
 * [`httplib_pthread_mutex_init();`](httplib_pthread_mutex_init.md)
 * [`httplib_pthread_mutex_lock();`](httplib_pthread_mutex_lock.md)
 * [`httplib_pthread_mutex_trylock();`](httplib_pthread_mutex_trylock.md)
-
-* [`httplib_pthread_getspecific();`](httplib_pthread_getspecific.md)
-* [`httplib_pthread_self();`](httplib_pthread_self.md)
