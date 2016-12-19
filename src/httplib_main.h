@@ -271,7 +271,6 @@ typedef long off_t;
 #endif /* !fileno MINGW #defines fileno */
 
 typedef HANDLE		pthread_mutex_t;
-typedef DWORD		pthread_key_t;
 typedef struct {
 	CRITICAL_SECTION	threadIdSec;
 	struct httplib_workerTLS *	waiting_thread; /* The chain of threads */

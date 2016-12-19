@@ -26,25 +26,29 @@
  */
 
 #include "httplib_main.h"
-#include "httplib_pthread.h"
-
-#if defined(_WIN32)
 
 /*
- * int pthread_set_specific( pthread_key_t key, void *value );
+ * int httplib_pthread_setspecific( pthread_key_t key, const void *value );
  *
- * The function pthread_set_specific() sets a key value for a previously
- * obtained thread specific key. The function returns 0 when succesful, or an
- * error code if the function failed. This function is not available on all
- * platforms and the implementation here is a replacement for Windows based
- * systems.
+ * The platform independent function httplib_pthread_setspecific() is used to
+ * set a key value for a previously obtained thread specific key. The function
+ * returns 0 when successful, or an error code if the function failed. On
+ * systems which support it, the functionality is implemented as a direct call
+ * to the pthread_setspecific() function. Otherwise an OS dependent alternative
+ * function call is used.
  */
 
-int pthread_setspecific( pthread_key_t key, void *value ) {
+int httplib_pthread_setspecific( pthread_key_t key, const void *value ) {
+
+#if defined(_WIN32)
 
 	if ( TlsSetValue( key, value ) ) return 0;
 	return GetLastError();
 
-}  /* pthread_setspecific */
+#else  /* _WIN32 */
+
+	return pthread_setspecific( key, value );
 
 #endif  /* _WIN32 */
+
+}  /* httplib_pthread_setspecific */

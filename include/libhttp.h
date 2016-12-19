@@ -71,6 +71,7 @@
 #define SIGKILL (0)
 
 typedef HANDLE		pthread_t;
+typedef DWORD		pthread_key_t;
 
 #else  /* _WIN32 */
 
@@ -984,6 +985,7 @@ LIBHTTP_API int			httplib_mkdir( const char *path, int mode );
 LIBHTTP_API DIR *		httplib_opendir( const char *name );
 LIBHTTP_API int			httplib_poll( struct pollfd *pfd, unsigned int nfds, int timeout );
 LIBHTTP_API pthread_t		httplib_pthread_self( void );
+LIBHTTP_API int			httplib_pthread_setspecific( pthread_key_t key, const void *value );
 LIBHTTP_API struct dirent *	httplib_readdir( DIR *dir );
 LIBHTTP_API int			httplib_remove( const char *path );
 LIBHTTP_API void		httplib_set_alloc_callback_func( httplib_alloc_callback_func log_func );

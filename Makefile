@@ -387,7 +387,7 @@ OBJLIST =									\
 	${OBJDIR}win32_pthread_mutex_trylock${OBJEXT}				\
 	${OBJDIR}win32_pthread_mutex_unlock${OBJEXT}				\
 	${OBJDIR}httplib_pthread_self${OBJEXT}					\
-	${OBJDIR}win32_pthread_setspecific${OBJEXT}				\
+	${OBJDIR}httplib_pthread_setspecific${OBJEXT}				\
 	${OBJDIR}wince_gmtime${OBJEXT}						\
 	${OBJDIR}wince_gmtime_s${OBJEXT}					\
 	${OBJDIR}wince_localtime${OBJEXT}					\
@@ -1465,8 +1465,7 @@ ${OBJDIR}httplib_pthread_self${OBJEXT}					: ${SRCDIR}httplib_pthread_self.c				
 									  ${SRCDIR}httplib_main.h					\
 									  ${INCDIR}libhttp.h
 
-${OBJDIR}win32_pthread_setspecific${OBJEXT}				: ${SRCDIR}win32_pthread_setspecific.c				\
-									  ${SRCDIR}httplib_pthread.h					\
+${OBJDIR}httplib_pthread_setspecific${OBJEXT}				: ${SRCDIR}httplib_pthread_setspecific.c			\
 									  ${SRCDIR}httplib_main.h					\
 									  ${INCDIR}libhttp.h
 
