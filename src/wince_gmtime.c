@@ -22,17 +22,29 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
 
 #if defined(_WIN32_WCE)
 
+/*
+ * struct tm *gmtime( const time_t *ptime );
+ *
+ * The function gmtime() is a system function which converts the number since
+ * EPOCH to a time structure based on UTC. This function is not available on
+ * all platforms and the implementation here can be used on Windows CE. Please
+ * note that this implementation is nut fully thread safe if the function is
+ * also called from threads which have been started outside of LibHTTP.
+ */
+
 struct tm *gmtime( const time_t *ptime ) {
 
-	int i = XX_httplib_atomic_inc(&XX_httplib_tm_index) % MAX_WORKER_THREADS;
-	return gmtime_s(ptime, XX_httplib_tm_array + i);
+	int i;
+
+	i = XX_httplib_atomic_inc(&XX_httplib_tm_index) % MAX_WORKER_THREADS;
+	return gmtime_s( ptime, XX_httplib_tm_array + i );
 
 }  /* gmtime */
 

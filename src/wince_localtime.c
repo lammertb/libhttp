@@ -29,8 +29,8 @@
 
 #if defined(_WIN32_WCE)
 
-static struct tm	XX_httplib_tm_array[MAX_WORKER_THREADS];
-static volatile int	XX_httplib_tm_index = 0;
+struct tm		XX_httplib_tm_array[MAX_WORKER_THREADS];
+volatile int		XX_httplib_tm_index				= 0;
 
 /*
  * struct tm *localtime( const time_t *ptime );

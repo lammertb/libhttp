@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
@@ -30,9 +30,20 @@
 
 #if defined(_WIN32)
 
+/*
+ * int pthread_set_specific( pthread_key_t key, void *value );
+ *
+ * The function pthread_set_specific() sets a key value for a previously
+ * obtained thread specific key. The function returns 0 when succesful, or an
+ * error code if the function failed. This function is not available on all
+ * platforms and the implementation here is a replacement for Windows based
+ * systems.
+ */
+
 int pthread_setspecific( pthread_key_t key, void *value ) {
 
-	return TlsSetValue(key, value) ? 0 : 1;
+	if ( TlsSetValue( key, value ) ) return 0;
+	return GetLastError();
 
 }  /* pthread_setspecific */
 
