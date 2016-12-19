@@ -270,7 +270,6 @@ typedef long off_t;
 #define fileno(x) (_fileno(x))
 #endif /* !fileno MINGW #defines fileno */
 
-typedef HANDLE		pthread_mutex_t;
 typedef struct {
 	CRITICAL_SECTION	threadIdSec;
 	struct httplib_workerTLS *	waiting_thread; /* The chain of threads */

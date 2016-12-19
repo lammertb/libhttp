@@ -77,7 +77,7 @@ int XX_httplib_consume_socket( struct httplib_context *ctx, struct socket *sp, i
 	}
 
 	pthread_cond_signal(&ctx->sq_empty);
-	pthread_mutex_unlock(&ctx->thread_mutex);
+	httplib_pthread_mutex_unlock( & ctx->thread_mutex );
 
 	return !ctx->stop_flag;
 #undef QUEUE_SIZE

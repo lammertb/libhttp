@@ -22,18 +22,32 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
-#include "httplib_pthread.h"
+
+/*
+ * int httplib_pthread_mutex_unlock( pthread_mutex_t *mutex );
+ *
+ * The function httplib_pthread_mutex_unlock() is a platform independent
+ * function to unlock a mutex. On systems which support it, a call to the
+ * function pthread_mutex_unlock() is issued. Otherwise an alternative
+ * implementation is used with comparable semantics.
+ *
+ * The function returns 0 when successful and -1 on failure.
+ */
+
+int httplib_pthread_mutex_unlock( pthread_mutex_t *mutex ) {
 
 #if defined(_WIN32)
 
-int pthread_mutex_unlock( pthread_mutex_t *mutex ) {
-
 	return ( ReleaseMutex( *mutex ) == 0 ) ? -1 : 0;
 
-}  /* pthread_mutex_unlock */
+#else  /* _WIN32 */
 
-#endif /* _WIN32 */
+	return pthread_mutex_unlock( mutex );
+
+#endif  /* _WIN32 */
+
+}  /* httplib_pthread_mutex_unlock */

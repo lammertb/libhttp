@@ -50,6 +50,6 @@ void httplib_lock_context( struct httplib_context *ctx ) {
 
 void httplib_unlock_context( struct httplib_context *ctx ) {
 
-	if ( ctx != NULL ) pthread_mutex_unlock( & ctx->nonce_mutex );
+	if ( ctx != NULL ) httplib_pthread_mutex_unlock( & ctx->nonce_mutex );
 
 }  /* httplib_unlock_context */

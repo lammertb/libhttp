@@ -90,13 +90,13 @@ static int timer_add( struct httplib_context *ctx, double next_time, double peri
 				break;
 			}
 		}
-		ctx->timers->timers[u].time = next_time;
+		ctx->timers->timers[u].time   = next_time;
 		ctx->timers->timers[u].period = period;
 		ctx->timers->timers[u].action = action;
-		ctx->timers->timers[u].arg = arg;
+		ctx->timers->timers[u].arg    = arg;
 		ctx->timers->timer_count++;
 	}
-	pthread_mutex_unlock(&ctx->timers->mutex);
+	httplib_pthread_mutex_unlock( & ctx->timers->mutex );
 	return error;
 
 }  /* timer_add */
@@ -136,15 +136,16 @@ static void timer_thread_run( void *thread_func_param ) {
 				ctx->timers->timers[u - 1] = ctx->timers->timers[u];
 			}
 			ctx->timers->timer_count--;
-			pthread_mutex_unlock(&ctx->timers->mutex);
+			httplib_pthread_mutex_unlock( & ctx->timers->mutex );
 			re_schedule = t.action(t.arg);
 			if (re_schedule && (t.period > 0)) {
 				timer_add(ctx, t.time + t.period, t.period, 0, t.action, t.arg);
 			}
 			continue;
-		} else {
-			pthread_mutex_unlock(&ctx->timers->mutex);
 		}
+		
+		else httplib_pthread_mutex_unlock( & ctx->timers->mutex );
+
 		httplib_sleep(1);
 		clock_gettime(CLOCK_MONOTONIC, &now);
 		d = (double)now.tv_sec + (double)now.tv_nsec * 1.0E-9;

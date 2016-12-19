@@ -42,11 +42,11 @@ pthread_mutex_t *XX_httplib_ssl_mutexes;
 
 void XX_httplib_ssl_locking_callback( int mode, int mutex_num, const char *file, int line ) {
 
-	(void)line;
-	(void)file;
+	UNUSED_PARAMETER(line);
+	UNUSED_PARAMETER(file);
 
 	if ( mode & 1 ) pthread_mutex_lock(   & XX_httplib_ssl_mutexes[mutex_num] );
-	else            pthread_mutex_unlock( & XX_httplib_ssl_mutexes[mutex_num] );
+	else            httplib_pthread_mutex_unlock( & XX_httplib_ssl_mutexes[mutex_num] );
 
 }  /* XX_httplib_ssl_locking_callback */
 

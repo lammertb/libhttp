@@ -44,7 +44,6 @@ int		pthread_mutex_destroy( pthread_mutex_t *mutex );
 int		pthread_mutex_init( pthread_mutex_t *mutex, void *unused );
 int		pthread_mutex_lock( pthread_mutex_t *mutex );
 int		pthread_mutex_trylock( pthread_mutex_t *mutex );
-int		pthread_mutex_unlock( pthread_mutex_t *mutex );
 
 void *		pthread_getspecific( pthread_key_t key );
 

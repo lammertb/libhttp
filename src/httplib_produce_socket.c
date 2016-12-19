@@ -78,7 +78,7 @@ void XX_httplib_produce_socket(struct httplib_context *ctx, const struct socket 
 	}
 
 	pthread_cond_signal(&ctx->sq_full);
-	pthread_mutex_unlock(&ctx->thread_mutex);
+	httplib_pthread_mutex_unlock( & ctx->thread_mutex );
 #undef QUEUE_SIZE
 
 }  /* XX_httplib_produce_socket */

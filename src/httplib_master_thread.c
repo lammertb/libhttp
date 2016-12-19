@@ -142,7 +142,7 @@ static void master_thread_run(void *thread_func_param) {
 #else
 	pthread_cond_broadcast(&ctx->sq_full);
 #endif
-	pthread_mutex_unlock(&ctx->thread_mutex);
+	httplib_pthread_mutex_unlock( & ctx->thread_mutex );
 
 	/* Join all worker threads to avoid leaking threads. */
 	workerthreadcount = ctx->cfg_worker_threads;
