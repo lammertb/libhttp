@@ -32,9 +32,8 @@ extern int			XX_httplib_thread_idx_max;
 
 int		pthread_cond_broadcast( pthread_cond_t *cv );
 int		pthread_cond_destroy( pthread_cond_t *cv );
-int		pthread_cond_init( pthread_cond_t *cv, const void *unused );
+int		pthread_cond_init( pthread_cond_t *cv, const pthread_condattr_t *attr );
 int		pthread_cond_signal( pthread_cond_t *cv );
 int		pthread_cond_timedwait( pthread_cond_t *cv, pthread_mutex_t *mutex, const struct timespec *abstime );
-int		pthread_cond_wait( pthread_cond_t *cv, pthread_mutex_t *mutex );
 
 #endif  /* _WIN32 */

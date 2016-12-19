@@ -22,18 +22,29 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
-#include "httplib_pthread.h"
+
+/*
+ * int httplib_pthread_cond_wait( pthread_cond_t *cv, pthread_mutex_t *mutex );
+ *
+ * The function httplib_pthread_cond_wait() performs a wait until a condition
+ * is met and then releases the specified mutex. The function returns 0 on
+ * success and a non zero error code at failure.
+ */
+
+int httplib_pthread_cond_wait( pthread_cond_t *cv, pthread_mutex_t *mutex ) {
 
 #if defined(_WIN32)
 
-int pthread_cond_wait( pthread_cond_t *cv, pthread_mutex_t *mutex ) {
+	return httplib_pthread_cond_timedwait( cv, mutex, NULL );
 
-	return pthread_cond_timedwait(cv, mutex, NULL);
+#else  /* _WIN32 */
 
-}  /* pthread_cond_wait */
+	return pthread_cond_wait( cv, mutex );
 
-#endif /* _WIN32 */
+#endif  /* _WIN32 */
+
+}  /* httplib_pthread_cond_wait */

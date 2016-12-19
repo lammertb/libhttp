@@ -122,7 +122,7 @@ int event_wait(void *eventhdl) {
 
 	struct posix_event *ev = (struct posix_event *)eventhdl;
 	httplib_pthread_mutex_lock( & ev->mutex );
-	pthread_cond_wait(&(ev->cond), &(ev->mutex));
+	httplib_pthread_cond_wait( & ev->cond, & ev->mutex );
 	httplib_pthread_mutex_unlock( & ev->mutex );
 	return 1;
 

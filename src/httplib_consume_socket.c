@@ -60,7 +60,8 @@ int XX_httplib_consume_socket( struct httplib_context *ctx, struct socket *sp, i
 
 	/* If the queue is empty, wait. We're idle at this point. */
 	while (ctx->sq_head == ctx->sq_tail && ctx->stop_flag == 0) {
-		pthread_cond_wait(&ctx->sq_full, &ctx->thread_mutex);
+
+		httplib_pthread_cond_wait( & ctx->sq_full, & ctx->thread_mutex );
 	}
 
 	/* If we're stopping, sq_head may be equal to sq_tail. */
