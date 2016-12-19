@@ -22,16 +22,30 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
 
 #if defined(_WIN32_WCE)
 
+#define LEAP_YEAR(x)	( ((x)%4 == 0)  &&  ( ((x)%100) != 0  || ((x)%400) == 0 ) )
+
+static const int	days_per_month = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+
+/*
+ * struct tm *localtime_s( const time_t *ptime, struct tm *ptm );
+ *
+ * The function localtime_s() returns a converted time to tm structure. This
+ * function is not available on all operating systems and this version offers
+ * a subsitute for use on Windows CE.
+ */
+
 struct tm *localtime_s( const time_t *ptime, struct tm *ptm ) {
 
-	int64_t t = ((int64_t)*ptime) * RATE_DIFF + EPOCH_DIFF;
+	int a;
+	int doy;
+	int64_t t;
 	FILETIME ft;
 	FILETIME lft;
 	SYSTEMTIME st;
@@ -39,20 +53,26 @@ struct tm *localtime_s( const time_t *ptime, struct tm *ptm ) {
 
 	if ( ptm == NULL ) return NULL;
 
+	int64_t t       = ((int64_t)*ptime) * RATE_DIFF + EPOCH_DIFF;
 	*(int64_t *)&ft = t;
 
-	FileTimeToLocalFileTime( &ft, &lft );
-	FileTimeToSystemTime(   &lft, &st  );
+	FileTimeToLocalFileTime( & ft,  & lft );
+	FileTimeToSystemTime(    & lft, & st  );
 
-	ptm->tm_year  = st.wYear - 1900;
+	ptm->tm_year  = st.wYear  - 1900;
 	ptm->tm_mon   = st.wMonth - 1;
 	ptm->tm_wday  = st.wDayOfWeek;
 	ptm->tm_mday  = st.wDay;
 	ptm->tm_hour  = st.wHour;
 	ptm->tm_min   = st.wMinute;
 	ptm->tm_sec   = st.wSecond;
-	ptm->tm_yday  = 0; /* hope nobody uses this */
 	ptm->tm_isdst = (GetTimeZoneInformation(&tzinfo) == TIME_ZONE_ID_DAYLIGHT) ? 1 : 0;
+
+	doy           = ptm->tm_mday;
+	for (a=0; a<ptm->tm_mon; a++) doy += days_per_month[a];
+	if ( ptm->tm_mon >= 2  &&  LEAP_YEAR( ptm->tm_year+1900 ) ) doy++;
+
+	ptm->tm_yday  = doy;
 
 	return ptm;
 
