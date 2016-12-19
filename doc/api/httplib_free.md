@@ -24,3 +24,5 @@ Due to the allocation of extra data space for tracking the memory allocation, th
 * [`httplib_malloc();`](httplib_malloc.md)
 * [`httplib_realloc();`](httplib_realloc.md)
 * [`httplib_set_alloc_callback_func();`](httplib_set_alloc_callback_func.md)
+* [`httplib_strdup();`](httplib_strdup.md)
+* [`httplib_strndup();`](httplib_strndup.md)
