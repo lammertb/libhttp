@@ -22,17 +22,31 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
 
-const char *httplib_get_option(const struct httplib_context *ctx, const char *name) {
+/*
+ * const char *httplib_get_option( const struct httplib_context *ctx, const char *name );
+ *
+ * The function httplib_get_option() returns the content of an option for a
+ * given context. If an error occurs, NULL is returned. If the option is valid
+ * but there is no context associated with it, the return value is an empty
+ * string.
+ */
+
+const char *httplib_get_option( const struct httplib_context *ctx, const char *name ) {
 
 	int i;
 
-	if      ( (i = XX_httplib_get_option_index(name)) == -1 ) return NULL;
-	else if ( ctx == NULL  ||  ctx->config[i] == NULL       ) return "";
-	else                                                      return ctx->config[i];
+	if ( name == NULL ) return NULL;
+
+	i = XX_httplib_get_option_index( name );
+	if ( i == -1 ) return NULL;
+
+	if ( ctx == NULL  ||  ctx->config[i] == NULL ) return "";
+
+	return ctx->config[i];
 
 }  /* httplib_get_option */
