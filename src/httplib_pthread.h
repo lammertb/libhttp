@@ -48,6 +48,5 @@ int		pthread_mutex_unlock( pthread_mutex_t *mutex );
 
 void *		pthread_getspecific( pthread_key_t key );
 int		pthread_setspecific( pthread_key_t key, void *value );
-DWORD		pthread_self( void );
 
 #endif  /* _WIN32 */

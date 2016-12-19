@@ -82,7 +82,7 @@ static void master_thread_run(void *thread_func_param) {
 	    && ((USE_MASTER_THREAD_PRIORITY) >= min_prio)) {
 		struct sched_param sched_param = {0};
 		sched_param.sched_priority = (USE_MASTER_THREAD_PRIORITY);
-		pthread_setschedparam(pthread_self(), SCHED_RR, &sched_param);
+		pthread_setschedparam( httplib_pthread_self(), SCHED_RR,  & sched_param );
 	}
 #endif
 

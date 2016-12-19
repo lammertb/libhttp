@@ -100,6 +100,7 @@ LibHTTP is often used as HTTP and HTTPS library inside a larger application.  A 
 * [`httplib_lock_connection( conn );`](api/httplib_lock_connection.md)
 * [`httplib_lock_context( ctx );`](api/httplib_lock_context.md)
 * [`httplib_poll( pfd, nfds, timeout );`](api/httplib_poll.md)
+* [`httplib_pthread_self();`](api/httplib_pthread_self.md)
 * [`httplib_start_thread( f, p );`](api/httplib_start_thread.md)
 * [`httplib_unlock_connection( conn );`](api/httplib_unlock_connection.md)
 * [`httplib_unlock_context( ctx );`](api/httplib_unlock_context.md)

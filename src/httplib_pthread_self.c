@@ -26,23 +26,26 @@
  */
 
 #include "httplib_main.h"
-#include "httplib_pthread.h"
-
-#ifdef _WIN32
 
 /*
- * DWORD pthread_self( void );
+ * pthread_t httplib_pthread_self( void );
  *
- * The function pthread_self() returns in ID describing the current thread. On
- * windows where there is no support for the pthread() library, this
- * implementation provides a comparable function which can be used as an
- * alternative.
+ * The function httplib_pthread_self() provides a platform independent way to
+ * retrieve an ID associated with the current thread. On systems which support
+ * it a call to pthread_self() is used. Otherwise a system specific value is
+ * returned which best resembles the functionality of the pthread_ equivalent.
  */
 
-DWORD pthread_self( void ) {
+pthread_t httplib_pthread_self( void ) {
+
+#if defined(_WIN32)
 
 	return GetCurrentThreadId();
 
-}  /* pthread_self */
+#else  /* _WIN32 */
+
+	return pthread_self();
 
 #endif  /* _WIN32 */
+
+}  /* httplib_pthread_self */

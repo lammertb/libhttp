@@ -79,7 +79,7 @@ void XX_httplib_set_thread_name(const char *name) {
 #elif defined(__GLIBC__)                                                       \
     && ((__GLIBC__ > 2) || ((__GLIBC__ == 2) && (__GLIBC_MINOR__ >= 12)))
 	/* pthread_setname_np first appeared in glibc in version 2.12*/
-	pthread_setname_np(pthread_self(), threadName);
+	pthread_setname_np( httplib_pthread_self(), threadName );
 #elif defined(__linux__)
 	/* on linux we can use the old prctl function */
 	prctl(PR_SET_NAME, threadName, 0, 0, 0);

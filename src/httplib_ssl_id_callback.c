@@ -75,7 +75,7 @@ unsigned long XX_httplib_ssl_id_callback( void ) {
 		 * can rise a warning/error, depending on the platform.
 		 * Here memcpy is used as an anything-to-anything cast. */
 		unsigned long ret = 0;
-		pthread_t t = pthread_self();
+		pthread_t t       = httplib_pthread_self();
 		memcpy(&ret, &t, sizeof(pthread_t));
 		return ret;
 	}

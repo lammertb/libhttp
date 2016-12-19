@@ -70,6 +70,8 @@
 
 #define SIGKILL (0)
 
+typedef HANDLE		pthread_t;
+
 #else  /* _WIN32 */
 
 /*
@@ -80,6 +82,7 @@
 #include <sys/poll.h>
 #include <sys/types.h>
 #include <dirent.h>
+#include <pthread.h>
 #include <signal.h>
 
 #endif  /* _WIN32 */
@@ -980,6 +983,7 @@ LIBHTTP_API int			httplib_kill( pid_t pid, int sig_num );
 LIBHTTP_API int			httplib_mkdir( const char *path, int mode );
 LIBHTTP_API DIR *		httplib_opendir( const char *name );
 LIBHTTP_API int			httplib_poll( struct pollfd *pfd, unsigned int nfds, int timeout );
+LIBHTTP_API pthread_t		httplib_pthread_self( void );
 LIBHTTP_API struct dirent *	httplib_readdir( DIR *dir );
 LIBHTTP_API int			httplib_remove( const char *path );
 LIBHTTP_API void		httplib_set_alloc_callback_func( httplib_alloc_callback_func log_func );
