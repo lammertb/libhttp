@@ -22,15 +22,22 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
-#include "httplib_pthread.h"
+
+/*
+ * The platform independent function httplib_pthread_mutex_trylock() tries to
+ * put a lock on a mutex. It checks the state of the mutex and returns a value
+ * accordingly. On systems which support it, this function is just a wrapper
+ * around pthread_mutex_trylock(). On other systems the functionality is
+ * emulated with own code.
+ */
+
+int httplib_pthread_mutex_trylock( pthread_mutex_t *mutex ) {
 
 #if defined(_WIN32)
-
-int pthread_mutex_trylock( pthread_mutex_t *mutex ) {
 
 	switch ( WaitForSingleObject( *mutex, 0 ) ) {
 
@@ -39,6 +46,10 @@ int pthread_mutex_trylock( pthread_mutex_t *mutex ) {
 	}
 	return -1;
 
-}  /* pthread_mutex_trylock */
+#else  /* _WIN32 */
 
-#endif /* _WIN32 */
+	return pthread_mutex_trylock( mutex );
+
+#endif  /* _WIN32 */
+
+}  /* httplib_pthread_mutex_trylock */
