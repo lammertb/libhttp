@@ -154,7 +154,7 @@ static void *worker_thread_run( struct worker_thread_args *thread_args ) {
 #if defined(_WIN32)
 	CloseHandle( tls.pthread_cond_helper_mutex );
 #endif
-	pthread_mutex_destroy( & conn->mutex );
+	httplib_pthread_mutex_destroy( & conn->mutex );
 	httplib_free( conn );
 
 	return NULL;

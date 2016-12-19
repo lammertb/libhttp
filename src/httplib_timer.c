@@ -189,7 +189,7 @@ static void timers_exit( struct httplib_context *ctx ) {
 
 	if ( ctx->timers != NULL ) {
 
-		pthread_mutex_destroy( & ctx->timers->mutex );
+		httplib_pthread_mutex_destroy( & ctx->timers->mutex );
 		httplib_free( ctx->timers );
 	}
 

@@ -41,8 +41,9 @@
 #if !defined(NO_SSL)
 void XX_httplib_uninitialize_ssl( struct httplib_context *ctx ) {
 
+	UNUSED_PARAMETER(ctx);
+
 	int i;
-	(void)ctx;
 
 	if (httplib_atomic_dec(&XX_httplib_cryptolib_users) == 0) {
 
@@ -60,7 +61,7 @@ void XX_httplib_uninitialize_ssl( struct httplib_context *ctx ) {
 		ERR_remove_state(0);
 
 		for (i = 0; i < CRYPTO_num_locks(); i++) {
-			pthread_mutex_destroy(&XX_httplib_ssl_mutexes[i]);
+			httplib_pthread_mutex_destroy( & XX_httplib_ssl_mutexes[i] );
 		}
 		httplib_free( XX_httplib_ssl_mutexes );
 		XX_httplib_ssl_mutexes = NULL;

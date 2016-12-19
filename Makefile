@@ -381,7 +381,7 @@ OBJLIST =									\
 	${OBJDIR}win32_pthread_getspecific${OBJEXT}				\
 	${OBJDIR}win32_pthread_key_create${OBJEXT}				\
 	${OBJDIR}win32_pthread_key_delete${OBJEXT}				\
-	${OBJDIR}win32_pthread_mutex_destroy${OBJEXT}				\
+	${OBJDIR}httplib_pthread_mutex_destroy${OBJEXT}				\
 	${OBJDIR}httplib_pthread_mutex_init${OBJEXT}				\
 	${OBJDIR}httplib_pthread_mutex_lock${OBJEXT}				\
 	${OBJDIR}httplib_pthread_mutex_trylock${OBJEXT}				\
@@ -1436,8 +1436,7 @@ ${OBJDIR}win32_pthread_key_delete${OBJEXT}				: ${SRCDIR}win32_pthread_key_delet
 									  ${SRCDIR}httplib_main.h					\
 									  ${INCDIR}libhttp.h
 
-${OBJDIR}win32_pthread_mutex_destroy${OBJEXT}				: ${SRCDIR}win32_pthread_mutex_destroy.c			\
-									  ${SRCDIR}httplib_pthread.h					\
+${OBJDIR}httplib_pthread_mutex_destroy${OBJEXT}				: ${SRCDIR}httplib_pthread_mutex_destroy.c			\
 									  ${SRCDIR}httplib_main.h					\
 									  ${INCDIR}libhttp.h
 

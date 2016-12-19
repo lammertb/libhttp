@@ -109,7 +109,7 @@ void *event_create(void) {
 	}
 	if (0 != pthread_cond_init(&(ret->cond), NULL)) {
 		/* pthread cond not available */
-		pthread_mutex_destroy(&(ret->mutex));
+		httplib_pthread_mutex_destroy( & ret->mutex );
 		XX_httplib_free(ret);
 		return NULL;
 	}
@@ -144,7 +144,7 @@ void event_destroy(void *eventhdl) {
 
 	struct posix_event *ev = (struct posix_event *)eventhdl;
 	pthread_cond_destroy(&(ev->cond));
-	pthread_mutex_destroy(&(ev->mutex));
+	httplib_pthread_mutex_destroy( & ev->mutex );
 	XX_httplib_free(ev);
 
 }  /* event_destroy */

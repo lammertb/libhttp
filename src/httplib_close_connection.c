@@ -108,7 +108,7 @@ void httplib_close_connection( struct httplib_connection *conn ) {
 
 		httplib_free( client_ctx->workerthreadids );
 		httplib_free( client_ctx                  );
-		pthread_mutex_destroy( & conn->mutex );
+		httplib_pthread_mutex_destroy( & conn->mutex );
 		httplib_free( conn );
 	}
 

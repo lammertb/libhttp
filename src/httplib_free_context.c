@@ -50,7 +50,7 @@ void XX_httplib_free_context( struct httplib_context *ctx ) {
 	/* All threads exited, no sync is needed. Destroy thread mutex and
 	 * condvars
 	 */
-	pthread_mutex_destroy(&ctx->thread_mutex);
+	httplib_pthread_mutex_destroy( & ctx->thread_mutex );
 #if defined(ALTERNATIVE_QUEUE)
 	XX_httplib_free(ctx->client_socks);
 	for (i = 0; (unsigned)i < ctx->cfg_worker_threads; i++) {
@@ -63,10 +63,10 @@ void XX_httplib_free_context( struct httplib_context *ctx ) {
 #endif
 
 	/* Destroy other context global data structures mutex */
-	pthread_mutex_destroy(&ctx->nonce_mutex);
+	httplib_pthread_mutex_destroy( & ctx->nonce_mutex );
 
 #if defined(USE_TIMERS)
-	timers_exit(ctx);
+	timers_exit( ctx );
 #endif
 
 	/* Deallocate config parameters */

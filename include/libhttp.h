@@ -985,6 +985,7 @@ LIBHTTP_API int			httplib_kill( pid_t pid, int sig_num );
 LIBHTTP_API int			httplib_mkdir( const char *path, int mode );
 LIBHTTP_API DIR *		httplib_opendir( const char *name );
 LIBHTTP_API int			httplib_poll( struct pollfd *pfd, unsigned int nfds, int timeout );
+LIBHTTP_API int			httplib_pthread_mutex_destroy( pthread_mutex_t *mutex );
 LIBHTTP_API int			httplib_pthread_mutex_init( pthread_mutex_t *mutex, const pthread_mutexattr_t *attr );
 LIBHTTP_API int			httplib_pthread_mutex_lock( pthread_mutex_t *mutex );
 LIBHTTP_API int			httplib_pthread_mutex_trylock( pthread_mutex_t *mutex );

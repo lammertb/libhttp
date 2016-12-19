@@ -22,18 +22,31 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
-#include "httplib_pthread.h"
+
+/*
+ * int httplib_pthread_mutex_destroy( pthread_mutex_t *mutex );
+ *
+ * The function httplib_pthread_mutex_destroy() provides a platform independent
+ * way to destroy a mutex. The function returns 0 when successful, and a non
+ * zero value if an error occures. On systems which support it the function is
+ * implemented as a wrapper around pthread_mutex_destroy(). On other systems
+ * own code is used with equivalent functionality.
+ */
+
+int httplib_pthread_mutex_destroy( pthread_mutex_t *mutex ) {
 
 #if defined(_WIN32)
 
-int pthread_mutex_destroy( pthread_mutex_t *mutex ) {
+	return ( CloseHandle( *mutex ) == 0 ) ? -1 : 0;
 
-	return ( CloseHandle(*mutex) == 0 ) ? -1 : 0;
+#else  /* _WIN32 */
 
-}  /* pthread_mutex_destroy */
+	return pthread_mutex_destroy( mutex );
 
 #endif /* _WIN32 */
+
+}  /* httplib_pthread_mutex_destroy */
