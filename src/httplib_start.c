@@ -74,7 +74,7 @@ struct httplib_context *httplib_start( const struct httplib_callbacks *callbacks
 		pthread_mutexattr_settype( & XX_httplib_pthread_mutex_attr, PTHREAD_MUTEX_RECURSIVE );
 #endif
 
-		if ( 0 != pthread_key_create( & XX_httplib_sTlsKey, XX_httplib_tls_dtor ) ) {
+		if ( 0 != httplib_pthread_key_create( & XX_httplib_sTlsKey, XX_httplib_tls_dtor ) ) {
 			/* Fatal error - abort start. However, this situation should
 			 * never
 			 * occur in practice. */

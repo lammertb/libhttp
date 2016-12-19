@@ -22,21 +22,39 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
-#include "httplib_pthread.h"
 
-#ifdef _WIN32
+/*
+ * int httplib_pthread_key_create( pthread_key_t *key, void (*destructor)(void *) );
+ *
+ * The function httplib_pthread_key_create() creates a key which can be used to
+ * reference an area for thread dependent storage. The function returns 0 when
+ * succesful and a non zero value otherwise. On systems which support it, the
+ * function is implemented as a wrapper around pthread_key_create(). On other
+ * systems own code is used to emulate the same behavior.
+ *
+ * Please note that on systems without a native implementation of the function
+ * pthread_key_create() that the parameter destructor is ignored.
+ */
 
-int pthread_key_create( pthread_key_t *key, void (*destructor)(void *) ) {
+int httplib_pthread_key_create( pthread_key_t *key, void (*destructor)(void *) ) {
+
+#if defined(_WIN32)
+
+	UNUSED_PARAMETER(destructor);
 
 	if ( key == NULL ) return -2;
 
 	*key = TlsAlloc();
 	return ( *key != TLS_OUT_OF_INDEXES ) ? 0 : -1;
 
-}  /* pthread_key_create */
+#else  /* _WIN32 */
+
+	return pthread_key_create( key, destructor );
 
 #endif  /* _WIN32 */
+
+}  /* httplib_pthread_key_create */
