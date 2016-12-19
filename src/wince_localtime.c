@@ -22,19 +22,37 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
 
 #if defined(_WIN32_WCE)
 
-struct tm XX_httplib_tm_array[MAX_WORKER_THREADS];
-int XX_httplib_tm_index = 0;
+static struct tm	XX_httplib_tm_array[MAX_WORKER_THREADS];
+static volatile int	XX_httplib_tm_index = 0;
+
+/*
+ * struct tm *localtime( const time_t *ptime );
+ *
+ * The time conversion function localtime() is not available on all platforms.
+ * This implementation provides an equivalent function which can be used on
+ * platforms where the native system libraries have no support for localtime().
+ * The function is thread safe by using an array with multiple entries to
+ * store the outcome of the function. Please note however that the number of
+ * entries in the table is equal to the normal number of threads started by
+ * LibHTTP, but this still may lead to overwriting results in border cases
+ * where the application creates additional threads which also use calls to
+ * this localtime implementation().
+ *
+ * The implementation should therefore use thread local storage in the future.
+ */
 
 struct tm *localtime( const time_t *ptime ) {
 
-	int i = XX_httplib_atomic_inc(&XX_httplib_tm_index) % MAX_WORKER_THREADS;
+	int i;
+       
+	i = XX_httplib_atomic_inc( & XX_httplib_tm_index ) % MAX_WORKER_THREADS;
 	return localtime_s( ptime, XX_httplib_tm_array + i );
 
 }  /* localtime */
