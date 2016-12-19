@@ -12,7 +12,7 @@
 
 | Type | Description |
 | :--- | :--- |
-|`int`|Integer value with the result of the function|
+|`int`|Integer value with the result of the function call|
 
 ### Description
 
