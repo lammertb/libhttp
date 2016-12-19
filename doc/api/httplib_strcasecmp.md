@@ -21,4 +21,6 @@ The function `httplib_strcasecmp()` is a helper function to compare two strings.
 
 ### See Also
 
+* [`httplib_strdup();`](httplib_strdup.md)
 * [`httplib_strncasecmp();`](httplib_strncasecmp.md)
+* [`httplib_strndup();`](httplib_strndup.md)

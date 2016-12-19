@@ -22,14 +22,29 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
 #include "httplib_string.h"
 
-char * XX_httplib_strdup( const char *str ) {
+/*
+ * char *httplib_strdup( const char *str );
+ *
+ * The function httplib_strdup() duplicates a NUL terminated string. This
+ * function is equivalent to the Posix strdup() function, with the difference
+ * that the own LibHTTP memory allocation functions are used. The memory used
+ * by the duplicated string should therefore after use be returned to the heap
+ * with a call to httplib_free().
+ *
+ * If the function succeeds, a pointer to the duplicate is returned. Otherwise
+ * the returned value is NULL.
+ */
+
+char *httplib_strdup( const char *str ) {
+
+	if ( str == NULL ) return NULL;
 
 	return httplib_strndup(str, strlen( str ) );
 
-}  /* XX_httplib_strdup */
+}  /* httplib_strdup */
