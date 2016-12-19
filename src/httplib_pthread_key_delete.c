@@ -22,18 +22,32 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
-#include "httplib_pthread.h"
 
-#ifdef _WIN32
+/*
+ * int httplib_pthread_key_delete( pthread_key_t key );
+ *
+ * The platform independent function httplib_pthread_key_delete() is used to
+ * delete a previously allocated key which was associated with a thread. The
+ * function returns 0 when successful and a non zero value if a problem occurs.
+ * On system which support it, this function is a wrapper around the function
+ * pthread_key_delete(). On other platforms own code is used to emulate the
+ * same behaviour.
+ */
 
-int pthread_key_delete( pthread_key_t key ) {
+int httplib_pthread_key_delete( pthread_key_t key ) {
 
-	return TlsFree(key) ? 0 : 1;
+#if defined(_WIN32)
 
-}  /* pthread_key_delete */
+	return TlsFree( key ) ? 0 : 1;
+
+#else  /* _WIN32 */
+
+	return pthread_key_delete( key );
 
 #endif  /* _WIN32 */
+
+}  /* httplib_pthread_key_delete */

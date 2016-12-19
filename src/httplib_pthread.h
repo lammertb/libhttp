@@ -37,8 +37,7 @@ int		pthread_cond_signal( pthread_cond_t *cv );
 int		pthread_cond_timedwait( pthread_cond_t *cv, pthread_mutex_t *mutex, const struct timespec *abstime );
 int		pthread_cond_wait( pthread_cond_t *cv, pthread_mutex_t *mutex );
 
-int		pthread_key_create( pthread_key_t *key, void (*_ignored)(void *) );
-int		pthread_key_delete( pthread_key_t key );
+int		pthread_key_create( pthread_key_t *key, void (*destructor)(void *) );
 
 void *		pthread_getspecific( pthread_key_t key );
 

@@ -104,7 +104,7 @@ void XX_httplib_free_context( struct httplib_context *ctx ) {
 		pthread_mutexattr_destroy(&XX_httplib_pthread_mutex_attr);
 #endif
 
-		pthread_key_delete(XX_httplib_sTlsKey);
+		httplib_pthread_key_delete( XX_httplib_sTlsKey );
 	}
 
 	/* deallocate system name string */

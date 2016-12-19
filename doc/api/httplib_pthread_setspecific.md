@@ -22,4 +22,6 @@ The platform independent function `httplib_pthread_setspecific()` is used to set
 ### See Also
 
 * [`httplib_pthread_getspecific();`](httplib_pthread_getspecific.md)
+* [`httplib_pthread_key_create();`](httplib_pthread_key_create.md)
+* [`httplib_pthread_key_delete();`](httplib_pthread_key_delete.md)
 * [`httplib_pthread_self();`](httplib_pthread_self.md)
