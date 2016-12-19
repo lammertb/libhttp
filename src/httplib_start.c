@@ -95,7 +95,7 @@ struct httplib_context *httplib_start( const struct httplib_callbacks *callbacks
 #if defined(_WIN32)
 	tls.pthread_cond_helper_mutex = NULL;
 #endif
-	pthread_setspecific( XX_httplib_sTlsKey, &tls );
+	httplib_pthread_setspecific( XX_httplib_sTlsKey, &tls );
 
 	ok =  0 == pthread_mutex_init( & ctx->thread_mutex, &XX_httplib_pthread_mutex_attr );
 #if !defined(ALTERNATIVE_QUEUE)
@@ -108,7 +108,7 @@ struct httplib_context *httplib_start( const struct httplib_callbacks *callbacks
 		 * occur in practice. */
 		httplib_cry( XX_httplib_fc( ctx ), "Cannot initialize thread synchronization objects" );
 		httplib_free( ctx );
-		pthread_setspecific( XX_httplib_sTlsKey, NULL );
+		httplib_pthread_setspecific( XX_httplib_sTlsKey, NULL );
 
 		return NULL;
 	}
@@ -128,14 +128,14 @@ struct httplib_context *httplib_start( const struct httplib_callbacks *callbacks
 
 			httplib_cry( XX_httplib_fc(ctx), "Invalid option: %s", name);
 			XX_httplib_free_context(ctx);
-			pthread_setspecific(XX_httplib_sTlsKey, NULL);
+			httplib_pthread_setspecific( XX_httplib_sTlsKey, NULL );
 			return NULL;
 		}
 		
 		if ((value = *options++) == NULL) {
 			httplib_cry( XX_httplib_fc(ctx), "%s: option value cannot be NULL", name);
 			XX_httplib_free_context(ctx);
-			pthread_setspecific(XX_httplib_sTlsKey, NULL);
+			httplib_pthread_setspecific(XX_httplib_sTlsKey, NULL);
 			return NULL;
 		}
 
@@ -157,7 +157,7 @@ struct httplib_context *httplib_start( const struct httplib_callbacks *callbacks
 
 		httplib_cry( XX_httplib_fc( ctx ), "%s", "Document root must not be set" );
 		XX_httplib_free_context( ctx );
-		pthread_setspecific( XX_httplib_sTlsKey, NULL );
+		httplib_pthread_setspecific( XX_httplib_sTlsKey, NULL );
 
 		return NULL;
 	}
@@ -178,7 +178,7 @@ struct httplib_context *httplib_start( const struct httplib_callbacks *callbacks
 	    !XX_httplib_set_acl_option(ctx)) {
 
 		XX_httplib_free_context( ctx );
-		pthread_setspecific( XX_httplib_sTlsKey, NULL );
+		httplib_pthread_setspecific( XX_httplib_sTlsKey, NULL );
 
 		return NULL;
 	}
@@ -199,7 +199,7 @@ struct httplib_context *httplib_start( const struct httplib_callbacks *callbacks
 	if (workerthreadcount > MAX_WORKER_THREADS) {
 		httplib_cry( XX_httplib_fc(ctx), "Too many worker threads");
 		XX_httplib_free_context(ctx);
-		pthread_setspecific(XX_httplib_sTlsKey, NULL);
+		httplib_pthread_setspecific( XX_httplib_sTlsKey, NULL );
 		return NULL;
 	}
 
@@ -209,7 +209,7 @@ struct httplib_context *httplib_start( const struct httplib_callbacks *callbacks
 		if (ctx->workerthreadids == NULL) {
 			httplib_cry( XX_httplib_fc(ctx), "Not enough memory for worker thread ID array");
 			XX_httplib_free_context(ctx);
-			pthread_setspecific(XX_httplib_sTlsKey, NULL);
+			httplib_pthread_setspecific( XX_httplib_sTlsKey, NULL );
 			return NULL;
 		}
 
@@ -219,7 +219,7 @@ struct httplib_context *httplib_start( const struct httplib_callbacks *callbacks
 			httplib_cry( XX_httplib_fc(ctx), "Not enough memory for worker event array");
 			XX_httplib_free(ctx->workerthreadids);
 			XX_httplib_free_context(ctx);
-			pthread_setspecific(XX_httplib_sTlsKey, NULL);
+			httplib_pthread_setspecific(i XX_httplib_sTlsKey, NULL );
 			return NULL;
 		}
 
@@ -229,7 +229,7 @@ struct httplib_context *httplib_start( const struct httplib_callbacks *callbacks
 			XX_httplib_free(ctx->client_socks);
 			XX_httplib_free(ctx->workerthreadids);
 			XX_httplib_free_context(ctx);
-			pthread_setspecific(XX_httplib_sTlsKey, NULL);
+			httplib_pthread_setspecific( XX_httplib_sTlsKey, NULL );
 			return NULL;
 		}
 
@@ -248,7 +248,7 @@ struct httplib_context *httplib_start( const struct httplib_callbacks *callbacks
 		
 		httplib_cry( XX_httplib_fc( ctx ), "Error creating timers" );
 		XX_httplib_free_context( ctx );
-		pthread_setspecific( XX_httplib_sTlsKey, NULL );
+		httplib_pthread_setspecific( XX_httplib_sTlsKey, NULL );
 
 		return NULL;
 	}
@@ -283,7 +283,7 @@ struct httplib_context *httplib_start( const struct httplib_callbacks *callbacks
 			else {
 				httplib_cry( XX_httplib_fc( ctx ), "Cannot create threads: error %ld", (long)ERRNO );
 				XX_httplib_free_context( ctx );
-				pthread_setspecific( XX_httplib_sTlsKey, NULL );
+				httplib_pthread_setspecific( XX_httplib_sTlsKey, NULL );
 
 				return NULL;
 			}
@@ -291,7 +291,7 @@ struct httplib_context *httplib_start( const struct httplib_callbacks *callbacks
 		}
 	}
 
-	pthread_setspecific( XX_httplib_sTlsKey, NULL );
+	httplib_pthread_setspecific( XX_httplib_sTlsKey, NULL );
 
 	return ctx;
 

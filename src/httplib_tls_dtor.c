@@ -51,6 +51,6 @@ void XX_httplib_tls_dtor( void *key ) {
 		}
 	}
 
-	pthread_setspecific( XX_httplib_sTlsKey, NULL );
+	httplib_pthread_setspecific( XX_httplib_sTlsKey, NULL );
 
 }  /* XX_httplib_tls_dtor */

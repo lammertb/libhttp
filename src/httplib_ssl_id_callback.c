@@ -67,7 +67,7 @@ unsigned long XX_httplib_ssl_id_callback( void ) {
 			tls = httplib_malloc( sizeof(struct httplib_workerTLS) );
 			tls->is_master = -2; /* -2 means "3rd party thread" */
 			tls->thread_idx = (unsigned)httplib_atomic_inc(&XX_httplib_thread_idx_max);
-			pthread_setspecific(XX_httplib_sTlsKey, tls);
+			httplib_pthread_setspecific( XX_httplib_sTlsKey, tls );
 		}
 		return tls->thread_idx;
 	} else {

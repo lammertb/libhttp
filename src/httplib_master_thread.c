@@ -91,7 +91,7 @@ static void master_thread_run(void *thread_func_param) {
 	tls.pthread_cond_helper_mutex = CreateEvent(NULL, FALSE, FALSE, NULL);
 #endif
 	tls.is_master = 1;
-	pthread_setspecific(XX_httplib_sTlsKey, &tls);
+	httplib_pthread_setspecific( XX_httplib_sTlsKey, &tls );
 
 	if (ctx->callbacks.init_thread) {
 		/* Callback for the master thread (type 0) */
@@ -129,7 +129,7 @@ static void master_thread_run(void *thread_func_param) {
 	XX_httplib_close_all_listening_sockets(ctx);
 
 	/* Wakeup workers that are waiting for connections to handle. */
-	(void)pthread_mutex_lock(&ctx->thread_mutex);
+	pthread_mutex_lock(&ctx->thread_mutex);
 #if defined(ALTERNATIVE_QUEUE)
 	for (i = 0; i < ctx->cfg_worker_threads; i++) {
 		event_signal(ctx->client_wait_events[i]);
@@ -142,7 +142,7 @@ static void master_thread_run(void *thread_func_param) {
 #else
 	pthread_cond_broadcast(&ctx->sq_full);
 #endif
-	(void)pthread_mutex_unlock(&ctx->thread_mutex);
+	pthread_mutex_unlock(&ctx->thread_mutex);
 
 	/* Join all worker threads to avoid leaking threads. */
 	workerthreadcount = ctx->cfg_worker_threads;
@@ -159,7 +159,7 @@ static void master_thread_run(void *thread_func_param) {
 #if defined(_WIN32)
 	CloseHandle(tls.pthread_cond_helper_mutex);
 #endif
-	pthread_setspecific(XX_httplib_sTlsKey, NULL);
+	httplib_pthread_setspecific( XX_httplib_sTlsKey, NULL );
 
 	/* Signal httplib_stop() that we're done.
 	 * WARNING: This must be the very last thing this

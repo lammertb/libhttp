@@ -84,7 +84,8 @@ static void *worker_thread_run( struct worker_thread_args *thread_args ) {
 	if ( conn == NULL ) httplib_cry( XX_httplib_fc(ctx), "%s", "Cannot create new connection struct, OOM");
 	
 	else {
-		pthread_setspecific(XX_httplib_sTlsKey, &tls);
+		httplib_pthread_setspecific( XX_httplib_sTlsKey, &tls );
+
 		conn->buf_size               = MAX_REQUEST_SIZE;
 		conn->buf                    = (char *)(conn + 1);
 		conn->ctx                    = ctx;
@@ -149,7 +150,7 @@ static void *worker_thread_run( struct worker_thread_args *thread_args ) {
 		}
 	}
 
-	pthread_setspecific( XX_httplib_sTlsKey, NULL );
+	httplib_pthread_setspecific( XX_httplib_sTlsKey, NULL );
 #if defined(_WIN32)
 	CloseHandle( tls.pthread_cond_helper_mutex );
 #endif
