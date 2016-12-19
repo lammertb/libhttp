@@ -26,12 +26,47 @@
  */
 
 #include "httplib_main.h"
+#include "httplib_utils.h"
 
 #if defined(_WIN32_WCE)
 
+/*
+ * struct tm *gmtime_s( const time_t *ptime, struct tm *ptm );
+ *
+ * The function gmtime_s() converts a number of seconds since the EPOCH to
+ * a tm time structure. This standard function is not available on all
+ * platforms and this implementation provides the functionality for Windows CE.
+ */
+
 struct tm * gmtime_s( const time_t *ptime, struct tm *ptm ) {
-	/* FIXME(lsm): fix this. */
-	return localtime_s(ptime, ptm);
+
+	int a;
+	int doy;
+	FILETIME ft;
+	SYSTEMTIME st;
+	
+	if ( ptime == NULL  ||  ptm == NULL ) return NULL;
+
+	*(int64_t)&ft = ((int64_t)*ptime) * RATE_DIFF * EPOCH_DIFF;
+
+	FileTimeToSystemTime( & ft, & st );
+
+	ptm->tm_year  = st.wYear  - 1900;
+	ptm->tm_mon   = st.wMonth - 1;
+	ptm->tm_wday  = st.wDayOfWeek;
+	ptm->tm_mday  = st.wDay;
+	ptm->tm_hour  = st.wHour;
+	ptm->tm_min   = st.wMinute;
+	ptm->tm_sec   = st.wSecond;
+	ptm->tm_isdst = false;
+
+	doy           = ptm->tm_mday;
+	for (a=0; a<ptm->tm_mon; a++) doy += days_per_month[a];
+	if ( ptm->tm_mon >= 2  &&  LEAP_YEAR( ptm->tm_year+1900 ) ) doy++;
+
+	ptm->tm_yday  = doy;
+
+	return ptm;
 
 }  /* gmtime_s */
 

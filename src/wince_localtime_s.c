@@ -26,12 +26,13 @@
  */
 
 #include "httplib_main.h"
+#include "httplib_utils.h"
 
 #if defined(_WIN32_WCE)
 
 #define LEAP_YEAR(x)	( ((x)%4 == 0)  &&  ( ((x)%100) != 0  || ((x)%400) == 0 ) )
 
-static const int	days_per_month = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+const int		XX_httplib_days_per_month[] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 
 /*
  * struct tm *localtime_s( const time_t *ptime, struct tm *ptm );
@@ -45,16 +46,14 @@ struct tm *localtime_s( const time_t *ptime, struct tm *ptm ) {
 
 	int a;
 	int doy;
-	int64_t t;
 	FILETIME ft;
 	FILETIME lft;
 	SYSTEMTIME st;
 	TIME_ZONE_INFORMATION tzinfo;
 
-	if ( ptm == NULL ) return NULL;
+	if ( ptime == NULL  ||  ptm == NULL ) return NULL;
 
-	int64_t t       = ((int64_t)*ptime) * RATE_DIFF + EPOCH_DIFF;
-	*(int64_t *)&ft = t;
+	*(int64_t *)&ft = ((int64_t)*ptime) * RATE_DIFF + EPOCH_DIFF;
 
 	FileTimeToLocalFileTime( & ft,  & lft );
 	FileTimeToSystemTime(    & lft, & st  );

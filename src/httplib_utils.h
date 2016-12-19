@@ -20,7 +20,7 @@
  * THE SOFTWARE.
  */
 
-
+#define LEAP_YEAR(x)	( ((x)%4) == 0  &&  ( ((x)%100) != 0  ||  ((x)%400) == 0 ) )
 
 void			XX_httplib_addenv( struct cgi_environment *env, PRINTF_FORMAT_STRING(const char *fmt), ... ) PRINTF_ARGS(2, 3);
 void			XX_httplib_base64_encode( const unsigned char *src, int src_len, char *dst );
@@ -29,3 +29,5 @@ uint64_t		XX_httplib_get_random( void );
 void			XX_httplib_gmt_time_string( char *buf, size_t buf_len, time_t *t );
 int			XX_httplib_inet_pton( int af, const char *src, void *dst, size_t dstlen );
 int			XX_httplib_lowercase( const char *s );
+
+extern const int	XX_httplib_days_per_month[];

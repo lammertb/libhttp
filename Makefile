@@ -1477,6 +1477,7 @@ ${OBJDIR}wince_gmtime${OBJEXT}						: ${SRCDIR}wince_gmtime.c					\
 
 ${OBJDIR}wince_gmtime_s${OBJEXT}					: ${SRCDIR}wince_gmtime_s.c					\
 									  ${SRCDIR}httplib_main.h					\
+									  ${SRCDIR}httplib_utils.h					\
 									  ${INCDIR}libhttp.h
 
 ${OBJDIR}wince_localtime${OBJEXT}					: ${SRCDIR}wince_localtime.c					\
@@ -1485,6 +1486,7 @@ ${OBJDIR}wince_localtime${OBJEXT}					: ${SRCDIR}wince_localtime.c					\
 
 ${OBJDIR}wince_localtime_s${OBJEXT}					: ${SRCDIR}wince_localtime_s.c					\
 									  ${SRCDIR}httplib_main.h					\
+									  ${SRCDIR}httplib_utils.h					\
 									  ${INCDIR}libhttp.h
 
 ${OBJDIR}wince_rename${OBJEXT}						: ${SRCDIR}wince_rename.c					\
