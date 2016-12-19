@@ -22,13 +22,22 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
 #include "httplib_pthread.h"
 
 #ifdef _WIN32
+
+/*
+ * DWORD pthread_self( void );
+ *
+ * The function pthread_self() returns in ID describing the current thread. On
+ * windows where there is no support for the pthread() library, this
+ * implementation provides a comparable function which can be used as an
+ * alternative.
+ */
 
 DWORD pthread_self( void ) {
 
