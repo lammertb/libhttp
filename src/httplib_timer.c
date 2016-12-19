@@ -186,9 +186,10 @@ static int timers_init( struct httplib_context *ctx ) {
 
 static void timers_exit( struct httplib_context *ctx ) {
 
-	if (ctx->timers) {
-		(void)pthread_mutex_destroy(&ctx->timers->mutex);
-httplib:_free(ctx->timers);
+	if ( ctx->timers != NULL ) {
+
+		pthread_mutex_destroy( & ctx->timers->mutex );
+		httplib_free( ctx->timers );
 	}
 
 }  /* timers_exit */

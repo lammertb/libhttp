@@ -22,13 +22,24 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
 
-void * httplib_get_user_data(const struct httplib_context *ctx) {
+/*
+ * void *httplib_get_user_data( const struct httplib_context *ctx );
+ *
+ * The function httplib_get_user_data() returns a pointer to user data which is
+ * associated with the context, or NULL if no user data has been registered.
+ * The user_data is specified when the context is allocated with a call to the
+ * httplib_start() function.
+ */
 
-	return (ctx == NULL) ? NULL : ctx->user_data;
+void *httplib_get_user_data( const struct httplib_context *ctx ) {
+
+	if ( ctx == NULL ) return NULL;
+
+	return ctx->user_data;
 
 }  /* httplib_get_user_data */

@@ -12,7 +12,7 @@
 
 | Type | Description |
 | :--- | :--- |
-|`void *`||
+|`void *`|A pointer to the user data or NULL on error, or if no user data has been registered|
 
 ### Description
 

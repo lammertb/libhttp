@@ -30,11 +30,11 @@
 
 #if defined(_WIN32)
 
-int pthread_cond_init( pthread_cond_t *cv, const void *unused ) {
+int pthread_cond_init( pthread_cond_t *cv, const void *attr ) {
 
-	(void)unused;
+	UNUSED_PARAMETER(attr);
 
-	InitializeCriticalSection(&cv->threadIdSec);
+	InitializeCriticalSection( & cv->threadIdSec );
 	cv->waiting_thread = NULL;
 
 	return 0;

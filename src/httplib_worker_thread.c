@@ -48,7 +48,7 @@ void *XX_httplib_worker_thread( void *thread_func_param ) {
 #endif
 
 	struct worker_thread_args *pwta = (struct worker_thread_args *)thread_func_param;
-	worker_thread_run(pwta);
+	worker_thread_run( pwta );
 	httplib_free( thread_func_param );
 
 	return 0;
@@ -78,15 +78,12 @@ static void *worker_thread_run( struct worker_thread_args *thread_args ) {
 	tls.pthread_cond_helper_mutex = CreateEvent(NULL, FALSE, FALSE, NULL);
 #endif
 
-	if (ctx->callbacks.init_thread) {
-		/* call init_thread for a worker thread (type 1) */
-		ctx->callbacks.init_thread(ctx, 1);
-	}
+	if ( ctx->callbacks.init_thread != NULL ) ctx->callbacks.init_thread( ctx, 1 ); /* call init_thread for a worker thread (type 1) */
 
 	conn = httplib_calloc( 1, sizeof(*conn) + MAX_REQUEST_SIZE );
-	if (conn == NULL) {
-		httplib_cry( XX_httplib_fc(ctx), "%s", "Cannot create new connection struct, OOM");
-	} else {
+	if ( conn == NULL ) httplib_cry( XX_httplib_fc(ctx), "%s", "Cannot create new connection struct, OOM");
+	
+	else {
 		pthread_setspecific(XX_httplib_sTlsKey, &tls);
 		conn->buf_size               = MAX_REQUEST_SIZE;
 		conn->buf                    = (char *)(conn + 1);
@@ -96,12 +93,13 @@ static void *worker_thread_run( struct worker_thread_args *thread_args ) {
 		/* Allocate a mutex for this connection to allow communication both
 		 * within the request handler and from elsewhere in the application
 		 */
-		pthread_mutex_init(&conn->mutex, &XX_httplib_pthread_mutex_attr);
+		pthread_mutex_init( & conn->mutex, &XX_httplib_pthread_mutex_attr );
 
 		/* Call XX_httplib_consume_socket() even when ctx->stop_flag > 0, to let it
 		 * signal sq_empty condvar to wake up the master waiting in
 		 * produce_socket() */
 		while (XX_httplib_consume_socket(ctx, &conn->client, conn->thread_index)) {
+
 			conn->conn_birth_time = time(NULL);
 
 /* Fill in IP, port info early so even if SSL setup below fails,
@@ -109,19 +107,15 @@ static void *worker_thread_run( struct worker_thread_args *thread_args ) {
  * Thanks to Johannes Winkelmann for the patch.
  */
 #if defined(USE_IPV6)
-			if (conn->client.rsa.sa.sa_family == AF_INET6) {
-				conn->request_info.remote_port =
-				    ntohs(conn->client.rsa.sin6.sin6_port);
-			} else
+			if ( conn->client.rsa.sa.sa_family == AF_INET6 ) conn->request_info.remote_port = ntohs(conn->client.rsa.sin6.sin6_port);
+			
+			else
 #endif
 			{
-				conn->request_info.remote_port =
-				    ntohs(conn->client.rsa.sin.sin_port);
+				conn->request_info.remote_port = ntohs(conn->client.rsa.sin.sin_port);
 			}
 
-			XX_httplib_sockaddr_to_string(conn->request_info.remote_addr,
-			                   sizeof(conn->request_info.remote_addr),
-			                   &conn->client.rsa);
+			XX_httplib_sockaddr_to_string(conn->request_info.remote_addr, sizeof(conn->request_info.remote_addr), &conn->client.rsa);
 
 			conn->request_info.is_ssl = conn->client.is_ssl;
 
@@ -131,10 +125,10 @@ static void *worker_thread_run( struct worker_thread_args *thread_args ) {
 				if ( XX_httplib_sslize( conn, conn->ctx->ssl_ctx, SSL_accept ) ) {
 
 					/* Get SSL client certificate information (if set) */
-					XX_httplib_ssl_get_client_cert_info(conn);
+					XX_httplib_ssl_get_client_cert_info( conn );
 
 					/* process HTTPS connection */
-					XX_httplib_process_new_connection(conn);
+					XX_httplib_process_new_connection( conn );
 
 					/* Free client certificate info */
 					if ( conn->request_info.client_cert != NULL ) {
@@ -149,20 +143,17 @@ static void *worker_thread_run( struct worker_thread_args *thread_args ) {
 					}
 				}
 #endif
-			} else {
-				/* process HTTP connection */
-				XX_httplib_process_new_connection( conn );
-			}
+			} else XX_httplib_process_new_connection( conn );
 
-			XX_httplib_close_connection(conn);
+			XX_httplib_close_connection( conn );
 		}
 	}
 
-	pthread_setspecific(XX_httplib_sTlsKey, NULL);
+	pthread_setspecific( XX_httplib_sTlsKey, NULL );
 #if defined(_WIN32)
-	CloseHandle(tls.pthread_cond_helper_mutex);
+	CloseHandle( tls.pthread_cond_helper_mutex );
 #endif
-	pthread_mutex_destroy(&conn->mutex);
+	pthread_mutex_destroy( & conn->mutex );
 	httplib_free( conn );
 
 	return NULL;

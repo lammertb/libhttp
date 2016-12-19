@@ -36,17 +36,20 @@
 int64_t httplib_store_body( struct httplib_connection *conn, const char *path ) {
 
 	char buf[MG_BUF_LEN];
-	int64_t len = 0;
+	int64_t len;
 	int ret;
 	int n;
 	struct file fi;
 
-	if (conn->consumed_content != 0) {
-		httplib_cry(conn, "%s: Contents already consumed", __func__);
+	len = 0;
+
+	if ( conn->consumed_content != 0 ) {
+
+		httplib_cry( conn, "%s: Contents already consumed", __func__ );
 		return -11;
 	}
 
-	ret = XX_httplib_put_dir(conn, path);
+	ret = XX_httplib_put_dir( conn, path );
 	if (ret < 0) {
 		/* -1 for path too long,
 		 * -2 for path can not be created. */
@@ -57,23 +60,27 @@ int64_t httplib_store_body( struct httplib_connection *conn, const char *path ) 
 		return 0;
 	}
 
-	if (XX_httplib_fopen(conn, path, "w", &fi) == 0) return -12;
+	if ( XX_httplib_fopen( conn, path, "w",  & fi ) == 0 ) return -12;
 
-	ret = httplib_read(conn, buf, sizeof(buf));
-	while (ret > 0) {
-		n = (int)fwrite(buf, 1, (size_t)ret, fi.fp);
-		if (n != ret) {
-			XX_httplib_fclose(&fi);
-			XX_httplib_remove_bad_file(conn, path);
+	ret = httplib_read( conn, buf, sizeof(buf) );
+
+	while ( ret > 0)  {
+
+		n = (int)fwrite( buf, 1, (size_t)ret, fi.fp );
+		if ( n != ret ) {
+
+			XX_httplib_fclose( & fi );
+			XX_httplib_remove_bad_file( conn, path );
 			return -13;
 		}
-		ret = httplib_read(conn, buf, sizeof(buf));
+		ret = httplib_read( conn, buf, sizeof(buf) );
 	}
 
 	/* TODO: XX_httplib_fclose should return an error,
 	 * and every caller should check and handle it. */
-	if (fclose(fi.fp) != 0) {
-		XX_httplib_remove_bad_file(conn, path);
+	if ( fclose(fi.fp) != 0 ) {
+
+		XX_httplib_remove_bad_file( conn, path );
 		return -14;
 	}
 

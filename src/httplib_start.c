@@ -58,79 +58,87 @@ struct httplib_context *httplib_start( const struct httplib_callbacks *callbacks
 	WSAStartup(MAKEWORD(2, 2), &data);
 #endif /* _WIN32 */
 
-	/* Allocate context and initialize reasonable general case defaults. */
-	if ((ctx = httplib_calloc(1, sizeof(*ctx))) == NULL) return NULL;
+	ctx = httplib_calloc( 1, sizeof(*ctx) );
+	if ( ctx == NULL ) return NULL;
 
 	/* Random number generator will initialize at the first call */
 	ctx->auth_nonce_mask = (uint64_t)XX_httplib_get_random() ^ (uint64_t)(ptrdiff_t)(options);
 
-	if (httplib_atomic_inc(&XX_httplib_sTlsInit) == 1) {
+	if ( httplib_atomic_inc( & XX_httplib_sTlsInit ) == 1 ) {
 
 #if defined(_WIN32)
-		InitializeCriticalSection(&global_log_file_lock);
+		InitializeCriticalSection( & global_log_file_lock );
 #endif /* _WIN32 */
 #if !defined(_WIN32)
-		pthread_mutexattr_init(&XX_httplib_pthread_mutex_attr);
-		pthread_mutexattr_settype(&XX_httplib_pthread_mutex_attr, PTHREAD_MUTEX_RECURSIVE);
+		pthread_mutexattr_init(    & XX_httplib_pthread_mutex_attr                          );
+		pthread_mutexattr_settype( & XX_httplib_pthread_mutex_attr, PTHREAD_MUTEX_RECURSIVE );
 #endif
 
-		if (0 != pthread_key_create(&XX_httplib_sTlsKey, XX_httplib_tls_dtor)) {
+		if ( 0 != pthread_key_create( & XX_httplib_sTlsKey, XX_httplib_tls_dtor ) ) {
 			/* Fatal error - abort start. However, this situation should
 			 * never
 			 * occur in practice. */
-			httplib_atomic_dec(&XX_httplib_sTlsInit);
-			httplib_cry( XX_httplib_fc(ctx), "Cannot initialize thread local storage");
+			httplib_atomic_dec( & XX_httplib_sTlsInit );
+			httplib_cry( XX_httplib_fc(ctx), "Cannot initialize thread local storage" );
 			httplib_free( ctx );
+
 			return NULL;
 		}
 	} else {
 		/* TODO (low): istead of sleeping, check if XX_httplib_sTlsKey is already
 		 * initialized. */
-		httplib_sleep(1);
+		httplib_sleep( 1 );
 	}
 
 	tls.is_master  = -1;
-	tls.thread_idx = (unsigned)httplib_atomic_inc(&XX_httplib_thread_idx_max);
+	tls.thread_idx = (unsigned)httplib_atomic_inc( & XX_httplib_thread_idx_max );
 #if defined(_WIN32)
 	tls.pthread_cond_helper_mutex = NULL;
 #endif
-	pthread_setspecific(XX_httplib_sTlsKey, &tls);
+	pthread_setspecific( XX_httplib_sTlsKey, &tls );
 
-	ok = 0 == pthread_mutex_init(&ctx->thread_mutex, &XX_httplib_pthread_mutex_attr);
+	ok =  0 == pthread_mutex_init( & ctx->thread_mutex, &XX_httplib_pthread_mutex_attr );
 #if !defined(ALTERNATIVE_QUEUE)
-	ok &= 0 == pthread_cond_init(&ctx->sq_empty, NULL);
-	ok &= 0 == pthread_cond_init(&ctx->sq_full, NULL);
+	ok &= 0 == pthread_cond_init(  & ctx->sq_empty, NULL );
+	ok &= 0 == pthread_cond_init(  & ctx->sq_full,  NULL );
 #endif
-	ok &= 0 == pthread_mutex_init(&ctx->nonce_mutex, &XX_httplib_pthread_mutex_attr);
-	if (!ok) {
+	ok &= 0 == pthread_mutex_init( & ctx->nonce_mutex,  & XX_httplib_pthread_mutex_attr );
+	if ( ! ok ) {
 		/* Fatal error - abort start. However, this situation should never
 		 * occur in practice. */
-		httplib_cry( XX_httplib_fc(ctx), "Cannot initialize thread synchronization objects");
+		httplib_cry( XX_httplib_fc( ctx ), "Cannot initialize thread synchronization objects" );
 		httplib_free( ctx );
-		pthread_setspecific(XX_httplib_sTlsKey, NULL);
+		pthread_setspecific( XX_httplib_sTlsKey, NULL );
+
 		return NULL;
 	}
 
-	if (callbacks) {
-		ctx->callbacks = *callbacks;
-		exit_callback = callbacks->exit_context;
+	if ( callbacks ) {
+
+		ctx->callbacks              = *callbacks;
+		exit_callback               = callbacks->exit_context;
 		ctx->callbacks.exit_context = 0;
 	}
 	ctx->user_data = user_data;
-	ctx->handlers = NULL;
+	ctx->handlers  = NULL;
 
 	while (options && (name = *options++) != NULL) {
+
 		if ((idx = XX_httplib_get_option_index(name)) == -1) {
+
 			httplib_cry( XX_httplib_fc(ctx), "Invalid option: %s", name);
 			XX_httplib_free_context(ctx);
 			pthread_setspecific(XX_httplib_sTlsKey, NULL);
 			return NULL;
-		} else if ((value = *options++) == NULL) {
+		}
+		
+		if ((value = *options++) == NULL) {
 			httplib_cry( XX_httplib_fc(ctx), "%s: option value cannot be NULL", name);
 			XX_httplib_free_context(ctx);
 			pthread_setspecific(XX_httplib_sTlsKey, NULL);
 			return NULL;
 		}
+
 		if (ctx->config[idx] != NULL) {
 			httplib_cry( XX_httplib_fc(ctx), "warning: %s: duplicate option", name);
 			httplib_free( ctx->config[idx] );
@@ -141,21 +149,21 @@ struct httplib_context *httplib_start( const struct httplib_callbacks *callbacks
 	/* Set default value if needed */
 	for (i = 0; XX_httplib_config_options[i].name != NULL; i++) {
 		default_value = XX_httplib_config_options[i].default_value;
-		if (ctx->config[i] == NULL && default_value != NULL) {
-			ctx->config[i] = XX_httplib_strdup(default_value);
-		}
+		if (ctx->config[i] == NULL && default_value != NULL) ctx->config[i] = XX_httplib_strdup(default_value);
 	}
 
 #if defined(NO_FILES)
-	if (ctx->config[DOCUMENT_ROOT] != NULL) {
-		httplib_cry( XX_httplib_fc(ctx), "%s", "Document root must not be set");
-		XX_httplib_free_context(ctx);
-		pthread_setspecific(XX_httplib_sTlsKey, NULL);
+	if ( ctx->config[DOCUMENT_ROOT] != NULL ) {
+
+		httplib_cry( XX_httplib_fc( ctx ), "%s", "Document root must not be set" );
+		XX_httplib_free_context( ctx );
+		pthread_setspecific( XX_httplib_sTlsKey, NULL );
+
 		return NULL;
 	}
 #endif
 
-	XX_httplib_get_system_name(&ctx->systemName);
+	XX_httplib_get_system_name( & ctx->systemName );
 
 	/* NOTE(lsm): order is important here. SSL certificates must
 	 * be initialized before listening ports. UID must be set last. */
@@ -168,15 +176,22 @@ struct httplib_context *httplib_start( const struct httplib_callbacks *callbacks
 	    !XX_httplib_set_uid_option(ctx) ||
 #endif
 	    !XX_httplib_set_acl_option(ctx)) {
-		XX_httplib_free_context(ctx);
-		pthread_setspecific(XX_httplib_sTlsKey, NULL);
+
+		XX_httplib_free_context( ctx );
+		pthread_setspecific( XX_httplib_sTlsKey, NULL );
+
 		return NULL;
 	}
 
 #if !defined(_WIN32)
-	/* Ignore SIGPIPE signal, so if browser cancels the request, it
-	 * won't kill the whole process. */
-	(void)signal(SIGPIPE, SIG_IGN);
+
+	/*
+	 * Ignore SIGPIPE signal, so if browser cancels the request, it
+	 * won't kill the whole process.
+	 */
+
+	signal(SIGPIPE, SIG_IGN);
+
 #endif /* !_WIN32 */
 
 	workerthreadcount = atoi(ctx->config[NUM_THREADS]);
@@ -229,50 +244,55 @@ struct httplib_context *httplib_start( const struct httplib_callbacks *callbacks
 	}
 
 #if defined(USE_TIMERS)
-	if (timers_init(ctx) != 0) {
-		httplib_cry( XX_httplib_fc(ctx), "Error creating timers");
-		XX_httplib_free_context(ctx);
-		pthread_setspecific(XX_httplib_sTlsKey, NULL);
+	if ( timers_init( ctx ) != 0 ) {
+		
+		httplib_cry( XX_httplib_fc( ctx ), "Error creating timers" );
+		XX_httplib_free_context( ctx );
+		pthread_setspecific( XX_httplib_sTlsKey, NULL );
+
 		return NULL;
 	}
 #endif
 
 	/* Context has been created - init user libraries */
-	if (ctx->callbacks.init_context) {
-		ctx->callbacks.init_context(ctx);
-	}
+	if ( ctx->callbacks.init_context != NULL ) ctx->callbacks.init_context( ctx );
+
 	ctx->callbacks.exit_context = exit_callback;
-	ctx->context_type = 1; /* server context */
+	ctx->context_type           = 1; /* server context */
 
 	/* Start master (listening) thread */
-	XX_httplib_start_thread_with_id( XX_httplib_master_thread, ctx, &ctx->masterthreadid);
+	XX_httplib_start_thread_with_id( XX_httplib_master_thread, ctx, &ctx->masterthreadid );
 
 	/* Start worker threads */
 	for (i = 0; i < ctx->cfg_worker_threads; i++) {
 		struct worker_thread_args *wta = httplib_malloc( sizeof(struct worker_thread_args) );
-		if (wta) {
-			wta->ctx = ctx;
+
+		if (wta != NULL ) {
+
+			wta->ctx   = ctx;
 			wta->index = (int)i;
 		}
 
 		if ((wta == NULL) || (XX_httplib_start_thread_with_id(XX_httplib_worker_thread, wta, &ctx->workerthreadids[i]) != 0)) {
 
 			/* thread was not created */
-			if (wta != NULL) httplib_free( wta );
+			if ( wta != NULL ) httplib_free( wta );
 
-			if (i > 0) {
-				httplib_cry( XX_httplib_fc(ctx), "Cannot start worker thread %i: error %ld", i + 1, (long)ERRNO);
-			} else {
-				httplib_cry( XX_httplib_fc(ctx), "Cannot create threads: error %ld", (long)ERRNO);
-				XX_httplib_free_context(ctx);
-				pthread_setspecific(XX_httplib_sTlsKey, NULL);
+			if ( i > 0 ) httplib_cry( XX_httplib_fc( ctx ), "Cannot start worker thread %i: error %ld", i + 1, (long)ERRNO );
+			
+			else {
+				httplib_cry( XX_httplib_fc( ctx ), "Cannot create threads: error %ld", (long)ERRNO );
+				XX_httplib_free_context( ctx );
+				pthread_setspecific( XX_httplib_sTlsKey, NULL );
+
 				return NULL;
 			}
 			break;
 		}
 	}
 
-	pthread_setspecific(XX_httplib_sTlsKey, NULL);
+	pthread_setspecific( XX_httplib_sTlsKey, NULL );
+
 	return ctx;
 
 }  /* httplib_start */

@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
@@ -43,7 +43,7 @@ const char *XX_httplib_ssl_error( void ) {
 	unsigned long err;
 
 	err = ERR_get_error();
-	return ((err == 0) ? "" : ERR_error_string(err, NULL));
+	return ( (err == 0) ? "" : ERR_error_string( err, NULL ) );
 
 }  /* XX_httplib_ssl_error */
 

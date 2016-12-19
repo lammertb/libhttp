@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
@@ -39,7 +39,9 @@
 
 long XX_httplib_ssl_get_protocol( int version_id ) {
 
-	long ret = SSL_OP_ALL;
+	long ret;
+
+	ret = SSL_OP_ALL;
 
 	if ( version_id > 0 ) ret |= SSL_OP_NO_SSLv2;
 	if ( version_id > 1 ) ret |= SSL_OP_NO_SSLv3;
