@@ -176,7 +176,7 @@ static void * timer_thread( void *thread_func_param ) {
 static int timers_init( struct httplib_context *ctx ) {
 
 	ctx->timers = (struct ttimers *)httplib_calloc(sizeof(struct ttimers), 1);
-	pthread_mutex_init(&ctx->timers->mutex, NULL);
+	httplib_pthread_mutex_init( & ctx->timers->mutex, NULL );
 
 	/* Start timer thread */
 	httplib_start_thread_with_id(timer_thread, ctx, &ctx->timers->threadid);

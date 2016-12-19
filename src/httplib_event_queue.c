@@ -102,7 +102,7 @@ void *event_create(void) {
 	struct posix_event *ret = XX_httplib_malloc(sizeof(struct posix_event));
 	if ( ret == NULL ) return NULL;
 
-	if (0 != pthread_mutex_init(&(ret->mutex), NULL)) {
+	if (0 != httplib_pthread_mutex_init( & ret->mutex, NULL ) ) {
 		/* pthread mutex not available */
 		XX_httplib_free(ret);
 		return NULL;

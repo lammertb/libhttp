@@ -41,7 +41,6 @@ int		pthread_key_create( pthread_key_t *key, void (*_ignored)(void *) );
 int		pthread_key_delete( pthread_key_t key );
 
 int		pthread_mutex_destroy( pthread_mutex_t *mutex );
-int		pthread_mutex_init( pthread_mutex_t *mutex, void *unused );
 
 void *		pthread_getspecific( pthread_key_t key );
 

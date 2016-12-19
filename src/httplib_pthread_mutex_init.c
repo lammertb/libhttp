@@ -22,21 +22,34 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
-#include "httplib_pthread.h"
+
+/*
+ * int httplib_pthread_mutex_init( pthread_mutex_t *mutex, const pthread_mutexattr_t *attr );
+ *
+ * The platform independent function httplib_pthread_mutex_init() is used to
+ * initialize a mutex for future locking. If the function succeeds the value 0
+ * is returned, otherwise an error code. On systems which support it this
+ * function is a wrapper around pthread_mutex_init(). On ither systems own code
+ * is used to emulate equivalent behaviour.
+ */
+
+int httplib_pthread_mutex_init( pthread_mutex_t *mutex, const pthread_mutexattr_t *attr ) {
 
 #if defined(_WIN32)
 
-int pthread_mutex_init( pthread_mutex_t *mutex, void *unused ) {
-
-	(void)unused;
+	UNUSED_PARAMETER(attr);
 
 	*mutex = CreateMutex( NULL, FALSE, NULL );
 	return (*mutex == NULL) ? -1 : 0;
 
-}  /* pthread_mutex_init */
+#else  /* _WIN32 */
 
-#endif  /* _WIN32 */
+	return pthread_mutex_init( mutex, attr );
+
+#endif
+
+}  /* httplib_pthread_mutex_init */
