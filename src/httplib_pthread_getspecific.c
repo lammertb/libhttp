@@ -22,18 +22,34 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
-#include "httplib_pthread.h"
+
+/*
+ * void *httplib_pthread_getspecific( pthread_key_t key );
+ *
+ * Thei platform independent function httplib_pthread_getspecific() returns
+ * data registered for a specific thread with a call to the function
+ * httplib_pthread_setspecific(). If no data could be found the value NULL is
+ * returned.
+ *
+ * If supported by the platform, the function is implemented as a wrapper
+ * around the pthread_getspecific() function. On other platforms equivalent
+ * code for that system is used.
+ */
+
+void *httplib_pthread_getspecific( pthread_key_t key ) {
 
 #if defined(_WIN32)
 
-void * pthread_getspecific(pthread_key_t key) {
+	return TlsGetValue( key );
 
-	return TlsGetValue(key);
+#else  /* _WIN32 */
 
-}  /* pthread_getspecific */
+	return pthread_getspecific( key );
 
 #endif  /* _WIN32 */
+
+}  /* httplib_pthread_getspecific */

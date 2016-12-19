@@ -60,7 +60,7 @@ unsigned long XX_httplib_ssl_id_callback( void ) {
 	if (sizeof(pthread_t) > sizeof(unsigned long)) {
 		/* This is the problematic case for CRYPTO_set_id_callback:
 		 * The OS pthread_t can not be cast to unsigned long. */
-		struct httplib_workerTLS *tls = (struct httplib_workerTLS *)pthread_getspecific(XX_httplib_sTlsKey);
+		struct httplib_workerTLS *tls = httplib_pthread_getspecific( XX_httplib_sTlsKey );
 		if (tls == NULL) {
 			/* SSL called from an unknown thread: Create some thread index.
 			 */

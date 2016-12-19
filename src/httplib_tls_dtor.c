@@ -40,7 +40,7 @@
 void XX_httplib_tls_dtor( void *key ) {
 
 	struct httplib_workerTLS *tls = (struct httplib_workerTLS *)key;
-	/* key == pthread_getspecific( XX_httplib_sTlsKey ); */
+	/* key == httplib_pthread_getspecific( XX_httplib_sTlsKey ); */
 
 	if ( tls != NULL ) {
 

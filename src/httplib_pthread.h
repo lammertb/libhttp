@@ -37,6 +37,4 @@ int		pthread_cond_signal( pthread_cond_t *cv );
 int		pthread_cond_timedwait( pthread_cond_t *cv, pthread_mutex_t *mutex, const struct timespec *abstime );
 int		pthread_cond_wait( pthread_cond_t *cv, pthread_mutex_t *mutex );
 
-void *		pthread_getspecific( pthread_key_t key );
-
 #endif  /* _WIN32 */
