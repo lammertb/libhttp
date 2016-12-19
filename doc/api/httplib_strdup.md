@@ -20,7 +20,7 @@ The function `httplib_strdup()` duplicates a NUL terminated string to a new stri
 
 If the duplicate of the string is no longer used, the allocated memory should be returned to the heap with a call to [`httplib_free()`](httplib_free.md).
 
-If the function fails the value `NULL` is returned, otherwise a pointer to the duplicate.
+If the function fails the value `NULL` is returned, otherwise a pointer to the duplicate. Failure can be either through an invalid parameter in the function call, or an out of memory situation when allocating space for the duplicate.
 
 ### See Also
 
