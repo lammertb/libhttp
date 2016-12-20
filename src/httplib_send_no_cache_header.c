@@ -22,18 +22,21 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
 
 int XX_httplib_send_no_cache_header( struct httplib_connection *conn ) {
 
-	/* Send all current and obsolete cache opt-out directives. */
-	return httplib_printf(conn,
+	/*
+	 * Send all current and obsolete cache opt-out directives.
+	 */
+
+	return httplib_printf( conn,
 	                 "Cache-Control: no-cache, no-store, "
 	                 "must-revalidate, private, max-age=0\r\n"
 	                 "Pragma: no-cache\r\n"
-	                 "Expires: 0\r\n");
+	                 "Expires: 0\r\n" );
 
 }  /* XX_httplib_send_no_cache_header */

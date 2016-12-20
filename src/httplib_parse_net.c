@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
@@ -43,16 +43,19 @@ int XX_httplib_parse_net( const char *spec, uint32_t *net, uint32_t *mask ) {
 	int b;
 	int c;
 	int d;
-	int slash = 32;
-	int len = 0;
+	int slash;
+	int len;
 
-	if ((sscanf(spec, "%d.%d.%d.%d/%d%n", &a, &b, &c, &d, &slash, &n) == 5
-	     || sscanf(spec, "%d.%d.%d.%d%n", &a, &b, &c, &d, &n) == 4) && isbyte(a)
-	    && isbyte(b) && isbyte(c) && isbyte(d) && slash >= 0
-	    && slash < 33) {
-		len = n;
-		*net = ((uint32_t)a << 24) | ((uint32_t)b << 16) | ((uint32_t)c << 8) | (uint32_t)d;
-		*mask = slash ? (0xffffffffU << (32 - slash)) : 0;
+	slash = 32;
+	len   = 0;
+
+	if ( ( sscanf(spec, "%d.%d.%d.%d/%d%n", &a, &b, &c, &d, &slash, &n) == 5  ||
+	       sscanf(spec, "%d.%d.%d.%d%n",    &a, &b, &c, &d,         &n) == 4     ) &&
+	     isbyte(a)  &&  isbyte(b)  &&  isbyte(c)  &&  isbyte(d)  &&  slash >= 0  &&  slash < 33 ) {
+
+		len   = n;
+		*net  = ((uint32_t)a << 24) | ((uint32_t)b << 16) | ((uint32_t)c << 8) | (uint32_t)d;
+		*mask = (slash) ? (0xffffffffU << (32 - slash)) : 0;
 	}
 
 	return len;

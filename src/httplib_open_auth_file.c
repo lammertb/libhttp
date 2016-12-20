@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
@@ -32,43 +32,61 @@
  * or search for .htpasswd in the requested directory. */
 void XX_httplib_open_auth_file( struct httplib_connection *conn, const char *path, struct file *filep ) {
 
-	if ( conn == NULL  ||  conn->ctx == NULL ) return;
-
 	char name[PATH_MAX];
 	const char *p;
 	const char *e;
-	const char *gpass = conn->ctx->config[GLOBAL_PASSWORDS_FILE];
+	const char *gpass;
 	struct file file = STRUCT_FILE_INITIALIZER;
 	int truncated;
 
-	if (gpass != NULL) {
-		/* Use global passwords file */
-		if (!XX_httplib_fopen(conn, gpass, "r", filep)) {
-#ifdef DEBUG
-			httplib_cry(conn, "fopen(%s): %s", gpass, strerror(ERRNO));
-#endif
-		}
-		/* Important: using local struct file to test path for is_directory
-		 * flag. If filep is used, XX_httplib_stat() makes it appear as if auth file
-		 * was opened. */
-	} else if (XX_httplib_stat(conn, path, &file) && file.is_directory) {
-		XX_httplib_snprintf(conn, &truncated, name, sizeof(name), "%s/%s", path, PASSWORDS_FILE_NAME);
+	if ( conn == NULL  ||  conn->ctx == NULL ) return;
 
-		if (truncated || !XX_httplib_fopen(conn, name, "r", filep)) {
+	gpass = conn->ctx->config[GLOBAL_PASSWORDS_FILE];
+
+	if ( gpass != NULL ) {
+
+		/*
+		 * Use global passwords file
+		 */
+
+		if ( ! XX_httplib_fopen( conn, gpass, "r", filep ) ) {
 #ifdef DEBUG
-			httplib_cry(conn, "fopen(%s): %s", name, strerror(ERRNO));
+			httplib_cry( conn, "fopen(%s): %s", gpass, strerror(ERRNO) );
 #endif
 		}
-	} else {
-		/* Try to find .htpasswd in requested directory. */
+		/*
+		 * Important: using local struct file to test path for is_directory
+		 * flag. If filep is used, XX_httplib_stat() makes it appear as if auth file
+		 * was opened.
+		 */
+
+	}
+	
+	else if ( XX_httplib_stat( conn, path, &file )  &&  file.is_directory ) {
+
+		XX_httplib_snprintf( conn, &truncated, name, sizeof(name), "%s/%s", path, PASSWORDS_FILE_NAME );
+
+		if ( truncated  ||  ! XX_httplib_fopen( conn, name, "r", filep ) ) {
+#ifdef DEBUG
+			httplib_cry( conn, "fopen(%s): %s", name, strerror(ERRNO) );
+#endif
+		}
+	}
+	
+	else {
+		/*
+		 * Try to find .htpasswd in requested directory.
+		 */
+
 		for (p = path, e = p + strlen(p) - 1; e > p; e--) {
 			if (e[0] == '/') break;
 		}
-		XX_httplib_snprintf(conn, &truncated, name, sizeof(name), "%.*s/%s", (int)(e - p), p, PASSWORDS_FILE_NAME);
 
-		if (truncated || !XX_httplib_fopen(conn, name, "r", filep)) {
+		XX_httplib_snprintf( conn, &truncated, name, sizeof(name), "%.*s/%s", (int)(e - p), p, PASSWORDS_FILE_NAME );
+
+		if ( truncated  ||  ! XX_httplib_fopen( conn, name, "r", filep ) ) {
 #ifdef DEBUG
-			httplib_cry(conn, "fopen(%s): %s", name, strerror(ERRNO));
+			httplib_cry( conn, "fopen(%s): %s", name, strerror(ERRNO) );
 #endif
 		}
 	}

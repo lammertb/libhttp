@@ -29,13 +29,18 @@
 
 int XX_httplib_must_hide_file( struct httplib_connection *conn, const char *path ) {
 
-	if (conn && conn->ctx) {
-		const char *pw_pattern = "**" PASSWORDS_FILE_NAME "$";
-		const char *pattern = conn->ctx->config[HIDE_FILES];
-		return XX_httplib_match_prefix(pw_pattern, strlen(pw_pattern), path) > 0
-		       || (pattern != NULL
-		           && XX_httplib_match_prefix(pattern, strlen(pattern), path) > 0);
-	}
+	const char *pw_pattern;
+	const char *pattern;
+
+	if ( conn == NULL  ||  conn->ctx == NULL ) return 0;
+
+	pw_pattern = "**" PASSWORDS_FILE_NAME "$";
+	pattern    = conn->ctx->config[HIDE_FILES];
+
+	return XX_httplib_match_prefix(pw_pattern, strlen(pw_pattern), path) > 0
+	       || (pattern != NULL
+	           && XX_httplib_match_prefix(pattern, strlen(pattern), path) > 0);
+
 	return 0;
 
 }  /* XX_httplib_must_hide_file */

@@ -34,8 +34,6 @@
 
 static int	hexdump2string( void *mem, int memlen, char *buf, int buflen );
 
-
-
 /*
  * void XX_httplib_ssl_get_client_cert_info( struct httplib_connection *conn );
  *
@@ -62,7 +60,7 @@ void XX_httplib_ssl_get_client_cert_info( struct httplib_connection *conn ) {
 
 	/* Get Subject and issuer */
 	X509_NAME *subj = X509_get_subject_name(cert);
-	X509_NAME *iss = X509_get_issuer_name(cert);
+	X509_NAME *iss  = X509_get_issuer_name(cert);
 
 	/* Get serial number */
 	ASN1_INTEGER *serial = X509_get_serialNumber(cert);

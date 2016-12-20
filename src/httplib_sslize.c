@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
@@ -45,31 +45,41 @@ int XX_httplib_sslize( struct httplib_connection *conn, SSL_CTX *s, int (*func)(
 
 	if ( conn == NULL ) return 0;
 
-	short_trust = (conn->ctx->config[SSL_SHORT_TRUST] != NULL) && (httplib_strcasecmp(conn->ctx->config[SSL_SHORT_TRUST], "yes") == 0);
+	short_trust = ( conn->ctx->config[SSL_SHORT_TRUST] != NULL  &&  ! httplib_strcasecmp( conn->ctx->config[SSL_SHORT_TRUST], "yes" ) );
 
-	if (short_trust) {
-		int trust_ret = XX_httplib_refresh_trust(conn);
-		if (!trust_ret) return trust_ret;
+	if ( short_trust ) {
+
+		int trust_ret = XX_httplib_refresh_trust( conn );
+		if ( ! trust_ret ) return trust_ret;
 	}
 
-	conn->ssl = SSL_new(s);
-	if (conn->ssl == NULL) return 0;
+	conn->ssl = SSL_new( s );
+	if ( conn->ssl == NULL ) return 0;
 
-	ret = SSL_set_fd(conn->ssl, conn->client.sock);
-	if (ret != 1) {
-		err = SSL_get_error(conn->ssl, ret);
+	ret = SSL_set_fd( conn->ssl, conn->client.sock );
+
+	if ( ret != 1 ) {
+
+		err = SSL_get_error( conn->ssl, ret );
 		(void)err; /* TODO: set some error message */
-		SSL_free(conn->ssl);
+		SSL_free( conn->ssl );
 		conn->ssl = NULL;
-		/* Avoid CRYPTO_cleanup_all_ex_data(); See discussion:
-		 * https://wiki.openssl.org/index.php/Talk:Library_Initialization */
-		ERR_remove_state(0);
+
+		/*
+		 * Avoid CRYPTO_cleanup_all_ex_data(); See discussion:
+		 * https://wiki.openssl.org/index.php/Talk:Library_Initialization
+		 */
+
+		ERR_remove_state( 0 );
 		return 0;
 	}
 
-	/* SSL functions may fail and require to be called again:
+	/*
+	 * SSL functions may fail and require to be called again:
 	 * see https://www.openssl.org/docs/manmaster/ssl/SSL_get_error.html
-	 * Here "func" could be SSL_connect or SSL_accept. */
+	 * Here "func" could be SSL_connect or SSL_accept.
+	 */
+
 	for (i = 0; i <= 16; i *= 2) {
 		ret = func(conn->ssl);
 		if (ret != 1) {
@@ -85,12 +95,17 @@ int XX_httplib_sslize( struct httplib_connection *conn, SSL_CTX *s, int (*func)(
 		else break;  /* Success */
 	}
 
-	if (ret != 1) {
-		SSL_free(conn->ssl);
+	if ( ret != 1 ) {
+
+		SSL_free( conn->ssl );
 		conn->ssl = NULL;
-		/* Avoid CRYPTO_cleanup_all_ex_data(); See discussion:
-		 * https://wiki.openssl.org/index.php/Talk:Library_Initialization */
-		ERR_remove_state(0);
+		/*
+		 * Avoid CRYPTO_cleanup_all_ex_data(); See discussion:
+		 * https://wiki.openssl.org/index.php/Talk:Library_Initialization
+		 */
+
+		ERR_remove_state( 0 );
+
 		return 0;
 	}
 

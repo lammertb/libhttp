@@ -50,12 +50,13 @@ int64_t httplib_store_body( struct httplib_connection *conn, const char *path ) 
 	}
 
 	ret = XX_httplib_put_dir( conn, path );
-	if (ret < 0) {
+	if ( ret < 0 ) {
+
 		/* -1 for path too long,
 		 * -2 for path can not be created. */
 		return ret;
 	}
-	if (ret != 1) {
+	if ( ret != 1 ) {
 		/* Return 0 means, path itself is a directory. */
 		return 0;
 	}
@@ -64,7 +65,7 @@ int64_t httplib_store_body( struct httplib_connection *conn, const char *path ) 
 
 	ret = httplib_read( conn, buf, sizeof(buf) );
 
-	while ( ret > 0)  {
+	while ( ret > 0 )  {
 
 		n = (int)fwrite( buf, 1, (size_t)ret, fi.fp );
 		if ( n != ret ) {
@@ -76,8 +77,11 @@ int64_t httplib_store_body( struct httplib_connection *conn, const char *path ) 
 		ret = httplib_read( conn, buf, sizeof(buf) );
 	}
 
-	/* TODO: XX_httplib_fclose should return an error,
-	 * and every caller should check and handle it. */
+	/*
+	 * TODO: XX_httplib_fclose should return an error,
+	 * and every caller should check and handle it.
+	 */
+
 	if ( fclose(fi.fp) != 0 ) {
 
 		XX_httplib_remove_bad_file( conn, path );

@@ -36,24 +36,34 @@ void XX_httplib_send_file_data( struct httplib_connection *conn, struct file *fi
 	int num_written;
 	int64_t size;
 
-	if (!filep || !conn) return;
+	if ( filep == NULL  ||  conn == NULL ) return;
 
 	/* Sanity check the offset */
-	size = (filep->size > INT64_MAX) ? INT64_MAX : (int64_t)(filep->size);
+	size   = (filep->size > INT64_MAX) ? INT64_MAX : (int64_t)(filep->size);
 	offset = (offset < 0) ? 0 : ((offset > size) ? size : offset);
 
-	if (len > 0 && filep->membuf != NULL && size > 0) {
-		/* file stored in memory */
-		if (len > size - offset) {
-			len = size - offset;
-		}
-		httplib_write(conn, filep->membuf + offset, (size_t)len);
-	} else if (len > 0 && filep->fp != NULL) {
+	if ( len > 0  &&  filep->membuf != NULL  &&  size > 0 ) {
+
+		/*
+		 * file stored in memory
+		 */
+
+		if (len > size - offset) len = size - offset;
+		httplib_write( conn, filep->membuf + offset, (size_t)len );
+
+	}
+	
+	else if ( len > 0  &&  filep->fp != NULL ) {
+
 /* file stored on disk */
 #if defined(__linux__)
-		/* sendfile is only available for Linux */
-		if ((conn->ssl == 0) && (conn->throttle == 0)
-		    && (!httplib_strcasecmp(conn->ctx->config[ALLOW_SENDFILE_CALL], "yes"))) {
+
+		/*
+		 * sendfile is only available for Linux
+		 */
+
+		if ( conn->ssl == 0  &&  conn->throttle == 0  &&  ! httplib_strcasecmp( conn->ctx->config[ALLOW_SENDFILE_CALL], "yes" ) ) {
+
 			off_t sf_offs = (off_t)offset;
 			ssize_t sf_sent;
 			int sf_file = fileno(filep->fp);
@@ -62,15 +72,18 @@ void XX_httplib_send_file_data( struct httplib_connection *conn, struct file *fi
 			do {
 				/* 2147479552 (0x7FFFF000) is a limit found by experiment on
 				 * 64 bit Linux (2^31 minus one memory page of 4k?). */
-				size_t sf_tosend =
-				    (size_t)((len < 0x7FFFF000) ? len : 0x7FFFF000);
-				sf_sent =
-				    sendfile(conn->client.sock, sf_file, &sf_offs, sf_tosend);
-				if (sf_sent > 0) {
+				size_t sf_tosend = (size_t)((len < 0x7FFFF000) ? len : 0x7FFFF000);
+				sf_sent = sendfile(conn->client.sock, sf_file, &sf_offs, sf_tosend);
+
+				if ( sf_sent > 0 ) {
+
 					conn->num_bytes_sent += sf_sent;
-					len -= sf_sent;
-					offset += sf_sent;
-				} else if (loop_cnt == 0) {
+					len                  -= sf_sent;
+					offset               += sf_sent;
+
+				}
+
+			  	else if (loop_cnt == 0) {
 					/* This file can not be sent using sendfile.
 					 * This might be the case for pseudo-files in the
 					 * /sys/ and /proc/ file system.
@@ -101,9 +114,7 @@ void XX_httplib_send_file_data( struct httplib_connection *conn, struct file *fi
 			while (len > 0) {
 				/* Calculate how much to read from the file in the buffer */
 				to_read = sizeof(buf);
-				if ((int64_t)to_read > len) {
-					to_read = (int)len;
-				}
+				if ((int64_t)to_read > len) to_read = (int)len;
 
 				/* Read from file, exit the loop on error */
 				if ((num_read = (int)fread(buf, 1, (size_t)to_read, filep->fp)) <= 0) break;

@@ -28,14 +28,17 @@
 #include "httplib_main.h"
 #include "httplib_string.h"
 
-/* Return null terminated string of given maximum length.
- * Report errors if length is exceeded. */
+/*
+ * Return null terminated string of given maximum length.
+ * Report errors if length is exceeded.
+ */
+
 void XX_httplib_vsnprintf( const struct httplib_connection *conn, int *truncated, char *buf, size_t buflen, const char *fmt, va_list ap ) {
 
 	int n;
 	int ok;
 
-	if (buflen == 0) return;
+	if ( buf == NULL  ||  buflen < 1 ) return;
 
 #ifdef __clang__
 #pragma clang diagnostic push
@@ -44,7 +47,7 @@ void XX_httplib_vsnprintf( const struct httplib_connection *conn, int *truncated
  * indirectly by XX_httplib_snprintf */
 #endif
 
-	n = (int)vsnprintf_impl(buf, buflen, fmt, ap);
+	n = (int)vsnprintf_impl( buf, buflen, fmt, ap );
 	ok = (n >= 0) && ((size_t)n < buflen);
 
 #ifdef __clang__
@@ -52,9 +55,11 @@ void XX_httplib_vsnprintf( const struct httplib_connection *conn, int *truncated
 #endif
 
 	if (ok) {
-		if (truncated) *truncated = 0;
-	} else {
-		if (truncated) *truncated = 1;
+		if ( truncated != NULL ) *truncated = 0;
+	}
+
+	else {
+		if ( truncated != NULL ) *truncated = 1;
 		httplib_cry(conn, "truncating vsnprintf buffer: [%.*s]", (int)((buflen > 200) ? 200 : (buflen - 1)), buf);
 		n = (int)buflen - 1;
 	}

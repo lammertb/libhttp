@@ -103,16 +103,19 @@ int XX_httplib_stat( struct httplib_connection *conn, const char *path, struct f
 int XX_httplib_stat( struct httplib_connection *conn, const char *path, struct file *filep ) {
 
 	struct stat st;
-	if (!filep) return 0;
 
-	memset(filep, 0, sizeof(*filep));
+	if ( filep == NULL ) return 0;
 
-	if (conn && XX_httplib_is_file_in_memory(conn, path, filep)) return 1;
+	memset( filep, 0, sizeof(*filep) );
 
-	if (0 == stat(path, &st)) {
-		filep->size = (uint64_t)(st.st_size);
+	if ( conn != NULL  &&  XX_httplib_is_file_in_memory( conn, path, filep ) ) return 1;
+
+	if ( stat( path, &st ) == 0 ) {
+
+		filep->size          = (uint64_t)(st.st_size);
 		filep->last_modified = st.st_mtime;
-		filep->is_directory = S_ISDIR(st.st_mode);
+		filep->is_directory  = S_ISDIR(st.st_mode);
+
 		return 1;
 	}
 
