@@ -58,8 +58,8 @@ void XX_httplib_free_context( struct httplib_context *ctx ) {
 	}
 	XX_httplib_free(ctx->client_wait_events);
 #else
-	pthread_cond_destroy(&ctx->sq_empty);
-	pthread_cond_destroy(&ctx->sq_full);
+	httplib_pthread_cond_destroy( & ctx->sq_empty );
+	httplib_pthread_cond_destroy( & ctx->sq_full  );
 #endif
 
 	/* Destroy other context global data structures mutex */

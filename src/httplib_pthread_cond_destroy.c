@@ -22,23 +22,40 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
-#include "httplib_pthread.h"
+
+/*
+ * int httplib_pthread_cond_destroy( pthread_cond_t *cv );
+ *
+ * The platform indepent function httplib_pthread_cond_destroy() destroys a
+ * previously allocated condition variable. The function returns 0 when
+ * successful and an error code otherwise. On system which support it, the
+ * function is implemented as a wrapper around pthread_cond_destroy(). On other
+ * systems the functionality is implemented with own code.
+ */
+
+int httplib_pthread_cond_destroy( pthread_cond_t *cv ) {
 
 #if defined(_WIN32)
 
-int pthread_cond_destroy( pthread_cond_t *cv ) {
+	int retval;
 
-	EnterCriticalSection(&cv->threadIdSec);
-	assert(cv->waiting_thread == NULL);
-	LeaveCriticalSection(&cv->threadIdSec);
-	DeleteCriticalSection(&cv->threadIdSec);
+	EnterCriticalSection( & cv->threadIdSec );
 
-	return 0;
+	retval = ( cv->waiting_thread == NULL ) ? 0 : -1;
 
-}  /* pthread_cond_destroy */
+	LeaveCriticalSection(  & cv->threadIdSec );
+	DeleteCriticalSection( & cv->threadIdSec );
 
-#endif /* _WIN32 */
+	return retval;
+
+#else  /* _WIN32 */
+
+	return pthread_cond_destroy( cv );
+
+#endif  /* _WIN32 */
+
+}  /* httplib_pthread_cond_destroy */

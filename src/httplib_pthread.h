@@ -31,6 +31,5 @@ extern int			XX_httplib_thread_idx_max;
 #if defined(_WIN32)
 
 int		pthread_cond_broadcast( pthread_cond_t *cv );
-int		pthread_cond_destroy( pthread_cond_t *cv );
 
 #endif  /* _WIN32 */

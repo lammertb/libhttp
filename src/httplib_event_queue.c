@@ -133,7 +133,7 @@ int event_wait( void *eventhdl ) {
 }  /* event_wait */
 
 
-int event_signal(void *eventhdl) {
+int event_signal( void *eventhdl ) {
 
 	struct posix_event *ev;
        
@@ -148,12 +148,16 @@ int event_signal(void *eventhdl) {
 }  /* event_signal */
 
 
-void event_destroy(void *eventhdl) {
+void event_destroy( void *eventhdl ) {
 
-	struct posix_event *ev = (struct posix_event *)eventhdl;
-	pthread_cond_destroy(&(ev->cond));
+	struct posix_event *ev;
+       
+	ev = eventhdl;
+
+	httplib_pthread_cond_destroy(  & ev->cond  );
 	httplib_pthread_mutex_destroy( & ev->mutex );
-	XX_httplib_free(ev);
+
+	XX_httplib_free( ev );
 
 }  /* event_destroy */
 
