@@ -22,24 +22,37 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
-#include "httplib_pthread.h"
+
+/*
+ * int httplib_pthread_cond_broadcast( pthread_cond_t *cv );
+ *
+ * The platform independent function httplib_pthread_cond_broadcast() unblocks
+ * all threads waiting for a specific condition. If the function is successful
+ * the value is returned, otherwise an error code.
+ *
+ * On systems which support it, the function is a wrapper around the function
+ * pthread_cond_broadcast(). On other systems own code is used to emulate the
+ * same behaviour.
+ */
+
+int httplib_pthread_cond_broadcast( pthread_cond_t *cv ) {
 
 #if defined(_WIN32)
 
-int pthread_cond_broadcast( pthread_cond_t *cv ) {
-
 	EnterCriticalSection( & cv->threadIdSec );
-
 	while ( cv->waiting_thread ) httplib_pthread_cond_signal( cv );
-
 	LeaveCriticalSection( & cv->threadIdSec );
 
 	return 0;
 
-}  /* pthread_cond_broadcast */
+#else  /* _WIN32 */
 
-#endif /* _WIN32 */
+	return pthread_cond_broadcast( cv );
+
+#endif  /* _WIN32 */
+
+}  /* httplib_pthread_cond_broadcast */

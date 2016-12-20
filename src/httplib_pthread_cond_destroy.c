@@ -44,11 +44,10 @@ int httplib_pthread_cond_destroy( pthread_cond_t *cv ) {
 	int retval;
 
 	EnterCriticalSection( & cv->threadIdSec );
-
 	retval = ( cv->waiting_thread == NULL ) ? 0 : -1;
-
 	LeaveCriticalSection(  & cv->threadIdSec );
-	DeleteCriticalSection( & cv->threadIdSec );
+
+	if ( ! retval ) DeleteCriticalSection( & cv->threadIdSec );
 
 	return retval;
 

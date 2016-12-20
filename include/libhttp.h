@@ -985,6 +985,7 @@ LIBHTTP_API int			httplib_kill( pid_t pid, int sig_num );
 LIBHTTP_API int			httplib_mkdir( const char *path, int mode );
 LIBHTTP_API DIR *		httplib_opendir( const char *name );
 LIBHTTP_API int			httplib_poll( struct pollfd *pfd, unsigned int nfds, int timeout );
+LIBHTTP_API int			httplib_pthread_cond_broadcast( pthread_cond_t *cv );
 LIBHTTP_API int			httplib_pthread_cond_destroy( pthread_cond_t *cv );
 LIBHTTP_API int			httplib_pthread_cond_init( pthread_cond_t *cv, const pthread_condattr_t *attr );
 LIBHTTP_API int			httplib_pthread_cond_signal( pthread_cond_t *cv );

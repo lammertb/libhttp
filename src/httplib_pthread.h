@@ -25,11 +25,3 @@
 extern pthread_mutex_t *	XX_httplib_ssl_mutexes;
 extern pthread_key_t		XX_httplib_sTlsKey;
 extern int			XX_httplib_thread_idx_max;
-
-
-
-#if defined(_WIN32)
-
-int		pthread_cond_broadcast( pthread_cond_t *cv );
-
-#endif  /* _WIN32 */

@@ -131,25 +131,23 @@ static void master_thread_run(void *thread_func_param) {
 	/* Wakeup workers that are waiting for connections to handle. */
 	httplib_pthread_mutex_lock( & ctx->thread_mutex );
 #if defined(ALTERNATIVE_QUEUE)
-	for (i = 0; i < ctx->cfg_worker_threads; i++) {
-		event_signal(ctx->client_wait_events[i]);
+	for (i=0; i<ctx->cfg_worker_threads; i++) {
+
+		event_signal( ctx->client_wait_events[i]i );
 
 		/* Since we know all sockets, we can shutdown the connections. */
-		if (ctx->client_socks[i].in_use) {
-			shutdown(ctx->client_socks[i].sock, SHUTDOWN_BOTH);
-		}
+		if (ctx->client_socks[i].in_use) shutdown( ctx->client_socks[i].sock, SHUTDOWN_BOTH );
 	}
 #else
-	pthread_cond_broadcast(&ctx->sq_full);
+	httplib_pthread_cond_broadcast( & ctx->sq_full );
 #endif
 	httplib_pthread_mutex_unlock( & ctx->thread_mutex );
 
 	/* Join all worker threads to avoid leaking threads. */
 	workerthreadcount = ctx->cfg_worker_threads;
-	for (i = 0; i < workerthreadcount; i++) {
-		if (ctx->workerthreadids[i] != 0) {
-			XX_httplib_join_thread(ctx->workerthreadids[i]);
-		}
+	for (i=0; i<workerthreadcount; i++) {
+
+		if ( ctx->workerthreadids[i] != 0 ) XX_httplib_join_thread(ctx->workerthreadids[i]);
 	}
 
 #if !defined(NO_SSL)
