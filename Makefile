@@ -374,7 +374,7 @@ OBJLIST =									\
 	${OBJDIR}win32_clock_gettime${OBJEXT}					\
 	${OBJDIR}win32_pthread_cond_broadcast${OBJEXT}				\
 	${OBJDIR}win32_pthread_cond_destroy${OBJEXT}				\
-	${OBJDIR}win32_pthread_cond_init${OBJEXT}				\
+	${OBJDIR}httplib_pthread_cond_init${OBJEXT}				\
 	${OBJDIR}httplib_pthread_cond_signal${OBJEXT}				\
 	${OBJDIR}httplib_pthread_cond_timedwait${OBJEXT}			\
 	${OBJDIR}httplib_pthread_cond_wait${OBJEXT}				\
@@ -1401,8 +1401,7 @@ ${OBJDIR}win32_pthread_cond_destroy${OBJEXT}				: ${SRCDIR}win32_pthread_cond_de
 									  ${SRCDIR}httplib_main.h					\
 									  ${INCDIR}libhttp.h
 
-${OBJDIR}win32_pthread_cond_init${OBJEXT}				: ${SRCDIR}win32_pthread_cond_init.c				\
-									  ${SRCDIR}httplib_pthread.h					\
+${OBJDIR}httplib_pthread_cond_init${OBJEXT}				: ${SRCDIR}httplib_pthread_cond_init.c				\
 									  ${SRCDIR}httplib_main.h					\
 									  ${INCDIR}libhttp.h
 

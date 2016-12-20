@@ -107,23 +107,27 @@ void *event_create(void) {
 		XX_httplib_free(ret);
 		return NULL;
 	}
-	if (0 != pthread_cond_init(&(ret->cond), NULL)) {
+	if (0 != httplib_pthread_cond_init( & ret->cond, NULL)) {
 		/* pthread cond not available */
 		httplib_pthread_mutex_destroy( & ret->mutex );
 		XX_httplib_free(ret);
 		return NULL;
 	}
-	return (void *)ret;
+	return ret;
 
 }  /* event_create */
 
 
-int event_wait(void *eventhdl) {
+int event_wait( void *eventhdl ) {
 
-	struct posix_event *ev = (struct posix_event *)eventhdl;
-	httplib_pthread_mutex_lock( & ev->mutex );
+	struct posix_event *ev;
+       
+	ev = eventhdl;
+
+	httplib_pthread_mutex_lock(            & ev->mutex );
 	httplib_pthread_cond_wait( & ev->cond, & ev->mutex );
-	httplib_pthread_mutex_unlock( & ev->mutex );
+	httplib_pthread_mutex_unlock(          & ev->mutex );
+
 	return 1;
 
 }  /* event_wait */

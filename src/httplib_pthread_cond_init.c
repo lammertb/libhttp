@@ -22,15 +22,29 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
-#include "httplib_pthread.h"
+
+/*
+ * int httplib_pthread_cond_init( pthread_cond_t *cv, const pthread_condattr_t *attr );
+ *
+ * The platform independent function httplib_pthread_cond_init() can be used to
+ * create a new condition variable with the attributes as specificied by a
+ * parameter. The function returns 0 when successful and an error code if a
+ * problem occurs.
+ *
+ * On systems which support it, the function is a wrapper arounnd the function
+ * pthread_cond_init(), otherwise equivalent functionality is implemented in
+ * own code.
+ *
+ * Please note that the attr parameter is ignored in the Windows implementation
+ */
+
+int httplib_pthread_cond_init( pthread_cond_t *cv, const pthread_condattr_t *attr ) {
 
 #if defined(_WIN32)
-
-int pthread_cond_init( pthread_cond_t *cv, const void *attr ) {
 
 	UNUSED_PARAMETER(attr);
 
@@ -39,6 +53,10 @@ int pthread_cond_init( pthread_cond_t *cv, const void *attr ) {
 
 	return 0;
 
-}  /* pthread_cond_init */
+#else  /* _WIN32 */
 
-#endif /* _WIN32 */
+	return pthread_cond_init( cv, attr );
+
+#endif  /* _WIN32 */
+
+}  /* httplib_pthread_cond_init */
