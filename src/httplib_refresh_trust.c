@@ -22,12 +22,15 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 1.9
  */
 
 #include "httplib_main.h"
 #include "httplib_ssl.h"
 #include "httplib_utils.h"
+
+static volatile int reload_lock		= 0;
+static long int data_check		= 0;
 
 /*
  * int XX_httplib_refresh_trust( struct httplib_connection *conn );
@@ -40,35 +43,32 @@
 
 int XX_httplib_refresh_trust( struct httplib_connection *conn ) {
 
-	static int reload_lock = 0;
-	static long int data_check = 0;
-	volatile int *p_reload_lock = (volatile int *)&reload_lock;
-
+	volatile int *p_reload_lock;
 	struct stat cert_buf;
 	long int t;
 	char *pem;
 	int should_verify_peer;
 
-	if ((pem = conn->ctx->config[SSL_CERTIFICATE]) == NULL
-	    && conn->ctx->callbacks.init_ssl == NULL) {
-		return 0;
-	}
+	p_reload_lock = & reload_lock;
 
-	t = data_check;
-	if (stat(pem, &cert_buf) != -1) t = (long int)cert_buf.st_mtime;
+	pem = conn->ctx->config[SSL_CERTIFICATE];
+	if ( pem == NULL  &&  conn->ctx->callbacks.init_ssl == NULL ) return 0;
 
-	if (data_check != t) {
+	if ( stat( pem, &cert_buf ) != -1 ) t = (long int)cert_buf.st_mtime;
+	else                                t = data_check;
+
+	if ( data_check != t ) {
+
 		data_check = t;
 
-		should_verify_peer =
-		    (conn->ctx->config[SSL_DO_VERIFY_PEER] != NULL)
-		    && (httplib_strcasecmp(conn->ctx->config[SSL_DO_VERIFY_PEER], "yes")
-		        == 0);
+		should_verify_peer = conn->ctx->config[SSL_DO_VERIFY_PEER] != NULL  &&  ! httplib_strcasecmp( conn->ctx->config[SSL_DO_VERIFY_PEER], "yes" );
 
-		if (should_verify_peer) {
+		if ( should_verify_peer ) {
+
 			char *ca_path = conn->ctx->config[SSL_CA_PATH];
 			char *ca_file = conn->ctx->config[SSL_CA_FILE];
-			if (SSL_CTX_load_verify_locations(conn->ctx->ssl_ctx, ca_file, ca_path) != 1) {
+
+			if ( SSL_CTX_load_verify_locations( conn->ctx->ssl_ctx, ca_file, ca_path ) != 1 ) {
 
 				httplib_cry( XX_httplib_fc(conn->ctx),
 				       "SSL_CTX_load_verify_locations error: %s "
@@ -76,18 +76,24 @@ int XX_httplib_refresh_trust( struct httplib_connection *conn ) {
 				       "either ssl_ca_path or ssl_ca_file. Is any of them "
 				       "present in "
 				       "the .conf file?",
-				       XX_httplib_ssl_error());
+				       XX_httplib_ssl_error() );
+
 				return 0;
 			}
 		}
 
-		if (1 == httplib_atomic_inc(p_reload_lock)) {
-			if (XX_httplib_ssl_use_pem_file(conn->ctx, pem) == 0) return 0;
+		if ( httplib_atomic_inc( p_reload_lock ) == 1 ) {
+
+			if ( XX_httplib_ssl_use_pem_file( conn->ctx, pem ) == 0 ) return 0;
 			*p_reload_lock = 0;
 		}
 	}
-	/* lock while cert is reloading */
-	while (*p_reload_lock) sleep(1);
+
+	/*
+	 * lock while cert is reloading
+	 */
+
+	while ( *p_reload_lock ) sleep( 1 );
 
 	return 1;
 

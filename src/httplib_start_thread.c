@@ -22,46 +22,49 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
 
+#if ! defined(USE_STACK_SIZE)  ||  (USE_STACK_SIZE <= 0)
+#undef USE_STACK_SIZE
+#define USE_STACK_SIZE		0
+#endif  /* USE_STACK_SIZE */
+
+/*
+ * int httplib_start_thread( httplib_thread_func_t func, void *param );
+ *
+ * The functiom httplib_start_thread() is a convenience function to help to
+ * start a detached thread. The function returns 0 if successful, or a non-zero
+ * value if an error occurs. An optional pointer parameter can be passed to the
+ * newly created thread.
+ */
+
+int httplib_start_thread( httplib_thread_func_t func, void *param ) {
+
 #if defined(_WIN32)
 
-int httplib_start_thread(httplib_thread_func_t f, void *p) {
+	return ( (_beginthread( (void(__cdecl *)(void *))func, USE_STACK_SIZE, param ) == ((uintptr_t)(-1L))) ? -1 : 0 );
 
-#if defined(USE_STACK_SIZE) && (USE_STACK_SIZE > 1)
-	/* Compile-time option to control stack size, e.g. -DUSE_STACK_SIZE=16384
-	 */
-	return ((_beginthread((void(__cdecl *)(void *))f, USE_STACK_SIZE, p) == ((uintptr_t)(-1L))) ? -1 : 0);
-#else
-	return ( (_beginthread((void(__cdecl *)(void *))f, 0, p) == ((uintptr_t)(-1L))) ? -1 : 0);
-#endif /* defined(USE_STACK_SIZE) && (USE_STACK_SIZE > 1) */
-
-}  /* httplib_start_thread */
-
-#else
-
-int httplib_start_thread(httplib_thread_func_t func, void *param) {
+#else  /* _WIN32 */
 
 	pthread_t thread_id;
 	pthread_attr_t attr;
 	int result;
 
-	pthread_attr_init(&attr);
-	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+	pthread_attr_init( & attr );
+	pthread_attr_setdetachstate( & attr, PTHREAD_CREATE_DETACHED );
 
-#if defined(USE_STACK_SIZE) && (USE_STACK_SIZE > 1)
-	/* Compile-time option to control stack size,
-	 * e.g. -DUSE_STACK_SIZE=16384 */
-	pthread_attr_setstacksize(&attr, USE_STACK_SIZE);
-#endif /* defined(USE_STACK_SIZE) && (USE_STACK_SIZE > 1) */
+#if (USE_STACK_SIZE > 1)
+	pthread_attr_setstacksize( & attr, USE_STACK_SIZE );
+#endif  /* USE_STACK_SIZE > 1 */
 
-	result = pthread_create(&thread_id, &attr, func, param);
-	pthread_attr_destroy(&attr);
+	result = pthread_create( & thread_id, &attr, func, param );
+	pthread_attr_destroy( & attr );
 
 	return result;
-}  /* httplib_start_thread */
 
 #endif /* _WIN32 */
+
+}  /* httplib_start_thread */

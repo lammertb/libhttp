@@ -904,6 +904,7 @@ pid_t			XX_httplib_spawn_process( struct httplib_connection *conn, const char *p
 int			XX_httplib_stat( struct httplib_connection *conn, const char *path, struct file *filep );
 int			XX_httplib_substitute_index_file( struct httplib_connection *conn, char *path, size_t path_len, struct file *filep );
 const char *		XX_httplib_suggest_connection_header( const struct httplib_connection *conn );
+LIBHTTP_THREAD		XX_httplib_websocket_client_thread( void *data );
 int			XX_httplib_websocket_write_exec( struct httplib_connection *conn, int opcode, const char *data, size_t dataLen, uint32_t masking_key );
 
 
@@ -926,14 +927,12 @@ void			md5_finish( md5_state_t *pms, md5_byte_t digest[16] );
 #ifdef _WIN32
 unsigned __stdcall	XX_httplib_master_thread( void *thread_func_param );
 int			XX_httplib_start_thread_with_id( unsigned(__stdcall *f)(void *), void *p, pthread_t *threadidptr );
-unsigned __stdcall	XX_httplib_websocket_client_thread( void *data );
 unsigned __stdcall	XX_httplib_worker_thread( void *thread_func_param );
 
 extern struct pthread_mutex_undefined_struct *	XX_httplib_pthread_mutex_attr;
 #else  /* _WIN32 */
 void *			XX_httplib_master_thread( void *thread_func_param );
 int			XX_httplib_start_thread_with_id( httplib_thread_func_t func, void *param, pthread_t *threadidptr );
-void *			XX_httplib_websocket_client_thread( void *data );
 void *			XX_httplib_worker_thread( void *thread_func_param );
 
 extern pthread_mutexattr_t	XX_httplib_pthread_mutex_attr;

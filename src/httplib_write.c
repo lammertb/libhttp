@@ -22,57 +22,76 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
 
-int httplib_write( struct httplib_connection *conn, const void *buf, size_t len ) {
+/*
+ * The function httplib_write() writes a number of characters over a
+ * connection. The amount of characters written is returned. If an error occurs
+ * the value 0 is returned.
+ *
+ * The function uses throtteling when necessary for a connection.
+ */
+
+int httplib_write( struct httplib_connection *conn, const void *buffie, size_t lennie ) {
 
 	time_t now;
 	int64_t n;
+	int64_t len;
 	int64_t total;
 	int64_t allowed;
+	const char *buf;
 
-	if (conn == NULL) return 0;
+	if ( conn == NULL  ||  buffie == NULL  ||  lennie == 0 ) return 0;
 
-	if (conn->throttle > 0) {
-		if ((now = time(NULL)) != conn->last_throttle_time) {
-			conn->last_throttle_time = now;
+	buf = buffie;
+	len = (int64_t)lennie;
+
+	if ( conn->throttle > 0 ) {
+
+		now = time( NULL );
+
+		if ( now != conn->last_throttle_time ) {
+
+			conn->last_throttle_time  = now;
 			conn->last_throttle_bytes = 0;
 		}
+
 		allowed = conn->throttle - conn->last_throttle_bytes;
-		if (allowed > (int64_t)len) allowed = (int64_t)len;
-		if ((total = XX_httplib_push_all(conn->ctx,
-		                      NULL,
-		                      conn->client.sock,
-		                      conn->ssl,
-		                      (const char *)buf,
-		                      (int64_t)allowed)) == allowed) {
-			buf = (const char *)buf + total;
+		if ( allowed > len ) allowed = len;
+
+		total = XX_httplib_push_all( conn->ctx, NULL, conn->client.sock, conn->ssl, buf, allowed );
+
+		if ( total == allowed ) {
+
+			buf                        = buf + total;
 			conn->last_throttle_bytes += total;
-			while (total < (int64_t)len && conn->ctx->stop_flag == 0) {
-				allowed = (conn->throttle > ((int64_t)len - total))
-				              ? (int64_t)len - total
-				              : conn->throttle;
-				if ((n = XX_httplib_push_all(conn->ctx,
-				                  NULL,
-				                  conn->client.sock,
-				                  conn->ssl,
-				                  (const char *)buf,
-				                  (int64_t)allowed)) != allowed) {
+
+			while ( total < len  &&  conn->ctx->stop_flag == 0 ) {
+
+				if ( conn->throttle > len-total ) allowed = len-total;
+				else                              allowed = conn->throttle;
+
+				n = XX_httplib_push_all( conn->ctx, NULL, conn->client.sock, conn->ssl, buf, allowed );
+				if ( n != allowed ) {
+				
+					if ( n > 0 ) total += n;	
 					break;
 				}
-				sleep(1);
+
+				sleep( 1 );
+
 				conn->last_throttle_bytes = allowed;
-				conn->last_throttle_time = time(NULL);
-				buf = (const char *)buf + n;
-				total += n;
+				conn->last_throttle_time  = time( NULL );
+				buf                       = buf + n;
+				total                    += n;
 			}
 		}
 	}
 	
-	else total = XX_httplib_push_all(conn->ctx, NULL, conn->client.sock, conn->ssl, (const char *)buf, (int64_t)len);
+	else total = XX_httplib_push_all( conn->ctx, NULL, conn->client.sock, conn->ssl, buf, len );
 
 	return (int)total;
 

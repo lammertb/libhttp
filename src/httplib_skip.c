@@ -22,13 +22,19 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
 
-/* Simplified version of XX_httplib_skip_quoted without quote char
- * and whitespace == delimiters */
+/*
+ * char *XX_httplib_skip( char **buf, const char *delimiters );
+ *
+ * The function XX_httplib_skip is a simplified version of the function
+ * XX_httplib_skip_quoted() without a quote char and where delimiters are only
+ * whitespace.
+ */
+
 char *XX_httplib_skip( char **buf, const char *delimiters ) {
 
 	return XX_httplib_skip_quoted( buf, delimiters, delimiters, 0 );

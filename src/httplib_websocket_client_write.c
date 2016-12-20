@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
@@ -36,23 +36,28 @@ static void mask_data( const char *in, size_t in_len, uint32_t masking_key, char
 /*
  * int httplib_websocket_client_write( struct httplib_connection *conn, int opcode, const char *data, size_t dataLen );
  *
- * The function httplib_websocket_client_write() is used to write as a client to a
- * websocket server.
+ * The function httplib_websocket_client_write() is used to write as a client
+ * to a websocket server. The function returns -1 if an error occures,
+ * otherwise the amount of bytes written.
  */
 
 int httplib_websocket_client_write( struct httplib_connection *conn, int opcode, const char *data, size_t dataLen ) {
 
-	int retval = -1;
-	char *masked_data = httplib_malloc( ((dataLen + 7) / 4) * 4 );
-	uint32_t masking_key = (uint32_t)XX_httplib_get_random();
+	int retval;
+	char *masked_data;
+	uint32_t masking_key;
 
-	if (masked_data == NULL) {
-		/* Return -1 in an error case */
-		httplib_cry(conn, "Cannot allocate buffer for masked websocket response: Out of memory");
+	retval      = -1;
+	masked_data = httplib_malloc( ((dataLen + 7) / 4) * 4 );
+	masking_key = (uint32_t) XX_httplib_get_random();
+
+	if ( masked_data == NULL ) {
+
+		httplib_cry( conn, "Cannot allocate buffer for masked websocket response: Out of memory" );
 		return -1;
 	}
 
-	mask_data(data, dataLen, masking_key, masked_data);
+	mask_data( data, dataLen, masking_key, masked_data );
 
 	retval = XX_httplib_websocket_write_exec( conn, opcode, masked_data, dataLen, masking_key );
 	httplib_free( masked_data );
@@ -60,8 +65,6 @@ int httplib_websocket_client_write( struct httplib_connection *conn, int opcode,
 	return retval;
 
 }  /* httplib_websocket_client_write */
-
-
 
 /*
  * static void mask_data( const char *in, size_t in_len, uint32_t masking_key, char *out );
@@ -72,25 +75,35 @@ int httplib_websocket_client_write( struct httplib_connection *conn, int opcode,
 
 static void mask_data( const char *in, size_t in_len, uint32_t masking_key, char *out ) {
 
-	size_t i = 0;
+	size_t i;
 
 	i = 0;
-	if ((in_len > 3) && ((ptrdiff_t)in % 4) == 0) {
-		/* Convert in 32 bit words, if data is 4 byte aligned */
-		while (i < (in_len - 3)) {
+
+	if ( in_len > 3  &&  ((ptrdiff_t)in % 4) == 0 ) {
+
+		/*
+		 * Convert in 32 bit words, if data is 4 byte aligned
+		 */
+
+		while ( i+3 < in_len ) {
+
 			*(uint32_t *)(void *)(out + i) = *(uint32_t *)(void *)(in + i) ^ masking_key;
 			i += 4;
 		}
 	}
-	if (i != in_len) {
-		/* convert 1-3 remaining bytes if ((dataLen % 4) != 0)*/
-		while (i < in_len) {
+	if ( i != in_len ) {
+
+		/*
+		 * convert 1-3 remaining bytes if ((dataLen % 4) != 0)
+		 */
+
+		while ( i < in_len ) {
+
 			*(uint8_t *)(void *)(out + i) = *(uint8_t *)(void *)(in + i) ^ *(((uint8_t *)&masking_key) + (i % 4));
 			i++;
 		}
 	}
 
 }  /* mask_data */
-
 
 #endif /* !USE_WEBSOCKET */

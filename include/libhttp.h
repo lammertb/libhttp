@@ -589,30 +589,6 @@ enum {
 LIBHTTP_API int httplib_printf(struct httplib_connection *, PRINTF_FORMAT_STRING(const char *fmt), ...) PRINTF_ARGS(2, 3);
 
 
-/* Send contents of the entire file together with HTTP headers. */
-LIBHTTP_API void httplib_send_file(struct httplib_connection *conn, const char *path);
-
-/* Send contents of the entire file together with HTTP headers.
-   Parameters:
-     conn: Current connection information.
-     path: Full path to the file to send.
-     mime_type: Content-Type for file.  NULL will cause the type to be
-                looked up by the file extension.
-*/
-LIBHTTP_API void httplib_send_mime_file(struct httplib_connection *conn, const char *path, const char *mime_type);
-
-/* Send contents of the entire file together with HTTP headers.
-   Parameters:
-     conn: Current connection information.
-     path: Full path to the file to send.
-     mime_type: Content-Type for file.  NULL will cause the type to be
-                looked up by the file extension.
-     additional_headers: Additional custom header fields appended to the header.
-                         Each header must start with an X- to ensure it is not
-   included twice.
-                         NULL does not append anything.
-*/
-LIBHTTP_API void httplib_send_mime_file2(struct httplib_connection *conn, const char *path, const char *mime_type, const char *additional_headers);
 
 /* Store body data into a file. */
 LIBHTTP_API int64_t httplib_store_body(struct httplib_connection *conn, const char *path);
@@ -964,6 +940,18 @@ LIBHTTP_API int httplib_get_response(struct httplib_connection *conn, char *ebuf
 */
 LIBHTTP_API unsigned httplib_check_feature(unsigned feature);
 
+#ifndef LIBHTTP_THREAD
+
+#if defined(_WIN32)
+#define LIBHTTP_THREAD			unsigned __stcall
+#define LIBHTTP_THREAD_RETNULL		0
+#else  /* _WIN32 */
+#define LIBHTTP_THREAD			void *
+#define LIBHTTP_THREAD_RETNULL		NULL
+#endif  /* _WIN32 */
+
+#endif  /* LIBHTTP_THREAD */
+
 typedef void (*httplib_alloc_callback_func)( const char *file, unsigned line, const char *action, int64_t current_bytes, int64_t total_blocks, int64_t total_bytes );
 
 #define				httplib_calloc(a, b) XX_httplib_calloc_ex(a, b, __FILE__, __LINE__)
@@ -1001,6 +989,7 @@ LIBHTTP_API pthread_t		httplib_pthread_self( void );
 LIBHTTP_API int			httplib_pthread_setspecific( pthread_key_t key, const void *value );
 LIBHTTP_API struct dirent *	httplib_readdir( DIR *dir );
 LIBHTTP_API int			httplib_remove( const char *path );
+LIBHTTP_API void		httplib_send_file( struct httplib_connection *conn, const char *path, const char *mime_type, const char *additional_headers );
 LIBHTTP_API void		httplib_set_alloc_callback_func( httplib_alloc_callback_func log_func );
 LIBHTTP_API int			httplib_strcasecmp( const char *s1, const char *s2 );
 LIBHTTP_API const char *	httplib_strcasestr( const char *big_str, const char *small_str );

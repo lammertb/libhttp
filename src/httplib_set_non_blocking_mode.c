@@ -22,31 +22,37 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
 
+/*
+ * int XX_httplib_set_non_block_mode( SOCKET sock );
+ *
+ * The function XX_httplib_set_non_blocking_mode() is an internal function to
+ * set a socket in non blocking mode, independent of the platform where the
+ * program is running on.
+ */
+
+int XX_httplib_set_non_blocking_mode( SOCKET sock ) {
+
 #if defined(_WIN32)
 
-int XX_httplib_set_non_blocking_mode( SOCKET sock ) {
+	unsigned long on;
 
-	unsigned long on = 1;
-	return ioctlsocket( sock, (long)FIONBIO, &on );
+	on = 1;
+	return ioctlsocket( sock, (long)FIONBIO, & on );
 
-}  /* XX_httplib_set_non_blocking_mode */
-
-#else
-
-int XX_httplib_set_non_blocking_mode( SOCKET sock ) {
+#else  /* _WIN32 */
 
 	int flags;
 
-	flags = fcntl(sock, F_GETFL, 0);
+	flags = fcntl( sock, F_GETFL, 0 );
 	fcntl( sock, F_SETFL, flags | O_NONBLOCK );
 
 	return 0;
 
-}  /* XX_httplib_set_non_blocking_mode */
+#endif  /* _WIN32 */
 
-#endif /* _WIN32 */
+}  /* XX_httplib_set_non_blocking_mode */

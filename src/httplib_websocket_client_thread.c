@@ -22,48 +22,47 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
 #include "httplib_memory.h"
 
 /*
- * ... XX_httplib_websocket_client_thread( void *data );
+ * LIBHTTP_THREAD XX_httplib_websocket_client_thread( void *data );
  *
  * The function XX_httplib_websocket_client_thread() is the worker thread which
  * connects as a client to a remote websocket server.
  */
 
 #if defined(USE_WEBSOCKET)
-#ifdef _WIN32
-unsigned __stdcall XX_httplib_websocket_client_thread( void *data ) {
-#else  /* _WIN32 */
-void * XX_httplib_websocket_client_thread(void *data) {
-#endif  /* _WIN32 */
-	struct websocket_client_thread_data *cdata = (struct websocket_client_thread_data *)data;
 
-	XX_httplib_set_thread_name("ws-client");
+LIBHTTP_THREAD XX_httplib_websocket_client_thread( void *data ) {
 
-	if (cdata->conn->ctx) {
-		if (cdata->conn->ctx->callbacks.init_thread) {
-			/* 3 indicates a websocket client thread */
-			/* TODO: check if conn->ctx can be set */
-			cdata->conn->ctx->callbacks.init_thread(cdata->conn->ctx, 3);
-		}
+	struct websocket_client_thread_data *cdata;
+
+	cdata = data;
+
+	XX_httplib_set_thread_name( "ws-client" );
+
+	if ( cdata->conn->ctx != NULL ) {
+
+		/*
+		 * 3 indicates a websocket client thread
+		 * TODO: check if conn->ctx can be set
+		 */
+
+		if ( cdata->conn->ctx->callbacks.init_thread != NULL ) cdata->conn->ctx->callbacks.init_thread( cdata->conn->ctx, 3 );
 	}
 
-	XX_httplib_read_websocket(cdata->conn, cdata->data_handler, cdata->callback_data);
+	XX_httplib_read_websocket( cdata->conn, cdata->data_handler, cdata->callback_data );
 
-	if (cdata->close_handler != NULL) cdata->close_handler(cdata->conn, cdata->callback_data);
+	if ( cdata->close_handler != NULL ) cdata->close_handler( cdata->conn, cdata->callback_data );
 
 	httplib_free( cdata );
 
+	return LIBHTTP_THREAD_RETNULL;
 
-#ifdef _WIN32
-	return 0;
-#else  /* _WIN32 */
-	return NULL;
-#endif  /* _WIN32 */
 }  /* XX_httplib_websocket_client_thread */
-#endif
+
+#endif  /* USE_WEBSOCKET */

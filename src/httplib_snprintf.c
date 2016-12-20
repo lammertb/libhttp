@@ -22,18 +22,26 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
 #include "httplib_string.h"
 
+/*
+ * void XX_httplib_snprintf( const struct httplib_connection *conn, int *truncated, char *buf, size_t buflen, const char *fmt, ... );
+ *
+ * The function XX_httplib_snprintf() is an internal function to send a string
+ * to a connection. The string can be formated with a format string and
+ * parameters in the same way as the snprintf function works.
+ */
+
 void XX_httplib_snprintf( const struct httplib_connection *conn, int *truncated, char *buf, size_t buflen, const char *fmt, ... ) {
 
 	va_list ap;
 
-	va_start(ap, fmt);
-	XX_httplib_vsnprintf(conn, truncated, buf, buflen, fmt, ap);
-	va_end(ap);
+	va_start( ap, fmt );
+	XX_httplib_vsnprintf( conn, truncated, buf, buflen, fmt, ap );
+	va_end( ap );
 
 }  /* XX_httplib_snprintf */

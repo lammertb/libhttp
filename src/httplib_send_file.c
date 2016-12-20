@@ -22,40 +22,36 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
 
-void httplib_send_file( struct httplib_connection *conn, const char *path ) {
+/*
+ * void httplib_send_file( struct httplib_connection *conn, const char *path, const char *mime_type, const char *additional_headers );
+ *
+ * The function httplib_send_file() sends a file to the other peer. Optionally
+ * the MIME type and additional headers can be specified.
+ */
 
-	httplib_send_mime_file( conn, path, NULL );
-
-}  /* httplib_send_file */
-
-
-void httplib_send_mime_file( struct httplib_connection *conn, const char *path, const char *mime_type ) {
-
-	httplib_send_mime_file2( conn, path, mime_type, NULL );
-
-}  /* httplib_send_mime_file */
-
-
-void httplib_send_mime_file2( struct httplib_connection *conn, const char *path, const char *mime_type, const char *additional_headers ) {
+void httplib_send_file( struct httplib_connection *conn, const char *path, const char *mime_type, const char *additional_headers ) {
 
 	struct file file = STRUCT_FILE_INITIALIZER;
 
-	if (XX_httplib_stat(conn, path, &file)) {
-		if (file.is_directory) {
-			if ( conn == NULL ) return;
-			if (!httplib_strcasecmp(conn->ctx->config[ENABLE_DIRECTORY_LISTING], "yes")) {
-				XX_httplib_handle_directory_request(conn, path);
-			} else {
-				XX_httplib_send_http_error(conn, 403, "%s", "Error: Directory listing denied");
-			}
-		} else {
-			XX_httplib_handle_static_file_request( conn, path, &file, mime_type, additional_headers);
-		}
-	} else XX_httplib_send_http_error(conn, 404, "%s", "Error: File not found");
+	if ( XX_httplib_stat( conn, path, &file ) ) {
 
-}  /* httplib_send_mime_file2 */
+		if ( file.is_directory ) {
+
+			if ( conn == NULL ) return;
+
+			if ( ! httplib_strcasecmp( conn->ctx->config[ENABLE_DIRECTORY_LISTING], "yes" ) ) XX_httplib_handle_directory_request( conn, path );
+			
+			else XX_httplib_send_http_error( conn, 403, "%s", "Error: Directory listing denied" );
+		}
+		
+		else XX_httplib_handle_static_file_request( conn, path, &file, mime_type, additional_headers );
+	}
+	
+	else XX_httplib_send_http_error( conn, 404, "%s", "Error: File not found" );
+
+}  /* httplib_send_file */

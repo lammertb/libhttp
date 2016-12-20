@@ -1,6 +1,6 @@
 # LibHTTP API Reference
 
-### `httplib_send_mime_file2( conn, path, mime_type, additional_headers );`
+### `httplib_send_file( conn, path, mime_type, additional_headers );`
 
 ### Parameters
 
@@ -17,7 +17,7 @@
 
 ### Description
 
-The function `httplib_send_mime_file2()` can be used to send a file over a connection. The function is similar to [`httplib_send_mime_file()`](httplib_send_mime_file.md) with the additional functionality that user specified headers can be sent. The MIME type of the file can be specified in the function call, or will be automatically determined based on the extension of the filename if the `mime_type` parameter has the value NULL.
+The function `httplib_send_file()` can be used to send a file over a connection. The MIME type of the file can be specified in the function call, or will be automatically determined based on the extension of the filename if the `mime_type` parameter has the value NULL.
 
 Additional custom header fields can be added as a parameter. Please make sure that these header names begin with `X-` to prevent name clashes with other headers. If the `additional_headers` parameter is NULL, no custom headers will be added.
 
@@ -25,6 +25,4 @@ Additional custom header fields can be added as a parameter. Please make sure th
 
 * [`httplib_get_builtin_mime_type();`](httplib_get_builtin_mime_type.md)
 * [`httplib_printf();`](httplib_printf.md)
-* [`httplib_send_file();`](httplib_send_file.md)
-* [`httplib_send_mime_file();`](httplib_send_mime_file.md)
 * [`httplib_write();`](httplib_write.md)

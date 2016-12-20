@@ -22,11 +22,18 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
 #include "httplib_string.h"
+
+/*
+ * int XX_httplib_remove_directory( struct httplib_connection *conn, const char *dir );
+ *
+ * The function XX_httplib_remove_directory() removes recirsively a directory
+ * tree.
+ */
 
 int XX_httplib_remove_directory( struct httplib_connection *conn, const char *dir ) {
 
@@ -35,53 +42,76 @@ int XX_httplib_remove_directory( struct httplib_connection *conn, const char *di
 	DIR *dirp;
 	struct de de;
 	int truncated;
-	int ok = 1;
+	int ok;
 
-	if ((dirp = httplib_opendir( dir )) == NULL) {
-		return 0;
-	} else {
-		de.conn = conn;
+	ok = 1;
 
-		while ((dp = httplib_readdir(dirp)) != NULL) {
-			/* Do not show current dir (but show hidden files as they will
-			 * also be removed) */
-			if (!strcmp(dp->d_name, ".") || !strcmp(dp->d_name, "..")) continue;
+	dirp = httplib_opendir( dir );
+	if ( dirp == NULL ) return 0;
+	
+	de.conn = conn;
 
-			XX_httplib_snprintf( conn, &truncated, path, sizeof(path), "%s/%s", dir, dp->d_name);
+	while ( (dp = httplib_readdir( dirp )) != NULL ) {
 
-			/* If we don't memset stat structure to zero, mtime will have
-			 * garbage and strftime() will segfault later on in
-			 * XX_httplib_print_dir_entry(). memset is required only if XX_httplib_stat()
-			 * fails. For more details, see
-			 * http://code.google.com/p/mongoose/issues/detail?id=79 */
-			memset(&de.file, 0, sizeof(de.file));
+		/*
+		 * Do not show current dir (but show hidden files as they will
+		 * also be removed)
+		 */
 
-			if (truncated) {
-				/* Do not delete anything shorter */
-				ok = 0;
-				continue;
-			}
+		if ( ! strcmp( dp->d_name, "." )   ||   ! strcmp( dp->d_name, ".." ) ) continue;
 
-			if (!XX_httplib_stat(conn, path, &de.file)) {
-				httplib_cry(conn, "%s: XX_httplib_stat(%s) failed: %s", __func__, path, strerror(ERRNO));
-				ok = 0;
-			}
-			if (de.file.membuf == NULL) {
-				/* file is not in memory */
-				if (de.file.is_directory) {
-					if (XX_httplib_remove_directory(conn, path) == 0) ok = 0;
-				} else {
-					if (httplib_remove( path ) == 0) ok = 0;
-				}
-			} else {
-				/* file is in memory. It can not be deleted. */
-				ok = 0;
-			}
+		XX_httplib_snprintf( conn, &truncated, path, sizeof(path), "%s/%s", dir, dp->d_name );
+
+		/*
+		 * If we don't memset stat structure to zero, mtime will have
+		 * garbage and strftime() will segfault later on in
+		 * XX_httplib_print_dir_entry(). memset is required only if XX_httplib_stat()
+		 * fails. For more details, see
+		 * http://code.google.com/p/mongoose/issues/detail?id=79
+		 */
+
+		memset( & de.file, 0, sizeof(de.file) );
+
+		if ( truncated ) {
+
+			/*
+			 * Do not delete anything shorter
+			 */
+
+			ok = 0;
+			continue;
 		}
-		httplib_closedir(dirp);
 
-		IGNORE_UNUSED_RESULT(rmdir(dir));
+		if ( ! XX_httplib_stat( conn, path, & de.file ) ) {
+
+			httplib_cry( conn, "%s: XX_httplib_stat(%s) failed: %s", __func__, path, strerror(ERRNO) );
+			ok = 0;
+		}
+		if ( de.file.membuf == NULL ) {
+
+			/*
+			 * file is not in memory
+			 */
+
+			if ( de.file.is_directory ) {
+
+				if ( XX_httplib_remove_directory( conn, path ) == 0 ) ok = 0;
+			}
+			
+			else if ( httplib_remove( path ) == 0 ) ok = 0;
+		}
+		
+		else {
+			/*
+			 * file is in memory. It can not be deleted.
+			 */
+
+			ok = 0;
+		}
 	}
+	httplib_closedir( dirp );
+
+	rmdir( dir );
 
 	return ok;
 

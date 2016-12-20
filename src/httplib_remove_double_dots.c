@@ -22,32 +22,46 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
 
-/* Protect against directory disclosure attack by removing '..',
- * excessive '/' and '\' characters */
+/*
+ * void XX_httplib_remove_double_dots_and_double_slashes( char *s );
+ *
+ * The function XX_httplib_remove_double_dots_and_double_slashes() removes
+ * '..' instances and excessive '/' and `\` characters to protext against
+ * directory disclosure attacks.
+ */
+
 void XX_httplib_remove_double_dots_and_double_slashes( char *s ) {
 
-	char *p = s;
+	char *p;
 
-	while ((s[0] == '.') && (s[1] == '.')) s++;
+	p = s;
 
-	while (*s != '\0') {
+	while ( s[0] == '.'  &&  s[1] == '.' ) s++;
+
+	while ( *s != '\0' ) {
+
 		*p++ = *s++;
-		if (s[-1] == '/' || s[-1] == '\\') {
-			/* Skip all following slashes, backslashes and double-dots */
-			while (s[0] != '\0') {
-				if (s[0] == '/' || s[0] == '\\') {
-					s++;
-				} else if (s[0] == '.' && s[1] == '.') {
-					s += 2;
-				} else break;
+
+		if ( s[-1] == '/'  ||  s[-1] == '\\' ) {
+
+			/*
+			 * Skip all following slashes, backslashes and double-dots
+			 */
+
+			while ( s[0] != '\0' ) {
+
+				if      ( s[0] == '/'  ||  s[0] == '\\' ) s++;
+				else if ( s[0] == '.'  &&  s[1] == '.'  ) s += 2;
+				else break;
 			}
 		}
 	}
+
 	*p = '\0';
 
 }  /* XX_httplib_remove_double_dots_and_double_slashes */
