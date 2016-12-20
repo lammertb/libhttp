@@ -22,17 +22,25 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
 #include "httplib_memory.h"
 
-/* Behaves like realloc(), but frees original pointer on failure */
+/*
+ * void *XX_httplib_realloc2( void *ptr, size_t size );
+ *
+ * The function XX_httplib_realloc2() behaves like XX_httplib_realloc() with
+ * the difference that on failure the original buffer is released.
+ */
+
 void *XX_httplib_realloc2( void *ptr, size_t size ) {
 
-	void *new_ptr = httplib_realloc( ptr, size );
-	if (new_ptr == NULL) httplib_free( ptr );
+	void *new_ptr;
+       
+	new_ptr = httplib_realloc( ptr, size );
+	if ( new_ptr == NULL ) httplib_free( ptr );
 
 	return new_ptr;
 

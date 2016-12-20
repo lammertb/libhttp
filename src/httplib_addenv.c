@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
@@ -49,55 +49,93 @@ void XX_httplib_addenv( struct cgi_environment *env, const char *fmt, ... ) {
 	char *added;
 	va_list ap;
 
-	/* Calculate how much space is left in the buffer */
+	/*
+	 * Calculate how much space is left in the buffer
+	 */
+
 	space = (env->buflen - env->bufused);
 
 	/* Calculate an estimate for the required space */
 	n = strlen(fmt) + 2 + 128;
 
 	do {
-		if (space <= n) {
-			/* Allocate new buffer */
+		if ( space <= n ) {
+
+			/*
+			 * Allocate new buffer
+			 */
+
 			n     = env->buflen + CGI_ENVIRONMENT_SIZE;
-			added = httplib_realloc(env->buf, n);
-			if (!added) {
-				/* Out of memory */
-				httplib_cry(env->conn, "%s: Cannot allocate memory for CGI variable [%s]", __func__, fmt);
+			added = httplib_realloc( env->buf, n );
+
+			if ( added == NULL ) {
+
+				/*
+				 * Out of memory
+				 */
+
+				httplib_cry( env->conn, "%s: Cannot allocate memory for CGI variable [%s]", __func__, fmt );
 				return;
 			}
-			env->buf = added;
+
+			env->buf    = added;
 			env->buflen = n;
-			space = (env->buflen - env->bufused);
+			space       = (env->buflen - env->bufused);
 		}
 
-		/* Make a pointer to the free space int the buffer */
+		/*
+		 * Make a pointer to the free space int the buffer
+		 */
+
 		added = env->buf + env->bufused;
 
-		/* Copy VARIABLE=VALUE\0 string into the free space */
-		va_start(ap, fmt);
-		XX_httplib_vsnprintf(env->conn, &truncated, added, (size_t)space, fmt, ap);
-		va_end(ap);
+		/*
+		 * Copy VARIABLE=VALUE\0 string into the free space
+		 */
 
-		/* Do not add truncated strings to the environment */
-		if (truncated) {
-			/* Reallocate the buffer */
+		va_start( ap, fmt );
+		XX_httplib_vsnprintf( env->conn, &truncated, added, (size_t)space, fmt, ap );
+		va_end( ap );
+
+		/*
+		 * Do not add truncated strings to the environment
+		 */
+
+		if ( truncated ) {
+
+			/*
+			 * Reallocate the buffer
+			 */
+
 			space = 0;
-			n = 1;
+			n     = 1;
 		}
-	} while (truncated);
 
-	/* Calculate number of bytes added to the environment */
-	n = strlen(added) + 1;
+	} while ( truncated );
+
+	/*
+	 * Calculate number of bytes added to the environment
+	 */
+
+	n             = strlen(added) + 1;
 	env->bufused += n;
 
-	/* Now update the variable index */
-	space = (env->varlen - env->varused);
-	if (space < 2) {
-		httplib_cry(env->conn, "%s: Cannot register CGI variable [%s]", __func__, fmt);
+	/*
+	 * Now update the variable index
+	 */
+
+	space = env->varlen - env->varused;
+
+	if ( space < 2 ) {
+
+		httplib_cry( env->conn, "%s: Cannot register CGI variable [%s]", __func__, fmt );
 		return;
 	}
 
-	/* Append a pointer to the added string into the envp array */
+	/*
+	 * Append a pointer to the added string into the envp array
+	 */
+
 	env->var[env->varused] = added;
 	env->varused++;
 

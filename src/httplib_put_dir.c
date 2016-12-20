@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
@@ -46,27 +46,50 @@ int XX_httplib_put_dir( struct httplib_connection *conn, const char *path ) {
 	const char *p;
 	struct file file = STRUCT_FILE_INITIALIZER;
 	size_t len;
-	int res = 1;
+	int res;
 
-	for (s = p = path + 2; (p = strchr(s, '/')) != NULL; s = ++p) {
+	res = 1;
+
+	s   = path+2;
+	p   = path+2;
+
+	while ( (p = strchr(s, '/')) != NULL ) {
+
 		len = (size_t)(p - path);
-		if (len >= sizeof(buf)) {
-			/* path too long */
+
+		if ( len >= sizeof(buf) ) {
+
+			/*
+			 * path too long
+			 */
+
 			res = -1;
 			break;
 		}
 		memcpy(buf, path, len);
 		buf[len] = '\0';
 
-		/* Try to create intermediate directory */
-		if (!XX_httplib_stat(conn, buf, &file) && httplib_mkdir( buf, 0755) != 0) {
-			/* path does not exixt and can not be created */
+		/*
+		 * Try to create intermediate directory
+		 */
+
+		if ( ! XX_httplib_stat( conn, buf, &file ) && httplib_mkdir( buf, 0755 ) != 0 ) {
+
+			/*
+			 * path does not exixt and can not be created
+			 */
+
 			res = -2;
 			break;
 		}
 
-		/* Is path itself a directory? */
-		if (p[1] == '\0') res = 0;
+		/*
+		 * Is path itself a directory?
+		 */
+
+		if ( p[1] == '\0' ) res = 0;
+
+		s = ++p;
 	}
 
 	return res;

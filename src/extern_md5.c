@@ -8,7 +8,7 @@
  * No Face Press, LLC
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 /* $Id: md5.h,v 1.4 2002/04/13 19:20:28 lpd Exp $ */
@@ -297,22 +297,22 @@ md5_process(md5_state_t *pms, const md5_byte_t *data /*[64]*/)
 	a = ROTATE_LEFT(t, s) + b
 
 	/* Do the following 16 operations. */
-	SET(a, b, c, d, 0, 7, T1);
-	SET(d, a, b, c, 1, 12, T2);
-	SET(c, d, a, b, 2, 17, T3);
-	SET(b, c, d, a, 3, 22, T4);
-	SET(a, b, c, d, 4, 7, T5);
-	SET(d, a, b, c, 5, 12, T6);
-	SET(c, d, a, b, 6, 17, T7);
-	SET(b, c, d, a, 7, 22, T8);
-	SET(a, b, c, d, 8, 7, T9);
-	SET(d, a, b, c, 9, 12, T10);
-	SET(c, d, a, b, 10, 17, T11);
-	SET(b, c, d, a, 11, 22, T12);
-	SET(a, b, c, d, 12, 7, T13);
-	SET(d, a, b, c, 13, 12, T14);
-	SET(c, d, a, b, 14, 17, T15);
-	SET(b, c, d, a, 15, 22, T16);
+	SET( a, b, c, d, 0,  7,  T1  );
+	SET( d, a, b, c, 1,  12, T2  );
+	SET( c, d, a, b, 2,  17, T3  );
+	SET( b, c, d, a, 3,  22, T4  );
+	SET( a, b, c, d, 4,  7,  T5  );
+	SET( d, a, b, c, 5,  12, T6  );
+	SET( c, d, a, b, 6,  17, T7  );
+	SET( b, c, d, a, 7,  22, T8  );
+	SET( a, b, c, d, 8,  7,  T9  );
+	SET( d, a, b, c, 9,  12, T10 );
+	SET( c, d, a, b, 10, 17, T11 );
+	SET( b, c, d, a, 11, 22, T12 );
+	SET( a, b, c, d, 12, 7,  T13 );
+	SET( d, a, b, c, 13, 12, T14 );
+	SET( c, d, a, b, 14, 17, T15 );
+	SET( b, c, d, a, 15, 22, T16 );
 #undef SET
 
 /* Round 2. */
@@ -324,22 +324,22 @@ md5_process(md5_state_t *pms, const md5_byte_t *data /*[64]*/)
 	a = ROTATE_LEFT(t, s) + b
 
 	/* Do the following 16 operations. */
-	SET(a, b, c, d, 1, 5, T17);
-	SET(d, a, b, c, 6, 9, T18);
-	SET(c, d, a, b, 11, 14, T19);
-	SET(b, c, d, a, 0, 20, T20);
-	SET(a, b, c, d, 5, 5, T21);
-	SET(d, a, b, c, 10, 9, T22);
-	SET(c, d, a, b, 15, 14, T23);
-	SET(b, c, d, a, 4, 20, T24);
-	SET(a, b, c, d, 9, 5, T25);
-	SET(d, a, b, c, 14, 9, T26);
-	SET(c, d, a, b, 3, 14, T27);
-	SET(b, c, d, a, 8, 20, T28);
-	SET(a, b, c, d, 13, 5, T29);
-	SET(d, a, b, c, 2, 9, T30);
-	SET(c, d, a, b, 7, 14, T31);
-	SET(b, c, d, a, 12, 20, T32);
+	SET( a, b, c, d, 1,  5,  T17 );
+	SET( d, a, b, c, 6,  9,  T18 );
+	SET( c, d, a, b, 11, 14, T19 );
+	SET( b, c, d, a, 0,  20, T20 );
+	SET( a, b, c, d, 5,  5,  T21 );
+	SET( d, a, b, c, 10, 9,  T22 );
+	SET( c, d, a, b, 15, 14, T23 );
+	SET( b, c, d, a, 4,  20, T24 );
+	SET( a, b, c, d, 9,  5,  T25 );
+	SET( d, a, b, c, 14, 9,  T26 );
+	SET( c, d, a, b, 3,  14, T27 );
+	SET( b, c, d, a, 8,  20, T28 );
+	SET( a, b, c, d, 13, 5,  T29 );
+	SET( d, a, b, c, 2,  9,  T30 );
+	SET( c, d, a, b, 7,  14, T31 );
+	SET( b, c, d, a, 12, 20, T32 );
 #undef SET
 
 /* Round 3. */
@@ -351,22 +351,22 @@ md5_process(md5_state_t *pms, const md5_byte_t *data /*[64]*/)
 	a = ROTATE_LEFT(t, s) + b
 
 	/* Do the following 16 operations. */
-	SET(a, b, c, d, 5, 4, T33);
-	SET(d, a, b, c, 8, 11, T34);
-	SET(c, d, a, b, 11, 16, T35);
-	SET(b, c, d, a, 14, 23, T36);
-	SET(a, b, c, d, 1, 4, T37);
-	SET(d, a, b, c, 4, 11, T38);
-	SET(c, d, a, b, 7, 16, T39);
-	SET(b, c, d, a, 10, 23, T40);
-	SET(a, b, c, d, 13, 4, T41);
-	SET(d, a, b, c, 0, 11, T42);
-	SET(c, d, a, b, 3, 16, T43);
-	SET(b, c, d, a, 6, 23, T44);
-	SET(a, b, c, d, 9, 4, T45);
-	SET(d, a, b, c, 12, 11, T46);
-	SET(c, d, a, b, 15, 16, T47);
-	SET(b, c, d, a, 2, 23, T48);
+	SET( a, b, c, d, 5,  4,  T33 );
+	SET( d, a, b, c, 8,  11, T34 );
+	SET( c, d, a, b, 11, 16, T35 );
+	SET( b, c, d, a, 14, 23, T36 );
+	SET( a, b, c, d, 1,  4,  T37 );
+	SET( d, a, b, c, 4,  11, T38 );
+	SET( c, d, a, b, 7,  16, T39 );
+	SET( b, c, d, a, 10, 23, T40 );
+	SET( a, b, c, d, 13, 4,  T41 );
+	SET( d, a, b, c, 0,  11, T42 );
+	SET( c, d, a, b, 3,  16, T43 );
+	SET( b, c, d, a, 6,  23, T44 );
+	SET( a, b, c, d, 9,  4,  T45 );
+	SET( d, a, b, c, 12, 11, T46 );
+	SET( c, d, a, b, 15, 16, T47 );
+	SET( b, c, d, a, 2,  23, T48 );
 #undef SET
 
 /* Round 4. */
@@ -378,22 +378,22 @@ md5_process(md5_state_t *pms, const md5_byte_t *data /*[64]*/)
 	a = ROTATE_LEFT(t, s) + b
 
 	/* Do the following 16 operations. */
-	SET(a, b, c, d, 0, 6, T49);
-	SET(d, a, b, c, 7, 10, T50);
-	SET(c, d, a, b, 14, 15, T51);
-	SET(b, c, d, a, 5, 21, T52);
-	SET(a, b, c, d, 12, 6, T53);
-	SET(d, a, b, c, 3, 10, T54);
-	SET(c, d, a, b, 10, 15, T55);
-	SET(b, c, d, a, 1, 21, T56);
-	SET(a, b, c, d, 8, 6, T57);
-	SET(d, a, b, c, 15, 10, T58);
-	SET(c, d, a, b, 6, 15, T59);
-	SET(b, c, d, a, 13, 21, T60);
-	SET(a, b, c, d, 4, 6, T61);
-	SET(d, a, b, c, 11, 10, T62);
-	SET(c, d, a, b, 2, 15, T63);
-	SET(b, c, d, a, 9, 21, T64);
+	SET( a, b, c, d, 0,  6,  T49 );
+	SET( d, a, b, c, 7,  10, T50 );
+	SET( c, d, a, b, 14, 15, T51 );
+	SET( b, c, d, a, 5,  21, T52 );
+	SET( a, b, c, d, 12, 6,  T53 );
+	SET( d, a, b, c, 3,  10, T54 );
+	SET( c, d, a, b, 10, 15, T55 );
+	SET( b, c, d, a, 1,  21, T56 );
+	SET( a, b, c, d, 8,  6,  T57 );
+	SET( d, a, b, c, 15, 10, T58 );
+	SET( c, d, a, b, 6,  15, T59 );
+	SET( b, c, d, a, 13, 21, T60 );
+	SET( a, b, c, d, 4,  6,  T61 );
+	SET( d, a, b, c, 11, 10, T62 );
+	SET( c, d, a, b, 2,  15, T63 );
+	SET( b, c, d, a, 9,  21, T64 );
 #undef SET
 
 	/* Then perform the following additions. (That is increment each
@@ -408,11 +408,12 @@ md5_process(md5_state_t *pms, const md5_byte_t *data /*[64]*/)
 MD5_STATIC void
 md5_init(md5_state_t *pms)
 {
-	pms->count[0] = pms->count[1] = 0;
-	pms->abcd[0] = 0x67452301;
-	pms->abcd[1] = /*0xefcdab89*/ T_MASK ^ 0x10325476;
-	pms->abcd[2] = /*0x98badcfe*/ T_MASK ^ 0x67452301;
-	pms->abcd[3] = 0x10325476;
+	pms->count[0] = 0;
+	pms->count[1] = 0;
+	pms->abcd[0]  = 0x67452301;
+	pms->abcd[1]  = /*0xefcdab89*/ T_MASK ^ 0x10325476;
+	pms->abcd[2]  = /*0x98badcfe*/ T_MASK ^ 0x67452301;
+	pms->abcd[3]  = 0x10325476;
 }
 
 MD5_STATIC void

@@ -22,82 +22,117 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
 
+/*
+ * XX_httplib_read_auth_file( struct file *filep, struct read_auth_file_struct *workdata );
+ *
+ * The function XX_httpib_read_auth_file() loops over the password file to
+ * read its contents. Include statements are honored which lets the routine
+ * also open and scan child files.
+ */
+
 int XX_httplib_read_auth_file( struct file *filep, struct read_auth_file_struct *workdata ) {
 
 	char *p;
-	int is_authorized = 0;
+	int is_authorized;
 	struct file fp;
 	size_t l;
 
-	if (!filep || !workdata) return 0;
+	if ( filep == NULL  ||  workdata == NULL ) return 0;
 
-	/* Loop over passwords file */
+	is_authorized = 0;
+
+	/*
+	 * Loop over passwords file
+	 */
+
 	p = (char *)filep->membuf;
-	while (XX_httplib_fgets(workdata->buf, sizeof(workdata->buf), filep, &p) != NULL) {
-		l = strlen(workdata->buf);
-		while (l > 0) {
-			if (isspace(workdata->buf[l - 1])
-			    || iscntrl(workdata->buf[l - 1])) {
+
+	while ( XX_httplib_fgets( workdata->buf, sizeof(workdata->buf), filep, &p ) != NULL ) {
+
+		l = strlen( workdata->buf );
+
+		while ( l > 0 ) {
+
+			if ( isspace(workdata->buf[l-1])  ||  iscntrl(workdata->buf[l-1]) ) {
+
 				l--;
 				workdata->buf[l] = 0;
-			} else break;
+			}
+			
+			else break;
 		}
-		if (l < 1) continue;
+
+		if ( l < 1 ) continue;
 
 		workdata->f_user = workdata->buf;
 
-		if (workdata->f_user[0] == ':') {
-			/* user names may not contain a ':' and may not be empty,
-			 * so lines starting with ':' may be used for a special purpose */
-			if (workdata->f_user[1] == '#') {
-				/* :# is a comment */
-				continue;
-			} else if (!strncmp(workdata->f_user + 1, "include=", 8)) {
-				if (XX_httplib_fopen(workdata->conn, workdata->f_user + 9, "r", &fp)) {
-					is_authorized = XX_httplib_read_auth_file(&fp, workdata);
-					XX_httplib_fclose(&fp);
-				} else {
-					httplib_cry(workdata->conn, "%s: cannot open authorization file: %s", __func__, workdata->buf);
+		if ( workdata->f_user[0] == ':' ) {
+
+			/*
+			 * user names may not contain a ':' and may not be empty,
+			 * so lines starting with ':' may be used for a special purpose
+			 */
+
+			if ( workdata->f_user[1] == '#' ) continue;  /* :# is a comment */
+			
+			else if ( ! strncmp( workdata->f_user + 1, "include=", 8 ) ) {
+
+				if ( XX_httplib_fopen( workdata->conn, workdata->f_user + 9, "r", &fp ) ) {
+
+					is_authorized = XX_httplib_read_auth_file( &fp, workdata );
+					XX_httplib_fclose( &fp );
 				}
+				
+				else httplib_cry( workdata->conn, "%s: cannot open authorization file: %s", __func__, workdata->buf );
+
 				continue;
 			}
-			/* everything is invalid for the moment (might change in the
-			 * future) */
-			httplib_cry(workdata->conn, "%s: syntax error in authorization file: %s", __func__, workdata->buf);
+			/*
+			 * everything is invalid for the moment (might change in the
+			 * future)
+			 */
+
+			httplib_cry( workdata->conn, "%s: syntax error in authorization file: %s", __func__, workdata->buf );
 			continue;
 		}
 
-		workdata->f_domain = strchr(workdata->f_user, ':');
-		if (workdata->f_domain == NULL) {
-			httplib_cry(workdata->conn, "%s: syntax error in authorization file: %s", __func__, workdata->buf);
+		workdata->f_domain = strchr( workdata->f_user, ':' );
+
+		if ( workdata->f_domain == NULL ) {
+
+			httplib_cry( workdata->conn, "%s: syntax error in authorization file: %s", __func__, workdata->buf );
 			continue;
 		}
+
 		*(workdata->f_domain) = 0;
 		(workdata->f_domain)++;
 
-		workdata->f_ha1 = strchr(workdata->f_domain, ':');
-		if (workdata->f_ha1 == NULL) {
-			httplib_cry(workdata->conn, "%s: syntax error in authorization file: %s", __func__, workdata->buf);
+		workdata->f_ha1 = strchr( workdata->f_domain, ':' );
+
+		if ( workdata->f_ha1 == NULL ) {
+
+			httplib_cry( workdata->conn, "%s: syntax error in authorization file: %s", __func__, workdata->buf );
 			continue;
 		}
+
 		*(workdata->f_ha1) = 0;
 		(workdata->f_ha1)++;
 
-		if (!strcmp(workdata->ah.user, workdata->f_user)
-		    && !strcmp(workdata->domain, workdata->f_domain)) {
-			return XX_httplib_check_password(workdata->conn->request_info.request_method,
-			                      workdata->f_ha1,
-			                      workdata->ah.uri,
-			                      workdata->ah.nonce,
-			                      workdata->ah.nc,
-			                      workdata->ah.cnonce,
-			                      workdata->ah.qop,
-			                      workdata->ah.response);
+		if ( ! strcmp( workdata->ah.user, workdata->f_user )  &&  ! strcmp( workdata->domain, workdata->f_domain ) ) {
+
+			return XX_httplib_check_password( workdata->conn->request_info.request_method,
+							  workdata->f_ha1,
+			                                  workdata->ah.uri,
+			                                  workdata->ah.nonce,
+			                                  workdata->ah.nc,
+			                                  workdata->ah.cnonce,
+			                                  workdata->ah.qop,
+			                                  workdata->ah.response );
 		}
 	}
 

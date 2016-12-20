@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 1.9
  */
 
 #include "httplib_main.h"
@@ -47,10 +47,13 @@ void XX_httplib_read_websocket( struct httplib_connection *conn, httplib_websock
 	int error;
 	int exit_by_callback;
 
-	/* body_len is the length of the entire queue in bytes
+	/* 
+	 * body_len is the length of the entire queue in bytes
 	 * len is the length of the current message
 	 * data_len is the length of the current message's data payload
-	 * header_len is the length of the current message's header */
+	 * header_len is the length of the current message's header
+	 */
+
 	size_t i;
 	size_t len;
 	size_t mask_len = 0;
@@ -58,135 +61,221 @@ void XX_httplib_read_websocket( struct httplib_connection *conn, httplib_websock
 	size_t header_len;
 	size_t body_len;
 
-	/* "The masking key is a 32-bit value chosen at random by the client."
+	/*
+	 * "The masking key is a 32-bit value chosen at random by the client."
 	 * http://tools.ietf.org/html/draft-ietf-hybi-thewebsocketprotocol-17#section-5
-	*/
+	 */
+
 	unsigned char mask[4];
 
-	/* data points to the place where the message is stored when passed to
-	 * the
-	 * websocket_data callback.  This is either mem on the stack, or a
-	 * dynamically allocated buffer if it is too large. */
+	/*
+	 * data points to the place where the message is stored when passed to
+	 * the websocket_data callback.  This is either mem on the stack, or a
+	 * dynamically allocated buffer if it is too large.
+	 */
+
 	char mem[4096];
-	char *data = mem;
+	char *data;
 	unsigned char mop; /* mask flag and opcode */
 	double timeout;
 
 	timeout = -1.0;
+	data    = mem;
 
-	if (                      conn->ctx->config[WEBSOCKET_TIMEOUT] ) timeout = atoi(conn->ctx->config[WEBSOCKET_TIMEOUT]) / 1000.0;
-	if ( timeout <= 0.0  &&  (conn->ctx->config[REQUEST_TIMEOUT])  ) timeout = atoi(conn->ctx->config[REQUEST_TIMEOUT])   / 1000.0;
+	if (                     conn->ctx->config[WEBSOCKET_TIMEOUT] ) timeout = atoi( conn->ctx->config[WEBSOCKET_TIMEOUT] ) / 1000.0;
+	if ( timeout <= 0.0  &&  conn->ctx->config[REQUEST_TIMEOUT]   ) timeout = atoi( conn->ctx->config[REQUEST_TIMEOUT]   ) / 1000.0;
 
-	XX_httplib_set_thread_name("wsock");
+	XX_httplib_set_thread_name( "wsock" );
 
-	/* Loop continuously, reading messages from the socket, invoking the
-	 * callback, and waiting repeatedly until an error occurs. */
-	while (!conn->ctx->stop_flag) {
+	/*
+	 * Loop continuously, reading messages from the socket, invoking the
+	 * callback, and waiting repeatedly until an error occurs.
+	 */
+
+	while ( ! conn->ctx->stop_flag ) {
+
 		header_len = 0;
-		assert(conn->data_len >= conn->request_len);
-		if ((body_len = (size_t)(conn->data_len - conn->request_len)) >= 2) {
-			len = buf[1] & 127;
+
+		assert( conn->data_len >= conn->request_len );
+
+		body_len = (size_t)(conn->data_len - conn->request_len);
+
+		if ( body_len >= 2 ) {
+
+			len      =  buf[1] & 127;
 			mask_len = (buf[1] & 128) ? 4 : 0;
-			if ((len < 126) && (body_len >= mask_len)) {
-				data_len = len;
+
+			if ( len < 126  &&  body_len >= mask_len ) {
+
+				data_len   = len;
 				header_len = 2 + mask_len;
-			} else if ((len == 126) && (body_len >= (4 + mask_len))) {
-				header_len = 4 + mask_len;
-				data_len = ((((size_t)buf[2]) << 8) + buf[3]);
-			} else if (body_len >= (10 + mask_len)) {
-				header_len = 10 + mask_len;
-				data_len = (((uint64_t)ntohl(*(uint32_t *)(void *)&buf[2]))
-				            << 32) + ntohl(*(uint32_t *)(void *)&buf[6]);
+			}
+			
+			else if ( len == 126  &&  body_len >= mask_len+4 ) {
+
+				header_len = mask_len+4;
+				data_len   = (((size_t)buf[2]) << 8) + buf[3];
+			}
+			
+			else if ( body_len >= 10+mask_len+10 ) {
+
+				header_len = mask_len+10;
+				data_len   = (((uint64_t)ntohl(*(uint32_t *)(void *)&buf[2])) << 32) + ntohl(*(uint32_t *)(void *)&buf[6]);
 			}
 		}
 
-		if (header_len > 0 && body_len >= header_len) {
-			/* Allocate space to hold websocket payload */
+		if ( header_len > 0  &&  body_len >= header_len ) {
+
+			/*
+			 * Allocate space to hold websocket payload
+			 */
+
 			data = mem;
-			if (data_len > sizeof(mem)) {
+
+			if ( data_len > sizeof(mem) ) {
+
 				data = httplib_malloc( data_len );
-				if (data == NULL) {
-					/* Allocation failed, exit the loop and then close the
-					 * connection */
-					httplib_cry(conn, "websocket out of memory; closing connection");
+
+				if ( data == NULL ) {
+
+					/*
+					 * Allocation failed, exit the loop and then close the
+					 * connection
+					 */
+
+					httplib_cry( conn, "websocket out of memory; closing connection" );
 					break;
 				}
 			}
 
 			/* Copy the mask before we shift the queue and destroy it */
-			if (mask_len > 0) memcpy( mask, buf + header_len - mask_len, sizeof(mask) );
-			else              memset( mask, 0,                           sizeof(mask) );
+			if ( mask_len > 0 ) memcpy( mask, buf + header_len - mask_len, sizeof(mask) );
+			else                memset( mask, 0,                           sizeof(mask) );
 
-			/* Read frame payload from the first message in the queue into
-			 * data and advance the queue by moving the memory in place. */
+			/*
+			 * Read frame payload from the first message in the queue into
+			 * data and advance the queue by moving the memory in place.
+			 */
+
 			assert(body_len >= header_len);
 			if (data_len + header_len > body_len) {
-				mop = buf[0]; /* current mask and opcode */
-				/* Overflow case */
+
+				 /*
+				  * current mask and opcode
+				  */
+
+				mop = buf[0];
+
+				/*
+				 * Overflow case
+				 */
+
 				len = body_len - header_len;
-				memcpy(data, buf + header_len, len);
+				memcpy( data, buf + header_len, len );
 				error = 0;
-				while (len < data_len) {
-					n = XX_httplib_pull( NULL, conn, data + len, (int)(data_len - len), timeout);
-					if (n <= 0) {
+
+				while ( len < data_len ) {
+
+					n = XX_httplib_pull( NULL, conn, data + len, (int)(data_len - len), timeout );
+					if ( n <= 0 ) {
+
 						error = 1;
 						break;
 					}
+
 					len += (size_t)n;
 				}
+				
 				if (error) {
+
 					httplib_cry(conn, "Websocket pull failed; closing connection");
 					break;
 				}
+
 				conn->data_len = conn->request_len;
-			} else {
-				mop = buf[0]; /* current mask and opcode, overwritten by
-				               * memmove() */
-				/* Length of the message being read at the front of the
-				 * queue */
+			}
+			
+			else {
+				/*
+				 * current mask and opcode, overwritten by
+				 * memmove()
+				 */
+
+				mop = buf[0];
+
+				/*
+				 * Length of the message being read at the front of the
+				 * queue
+				 */
+
 				len = data_len + header_len;
 
-				/* Copy the data payload into the data pointer for the
-				 * callback */
-				memcpy(data, buf + header_len, data_len);
+				/*
+				 * Copy the data payload into the data pointer for the
+				 * callback
+				 */
 
-				/* Move the queue forward len bytes */
-				memmove(buf, buf + len, body_len - len);
+				memcpy( data, buf + header_len, data_len );
 
-				/* Mark the queue as advanced */
+				/*
+				 * Move the queue forward len bytes
+				 */
+
+				memmove( buf, buf + len, body_len - len );
+
+				/*
+				 * Mark the queue as advanced
+				 */
+
 				conn->data_len -= (int)len;
 			}
 
-			/* Apply mask if necessary */
-			if (mask_len > 0) for (i = 0; i < data_len; ++i) data[i] ^= mask[i & 3];
+			/*
+			 * Apply mask if necessary
+			 */
 
-			/* Exit the loop if callback signals to exit (server side),
-			 * or "connection close" opcode received (client side). */
+			if ( mask_len > 0 ) for (i=0; i<data_len; i++) data[i] ^= mask[i % 4];
+
+			/*
+			 * Exit the loop if callback signals to exit (server side),
+			 * or "connection close" opcode received (client side).
+			 */
+
 			exit_by_callback = 0;
-			if ((ws_data_handler != NULL) && !ws_data_handler(conn, mop, data, data_len, callback_data)) {
-				exit_by_callback = 1;
-			}
+			if ((ws_data_handler != NULL) && !ws_data_handler(conn, mop, data, data_len, callback_data)) exit_by_callback = 1;
 
 			if ( data != mem ) httplib_free( data );
 
-			if (exit_by_callback || ((mop & 0xf) == WEBSOCKET_OPCODE_CONNECTION_CLOSE)) {
-				/* Opcode == 8, connection close */
-				break;
-			}
+			/*
+			 * Opcode == 8, connection close
+			 */
 
-			/* Not breaking the loop, process next websocket frame. */
-		} else {
-			/* Read from the socket into the next available location in the
-			 * message queue. */
-			if ((n = XX_httplib_pull(NULL, conn, conn->buf + conn->data_len, conn->buf_size - conn->data_len, timeout)) <= 0) {
-				/* Error, no bytes read */
-				break;
-			}
+			if ( exit_by_callback  ||  (mop & 0xf) == WEBSOCKET_OPCODE_CONNECTION_CLOSE ) break;
+
+			/*
+			 * Not breaking the loop, process next websocket frame.
+			 */
+		}
+		
+		else {
+			/*
+			 * Read from the socket into the next available location in the
+			 * message queue.
+			 */
+
+			n = XX_httplib_pull( NULL, conn, conn->buf + conn->data_len, conn->buf_size - conn->data_len, timeout );
+
+			/*
+			 * Error, no bytes read
+			 */
+
+			if ( n <= 0 ) break;
+
 			conn->data_len += n;
 		}
 	}
 
-	XX_httplib_set_thread_name("worker");
+	XX_httplib_set_thread_name( "worker" );
 
 }  /* XX_httplib_read_websocket */
 

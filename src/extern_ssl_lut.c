@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
@@ -30,10 +30,15 @@
 
 #if !defined(NO_SSL)  &&  !defined(NO_SSL_DL)
 
-/* XX_httplib_set_ssl_option() function updates this array.
+/*
+ * struct ssl_func XX_httplib_ssl_sw[];
+ *
+ * XX_httplib_set_ssl_option() function updates this array.
  * It loads SSL library dynamically and changes NULLs to the actual addresses
  * of respective functions. The macros above (like SSL_connect()) are really
- * just calling these functions indirectly via the pointer. */
+ * just calling these functions indirectly via the pointer.
+ */
+
 struct ssl_func XX_httplib_ssl_sw[] = {
 	{ "SSL_free",                           NULL },
 	{ "SSL_accept",                         NULL },
@@ -71,8 +76,13 @@ struct ssl_func XX_httplib_ssl_sw[] = {
 };
 
 
-/* Similar array as XX_httplib_ssl_sw. These functions could be located in different
- * lib. */
+/*
+ * struct ssl_func XX_httplib_crypto_sw[];
+ *
+ * Similar array as XX_httplib_ssl_sw. These functions could be located in different
+ * lib.
+ */
+
 struct ssl_func XX_httplib_crypto_sw[] = {
 	{ "CRYPTO_num_locks",            NULL },
 	{ "CRYPTO_set_locking_callback", NULL },
