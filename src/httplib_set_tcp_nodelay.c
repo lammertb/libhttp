@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
@@ -34,10 +34,8 @@
 
 int XX_httplib_set_tcp_nodelay( SOCKET sock, int nodelay_on ) {
 
-	if (setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, (SOCK_OPT_TYPE)&nodelay_on, sizeof(nodelay_on)) != 0) { /* Error */
-		return 1;
-	}
-	/* OK */
+	if ( setsockopt( sock, IPPROTO_TCP, TCP_NODELAY, (SOCK_OPT_TYPE)&nodelay_on, sizeof(nodelay_on) ) != 0 ) return 1;
+
 	return 0;
 
 }  /* XX_httplib_set_tcp_nodelay */

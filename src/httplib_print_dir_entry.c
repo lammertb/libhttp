@@ -37,21 +37,26 @@ void XX_httplib_print_dir_entry( struct de *de ) {
 
 	if ( de->file.is_directory ) XX_httplib_snprintf( de->conn, NULL, size, sizeof(size), "%s", "[DIRECTORY]" );
 	else {
-		/* We use (signed) cast below because MSVC 6 compiler cannot
-		 * convert unsigned __int64 to double. Sigh. */
+		/*
+		 * We use (signed) cast below because MSVC 6 compiler cannot
+		 * convert unsigned __int64 to double. Sigh.
+		 */
+
 		if      ( de->file.size <       1024)  XX_httplib_snprintf( de->conn, NULL, size, sizeof(size), "%d",     (int)   de->file.size                 );
 		else if ( de->file.size <   0x100000 ) XX_httplib_snprintf( de->conn, NULL, size, sizeof(size), "%.1fk", ((double)de->file.size) / 1024.0       );
 		else if ( de->file.size < 0x40000000 ) XX_httplib_snprintf( de->conn, NULL, size, sizeof(size), "%.1fM", ((double)de->file.size) / 1048576.0    );
 		else                                   XX_httplib_snprintf( de->conn, NULL, size, sizeof(size), "%.1fG", ((double)de->file.size) / 1073741824.0 );
 	}
 
-	/* Note: XX_httplib_snprintf will not cause a buffer overflow above.
-	 * So, string truncation checks are not required here. */
+	/*
+	 * Note: XX_httplib_snprintf will not cause a buffer overflow above.
+	 * So, string truncation checks are not required here.
+	 */
 
 	tm = localtime(&de->file.last_modified);
-	if (tm != NULL) {
-		strftime(mod, sizeof(mod), "%d-%b-%Y %H:%M", tm);
-	} else {
+	if ( tm != NULL ) strftime( mod, sizeof(mod), "%d-%b-%Y %H:%M", tm );
+	
+	else {
 		httplib_strlcpy( mod, "01-Jan-1970 00:00", sizeof(mod) );
 		mod[sizeof(mod) - 1] = '\0';
 	}

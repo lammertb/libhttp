@@ -62,12 +62,15 @@ static int alloc_vprintf( char **out_buf, char *prealloc_buf, size_t prealloc_si
 	va_list ap_copy;
 	int len;
 
-	/* Windows is not standard-compliant, and vsnprintf() returns -1 if
+	/*
+	 * Windows is not standard-compliant, and vsnprintf() returns -1 if
 	 * buffer is too small. Also, older versions of msvcrt.dll do not have
 	 * _vscprintf().  However, if size is 0, vsnprintf() behaves correctly.
 	 * Therefore, we make two passes: on first pass, get required message
 	 * length.
-	 * On second pass, actually print the message. */
+	 * On second pass, actually print the message.
+	 */
+
 	va_copy(ap_copy, ap);
 	len = vsnprintf_impl(NULL, 0, fmt, ap_copy);
 	va_end(ap_copy);
@@ -90,16 +93,14 @@ static int alloc_vprintf( char **out_buf, char *prealloc_buf, size_t prealloc_si
 		}
 		/* Buffer allocation successful. Store the string there. */
 		va_copy(ap_copy, ap);
-		IGNORE_UNUSED_RESULT(
-		    vsnprintf_impl(*out_buf, (size_t)(len) + 1, fmt, ap_copy));
+		vsnprintf_impl(*out_buf, (size_t)(len) + 1, fmt, ap_copy);
 		va_end(ap_copy);
 
 	} else {
 		/* The pre-allocated buffer is large enough.
 		 * Use it to store the string and return the address. */
 		va_copy(ap_copy, ap);
-		IGNORE_UNUSED_RESULT(
-		    vsnprintf_impl(prealloc_buf, prealloc_size, fmt, ap_copy));
+		vsnprintf_impl(prealloc_buf, prealloc_size, fmt, ap_copy);
 		va_end(ap_copy);
 		*out_buf = prealloc_buf;
 	}

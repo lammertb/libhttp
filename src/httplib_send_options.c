@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
@@ -47,9 +47,10 @@ void XX_httplib_send_options( struct httplib_connection *conn ) {
 	curtime           = time( NULL );
 	conn->status_code = 200;
 	conn->must_close  = 1;
+
 	XX_httplib_gmt_time_string( date, sizeof(date), &curtime );
 
-	httplib_printf(conn,
+	httplib_printf( conn,
 	          "HTTP/1.1 200 OK\r\n"
 	          "Date: %s\r\n"
 	          /* TODO: "Cache-Control" (?) */
@@ -58,7 +59,7 @@ void XX_httplib_send_options( struct httplib_connection *conn ) {
 	          "PROPFIND, MKCOL\r\n"
 	          "DAV: 1\r\n\r\n",
 	          date,
-	          XX_httplib_suggest_connection_header(conn));
+	          XX_httplib_suggest_connection_header( conn ) );
 
 }  /* XX_httplib_send_options */
 

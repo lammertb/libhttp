@@ -22,13 +22,13 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
 
 int XX_httplib_parse_range_header( const char *header, int64_t *a, int64_t *b ) {
 
-	return sscanf(header, "bytes=%" INT64_FMT "-%" INT64_FMT, a, b);
+	return sscanf( header, "bytes=%" INT64_FMT "-%" INT64_FMT, a, b );
 
 }  /* XX_httplib_parse_range_header */

@@ -53,9 +53,11 @@ int XX_httplib_parse_http_message( char *buf, int len, struct httplib_request_in
 	if (request_length > 0) {
 		/* Reset attributes. DO NOT TOUCH is_ssl, remote_ip, remote_addr,
 		 * remote_port */
-		ri->remote_user = ri->request_method = ri->request_uri =
-		    ri->http_version = NULL;
-		ri->num_headers = 0;
+		ri->remote_user    = NULL;
+		ri->request_method = NULL;
+		ri->request_uri    = NULL;
+		ri->http_version   = NULL;
+		ri->num_headers    = 0;
 
 		buf[request_length - 1] = '\0';
 
@@ -63,10 +65,10 @@ int XX_httplib_parse_http_message( char *buf, int len, struct httplib_request_in
 		while (*buf != '\0' && isspace(*(unsigned char *)buf)) {
 			buf++;
 		}
-		start_line = XX_httplib_skip(&buf, "\r\n");
-		ri->request_method = XX_httplib_skip(&start_line, " ");
-		ri->request_uri = XX_httplib_skip(&start_line, " ");
-		ri->http_version = start_line;
+		start_line         = XX_httplib_skip( &buf, "\r\n" );
+		ri->request_method = XX_httplib_skip( &start_line, " " );
+		ri->request_uri    = XX_httplib_skip( &start_line, " " );
+		ri->http_version   = start_line;
 
 		/* HTTP message could be either HTTP request:
 		 * "GET / HTTP/1.0 ..."
