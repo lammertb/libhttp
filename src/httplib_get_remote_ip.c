@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
@@ -38,6 +38,6 @@ uint32_t XX_httplib_get_remote_ip( const struct httplib_connection *conn ) {
 
 	if ( conn == NULL ) return 0;
 
-	return ntohl(*(const uint32_t *)&conn->client.rsa.sin.sin_addr);
+	return ntohl( *(const uint32_t *)&conn->client.rsa.sin.sin_addr );
 
 }  /* XX_httplib_get_remote_ip */

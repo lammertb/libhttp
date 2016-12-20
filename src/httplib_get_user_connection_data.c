@@ -22,15 +22,15 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
 
-void * httplib_get_user_connection_data(const struct httplib_connection *conn) {
+void * httplib_get_user_connection_data( const struct httplib_connection *conn ) {
 
-	if (conn != NULL) return conn->request_info.conn_data;
+	if ( conn == NULL ) return NULL;
 
-	return NULL;
+	return conn->request_info.conn_data;
 
 }  /* httplib_get_user_connection_data */

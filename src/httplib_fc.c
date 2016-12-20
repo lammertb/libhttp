@@ -22,18 +22,23 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
 
-/* Return fake connection structure. Used for logging, if connection
- * is not applicable at the moment of logging. */
+/*
+ * struct httplib_connection *XX_httplib_fc( struct httplib_context *ctx );
+ *
+ * TThe function XX_httplib_fc() returns a fake connection structure specific
+ * for logging if a connection is not applicable at the moment of logging.
+ */
+
 struct httplib_connection *XX_httplib_fc( struct httplib_context *ctx ) {
 
 	static struct httplib_connection fake_connection;
 
 	fake_connection.ctx = ctx;
-	return &fake_connection;
+	return & fake_connection;
 
 }  /* XX_httplib_fc */

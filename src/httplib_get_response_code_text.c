@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
@@ -36,7 +36,8 @@
 
 const char *httplib_get_response_code_text( struct httplib_connection *conn, int response_code ) {
 
-	/* See IANA HTTP status code assignment:
+	/*
+	 * See IANA HTTP status code assignment:
 	 * http://www.iana.org/assignments/http-status-codes/http-status-codes.xhtml
 	 */
 
@@ -113,10 +114,16 @@ const char *httplib_get_response_code_text( struct httplib_connection *conn, int
 
 
 	default:
-		/* This error code is unknown. This should not happen. */
-		if ( conn !=  NULL) httplib_cry( conn, "Unknown HTTP response code: %u", response_code );
+		/*
+		 * This error code is unknown. This should not happen.
+		 */
 
-		/* Return at least a category according to RFC 2616 Section 10. */
+		if ( conn !=  NULL ) httplib_cry( conn, "Unknown HTTP response code: %u", response_code );
+
+		/*
+		 * Return at least a category according to RFC 2616 Section 10.
+		 */
+
 		if (response_code >= 100 && response_code < 200) return "Information";
 		if (response_code >= 200 && response_code < 300) return "Success";
 		if (response_code >= 300 && response_code < 400) return "Redirection";

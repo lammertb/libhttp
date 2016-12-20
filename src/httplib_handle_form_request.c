@@ -58,17 +58,20 @@ static int url_encoded_field_found(const struct httplib_connection *conn,
 
 	} else filename_dec[0] = 0;
 
-	ret =
-	    fdh->field_found(key_dec, filename_dec, path, path_len, fdh->user_data);
+	ret = fdh->field_found(key_dec, filename_dec, path, path_len, fdh->user_data);
 
 	if ((ret & 0xF) == FORM_FIELD_STORAGE_GET) {
+
 		if (fdh->field_get == NULL) {
+
 			httplib_cry(conn, "%s: Function \"Get\" not available", __func__);
 			return FORM_FIELD_STORAGE_SKIP;
 		}
 	}
 	if ((ret & 0xF) == FORM_FIELD_STORAGE_STORE) {
+
 		if (fdh->field_store == NULL) {
+
 			httplib_cry(conn, "%s: Function \"Store\" not available", __func__);
 			return FORM_FIELD_STORAGE_SKIP;
 		}
@@ -88,10 +91,15 @@ static int url_encoded_field_get(const struct httplib_connection *conn,
 	char key_dec[1024];
 
 	char *value_dec = httplib_malloc( value_len+1 );
-	int value_dec_len, ret;
+	int value_dec_len;
+	int ret;
 
-	if (!value_dec) {
-		/* Log error message and stop parsing the form data. */
+	if ( value_dec == NULL ) {
+
+		/*
+		 * Log error message and stop parsing the form data.
+		 */
+
 		httplib_cry(conn, "%s: Not enough memory (required: %lu)", __func__, (unsigned long)(value_len + 1));
 		return FORM_FIELD_STORAGE_ABORT;
 	}
@@ -166,7 +174,8 @@ int httplib_handle_form_request(struct httplib_connection *conn, struct httplib_
 
 	int has_body_data = (conn->request_info.content_length > 0) || (conn->is_chunked);
 
-	/* There are three ways to encode data from a HTML form:
+	/*
+	 * There are three ways to encode data from a HTML form:
 	 * 1) method: GET (default)
 	 *    The form data is in the HTTP query string.
 	 * 2) method: POST, enctype: "application/x-www-form-urlencoded"
@@ -191,7 +200,7 @@ int httplib_handle_form_request(struct httplib_connection *conn, struct httplib_
 		 * call httplib_read. We just need to split the query string into key-value
 		 * pairs. */
 		data = conn->request_info.query_string;
-		if (!data) {
+		if ( data == NULL ) {
 			/* No query string. */
 			return -1;
 		}
@@ -207,7 +216,8 @@ int httplib_handle_form_request(struct httplib_connection *conn, struct httplib_
 			}
 			keylen = val - data;
 
-			/* In every "field_found" callback we ask what to do with the
+			/*
+			 * In every "field_found" callback we ask what to do with the
 			 * data ("field_storage"). This could be:
 			 * FORM_FIELD_STORAGE_SKIP (0) ... ignore the value of this field
 			 * FORM_FIELD_STORAGE_GET (1) ... read the data and call the get
@@ -218,6 +228,7 @@ int httplib_handle_form_request(struct httplib_connection *conn, struct httplib_
 			 *                               (currently not implemented)
 			 * FORM_FIELD_STORAGE_ABORT (flag) ... stop parsing
 			 */
+
 			memset(path, 0, sizeof(path));
 			field_count++;
 			field_storage = url_encoded_field_found(conn, data, (size_t)keylen, NULL, 0, path, sizeof(path) - 1, fdh);
@@ -234,16 +245,14 @@ int httplib_handle_form_request(struct httplib_connection *conn, struct httplib_
 
 			if (field_storage == FORM_FIELD_STORAGE_GET) {
 				/* Call callback */
-				url_encoded_field_get(
-				    conn, data, (size_t)keylen, val, (size_t)vallen, fdh);
+				url_encoded_field_get( conn, data, (size_t)keylen, val, (size_t)vallen, fdh);
 			}
 			if (field_storage == FORM_FIELD_STORAGE_STORE) {
 				/* Store the content to a file */
 				if (XX_httplib_fopen(conn, path, "wb", &fstore) == 0) fstore.fp = NULL;
 				file_size = 0;
 				if (fstore.fp != NULL) {
-					size_t n =
-					    (size_t)fwrite(val, 1, (size_t)vallen, fstore.fp);
+					size_t n = (size_t)fwrite(val, 1, (size_t)vallen, fstore.fp);
 					if ((n != (size_t)vallen) || (ferror(fstore.fp))) {
 						httplib_cry(conn, "%s: Cannot write file %s", __func__, path);
 						fclose(fstore.fp);
@@ -348,13 +357,13 @@ int httplib_handle_form_request(struct httplib_connection *conn, struct httplib_
 			field_count++;
 			field_storage = url_encoded_field_found(conn, buf, (size_t)keylen, NULL, 0, path, sizeof(path) - 1, fdh);
 
-			if ((field_storage & FORM_FIELD_STORAGE_ABORT)
-			    == FORM_FIELD_STORAGE_ABORT) {
+			if ((field_storage & FORM_FIELD_STORAGE_ABORT) == FORM_FIELD_STORAGE_ABORT) {
 				/* Stop parsing the request */
 				break;
 			}
 
 			if (field_storage == FORM_FIELD_STORAGE_STORE) {
+
 				if (XX_httplib_fopen(conn, path, "wb", &fstore) == 0) fstore.fp = NULL;
 				file_size = 0;
 				if (!fstore.fp) httplib_cry(conn, "%s: Cannot create file %s", __func__, path);
@@ -385,8 +394,7 @@ int httplib_handle_form_request(struct httplib_connection *conn, struct httplib_
 					/* Call callback */
 					url_encoded_field_get(conn,
 					                      ((get_block > 0) ? NULL : buf),
-					                      ((get_block > 0) ? 0
-					                                       : (size_t)keylen),
+					                      ((get_block > 0) ? 0    : (size_t)keylen),
 					                      val,
 					                      (size_t)vallen,
 					                      fdh);
@@ -454,9 +462,12 @@ int httplib_handle_form_request(struct httplib_connection *conn, struct httplib_
 	}
 
 	if (!httplib_strncasecmp(content_type, "MULTIPART/FORM-DATA;", 20)) {
-		/* The form data is in the request body data, encoded as multipart
+		/*
+		 * The form data is in the request body data, encoded as multipart
 		 * content (see https://www.ietf.org/rfc/rfc1867.txt,
-		 * https://www.ietf.org/rfc/rfc2388.txt). */
+		 * https://www.ietf.org/rfc/rfc2388.txt).
+		 */
+
 		const char *boundary;
 		size_t bl;
 		ptrdiff_t used;
@@ -476,7 +487,10 @@ int httplib_handle_form_request(struct httplib_connection *conn, struct httplib_
 		bl = 20;
 		while (content_type[bl] == ' ') bl++;
 
-		/* There has to be a BOUNDARY definition in the Content-Type header */
+		/*
+		 * There has to be a BOUNDARY definition in the Content-Type header
+		 */
+
 		if (httplib_strncasecmp(content_type + bl, "BOUNDARY=", 9)) {
 			/* Malformed request */
 			return -1;
@@ -618,9 +632,7 @@ int httplib_handle_form_request(struct httplib_connection *conn, struct httplib_
 				if (field_storage == FORM_FIELD_STORAGE_GET) {
 					unencoded_field_get(conn,
 					                    ((get_block > 0) ? NULL : nbeg),
-					                    ((get_block > 0)
-					                         ? 0
-					                         : (size_t)(nend - nbeg)),
+					                    ((get_block > 0) ? 0    : (size_t)(nend - nbeg)),
 					                    hend,
 					                    towrite,
 					                    fdh);
@@ -669,8 +681,7 @@ int httplib_handle_form_request(struct httplib_connection *conn, struct httplib_
 				/* Call callback */
 				unencoded_field_get(conn,
 				                    ((get_block > 0) ? NULL : nbeg),
-				                    ((get_block > 0) ? 0
-				                                     : (size_t)(nend - nbeg)),
+				                    ((get_block > 0) ? 0    : (size_t)(nend - nbeg)),
 				                    hend,
 				                    towrite,
 				                    fdh);

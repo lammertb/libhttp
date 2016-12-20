@@ -22,13 +22,14 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
 
 /* Look at the "path" extension and figure what mime type it has.
  * Store mime type in the vector. */
+
 void XX_httplib_get_mime_type( struct httplib_context *ctx, const char *path, struct vec *vec ) {
 
 	struct vec ext_vec;
@@ -37,17 +38,27 @@ void XX_httplib_get_mime_type( struct httplib_context *ctx, const char *path, st
 	const char *ext;
 	size_t path_len;
 
-	path_len = strlen(path);
+	if ( ctx == NULL  ||  path == NULL  ||  vec == NULL ) return;
 
-	if (ctx == NULL || vec == NULL) return;
+	path_len = strlen( path );
 
-	/* Scan user-defined mime types first, in case user wants to
-	 * override default mime types. */
+	/*
+	 * Scan user-defined mime types first, in case user wants to
+	 * override default mime types.
+	 */
+
 	list = ctx->config[EXTRA_MIME_TYPES];
-	while ((list = XX_httplib_next_option(list, &ext_vec, &mime_vec)) != NULL) {
-		/* ext now points to the path suffix */
+
+	while ( (list = XX_httplib_next_option( list, &ext_vec, &mime_vec )) != NULL ) {
+
+		/*
+		 * ext now points to the path suffix
+		 */
+
 		ext = path + path_len - ext_vec.len;
-		if (httplib_strncasecmp(ext, ext_vec.ptr, ext_vec.len) == 0) {
+
+		if ( httplib_strncasecmp( ext, ext_vec.ptr, ext_vec.len ) == 0 ) {
+
 			*vec = mime_vec;
 			return;
 		}

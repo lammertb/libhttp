@@ -22,14 +22,20 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
 #include "httplib_ssl.h"
 
-/* Print error message to the opened error log stream. */
-void httplib_cry(const struct httplib_connection *conn, const char *fmt, ...) {
+/*
+ * void httplib_cry( const struct httplib_connection *conn, const char *fmt, ... );
+ *
+ * The function httplib_cry() prints a formatted error message to the opened
+ * error log stream.
+ */
+
+void httplib_cry( const struct httplib_connection *conn, const char *fmt, ... ) {
 
 	char buf[MG_BUF_LEN];
 	char src_addr[IP_ADDR_STR_LEN];
@@ -37,51 +43,46 @@ void httplib_cry(const struct httplib_connection *conn, const char *fmt, ...) {
 	struct file fi;
 	time_t timestamp;
 
-	va_start(ap, fmt);
-	IGNORE_UNUSED_RESULT(vsnprintf_impl(buf, sizeof(buf), fmt, ap));
-	va_end(ap);
-	buf[sizeof(buf) - 1] = 0;
+	va_start( ap, fmt );
+	vsnprintf_impl( buf, sizeof(buf), fmt, ap );
+	va_end( ap );
+	buf[sizeof(buf)-1] = 0;
 
-	if (!conn) {
-		puts(buf);
-		return;
-	}
+	if ( conn == NULL  ||  conn->ctx == NULL ) return;
 
-	/* Do not lock when getting the callback value, here and below.
+	/*
+	 * Do not lock when getting the callback value, here and below.
 	 * I suppose this is fine, since function cannot disappear in the
-	 * same way string option can. */
-	if ((conn->ctx->callbacks.log_message == NULL)
-	    || (conn->ctx->callbacks.log_message(conn, buf) == 0)) {
+	 * same way string option can.
+	 */
 
-		if (conn->ctx->config[ERROR_LOG_FILE] != NULL) {
-			if (XX_httplib_fopen(conn, conn->ctx->config[ERROR_LOG_FILE], "a+", &fi)
-			    == 0) {
-				fi.fp = NULL;
-			}
-		} else fi.fp = NULL;
+	if ( conn->ctx->callbacks.log_message == NULL  ||  conn->ctx->callbacks.log_message( conn, buf ) == 0 ) {
 
-		if (fi.fp != NULL) {
-			flockfile(fi.fp);
-			timestamp = time(NULL);
+		if ( conn->ctx->config[ERROR_LOG_FILE] != NULL ) {
 
-			XX_httplib_sockaddr_to_string(src_addr, sizeof(src_addr), &conn->client.rsa);
-			fprintf(fi.fp,
-			        "[%010lu] [error] [client %s] ",
-			        (unsigned long)timestamp,
-			        src_addr);
+			if ( XX_httplib_fopen( conn, conn->ctx->config[ERROR_LOG_FILE], "a+", &fi ) == 0 ) fi.fp = NULL;
+		}
+		
+		else fi.fp = NULL;
 
-			if (conn->request_info.request_method != NULL) {
-				fprintf(fi.fp,
-				        "%s %s: ",
-				        conn->request_info.request_method,
-				        conn->request_info.request_uri);
+		if ( fi.fp != NULL ) {
+
+			flockfile( fi.fp );
+			timestamp = time( NULL );
+
+			XX_httplib_sockaddr_to_string( src_addr, sizeof(src_addr), &conn->client.rsa );
+			fprintf( fi.fp, "[%010lu] [error] [client %s] ", (unsigned long)timestamp, src_addr );
+
+			if ( conn->request_info.request_method != NULL ) {
+
+				fprintf( fi.fp, "%s %s: ", conn->request_info.request_method, conn->request_info.request_uri );
 			}
 
-			fprintf(fi.fp, "%s", buf);
-			fputc('\n', fi.fp);
-			fflush(fi.fp);
-			funlockfile(fi.fp);
-			XX_httplib_fclose(&fi);
+			fprintf( fi.fp, "%s", buf );
+			fputc( '\n', fi.fp );
+			fflush( fi.fp );
+			funlockfile( fi.fp );
+			XX_httplib_fclose( &fi );
 		}
 	}
 

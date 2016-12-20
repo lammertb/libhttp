@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
@@ -43,25 +43,33 @@ int XX_httplib_check_acl( struct httplib_context *ctx, uint32_t remote_ip ) {
 	uint32_t net;
 	uint32_t mask;
 	struct vec vec;
+	const char *list;
 
-	if (ctx) {
-		const char *list = ctx->config[ACCESS_CONTROL_LIST];
+	if ( ctx == NULL ) return -1;
 
-		/* If any ACL is set, deny by default */
-		allowed = (list == NULL) ? '+' : '-';
+	list = ctx->config[ACCESS_CONTROL_LIST];
 
-		while ((list = XX_httplib_next_option(list, &vec, NULL)) != NULL) {
-			flag = vec.ptr[0];
-			if ((flag != '+' && flag != '-') || XX_httplib_parse_net(&vec.ptr[1], &net, &mask) == 0) {
-				httplib_cry( XX_httplib_fc(ctx), "%s: subnet must be [+|-]x.x.x.x[/x]", __func__);
-				return -1;
-			}
+	/*
+	 * If any ACL is set, deny by default
+	 */
 
-			if (net == (remote_ip & mask)) allowed = flag;
+	if ( list == NULL ) allowed = '+';
+	else                allowed = '-';
+
+
+	while ( (list = XX_httplib_next_option( list, & vec, NULL )) != NULL ) {
+
+		flag = vec.ptr[0];
+
+		if ( (flag != '+'  &&  flag != '-')  ||  XX_httplib_parse_net( &vec.ptr[1], &net, &mask ) == 0 ) {
+
+			httplib_cry( XX_httplib_fc(ctx), "%s: subnet must be [+|-]x.x.x.x[/x]", __func__ );
+			return -1;
 		}
 
-		return allowed == '+';
+		if ( (remote_ip & mask) == net ) allowed = flag;
 	}
-	return -1;
+
+	return (allowed == '+');
 
 }  /* XX_httplib_check_acl */

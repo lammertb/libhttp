@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
@@ -41,24 +41,32 @@ void XX_httplib_close_connection( struct httplib_connection *conn ) {
 
 	if ( conn == NULL  ||  conn->ctx == NULL ) return;
 
-	/* call the connection_close callback if assigned */
-	if ((conn->ctx->callbacks.connection_close != NULL) && (conn->ctx->context_type == 1)) {
-		conn->ctx->callbacks.connection_close(conn);
-	}
+	/*
+	 * call the connection_close callback if assigned
+	 */
+
+	if ( conn->ctx->callbacks.connection_close != NULL  &&  conn->ctx->context_type == 1 ) conn->ctx->callbacks.connection_close( conn );
 
 	httplib_lock_connection( conn );
 
 	conn->must_close = 1;
 
 #ifndef NO_SSL
-	if (conn->ssl != NULL) {
-		/* Run SSL_shutdown twice to ensure completly close SSL connection
+	if ( conn->ssl != NULL ) {
+
+		/*
+		 * Run SSL_shutdown twice to ensure completly close SSL connection
 		 */
-		SSL_shutdown(conn->ssl);
-		SSL_free(conn->ssl);
-		/* Avoid CRYPTO_cleanup_all_ex_data(); See discussion:
-		 * https://wiki.openssl.org/index.php/Talk:Library_Initialization */
-		ERR_remove_state(0);
+
+		SSL_shutdown( conn->ssl );
+		SSL_free(     conn->ssl );
+
+		/*
+		 * Avoid CRYPTO_cleanup_all_ex_data(); See discussion:
+		 * https://wiki.openssl.org/index.php/Talk:Library_Initialization
+		 */
+
+		ERR_remove_state( 0 );
 		conn->ssl = NULL;
 	}
 #endif
@@ -84,31 +92,44 @@ void XX_httplib_close_connection( struct httplib_connection *conn ) {
 
 void httplib_close_connection( struct httplib_connection *conn ) {
 
-	struct httplib_context *client_ctx = NULL;
+	struct httplib_context *client_ctx;
 	unsigned int i;
 
 	if ( conn == NULL ) return;
 
 	if ( conn->ctx->context_type == 2 ) {
 
-		client_ctx = conn->ctx;
-		/* client context: loops must end */
+		client_ctx           = conn->ctx;
 		conn->ctx->stop_flag = 1;
 	}
 
+	else client_ctx = NULL;
+
 #ifndef NO_SSL
-	if (conn->client_ssl_ctx != NULL) SSL_CTX_free((SSL_CTX *)conn->client_ssl_ctx);
+	if ( conn->client_ssl_ctx != NULL ) {
+		
+		SSL_CTX_free( (SSL_CTX *)conn->client_ssl_ctx );
+		conn->client_ssl_ctx = NULL;
+	}
 #endif
-	XX_httplib_close_connection(conn);
-	if (client_ctx != NULL) {
-		/* join worker thread and free context */
-		for (i = 0; i < client_ctx->cfg_worker_threads; i++) {
-			if (client_ctx->workerthreadids[i] != 0) XX_httplib_join_thread(client_ctx->workerthreadids[i]);
+	XX_httplib_close_connection( conn );
+
+	if ( client_ctx != NULL ) {
+
+		/*
+		 * join worker thread and free context
+		 */
+
+		for (i=0; i<client_ctx->cfg_worker_threads; i++) {
+
+			if ( client_ctx->workerthreadids[i] != 0 ) XX_httplib_join_thread( client_ctx->workerthreadids[i] );
 		}
 
 		httplib_free( client_ctx->workerthreadids );
 		httplib_free( client_ctx                  );
+
 		httplib_pthread_mutex_destroy( & conn->mutex );
+
 		httplib_free( conn );
 	}
 

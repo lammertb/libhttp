@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
@@ -42,38 +42,59 @@ int httplib_get_var2( const char *data, size_t data_len, const char *name, char 
 	size_t name_len;
 	int len;
 
-	if (dst == NULL || dst_len == 0) {
-		len = -2;
-	} else if (data == NULL || name == NULL || data_len == 0) {
-		len = -1;
+	if ( dst == NULL  ||  dst_len < 1 ) return -2;
+
+	if ( data == NULL  ||  name == NULL  ||  data_len == 0 ) {
+
 		dst[0] = '\0';
-	} else {
-		name_len = strlen(name);
-		e = data + data_len;
-		len = -1;
-		dst[0] = '\0';
+		return -1;
+	}
+	
+	name_len = strlen( name );
+	e        = data + data_len;
+	len      = -1;
+	dst[0]   = '\0';
 
-		/* data is "var1=val1&var2=val2...". Find variable first */
-		for (p = data; p + name_len < e; p++) {
-			if ((p == data || p[-1] == '&') && p[name_len] == '='
-			    && !httplib_strncasecmp(name, p, name_len) && 0 == occurrence--) {
-				/* Point p to variable value */
-				p += name_len + 1;
+	/*
+	 * data is "var1=val1&var2=val2...". Find variable first
+	 */
 
-				/* Point s to the end of the value */
-				s = (const char *)memchr(p, '&', (size_t)(e - p));
-				if (s == NULL) s = e;
-				/* assert(s >= p); */
-				if (s < p) return -3;
+	for (p=data; p+name_len < e; p++) {
 
-				/* Decode variable into destination buffer */
-				len = httplib_url_decode(p, (int)(s - p), dst, (int)dst_len, 1);
+		if ( (p == data || p[-1] == '&')  &&  p[name_len] == '='  &&  ! httplib_strncasecmp( name, p, name_len )  &&  occurrence-- == 0 ) {
 
-				/* Redirect error code from -1 to -2 (destination buffer too
-				 * small). */
-				if (len == -1) len = -2;
-				break;
-			}
+			/*
+			 * Point p to variable value
+			 */
+
+			p += name_len + 1;
+
+			/*
+			 * Point s to the end of the value
+			 */
+
+			s = (const char *)memchr( p, '&', (size_t)(e - p) );
+			if (s == NULL) s = e;
+
+			/*
+			 * assert(s >= p);
+			 */
+
+			if (s < p) return -3;
+
+			/*
+			 * Decode variable into destination buffer
+			 */
+
+			len = httplib_url_decode( p, (int)(s - p), dst, (int)dst_len, 1 );
+
+			/*
+			 * Redirect error code from -1 to -2 (destination buffer too
+			 * small).
+			 */
+
+			if (len == -1) len = -2;
+			break;
 		}
 	}
 

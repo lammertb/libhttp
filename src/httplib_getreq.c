@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
@@ -38,78 +38,134 @@ int XX_httplib_getreq( struct httplib_connection *conn, char *ebuf, size_t ebuf_
 
 	const char *cl;
 
-	if (ebuf_len > 0) ebuf[0] = '\0';
-	*err = 0;
+	if ( err  == NULL                   )               return 0;
+	if ( ebuf == NULL  ||  ebuf_len < 1 ) { *err = 500; return 0; }
 
-	XX_httplib_reset_per_request_attributes(conn);
+	ebuf[0] = '\0';
+	*err    = 0;
 
-	if (!conn) {
-		XX_httplib_snprintf(conn, NULL, ebuf, ebuf_len, "%s", "Internal error");
+	XX_httplib_reset_per_request_attributes( conn );
+
+	if ( conn == NULL ) {
+
+		XX_httplib_snprintf( conn, NULL, ebuf, ebuf_len, "%s", "Internal error" );
 		*err = 500;
 		return 0;
 	}
-	/* Set the time the request was received. This value should be used for
-	 * timeouts. */
-	clock_gettime(CLOCK_MONOTONIC, &(conn->req_time));
 
-	conn->request_len =
-	    XX_httplib_read_request(NULL, conn, conn->buf, conn->buf_size, &conn->data_len);
-	/* assert(conn->request_len < 0 || conn->data_len >= conn->request_len);
+	/*
+	 * Set the time the request was received. This value should be used for
+	 * timeouts.
 	 */
-	if (conn->request_len >= 0 && conn->data_len < conn->request_len) {
-		XX_httplib_snprintf(conn, NULL, ebuf, ebuf_len, "%s", "Invalid request size");
+
+	clock_gettime( CLOCK_MONOTONIC, &conn->req_time );
+
+	conn->request_len = XX_httplib_read_request( NULL, conn, conn->buf, conn->buf_size, &conn->data_len );
+
+	/* 
+	 * assert(conn->request_len < 0 || conn->data_len >= conn->request_len);
+	 */
+
+	if ( conn->request_len >= 0  &&  conn->data_len < conn->request_len ) {
+
+		XX_httplib_snprintf( conn, NULL, ebuf, ebuf_len, "%s", "Invalid request size" );
 		*err = 500;
 		return 0;
 	}
 
-	if (conn->request_len == 0 && conn->data_len == conn->buf_size) {
-		XX_httplib_snprintf(conn, NULL, ebuf, ebuf_len, "%s", "Request Too Large");
+	if ( conn->request_len == 0  &&  conn->data_len == conn->buf_size ) {
+
+		XX_httplib_snprintf( conn, NULL, ebuf, ebuf_len, "%s", "Request Too Large" );
 		*err = 413;
 		return 0;
-	} else if (conn->request_len <= 0) {
-		if (conn->data_len > 0) {
-			XX_httplib_snprintf(conn, NULL, ebuf, ebuf_len, "%s", "Client sent malformed request");
+	}
+	
+	else if ( conn->request_len <= 0 ) {
+
+		if ( conn->data_len > 0 ) {
+
+			XX_httplib_snprintf( conn, NULL, ebuf, ebuf_len, "%s", "Client sent malformed request" );
 			*err = 400;
-		} else {
-			/* Server did not send anything -> just close the connection */
+		}
+		
+		else {
+			/*
+			 * Server did not send anything -> just close the connection
+			 */
+
 			conn->must_close = 1;
-			XX_httplib_snprintf(conn, NULL, ebuf, ebuf_len, "%s", "Client did not send a request");
+			XX_httplib_snprintf( conn, NULL, ebuf, ebuf_len, "%s", "Client did not send a request" );
 			*err = 0;
 		}
 		return 0;
-	} else if (XX_httplib_parse_http_message(conn->buf, conn->buf_size, &conn->request_info) <= 0) {
-		XX_httplib_snprintf(conn, NULL, ebuf, ebuf_len, "%s", "Bad Request");
+	}
+	
+	else if ( XX_httplib_parse_http_message( conn->buf, conn->buf_size, &conn->request_info ) <= 0 ) {
+
+		XX_httplib_snprintf( conn, NULL, ebuf, ebuf_len, "%s", "Bad Request" );
 		*err = 400;
 		return 0;
-	} else {
-		/* Message is a valid request or response */
-		if ((cl = XX_httplib_get_header(&conn->request_info, "Content-Length")) != NULL) {
-			/* Request/response has content length set */
+	}
+	
+	else {
+		/*
+		 * Message is a valid request or response
+		 */
+
+		if ( (cl = XX_httplib_get_header( &conn->request_info, "Content-Length")) != NULL ) {
+
+			/*
+			 * Request/response has content length set
+			 */
+
 			char *endptr = NULL;
-			conn->content_len = strtoll(cl, &endptr, 10);
-			if (endptr == cl) {
-				XX_httplib_snprintf(conn, NULL, ebuf, ebuf_len, "%s", "Bad Request");
+			conn->content_len = strtoll( cl, &endptr, 10 );
+
+			if ( endptr == cl ) {
+
+				XX_httplib_snprintf( conn, NULL, ebuf, ebuf_len, "%s", "Bad Request" );
 				*err = 411;
 				return 0;
 			}
-			/* Publish the content length back to the request info. */
+
+			/*
+			 * Publish the content length back to the request info.
+			 */
+
 			conn->request_info.content_length = conn->content_len;
-		} else if ((cl = XX_httplib_get_header(&conn->request_info, "Transfer-Encoding"))
-		               != NULL
-		           && !httplib_strcasecmp(cl, "chunked")) {
+		}
+		
+		else if ( (cl = XX_httplib_get_header( &conn->request_info, "Transfer-Encoding" )) != NULL  &&  ! httplib_strcasecmp( cl, "chunked" ) ) {
+
 			conn->is_chunked = 1;
-		} else if (!httplib_strcasecmp(conn->request_info.request_method, "POST")
-		           || !httplib_strcasecmp(conn->request_info.request_method, "PUT")) {
-			/* POST or PUT request without content length set */
+		}
+		
+		else if ( ! httplib_strcasecmp( conn->request_info.request_method, "POST" )  ||  ! httplib_strcasecmp( conn->request_info.request_method, "PUT" ) ) {
+
+			/*
+			 * POST or PUT request without content length set
+			 */
+
 			conn->content_len = -1;
-		} else if (!httplib_strncasecmp(conn->request_info.request_method, "HTTP/", 5)) {
-			/* Response without content length set */
+		}
+		
+		else if ( ! httplib_strncasecmp( conn->request_info.request_method, "HTTP/", 5 ) ) {
+
+			/*
+			 * Response without content length set
+			 */
+
 			conn->content_len = -1;
 		} else {
-			/* Other request */
+
+			/*
+			 * Other request
+			 */
+
 			conn->content_len = 0;
 		}
 	}
+
 	return 1;
 
 }  /* XX_httplib_getreq */

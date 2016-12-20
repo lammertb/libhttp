@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
@@ -31,37 +31,48 @@
 /*
  * int httplib_get_response( struct httplib_connection *conn, char *ebuf, size_t ebuf_len, int timeout );
  *
- * The function httplib_get_response tries to get a response from a remote peer.
+ * The function httplib_get_response() tries to get a response from a remote
+ * peer.
  */
 
 int httplib_get_response( struct httplib_connection *conn, char *ebuf, size_t ebuf_len, int timeout ) {
 
-	if ( conn == NULL ) return -1;
-
-	/* Implementation of API function for HTTP clients */
-	int err, ret;
-	struct httplib_context *octx = conn->ctx;
-	struct httplib_context rctx = *(conn->ctx);
+	int err;
+	int ret;
+	struct httplib_context *octx;
+	struct httplib_context rctx;
 	char txt[32]; /* will not overflow */
 
-	if (timeout >= 0) {
-		XX_httplib_snprintf(conn, NULL, txt, sizeof(txt), "%i", timeout);
+	if ( conn == NULL ) return -1;
+
+	octx =   conn->ctx;
+	rctx = *(conn->ctx);
+
+	if ( timeout >= 0 ) {
+
+		XX_httplib_snprintf( conn, NULL, txt, sizeof(txt), "%i", timeout );
 		rctx.config[REQUEST_TIMEOUT] = txt;
-		XX_httplib_set_sock_timeout(conn->client.sock, timeout);
-	} else {
-		rctx.config[REQUEST_TIMEOUT] = NULL;
+		XX_httplib_set_sock_timeout( conn->client.sock, timeout );
 	}
+	
+	else rctx.config[REQUEST_TIMEOUT] = NULL;
 
 	conn->ctx = &rctx;
-	ret = XX_httplib_getreq(conn, ebuf, ebuf_len, &err);
+	ret       = XX_httplib_getreq( conn, ebuf, ebuf_len, &err );
 	conn->ctx = octx;
 
-	/* TODO: 1) uri is deprecated;
-	 *       2) here, ri.uri is the http response code */
+	/*
+	 * TODO: 1) uri is deprecated;
+	 *       2) here, ri.uri is the http response code
+	 */
+
 	conn->request_info.uri = conn->request_info.request_uri;
 
-	/* TODO (mid): Define proper return values - maybe return length?
-	 * For the first test use <0 for error and >0 for OK */
+	/*
+	 * TODO (mid): Define proper return values - maybe return length?
+	 * For the first test use <0 for error and >0 for OK
+	 */
+
 	return (ret == 0) ? -1 : +1;
 
 }  /* httplib_get_response */

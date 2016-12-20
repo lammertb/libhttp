@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
@@ -38,74 +38,86 @@ const char * XX_httplib_get_rel_url_at_current_server( const char *uri, const st
 
 	const char *server_domain;
 	size_t server_domain_len;
-	size_t request_domain_len = 0;
-	unsigned long port = 0;
+	size_t request_domain_len;
+	unsigned long port;
 	int i;
-	const char *hostbegin = NULL;
-	const char *hostend = NULL;
+	const char *hostbegin;
+	const char *hostend;
 	const char *portbegin;
 	char *portend;
 
-	/* DNS is case insensitive, so use case insensitive string compare here
-	 */
-	server_domain = conn->ctx->config[AUTHENTICATION_DOMAIN];
-	if (!server_domain) {
-		return 0;
-	}
-	server_domain_len = strlen(server_domain);
-	if (!server_domain_len) {
-		return 0;
-	}
+	request_domain_len = 0;
+	port               = 0;
+	hostbegin          = NULL;
+	hostend            = NULL;
 
-	for (i = 0; XX_httplib_abs_uri_protocols[i].proto != NULL; i++) {
-		if (httplib_strncasecmp(uri,
-		                   XX_httplib_abs_uri_protocols[i].proto,
-		                   XX_httplib_abs_uri_protocols[i].proto_len) == 0) {
+	/*
+	 * DNS is case insensitive, so use case insensitive string compare here
+	 */
+
+	server_domain = conn->ctx->config[AUTHENTICATION_DOMAIN];
+	if ( server_domain == NULL ) return 0;
+
+	server_domain_len = strlen( server_domain );
+	if ( server_domain_len == 0 ) return 0;
+
+	for (i=0; XX_httplib_abs_uri_protocols[i].proto != NULL; i++) {
+
+		if ( httplib_strncasecmp( uri, XX_httplib_abs_uri_protocols[i].proto, XX_httplib_abs_uri_protocols[i].proto_len ) == 0 ) { 
 
 			hostbegin = uri + XX_httplib_abs_uri_protocols[i].proto_len;
-			hostend = strchr(hostbegin, '/');
-			if (!hostend) {
-				return 0;
-			}
-			portbegin = strchr(hostbegin, ':');
-			if ((!portbegin) || (portbegin > hostend)) {
+			hostend   = strchr( hostbegin, '/' );
+
+			if ( hostend == NULL ) return 0;
+
+			portbegin = strchr( hostbegin, ':' );
+
+			if ( ! portbegin  ||   portbegin > hostend ) {
+
 				port = XX_httplib_abs_uri_protocols[i].default_port;
 				request_domain_len = (size_t)(hostend - hostbegin);
-			} else {
-				port = strtoul(portbegin + 1, &portend, 10);
-				if ((portend != hostend) || !port || !XX_httplib_is_valid_port(port)) {
-					return 0;
-				}
+			}
+			
+			else {
+				port = strtoul( portbegin + 1, &portend, 10 );
+				if ( portend != hostend  ||  ! port  ||  ! XX_httplib_is_valid_port( port ) ) return 0;
 				request_domain_len = (size_t)(portbegin - hostbegin);
 			}
-			/* protocol found, port set */
+
+			/*
+			 * protocol found, port set
+			 */
+
 			break;
 		}
 	}
 
-	if (!port) {
-		/* port remains 0 if the protocol is not found */
+	if ( port == 0 ) {
+		/*
+		 * port remains 0 if the protocol is not found
+		 */
+
 		return 0;
 	}
 
 #if defined(USE_IPV6)
-	if (conn->client.lsa.sa.sa_family == AF_INET6) {
-		if (ntohs(conn->client.lsa.sin6.sin6_port) != port) {
-			/* Request is directed to a different port */
-			return 0;
-		}
-	} else
+	if ( conn->client.lsa.sa.sa_family == AF_INET6 ) {
+
+		if ( ntohs( conn->client.lsa.sin6.sin6_port ) != port ) return 0;
+	}
+	
+	else
 #endif
 	{
-		if (ntohs(conn->client.lsa.sin.sin_port) != port) {
-			/* Request is directed to a different port */
-			return 0;
-		}
+		if ( ntohs( conn->client.lsa.sin.sin_port ) != port ) return 0;
 	}
 
-	if ((request_domain_len != server_domain_len)
-	    || (0 != memcmp(server_domain, hostbegin, server_domain_len))) {
-		/* Request is directed to another server */
+	if ( request_domain_len != server_domain_len  ||  ( memcmp( server_domain, hostbegin, server_domain_len ) != 0 ) ) {
+
+		/*
+		 * Request is directed to another server
+		 */
+
 		return 0;
 	}
 

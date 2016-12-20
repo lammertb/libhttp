@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
@@ -35,22 +35,29 @@ const char *XX_httplib_fgets( char *buf, size_t size, struct file *filep, char *
 
 	if ( filep == NULL ) return NULL;
 
-	if (filep->membuf != NULL && *p != NULL) {
+	if ( filep->membuf != NULL && *p != NULL ) {
+
 		memend = (const char *)&filep->membuf[filep->size];
-		/* Search for \n from p till the end of stream */
+
+		/*
+		 * Search for \n from p till the end of stream
+		 */
+
 		eof = (char *)memchr(*p, '\n', (size_t)(memend - *p));
-		if (eof != NULL) {
-			eof += 1; /* Include \n */
-		} else {
-			eof = memend; /* Copy remaining data */
-		}
+
+		if ( eof != NULL ) eof += 1;		/* Include \n			*/
+		else               eof  = memend;	/* Copy remaining data		*/
+
 		len = ((size_t)(eof - *p) > (size - 1)) ? (size - 1) : (size_t)(eof - *p);
-		memcpy(buf, *p, len);
+		memcpy( buf, *p, len );
 		buf[len] = '\0';
-		*p += len;
-		return len ? eof : NULL;
-	} else if (filep->fp != NULL) {
-		return fgets(buf, (int)size, filep->fp);
-	} else return NULL;
+		*p      += len;
+
+		return (len) ? eof : NULL;
+	}
+	
+	if ( filep->fp != NULL ) return fgets( buf, (int)size, filep->fp );
+	
+	return NULL;
 
 }  /* XX_httplib_fgets */

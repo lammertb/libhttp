@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
@@ -39,23 +39,20 @@
 int XX_httplib_set_uid_option( struct httplib_context *ctx ) {
 
 	struct passwd *pw;
+	const char *uid;
 
-	if ( ctx != NULL ) {
+	if ( ctx == NULL ) return 0;
 
-		const char *uid = ctx->config[RUN_AS_USER];
-		int success = 0;
+	uid = ctx->config[RUN_AS_USER];
 
-		if (uid == NULL) success = 1;
-		else {
-			if      ( (pw = getpwnam(uid)) == NULL ) httplib_cry( XX_httplib_fc(ctx), "%s: unknown user [%s]", __func__, uid                  );
-			else if ( setgid(pw->pw_gid)   == -1   ) httplib_cry( XX_httplib_fc(ctx), "%s: setgid(%s): %s",    __func__, uid, strerror(errno) );
-			else if ( setgroups(0, NULL)           ) httplib_cry( XX_httplib_fc(ctx), "%s: setgroups(): %s",   __func__,      strerror(errno) );
-			else if ( setuid(pw->pw_uid)   == -1   ) httplib_cry( XX_httplib_fc(ctx), "%s: setuid(%s): %s",    __func__, uid, strerror(errno) );
-			else success = 1;
-		}
+	if ( uid == NULL ) return 1;
 
-		return success;
-	}
+	if      ( (pw = getpwnam(uid)) == NULL ) httplib_cry( XX_httplib_fc(ctx), "%s: unknown user [%s]", __func__, uid                  );
+	else if ( setgid(pw->pw_gid)   == -1   ) httplib_cry( XX_httplib_fc(ctx), "%s: setgid(%s): %s",    __func__, uid, strerror(errno) );
+	else if ( setgroups(0, NULL)           ) httplib_cry( XX_httplib_fc(ctx), "%s: setgroups(): %s",   __func__,      strerror(errno) );
+	else if ( setuid(pw->pw_uid)   == -1   ) httplib_cry( XX_httplib_fc(ctx), "%s: setuid(%s): %s",    __func__, uid, strerror(errno) );
+	else return 1;
+
 	return 0;
 
 }  /* XX_httplib_set_uid_option */

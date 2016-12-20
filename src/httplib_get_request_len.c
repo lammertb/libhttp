@@ -22,34 +22,41 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
 
-/* Check whether full request is buffered. Return:
+/*
+ * Check whether full request is buffered. Return:
  * -1  if request is malformed
  *  0  if request is not yet fully buffered
- * >0  actual request length, including last \r\n\r\n */
+ * >0  actual request length, including last \r\n\r\n
+ */
+
 int XX_httplib_get_request_len( const char *buf, int buflen ) {
 
 	const char *s;
 	const char *e;
-	int len = 0;
+	int len;
 
-	for (s = buf, e = s + buflen - 1; len <= 0 && s < e; s++)
-		/* Control characters are not allowed but >=128 is. */
-		if (!isprint(*(const unsigned char *)s) && *s != '\r' && *s != '\n'
-		    && *(const unsigned char *)s < 128) {
-			len = -1;
-			break; /* [i_a] abort scan as soon as one malformed character is
-			        * found; */
-			/* don't let subsequent \r\n\r\n win us over anyhow */
-		} else if (s[0] == '\n' && s[1] == '\n') {
-			len = (int)(s - buf) + 2;
-		} else if (s[0] == '\n' && &s[1] < e && s[1] == '\r' && s[2] == '\n') {
-			len = (int)(s - buf) + 3;
-		}
+	len = 0;
+	s   = buf;
+	e   = s+buflen-1;
+
+	while ( len <= 0  &&  s < e ) {
+
+		/*
+		 * Control characters are not allowed but >=128 is.
+		 */
+
+		if ( ! isprint( *(const unsigned char *)s) && *s != '\r'  &&  *s != '\n'  &&  *(const unsigned char *)s < 128 ) return -1;
+
+		if      ( s[0] == '\n'  &&                                   s[1] == '\n') len = (int)(s - buf) + 2;
+		else if ( s[0] == '\n'  &&  &s[1] < e  &&  s[1] == '\r'  &&  s[2] == '\n') len = (int)(s - buf) + 3;
+
+		s++;
+	}
 
 	return len;
 

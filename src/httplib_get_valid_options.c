@@ -22,12 +22,12 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
 
-const struct httplib_option *httplib_get_valid_options(void) {
+const struct httplib_option *httplib_get_valid_options( void ) {
 
 	return XX_httplib_config_options;
 

@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
@@ -42,32 +42,41 @@ struct httplib_connection * httplib_download( const char *host, int port, int us
 	int i;
 	int reqerr;
 
-	va_start(ap, fmt);
+	va_start( ap, fmt );
 	ebuf[0] = '\0';
 
-	/* open a connection */
-	conn = httplib_connect_client(host, port, use_ssl, ebuf, ebuf_len);
+	conn = httplib_connect_client( host, port, use_ssl, ebuf, ebuf_len );
 
-	if (conn != NULL) {
-		i = XX_httplib_vprintf(conn, fmt, ap);
-		if (i <= 0) {
-			XX_httplib_snprintf(conn, NULL, ebuf, ebuf_len, "%s", "Error sending request");
-		} else {
+	if ( conn != NULL ) {
+
+		i = XX_httplib_vprintf( conn, fmt, ap );
+
+		if (i <= 0) XX_httplib_snprintf( conn, NULL, ebuf, ebuf_len, "%s", "Error sending request" );
+		
+		else {
 			XX_httplib_getreq(conn, ebuf, ebuf_len, &reqerr);
 
-			/* TODO: 1) uri is deprecated;
-			 *       2) here, ri.uri is the http response code */
+			/*
+			 * TODO: 1) uri is deprecated;
+			 *       2) here, ri.uri is the http response code
+			 */
+
 			conn->request_info.uri = conn->request_info.request_uri;
 		}
 	}
 
-	/* if an error occured, close the connection */
-	if (ebuf[0] != '\0' && conn != NULL) {
-		httplib_close_connection(conn);
+	/*
+	 * if an error occured, close the connection
+	 */
+
+	if ( ebuf[0] != '\0'  &&  conn != NULL ) {
+
+		httplib_close_connection( conn );
 		conn = NULL;
 	}
 
-	va_end(ap);
+	va_end( ap );
+
 	return conn;
 
 }  /* httplib_download */

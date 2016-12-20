@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
@@ -31,10 +31,12 @@
 const char *XX_httplib_get_header( const struct httplib_request_info *ri, const char *name ) {
 
 	int i;
-	if (ri) {
-		for (i = 0; i < ri->num_headers; i++) {
-			if (!httplib_strcasecmp(name, ri->http_headers[i].name)) return ri->http_headers[i].value;
-		}
+
+	if ( ri == NULL  ||  name == NULL ) return NULL;
+
+	for (i=0; i<ri->num_headers; i++) {
+
+		if ( ! httplib_strcasecmp( name, ri->http_headers[i].name ) ) return ri->http_headers[i].value;
 	}
 
 	return NULL;

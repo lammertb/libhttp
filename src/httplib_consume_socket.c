@@ -22,11 +22,13 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
 #include "httplib_pthread.h"
+
+#define QUEUE_SIZE(ctx) ((int)(ARRAY_SIZE(ctx->queue)))
 
 /*
  * int XX_httplib_consume_socket( struct httplib_context *ctx, struct socket *sp, int thread_index );
@@ -40,10 +42,10 @@
 int XX_httplib_consume_socket( struct httplib_context *ctx, struct socket *sp, int thread_index ) {
 
 	ctx->client_socks[thread_index].in_use = 0;
-	event_wait(ctx->client_wait_events[thread_index]);
+	event_wait( ctx->client_wait_events[thread_index] );
 	*sp = ctx->client_socks[thread_index];
 
-	return !ctx->stop_flag;
+	return ! ctx->stop_flag;
 
 }  /* XX_httplib_consume_socket */
 
@@ -52,26 +54,34 @@ int XX_httplib_consume_socket( struct httplib_context *ctx, struct socket *sp, i
 /* Worker threads take accepted socket from the queue */
 int XX_httplib_consume_socket( struct httplib_context *ctx, struct socket *sp, int thread_index ) {
 
-#define QUEUE_SIZE(ctx) ((int)(ARRAY_SIZE(ctx->queue)))
-
 	UNUSED_PARAMETER(thread_index);
 
 	httplib_pthread_mutex_lock( & ctx->thread_mutex );
 
-	/* If the queue is empty, wait. We're idle at this point. */
-	while (ctx->sq_head == ctx->sq_tail && ctx->stop_flag == 0) {
+	/*
+	 * If the queue is empty, wait. We're idle at this point.
+	 */
 
-		httplib_pthread_cond_wait( & ctx->sq_full, & ctx->thread_mutex );
-	}
+	while ( ctx->sq_head == ctx->sq_tail  &&  ctx->stop_flag == 0 ) httplib_pthread_cond_wait( & ctx->sq_full, & ctx->thread_mutex );
 
-	/* If we're stopping, sq_head may be equal to sq_tail. */
-	if (ctx->sq_head > ctx->sq_tail) {
-		/* Copy socket from the queue and increment tail */
+	/*
+	 * If we're stopping, sq_head may be equal to sq_tail.
+	 */
+
+	if ( ctx->sq_head > ctx->sq_tail ) {
+
+		/*
+		 * Copy socket from the queue and increment tail
+		 */
+
 		*sp = ctx->queue[ctx->sq_tail % QUEUE_SIZE(ctx)];
 		ctx->sq_tail++;
 
-		/* Wrap pointers if needed */
-		while (ctx->sq_tail > QUEUE_SIZE(ctx)) {
+		/*
+		 * Wrap pointers if needed
+		 */
+
+		while ( ctx->sq_tail > QUEUE_SIZE(ctx) ) {
 
 			ctx->sq_tail -= QUEUE_SIZE(ctx);
 			ctx->sq_head -= QUEUE_SIZE(ctx);
@@ -81,8 +91,7 @@ int XX_httplib_consume_socket( struct httplib_context *ctx, struct socket *sp, i
 	httplib_pthread_cond_signal(  & ctx->sq_empty     );
 	httplib_pthread_mutex_unlock( & ctx->thread_mutex );
 
-	return !ctx->stop_flag;
-#undef QUEUE_SIZE
+	return ! ctx->stop_flag;
 
 }  /* XX_httplib_consume_socket */
 

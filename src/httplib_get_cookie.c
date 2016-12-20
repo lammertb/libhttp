@@ -22,42 +22,49 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 1.9
  */
 
 #include "httplib_main.h"
 #include "httplib_string.h"
 
 /* HCP24: some changes to compare hole var_name */
-int httplib_get_cookie(const char *cookie_header, const char *var_name, char *dst, size_t dst_size) {
+int httplib_get_cookie( const char *cookie_header, const char *var_name, char *dst, size_t dst_size ) {
 
 	const char *s;
 	const char *p;
 	const char *end;
 	int name_len;
-	int len = -1;
+	int len;
 
-	if (dst == NULL || dst_size == 0) return -2;
+	if ( dst == NULL  ||  dst_size < 1 ) return -2;
 
+	len    = -1;
 	dst[0] = '\0';
-	if (var_name == NULL || (s = cookie_header) == NULL) return -1;
+	if ( var_name == NULL  ||  cookie_header == NULL ) return -1;
 
-	name_len = (int)strlen(var_name);
-	end = s + strlen(s);
+	s = cookie_header;
+
+	name_len = (int)strlen( var_name );
+	end      = s + strlen( s );
+
 	for (; (s = httplib_strcasestr( s, var_name )) != NULL; s += name_len) {
 		if (s[name_len] == '=') {
-			/* HCP24: now check is it a substring or a full cookie name */
+
+			/*
+			 * HCP24: now check is it a substring or a full cookie name
+			 */
+
 			if ((s == cookie_header) || (s[-1] == ' ')) {
 				s += name_len + 1;
-				if ((p = strchr(s, ' ')) == NULL) {
-					p = end;
-				}
-				if (p[-1] == ';') p--;
-				if (*s == '"' && p[-1] == '"' && p > s + 1) {
+				if ( (p = strchr(s, ' ')) == NULL ) p = end;
+				if ( p[-1] == ';' ) p--;
+				if ( *s == '"' && p[-1] == '"' && p > s + 1 ) {
 					s++;
 					p--;
 				}
 				if ((size_t)(p - s) < dst_size) {
+
 					len = (int)(p - s);
 					httplib_strlcpy( dst, s, (size_t)len+1 );
 				} else len = -3;
@@ -65,6 +72,7 @@ int httplib_get_cookie(const char *cookie_header, const char *var_name, char *ds
 			}
 		}
 	}
+
 	return len;
 
 }  /* httplib_get_cookie */

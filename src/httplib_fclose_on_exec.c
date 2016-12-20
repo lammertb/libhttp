@@ -22,21 +22,22 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
 
 void XX_httplib_fclose_on_exec( struct file *filep, struct httplib_connection *conn ) {
 
-	if (filep != NULL && filep->fp != NULL) {
+	if ( filep == NULL  ||  filep->fp == NULL ) return;
+
 #ifdef _WIN32
-		(void)conn; /* Unused. */
+	UNUSED_PARAMETER(conn);
 #else
-		if (fcntl(fileno(filep->fp), F_SETFD, FD_CLOEXEC) != 0) {
-			httplib_cry(conn, "%s: fcntl(F_SETFD FD_CLOEXEC) failed: %s", __func__, strerror(ERRNO));
-		}
-#endif
+	if ( fcntl( fileno( filep->fp ), F_SETFD, FD_CLOEXEC) != 0 ) {
+
+		httplib_cry( conn, "%s: fcntl(F_SETFD FD_CLOEXEC) failed: %s", __func__, strerror(ERRNO) );
 	}
+#endif
 
 }  /* XX_httplib_fclose_on_exec */

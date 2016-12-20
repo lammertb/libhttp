@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
@@ -33,9 +33,9 @@ int httplib_printf( struct httplib_connection *conn, const char *fmt, ... ) {
 	va_list ap;
 	int result;
 
-	va_start(ap, fmt);
-	result = XX_httplib_vprintf(conn, fmt, ap);
-	va_end(ap);
+	va_start( ap, fmt );
+	result = XX_httplib_vprintf( conn, fmt, ap );
+	va_end( ap );
 
 	return result;
 

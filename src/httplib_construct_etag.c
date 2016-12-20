@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
@@ -37,8 +37,9 @@
 
 void XX_httplib_construct_etag( char *buf, size_t buf_len, const struct file *filep ) {
 
-	if (filep != NULL && buf != NULL) {
-		XX_httplib_snprintf(NULL, NULL, buf, buf_len, "\"%lx.%" INT64_FMT "\"", (unsigned long)filep->last_modified, filep->size);
+	if ( filep != NULL  &&  buf != NULL  &&  buf_len > 0 ) {
+
+		XX_httplib_snprintf( NULL, NULL, buf, buf_len, "\"%lx.%" INT64_FMT "\"", (unsigned long)filep->last_modified, filep->size );
 	}
 
 }  /* XX_httplib_construct_etag */

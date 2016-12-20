@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
@@ -47,30 +47,37 @@ void XX_httplib_free_context( struct httplib_context *ctx ) {
 
 	if ( ctx->callbacks.exit_context ) ctx->callbacks.exit_context( ctx );
 
-	/* All threads exited, no sync is needed. Destroy thread mutex and
+	/*
+	 * All threads exited, no sync is needed. Destroy thread mutex and
 	 * condvars
 	 */
+
 	httplib_pthread_mutex_destroy( & ctx->thread_mutex );
 #if defined(ALTERNATIVE_QUEUE)
-	XX_httplib_free(ctx->client_socks);
-	for (i = 0; (unsigned)i < ctx->cfg_worker_threads; i++) {
-		event_destroy(ctx->client_wait_events[i]);
-	}
-	XX_httplib_free(ctx->client_wait_events);
+	XX_httplib_free( ctx->client_socks );
+	for (i=0; (unsigned)i < ctx->cfg_worker_threads; i++) event_destroy( ctx->client_wait_events[i] );
+	XX_httplib_free( ctx->client_wait_events );
 #else
 	httplib_pthread_cond_destroy( & ctx->sq_empty );
 	httplib_pthread_cond_destroy( & ctx->sq_full  );
 #endif
 
-	/* Destroy other context global data structures mutex */
+	/*
+	 * Destroy other context global data structures mutex
+	 */
+
 	httplib_pthread_mutex_destroy( & ctx->nonce_mutex );
 
 #if defined(USE_TIMERS)
 	timers_exit( ctx );
 #endif
 
-	/* Deallocate config parameters */
+	/*
+	 * Deallocate config parameters
+	 */
+
 	for (i = 0; i < NUM_OPTIONS; i++) {
+
 		if (ctx->config[i] != NULL) {
 #if defined(_MSC_VER)
 #pragma warning(suppress : 6001)
@@ -79,38 +86,60 @@ void XX_httplib_free_context( struct httplib_context *ctx ) {
 		}
 	}
 
-	/* Deallocate request handlers */
-	while (ctx->handlers) {
-		tmp_rh = ctx->handlers;
+	/*
+	 * Deallocate request handlers
+	 */
+
+	while ( ctx->handlers ) {
+
+		tmp_rh        = ctx->handlers;
 		ctx->handlers = tmp_rh->next;
+
 		httplib_free( tmp_rh->uri );
 		httplib_free( tmp_rh      );
 	}
 
 #ifndef NO_SSL
-	/* Deallocate SSL context */
-	if (ctx->ssl_ctx != NULL) SSL_CTX_free(ctx->ssl_ctx);
+
+	/*
+	 * Deallocate SSL context
+	 */
+
+	if ( ctx->ssl_ctx != NULL ) SSL_CTX_free( ctx->ssl_ctx );
+
 #endif /* !NO_SSL */
 
-	/* Deallocate worker thread ID array */
-	if (ctx->workerthreadids != NULL) httplib_free( ctx->workerthreadids );
+	/*
+	 * Deallocate worker thread ID array
+	 */
 
-	/* Deallocate the tls variable */
-	if (httplib_atomic_dec(&XX_httplib_sTlsInit) == 0) {
+	if ( ctx->workerthreadids != NULL ) httplib_free( ctx->workerthreadids );
+
+	/*
+	 * Deallocate the tls variable
+	 */
+
+	if ( httplib_atomic_dec(&XX_httplib_sTlsInit) == 0 ) {
 #if defined(_WIN32)
-		DeleteCriticalSection(&global_log_file_lock);
+		DeleteCriticalSection( & global_log_file_lock );
 #endif /* _WIN32 */
 #if !defined(_WIN32)
-		pthread_mutexattr_destroy(&XX_httplib_pthread_mutex_attr);
+		pthread_mutexattr_destroy( & XX_httplib_pthread_mutex_attr );
 #endif
 
 		httplib_pthread_key_delete( XX_httplib_sTlsKey );
 	}
 
-	/* deallocate system name string */
+	/*
+	 * deallocate system name string
+	 */
+
 	httplib_free( ctx->systemName );
 
-	/* Deallocate context itself */
+	/*
+	 * Deallocate context itself
+	 */
+
 	httplib_free( ctx );
 
 }  /* XX_httplib_free_context */

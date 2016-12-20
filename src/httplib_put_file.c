@@ -47,7 +47,7 @@ void XX_httplib_put_file( struct httplib_connection *conn, const char *path ) {
 	char date[64];
 	time_t curtime;
 
-	if (conn == NULL) return;
+	if ( conn == NULL ) return;
 
 	curtime = time( NULL );
 

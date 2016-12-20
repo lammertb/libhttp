@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
@@ -37,42 +37,49 @@
 
 #if defined(ALTERNATIVE_QUEUE)
 
-void * event_create(void) {
+void *event_create( void ) {
 
-	int ret = eventfd(0, EFD_CLOEXEC);
-	if (ret == -1) {
-		/* Linux uses -1 on error, Windows NULL. */
-		/* However, Linux does not return 0 on success either. */
-		return 0;
+	int ret;
+
+	ret = eventfd( 0, EFD_CLOEXEC );
+
+	if ( ret == -1 ) {
+
+		/*
+		 * Linux uses -1 on error, Windows NULL.
+		 * However, Linux does not return 0 on success either.
+		 */
+
+		return NULL;
 	}
 	return (void *)ret;
 
 }  /* event_create */
 
 
-int event_wait(void *eventhdl) {
+int event_wait( void *eventhdl ) {
 
 	uint64_t u;
-	int s = (int)read((int)eventhdl, &u, sizeof(u));
-	if (s != sizeof(uint64_t)) {
-		/* error */
-		return 0;
-	}
-	(void)u; /* the value is not required */
+	int s;
+
+	s = (int)read( (int)eventhdl, &u, sizeof(u) );
+	if ( s != sizeof(uint64_t) ) return 0;
+
 	return 1;
 
 }  /* event_wait */
 
 
-int event_signal(void *eventhdl) {
+int event_signal( void *eventhdl ) {
 
-	uint64_t u = 1;
-	int s = (int)write((int)eventhdl, &u, sizeof(u));
+	uint64_t u;
+	int s;
 
-	if (s != sizeof(uint64_t)) {
-		/* error */
-		return 0;
-	}
+	u = 1;
+	s = (int)write( (int)eventhdl, &u, sizeof(u) );
+
+	if ( s != sizeof(uint64_t) ) return 0;
+
 	return 1;
 
 }  /* event_signal */
@@ -80,7 +87,7 @@ int event_signal(void *eventhdl) {
 
 void event_destroy( void *eventhdl ) {
 
-	close((int)eventhdl);
+	close( (int)eventhdl );
 
 }  /* event_destroy */
 
@@ -92,6 +99,7 @@ void event_destroy( void *eventhdl ) {
 #if !defined(__linux__) && !defined(_WIN32) && defined(ALTERNATIVE_QUEUE)
 
 struct posix_event {
+
 	pthread_mutex_t mutex;
 	pthread_cond_t cond;
 };
@@ -99,20 +107,31 @@ struct posix_event {
 
 void *event_create(void) {
 
-	struct posix_event *ret = XX_httplib_malloc(sizeof(struct posix_event));
+	struct posix_event *ret;
+       
+	ret = XX_httplib_malloc( sizeof(struct posix_event) );
 	if ( ret == NULL ) return NULL;
 
-	if (0 != httplib_pthread_mutex_init( & ret->mutex, NULL ) ) {
-		/* pthread mutex not available */
-		XX_httplib_free(ret);
+	if ( httplib_pthread_mutex_init( & ret->mutex, NULL ) != 0 ) {
+
+		/*
+		 * pthread mutex not available
+		 */
+
+		XX_httplib_free( ret );
 		return NULL;
 	}
-	if (0 != httplib_pthread_cond_init( & ret->cond, NULL)) {
-		/* pthread cond not available */
+	if ( httplib_pthread_cond_init( & ret->cond, NULL ) != 0 ) {
+
+		/*
+		 * pthread cond not available
+		 */
+
 		httplib_pthread_mutex_destroy( & ret->mutex );
-		XX_httplib_free(ret);
+		XX_httplib_free( ret );
 		return NULL;
 	}
+
 	return ret;
 
 }  /* event_create */
@@ -167,16 +186,18 @@ void event_destroy( void *eventhdl ) {
 
 
 #if defined(_WIN32)  &&  defined(ALTERNATIVE_QUEUE)
-void *event_create(void) {
+void *event_create( void ) {
 
 	return (void *) CreateEvent( NULL, FALSE, FALSE, NULL );
 
 }  /* event_create */
 
 
-int event_wait(void *eventhdl) {
+int event_wait( void *eventhdl ) {
 
-	int res = WaitForSingleObject( (HANDLE) eventhdl, INFINITE );
+	int res;
+       
+	res = WaitForSingleObject( (HANDLE) eventhdl, INFINITE );
 	return ( res == WAIT_OBJECT_0 );
 
 }  /* event_wait */

@@ -22,10 +22,18 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
+
+/*
+ * void XX_httplib_discard_unread_request_data( struct httplib_connection *conn );
+ *
+ * The function XX_httplib_discard_unread_request_data() discards any request
+ * data on a connection which is not further needed but has alread been
+ * received.
+ */
 
 void XX_httplib_discard_unread_request_data( struct httplib_connection *conn ) {
 
@@ -33,29 +41,38 @@ void XX_httplib_discard_unread_request_data( struct httplib_connection *conn ) {
 	size_t to_read;
 	int nread;
 
-	if (conn == NULL) {
-		return;
-	}
+	if ( conn == NULL ) return;
 
 	to_read = sizeof(buf);
 
-	if (conn->is_chunked) {
-		/* Chunked encoding: 1=chunk not read completely, 2=chunk read
-		 * completely */
-		while (conn->is_chunked == 1) {
-			nread = httplib_read(conn, buf, to_read);
-			if (nread <= 0) break;
+	if ( conn->is_chunked ) {
+
+		/*
+		 * Chunked encoding: 1=chunk not read completely, 2=chunk read
+		 * completely
+		 */
+
+		while ( conn->is_chunked == 1 ) {
+
+			nread = httplib_read( conn, buf, to_read );
+			if ( nread <= 0 ) break;
 		}
 
-	} else {
-		/* Not chunked: content length is known */
-		while (conn->consumed_content < conn->content_len) {
-			if (to_read
-			    > (size_t)(conn->content_len - conn->consumed_content)) {
+	}
+	
+	else {
+		/*
+		 * Not chunked: content length is known
+		 */
+
+		while ( conn->consumed_content < conn->content_len ) {
+
+			if ( to_read > (size_t)(conn->content_len - conn->consumed_content) ) {
+
 				to_read = (size_t)(conn->content_len - conn->consumed_content);
 			}
 
-			nread = httplib_read(conn, buf, to_read);
+			nread = httplib_read( conn, buf, to_read );
 			if (nread <= 0) break;
 		}
 	}

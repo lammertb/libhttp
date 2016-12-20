@@ -22,16 +22,22 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
 #include "httplib_utils.h"
 
-/* difftime for struct timespec. Return value is in seconds. */
-double XX_httplib_difftimespec(const struct timespec *ts_now, const struct timespec *ts_before) {
+/*
+ * double XX_httplib_difftimespec( const struct timespec_ts_now, const struct timespec *ts_before );
+ *
+ * The function XX_httplib_difftimespec() returns the time difference in
+ * seconds between two times specified with a timespec structure.
+ */
 
-	return (double)(ts_now->tv_nsec - ts_before->tv_nsec) * 1.0E-9
-	       + (double)(ts_now->tv_sec - ts_before->tv_sec);
+double XX_httplib_difftimespec( const struct timespec *ts_now, const struct timespec *ts_before ) {
+
+	return ((double)(ts_now->tv_nsec - ts_before->tv_nsec)) * 1.0E-9 +
+	       ((double)(ts_now->tv_sec  - ts_before->tv_sec ));
 
 }  /* XX_httplib_difftimespec */

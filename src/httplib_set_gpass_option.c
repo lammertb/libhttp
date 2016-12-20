@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
@@ -31,19 +31,21 @@
  * int XX_httplib_set_gpass_option( struct httplib_context *ctx );
  *
  * The function XX_httplib_set_gpass_option() sets the global password file
- * oprion for a context.
+ * option for a context.
  */
 
 int XX_httplib_set_gpass_option( struct httplib_context *ctx ) {
 
+	struct file file = STRUCT_FILE_INITIALIZER;
+	const char *path;
+
 	if ( ctx == NULL ) return 0;
 
-	struct file file = STRUCT_FILE_INITIALIZER;
-	const char *path = ctx->config[GLOBAL_PASSWORDS_FILE];
+	path = ctx->config[GLOBAL_PASSWORDS_FILE];
 
-	if (path != NULL && !XX_httplib_stat( XX_httplib_fc(ctx), path, &file)) {
+	if ( path != NULL  &&  ! XX_httplib_stat( XX_httplib_fc(ctx), path, &file ) ) {
 
-		httplib_cry( XX_httplib_fc(ctx), "Cannot open %s: %s", path, strerror(ERRNO));
+		httplib_cry( XX_httplib_fc(ctx), "Cannot open %s: %s", path, strerror(ERRNO) );
 		return 0;
 	}
 	return 1;

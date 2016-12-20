@@ -22,15 +22,18 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 1.9
  */
 
 #include "httplib_main.h"
 #include "httplib_ssl.h"
 #include "httplib_utils.h"
 
-/* Read from IO channel - opened file descriptor, socket, or SSL descriptor.
- * Return negative value on error, or number of bytes read on success. */
+/*
+ * Read from IO channel - opened file descriptor, socket, or SSL descriptor.
+ * Return negative value on error, or number of bytes read on success.
+ */
+
 int XX_httplib_pull( FILE *fp, struct httplib_connection *conn, char *buf, int len, double timeout ) {
 
 	int nread;
@@ -44,49 +47,61 @@ int XX_httplib_pull( FILE *fp, struct httplib_connection *conn, char *buf, int l
 	typedef size_t len_t;
 #endif
 
-	if (timeout > 0) {
-		memset(&start, 0, sizeof(start));
-		memset(&now, 0, sizeof(now));
-		clock_gettime(CLOCK_MONOTONIC, &start);
+	if ( timeout > 0 ) {
+
+		memset( &start, 0, sizeof(start) );
+		memset( &now,   0, sizeof(now)   );
+
+		clock_gettime( CLOCK_MONOTONIC, &start );
 	}
 
 	do {
-		if (fp != NULL) {
+		if ( fp != NULL ) {
 #if !defined(_WIN32_WCE)
-			/* Use read() instead of fread(), because if we're reading from the
+			/*
+			 * Use read() instead of fread(), because if we're reading from the
 			 * CGI pipe, fread() may block until IO buffer is filled up. We
 			 * cannot afford to block and must pass all read bytes immediately
-			 * to the client. */
-			nread = (int)read(fileno(fp), buf, (size_t)len);
+			 * to the client.
+			 */
+
+			nread = (int)read( fileno(fp), buf, (size_t)len );
 #else
-			/* WinCE does not support CGI pipes */
+			/*
+			 * WinCE does not support CGI pipes
+			 */
+
 			nread = (int)fread(buf, 1, (size_t)len, fp);
 #endif
 			err = (nread < 0) ? ERRNO : 0;
 
 #ifndef NO_SSL
-		} else if (conn->ssl != NULL) {
-			nread = SSL_read(conn->ssl, buf, len);
+		}
+		
+		else if ( conn->ssl != NULL ) {
+
+			nread = SSL_read( conn->ssl, buf, len );
+
 			if (nread <= 0) {
+
 				err = SSL_get_error(conn->ssl, nread);
-				if ((err == SSL_ERROR_SYSCALL) && (nread == -1)) {
-					err = ERRNO;
-				} else if ((err == SSL_ERROR_WANT_READ) || (err == SSL_ERROR_WANT_WRITE)) {
-					nread = 0;
-				} else return -1;
-			} else err = 0;
+				if      ( err == SSL_ERROR_SYSCALL    && (nread == -1)) err = ERRNO;
+				else if ( err == SSL_ERROR_WANT_READ  || (err == SSL_ERROR_WANT_WRITE)) nread = 0;
+				
+				else return -1;
+			}
+			else err = 0;
 #endif
 
-		} else {
+		}
+		
+		else {
 			nread = (int)recv(conn->client.sock, buf, (len_t)len, 0);
-			err = (nread < 0) ? ERRNO : 0;
-			if (nread == 0) {
-				/* shutdown of the socket at client side */
-				return -1;
-			}
+			err   = (nread < 0) ? ERRNO : 0;
+			if (nread == 0) return -1; /* shutdown of the socket at client side */
 		}
 
-		if (conn->ctx->stop_flag) return -1;
+		if ( conn->ctx->stop_flag ) return -1;
 
 		if ((nread > 0) || (nread == 0 && len == 0)) {
 			/* some data has been read, or no data was requested */
@@ -125,7 +140,10 @@ int XX_httplib_pull( FILE *fp, struct httplib_connection *conn, char *buf, int l
 		if (timeout > 0) clock_gettime(CLOCK_MONOTONIC, &now);
 	} while ((timeout <= 0) || (XX_httplib_difftimespec(&now, &start) <= timeout));
 
-	/* Timeout occured, but no data available. */
+	/*
+	 * Timeout occured, but no data available.
+	 */
+
 	return -1;
 
 }  /* XX_httplib_pull */
