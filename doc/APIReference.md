@@ -52,7 +52,7 @@ LibHTTP is often used as HTTP and HTTPS library inside a larger application.  A 
 * [`httplib_handle_form_request( conn, fdh );`](api/httplib_handle_form_request.md)
 * [`httplib_printf( conn, fmt, ... );`](api/httplib_printf.md)
 * [`httplib_read( conn, buf, len );`](api/httplib_read.md)
-* [`httplib_send_file( conn, path, mime_type, additional_headers );`](api/httplib_send_mime_file2.md)
+* [`httplib_send_file( conn, path, mime_type, additional_headers );`](api/httplib_send_file.md)
 * [`httplib_set_request_handler( ctx, uri, handler, cbdata );`](api/httplib_set_request_handler.md)
 * [`httplib_set_user_connection_data( conn, data );`](api/httplib_set_user_connection_data.md)
 * [`httplib_store_body( conn, path );`](api/httplib_store_body.md)
