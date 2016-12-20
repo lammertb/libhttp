@@ -22,31 +22,51 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
-#include "httplib_pthread.h"
+
+/*
+ * int httplib_pthread_cond_signal( pthread_cond_t *cv );
+ *
+ * The platform independent function httplib_pthread_cond_signal() unlocks a
+ * blocking condition for one thread. Of the function is successful, the value
+ * 0 will be returned. Otherwise the returned value is an error code.
+ *
+ * On systems which support it, the function is a wrapper around the function
+ * pthread_cond_signal(). In other environments own code is used which emulates
+ * the same behaviour.
+ */
+
+int httplib_pthread_cond_signal( pthread_cond_t *cv ) {
 
 #if defined(_WIN32)
 
-int pthread_cond_signal( pthread_cond_t *cv ) {
+	HANDLE wkup;
+	bool ok;
 
-	HANDLE wkup = NULL;
-	BOOL ok = FALSE;
+	wkup = NULL;
+	ok   = false;
 
-	EnterCriticalSection(&cv->threadIdSec);
-	if (cv->waiting_thread) {
-		wkup = cv->waiting_thread->pthread_cond_helper_mutex;
+	EnterCriticalSection( & cv->threadIdSec );
+
+	if ( cv->waiting_thread ) {
+
+		wkup               = cv->waiting_thread->pthread_cond_helper_mutex;
 		cv->waiting_thread = cv->waiting_thread->next_waiting_thread;
 
-		ok = SetEvent(wkup);
-		assert(ok);
+		ok = SetEvent( wkup );
 	}
-	LeaveCriticalSection(&cv->threadIdSec);
 
-	return ok ? 0 : 1;
+	LeaveCriticalSection( & cv->threadIdSec );
 
-}  /* pthread_cond_signal */
+	return ( ok ) ? 0 : 1;
 
-#endif /* _WIN32 */
+#else  /* _WIN32 */
+
+	return pthread_cond_signal( cv );
+
+#endif
+
+}  /* httplib_pthread_cond_signal */

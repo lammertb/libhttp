@@ -79,7 +79,7 @@ void XX_httplib_produce_socket(struct httplib_context *ctx, const struct socket 
 		ctx->sq_head++;
 	}
 
-	pthread_cond_signal(&ctx->sq_full);
+	httplib_pthread_cond_signal(  & ctx->sq_full      );
 	httplib_pthread_mutex_unlock( & ctx->thread_mutex );
 #undef QUEUE_SIZE
 

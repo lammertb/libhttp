@@ -32,9 +32,11 @@
 
 int pthread_cond_broadcast( pthread_cond_t *cv ) {
 
-	EnterCriticalSection(&cv->threadIdSec);
-	while (cv->waiting_thread) pthread_cond_signal(cv);
-	LeaveCriticalSection(&cv->threadIdSec);
+	EnterCriticalSection( & cv->threadIdSec );
+
+	while ( cv->waiting_thread ) httplib_pthread_cond_signal( cv );
+
+	LeaveCriticalSection( & cv->threadIdSec );
 
 	return 0;
 

@@ -131,10 +131,14 @@ int event_wait(void *eventhdl) {
 
 int event_signal(void *eventhdl) {
 
-	struct posix_event *ev = (struct posix_event *)eventhdl;
-	httplib_pthread_mutex_lock( & ev->mutex );
-	pthread_cond_signal(&(ev->cond));
+	struct posix_event *ev;
+       
+	ev = eventhdl;
+
+	httplib_pthread_mutex_lock(   & ev->mutex );
+	httplib_pthread_cond_signal(  & ev->cond  );
 	httplib_pthread_mutex_unlock( & ev->mutex );
+
 	return 1;
 
 }  /* event_signal */

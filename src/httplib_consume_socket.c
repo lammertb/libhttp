@@ -72,12 +72,13 @@ int XX_httplib_consume_socket( struct httplib_context *ctx, struct socket *sp, i
 
 		/* Wrap pointers if needed */
 		while (ctx->sq_tail > QUEUE_SIZE(ctx)) {
+
 			ctx->sq_tail -= QUEUE_SIZE(ctx);
 			ctx->sq_head -= QUEUE_SIZE(ctx);
 		}
 	}
 
-	pthread_cond_signal(&ctx->sq_empty);
+	httplib_pthread_cond_signal(  & ctx->sq_empty     );
 	httplib_pthread_mutex_unlock( & ctx->thread_mutex );
 
 	return !ctx->stop_flag;
