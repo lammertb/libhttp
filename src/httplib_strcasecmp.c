@@ -22,19 +22,25 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
 #include "httplib_utils.h"
 
-int httplib_strcasecmp(const char *s1, const char *s2) {
+/*
+ * int httplib_strcasecmp( const char *s1, const char *s2 );
+ *
+ * The function httplib_strcasecmp() provides a platform independent way to
+ * compare two strings in a case insensitive way.
+ */
+
+int httplib_strcasecmp( const char *s1, const char *s2 ) {
 
 	int diff;
 
-	do {
-		diff = XX_httplib_lowercase(s1++) - XX_httplib_lowercase(s2++);
-	} while (diff == 0 && s1[-1] != '\0');
+	if ( s1 == NULL  ||  s2 == NULL ) return 0;
+	do { diff = XX_httplib_lowercase(s1++) - XX_httplib_lowercase(s2++); } while ( diff == 0  &&  s1[-1] != '\0' );
 
 	return diff;
 

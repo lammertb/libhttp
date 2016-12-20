@@ -27,5 +27,6 @@ If the function fails the value `NULL` is returned, otherwise a pointer to the d
 
 * [`httplib_free();`](httplib_free.md)
 * [`httplib_strcasecmp();`](httplib_strcasecmp.md)
+* [`httplib_strcasestr();`](httplib_strcasestr.md)
 * [`httplib_strdup();`](httplib_strdup.md)
 * [`httplib_strncasecmp();`](httplib_strncasecmp.md)

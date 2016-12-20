@@ -134,7 +134,7 @@ struct ssl_func {
 
 int				XX_httplib_get_first_ssl_listener_index( const struct httplib_context *ctx );
 int				XX_httplib_initialize_ssl( struct httplib_context *ctx );
-int				XX_httplib_set_ssl_option( struct httplib_context *ctx );
+bool				XX_httplib_set_ssl_option( struct httplib_context *ctx );
 const char *			XX_httplib_ssl_error( void );
 void				XX_httplib_ssl_get_client_cert_info( struct httplib_connection *conn );
 long				XX_httplib_ssl_get_protocol( int version_id );

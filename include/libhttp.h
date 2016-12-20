@@ -869,8 +869,6 @@ LIBHTTP_API void httplib_cry(const struct httplib_connection *conn, PRINTF_FORMA
 
 
 /* utility methods to compare two buffers, case insensitive. */
-LIBHTTP_API int httplib_strcasecmp(const char *s1, const char *s2);
-LIBHTTP_API int httplib_strncasecmp(const char *s1, const char *s2, size_t len);
 
 
 /* Connect to a websocket as a client
@@ -1004,7 +1002,10 @@ LIBHTTP_API int			httplib_pthread_setspecific( pthread_key_t key, const void *va
 LIBHTTP_API struct dirent *	httplib_readdir( DIR *dir );
 LIBHTTP_API int			httplib_remove( const char *path );
 LIBHTTP_API void		httplib_set_alloc_callback_func( httplib_alloc_callback_func log_func );
+LIBHTTP_API int			httplib_strcasecmp( const char *s1, const char *s2 );
+LIBHTTP_API const char *	httplib_strcasestr( const char *big_str, const char *small_str );
 LIBHTTP_API void		httplib_strlcpy( char *dst, const char *src, size_t len );
+LIBHTTP_API int			httplib_strncasecmp( const char *s1, const char *s2, size_t len );
 LIBHTTP_API char *		httplib_strndup( const char *str, size_t len );
 
 #ifdef __cplusplus

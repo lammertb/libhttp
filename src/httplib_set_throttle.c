@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
@@ -37,29 +37,42 @@
 
 int XX_httplib_set_throttle( const char *spec, uint32_t remote_ip, const char *uri ) {
 
-	int throttle = 0;
-	struct vec vec, val;
-	uint32_t net, mask;
+	int facchar;
+	struct vec vec;
+	struct vec val;
+	uint32_t net;
+	uint32_t mask;
 	char mult;
 	double v;
 
-	while ((spec = XX_httplib_next_option(spec, &vec, &val)) != NULL) {
+	while ( (spec = XX_httplib_next_option( spec, & vec, & val )) != NULL ) {
+
 		mult = ',';
-		if ((val.ptr == NULL) || (sscanf(val.ptr, "%lf%c", &v, &mult) < 1)
-		    || (v < 0) || ((XX_httplib_lowercase(&mult) != 'k')
-		                   && (XX_httplib_lowercase(&mult) != 'm') && (mult != ','))) {
-			continue;
+
+		if ( val.ptr                               == NULL ) continue;
+		if ( sscanf( val.ptr, "%lf%c", &v, &mult ) <  1    ) continue;
+		if ( v                                     <  0    ) continue;             
+
+		facchar = XX_httplib_lowercase( & mult );
+
+		if ( facchar != 'k'  &&  facchar != 'm'  &&  mult != ',' ) continue;
+
+		switch ( facchar ) {
+
+			case 'k' : v *= 1024.0;        break;
+			case 'm' : v *= 1024.0*1024.0; break;
 		}
-		v *= (XX_httplib_lowercase(&mult) == 'k') ? 1024 : ((XX_httplib_lowercase(&mult) == 'm') ? 1048576 : 1);
-		if (vec.len == 1 && vec.ptr[0] == '*') {
-			throttle = (int)v;
-		} else if (XX_httplib_parse_net(vec.ptr, &net, &mask) > 0) {
-			if ((remote_ip & mask) == net) {
-				throttle = (int)v;
-			}
-		} else if (XX_httplib_match_prefix(vec.ptr, vec.len, uri) > 0) throttle = (int)v;
+
+		if ( vec.len == 1 && vec.ptr[0] == '*' ) return (int)v;
+		
+		if ( XX_httplib_parse_net( vec.ptr, &net, &mask ) > 0 ) {
+
+			if ( (remote_ip & mask) == net ) return (int)v;
+		}
+		
+		if ( XX_httplib_match_prefix( vec.ptr, vec.len, uri) > 0 ) return (int)v;
 	}
 
-	return throttle;
+	return 0;
 
 }  /* XX_httplib_set_throttle */

@@ -44,7 +44,7 @@ int httplib_get_cookie(const char *cookie_header, const char *var_name, char *ds
 
 	name_len = (int)strlen(var_name);
 	end = s + strlen(s);
-	for (; (s = XX_httplib_strcasestr(s, var_name)) != NULL; s += name_len) {
+	for (; (s = httplib_strcasestr( s, var_name )) != NULL; s += name_len) {
 		if (s[name_len] == '=') {
 			/* HCP24: now check is it a substring or a full cookie name */
 			if ((s == cookie_header) || (s[-1] == ' ')) {

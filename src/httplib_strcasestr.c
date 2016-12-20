@@ -28,18 +28,32 @@
 #include "httplib_main.h"
 #include "httplib_string.h"
 
-const char * XX_httplib_strcasestr( const char *big_str, const char *small_str ) {
+/*
+ * const char *httplib_strcasestr( const char *big_str, const char *small_str );
+ *
+ * The function httplib_strcasestr() searches case insensitive for a NUL
+ * terminated string in another string and returns a pointer to the first
+ * occurrence, or NULL if the substring could not be found.
+ */
+
+LIBHTTP_API const char *httplib_strcasestr( const char *big_str, const char *small_str ) {
 
 	size_t i;
-	size_t big_len = strlen(big_str);
-	size_t small_len = strlen(small_str);
+	size_t big_len;
+	size_t small_len;
 
-	if (big_len >= small_len) {
-		for (i = 0; i <= (big_len - small_len); i++) {
-			if (httplib_strncasecmp(big_str + i, small_str, small_len) == 0) return big_str + i;
-		}
+	if ( big_str == NULL  ||  small_str == NULL ) return NULL;
+
+	big_len   = strlen( big_str   );
+	small_len = strlen( small_str );
+
+	if ( big_len < small_len ) return NULL;
+
+	for (i=0; i<=big_len-small_len; i++) {
+
+		if ( httplib_strncasecmp( big_str+i, small_str, small_len ) == 0 ) return big_str+i;
 	}
 
 	return NULL;
 
-}  /* XX_httplib_strcasestr */
+}  /* httplib_strcasestr */

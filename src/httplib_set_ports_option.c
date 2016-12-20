@@ -22,22 +22,21 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
 #include "httplib_memory.h"
 #include "httplib_utils.h"
 
-static int parse_port_string( const struct vec *vec, struct socket *so, int *ip_version );
-
-
+static bool parse_port_string( const struct vec *vec, struct socket *so, int *ip_version );
 
 /*
  * int XX_httplib_set_ports_option( struct httplib_context *ctx );
  *
  * The function XX_httplib_set_ports_option() set the port options for a
- * context.
+ * context. The function returns the total number of ports opened, or 0 if no
+ * ports have been opened.
  */
 
 int XX_httplib_set_ports_option( struct httplib_context *ctx ) {
@@ -46,191 +45,216 @@ int XX_httplib_set_ports_option( struct httplib_context *ctx ) {
 	int on = 1;
 #if defined(USE_IPV6)
 	int off = 0;
-#endif
+#endif  /* USE_IPV6 */
 	struct vec vec;
-	struct socket so, *ptr;
-
+	struct socket so;
+	struct socket *ptr;
 	struct pollfd *pfd;
 	union usa usa;
 	socklen_t len;
 	int ip_version;
-
-	int portsTotal = 0;
-	int portsOk = 0;
+	int ports_total;
+	int ports_ok;
 
 	if ( ctx == NULL ) return 0;
 
-	memset(&so, 0, sizeof(so));
-	memset(&usa, 0, sizeof(usa));
-	len = sizeof(usa);
+	ports_total = 0;
+	ports_ok    = 0;
+
+	memset( & so,  0, sizeof(so)  );
+	memset( & usa, 0, sizeof(usa) );
+
+	len  = sizeof(usa);
 	list = ctx->config[LISTENING_PORTS];
 
-	while ((list = XX_httplib_next_option(list, &vec, NULL)) != NULL) {
+	while ( (list = XX_httplib_next_option( list, &vec, NULL )) != NULL ) {
 
-		portsTotal++;
+		ports_total++;
 
-		if (!parse_port_string(&vec, &so, &ip_version)) {
+		if ( ! parse_port_string( & vec, & so, & ip_version ) ) {
+
 			httplib_cry( XX_httplib_fc(ctx),
 			       "%.*s: invalid port spec (entry %i). Expecting list of: %s",
 			       (int)vec.len,
 			       vec.ptr,
-			       portsTotal,
-			       "[IP_ADDRESS:]PORT[s|r]");
+			       ports_total,
+			       "[IP_ADDRESS:]PORT[s|r]" );
 			continue;
 		}
 
 #if !defined(NO_SSL)
-		if (so.is_ssl && ctx->ssl_ctx == NULL) {
+		if ( so.is_ssl  &&  ctx->ssl_ctx == NULL ) {
 
-			httplib_cry( XX_httplib_fc(ctx), "Cannot add SSL socket (entry %i). Is -ssl_certificate option set?", portsTotal);
+			httplib_cry( XX_httplib_fc(ctx), "Cannot add SSL socket (entry %i). Is -ssl_certificate option set?", ports_total );
 			continue;
 		}
-#endif
+#endif  /* ! NO_SLL */
 
-		if ((so.sock = socket(so.lsa.sa.sa_family, SOCK_STREAM, 6))
-		    == INVALID_SOCKET) {
+		if ( ( so.sock = socket( so.lsa.sa.sa_family, SOCK_STREAM, 6 ) ) == INVALID_SOCKET ) {
 
-			httplib_cry( XX_httplib_fc(ctx), "cannot create socket (entry %i)", portsTotal);
+			httplib_cry( XX_httplib_fc(ctx), "cannot create socket (entry %i)", ports_total );
 			continue;
 		}
 
-#ifdef _WIN32
-		/* Windows SO_REUSEADDR lets many procs binds to a
+#if defined(_WIN32)
+
+		/*
+		 * Windows SO_REUSEADDR lets many procs binds to a
 		 * socket, SO_EXCLUSIVEADDRUSE makes the bind fail
-		 * if someone already has the socket -- DTL */
-		/* NOTE: If SO_EXCLUSIVEADDRUSE is used,
+		 * if someone already has the socket -- DTL
+		 *
+		 * NOTE: If SO_EXCLUSIVEADDRUSE is used,
 		 * Windows might need a few seconds before
 		 * the same port can be used again in the
 		 * same process, so a short Sleep may be
 		 * required between httplib_stop and httplib_start.
 		 */
-		if (setsockopt(so.sock, SOL_SOCKET, SO_EXCLUSIVEADDRUSE, (SOCK_OPT_TYPE)&on, sizeof(on)) != 0) {
 
-			/* Set reuse option, but don't abort on errors. */
-			httplib_cry( XX_httplib_fc(ctx), "cannot set socket option SO_EXCLUSIVEADDRUSE (entry %i)", portsTotal);
+		if ( setsockopt( so.sock, SOL_SOCKET, SO_EXCLUSIVEADDRUSE, (SOCK_OPT_TYPE)&on, sizeof(on) ) != 0 ) {
+
+			/*
+			 * Set reuse option, but don't abort on errors.
+			 */
+
+			httplib_cry( XX_httplib_fc(ctx), "cannot set socket option SO_EXCLUSIVEADDRUSE (entry %i)", ports_total );
 		}
-#else
-		if (setsockopt(so.sock, SOL_SOCKET, SO_REUSEADDR, (SOCK_OPT_TYPE)&on, sizeof(on)) != 0) {
+#else  /* _WIN32 */
+		if ( setsockopt( so.sock, SOL_SOCKET, SO_REUSEADDR, (SOCK_OPT_TYPE)&on, sizeof(on) ) != 0 ) {
 
-			/* Set reuse option, but don't abort on errors. */
-			httplib_cry( XX_httplib_fc(ctx), "cannot set socket option SO_REUSEADDR (entry %i)", portsTotal);
+			/*
+			 * Set reuse option, but don't abort on errors.
+			 */
+
+			httplib_cry( XX_httplib_fc(ctx), "cannot set socket option SO_REUSEADDR (entry %i)", ports_total );
 		}
-#endif
+#endif  /* _WIN32 */
 
-		if (ip_version > 4) {
+		if ( ip_version > 4 ) {
 #if defined(USE_IPV6)
-			if (ip_version == 6) {
-				if (so.lsa.sa.sa_family == AF_INET6
-				    && setsockopt(so.sock, IPPROTO_IPV6, IPV6_V6ONLY, (void *)&off, sizeof(off)) != 0) {
+			if ( ip_version == 6 ) {
 
-					/* Set IPv6 only option, but don't abort on errors. */
-					httplib_cry( XX_httplib_fc(ctx), "cannot set socket option IPV6_V6ONLY (entry %i)", portsTotal);
+				if ( so.lsa.sa.sa_family == AF_INET6  &&  setsockopt( so.sock, IPPROTO_IPV6, IPV6_V6ONLY, (void *)&off, sizeof(off) ) != 0 ) {
+
+					/*
+					 * Set IPv6 only option, but don't abort on errors.
+					 */
+
+					httplib_cry( XX_httplib_fc(ctx), "cannot set socket option IPV6_V6ONLY (entry %i)", ports_total );
 				}
 			}
-#else
-			httplib_cry( XX_httplib_fc(ctx), "IPv6 not available");
-			closesocket(so.sock);
+#else  /* USE_IPV6 */
+			httplib_cry( XX_httplib_fc(ctx), "IPv6 not available" );
+			closesocket( so.sock );
 			so.sock = INVALID_SOCKET;
 			continue;
-#endif
+#endif  /* USE_IPV6 */
 		}
 
-		if (so.lsa.sa.sa_family == AF_INET) {
+		if ( so.lsa.sa.sa_family == AF_INET ) {
 
 			len = sizeof(so.lsa.sin);
-			if (bind(so.sock, &so.lsa.sa, len) != 0) {
-				httplib_cry( XX_httplib_fc(ctx), "cannot bind to %.*s: %d (%s)", (int)vec.len, vec.ptr, (int)ERRNO, strerror(errno));
-				closesocket(so.sock);
+
+			if ( bind( so.sock, &so.lsa.sa, len ) != 0 ) {
+
+				httplib_cry( XX_httplib_fc(ctx), "cannot bind to %.*s: %d (%s)", (int)vec.len, vec.ptr, (int)ERRNO, strerror(errno) );
+				closesocket( so.sock );
 				so.sock = INVALID_SOCKET;
 				continue;
 			}
 		}
 #if defined(USE_IPV6)
-		else if (so.lsa.sa.sa_family == AF_INET6) {
+		else if ( so.lsa.sa.sa_family == AF_INET6 ) {
 
 			len = sizeof(so.lsa.sin6);
-			if (bind(so.sock, &so.lsa.sa, len) != 0) {
-				httplib_cry( XX_httplib_fc(ctx), "cannot bind to IPv6 %.*s: %d (%s)", (int)vec.len, vec.ptr, (int)ERRNO, strerror(errno));
-				closesocket(so.sock);
+
+			if ( bind( so.sock, &so.lsa.sa, len ) != 0 ) {
+
+				httplib_cry( XX_httplib_fc(ctx), "cannot bind to IPv6 %.*s: %d (%s)", (int)vec.len, vec.ptr, (int)ERRNO, strerror(errno) );
+				closesocket( so.sock );
 				so.sock = INVALID_SOCKET;
 				continue;
 			}
 		}
-#endif
+#endif  /* USE_IPV6 */
 		else {
-			httplib_cry( XX_httplib_fc(ctx), "cannot bind: address family not supported (entry %i)", portsTotal);
+			httplib_cry( XX_httplib_fc(ctx), "cannot bind: address family not supported (entry %i)", ports_total );
 			continue;
 		}
 
-		if (listen(so.sock, SOMAXCONN) != 0) {
+		if ( listen( so.sock, SOMAXCONN ) != 0 ) {
 
-			httplib_cry( XX_httplib_fc(ctx), "cannot listen to %.*s: %d (%s)", (int)vec.len, vec.ptr, (int)ERRNO, strerror(errno));
-			closesocket(so.sock);
+			httplib_cry( XX_httplib_fc(ctx), "cannot listen to %.*s: %d (%s)", (int)vec.len, vec.ptr, (int)ERRNO, strerror(errno) );
+			closesocket( so.sock );
 			so.sock = INVALID_SOCKET;
 			continue;
 		}
 
-		if (getsockname(so.sock, &(usa.sa), &len) != 0
-		    || usa.sa.sa_family != so.lsa.sa.sa_family) {
+		if ( getsockname( so.sock, &(usa.sa), &len ) != 0  ||  usa.sa.sa_family  !=  so.lsa.sa.sa_family ) {
 
 			int err = (int)ERRNO;
-			httplib_cry( XX_httplib_fc(ctx), "call to getsockname failed %.*s: %d (%s)", (int)vec.len, vec.ptr, err, strerror(errno));
-			closesocket(so.sock);
+			httplib_cry( XX_httplib_fc(ctx), "call to getsockname failed %.*s: %d (%s)", (int)vec.len, vec.ptr, err, strerror(errno) );
+			closesocket( so.sock );
 			so.sock = INVALID_SOCKET;
 			continue;
 		}
 
-/* Update lsa port in case of random free ports */
+/*
+ * Update lsa port in case of random free ports
+ */
+
 #if defined(USE_IPV6)
-		if (so.lsa.sa.sa_family == AF_INET6) {
-			so.lsa.sin6.sin6_port = usa.sin6.sin6_port;
-		} else
-#endif
+		if ( so.lsa.sa.sa_family == AF_INET6 ) so.lsa.sin6.sin6_port = usa.sin6.sin6_port;
+
+		else
+#endif  /* USE_IPV6 */
 		{
 			so.lsa.sin.sin_port = usa.sin.sin_port;
 		}
 
-		if ((ptr = httplib_realloc( ctx->listening_sockets, (ctx->num_listening_sockets + 1) * sizeof(ctx->listening_sockets[0]) )) == NULL) {
+		ptr = httplib_realloc( ctx->listening_sockets, (ctx->num_listening_sockets+1) * sizeof(ctx->listening_sockets[0]) );
 
-			httplib_cry( XX_httplib_fc(ctx), "%s", "Out of memory");
-			closesocket(so.sock);
+		if ( ptr != NULL ) ctx->listening_sockets = ptr;
+		else {
+			httplib_cry( XX_httplib_fc(ctx), "%s", "Out of memory" );
+			closesocket( so.sock );
 			so.sock = INVALID_SOCKET;
 			continue;
 		}
 
-		if ((pfd = httplib_realloc(
-		         ctx->listening_socket_fds,
-		         (ctx->num_listening_sockets + 1)
-		             * sizeof(ctx->listening_socket_fds[0]))) == NULL) {
 
-			httplib_cry( XX_httplib_fc(ctx), "%s", "Out of memory");
-			closesocket(so.sock);
+		pfd = httplib_realloc( ctx->listening_socket_fds, (ctx->num_listening_sockets+1) * sizeof(ctx->listening_socket_fds[0]) );
+
+		if ( pfd != NULL ) ctx->listening_socket_fds = pfd;
+		else {
+			httplib_cry( XX_httplib_fc(ctx), "%s", "Out of memory" );
+			closesocket( so.sock );
 			so.sock = INVALID_SOCKET;
-			httplib_free( ptr );
 			continue;
 		}
 
-		XX_httplib_set_close_on_exec(so.sock, XX_httplib_fc(ctx));
-		ctx->listening_sockets = ptr;
+
+		XX_httplib_set_close_on_exec( so.sock, XX_httplib_fc(ctx) );
+
 		ctx->listening_sockets[ctx->num_listening_sockets] = so;
-		ctx->listening_socket_fds = pfd;
 		ctx->num_listening_sockets++;
-		portsOk++;
+
+		ports_ok++;
 	}
 
-	if (portsOk != portsTotal) {
-		XX_httplib_close_all_listening_sockets(ctx);
-		portsOk = 0;
+	if ( ports_ok != ports_total ) {
+
+		XX_httplib_close_all_listening_sockets( ctx );
+		ports_ok = 0;
 	}
 
-	return portsOk;
+	return ports_ok;
 
 }  /* XX_httplib_set_ports_option */
 
 
 
 /*
- * static int parse_port_string( const struct vec *vec, struct socket *so, int *ip_version );
+ * static bool parse_port_string( const struct vec *vec, struct socket *so, int *ip_version );
  *
  * Valid listening port specification is: [ip_address:]port[s]
  * Examples for IPv4: 80, 443s, 127.0.0.1:3128, 192.0.2.3:8080s
@@ -245,9 +269,11 @@ int XX_httplib_set_ports_option( struct httplib_context *ctx ) {
  * environment, they might work differently, or might not work
  * at all - it must be tested what options work best in the
  * relevant network environment.
+ *
+ * The function returns false if an error occurs and true otherwise.
  */
 
-static int parse_port_string( const struct vec *vec, struct socket *so, int *ip_version ) {
+static bool parse_port_string( const struct vec *vec, struct socket *so, int *ip_version ) {
 
 	unsigned int a;
 	unsigned int b;
@@ -258,78 +284,122 @@ static int parse_port_string( const struct vec *vec, struct socket *so, int *ip_
 	int len;
 #if defined(USE_IPV6)
 	char buf[100] = {0};
-#endif
+#endif  /* USE_IPV6 */
 
-	/* MacOS needs that. If we do not zero it, subsequent bind() will fail.
+	/*
+	 * MacOS needs that. If we do not zero it, subsequent bind() will fail.
 	 * Also, all-zeroes in the socket address means binding to all addresses
-	 * for both IPv4 and IPv6 (INADDR_ANY and IN6ADDR_ANY_INIT). */
-	memset(so, 0, sizeof(*so));
-	so->lsa.sin.sin_family = AF_INET;
-	*ip_version = 0;
+	 * for both IPv4 and IPv6 (INADDR_ANY and IN6ADDR_ANY_INIT).
+	 */
 
-	if (sscanf(vec->ptr, "%u.%u.%u.%u:%u%n", &a, &b, &c, &d, &port, &len)
-	    == 5) {
-		/* Bind to a specific IPv4 address, e.g. 192.168.1.5:8080 */
-		so->lsa.sin.sin_addr.s_addr =
-		    htonl((a << 24) | (b << 16) | (c << 8) | d);
-		so->lsa.sin.sin_port = htons((uint16_t)port);
+	memset( so, 0, sizeof(*so) );
+
+	so->lsa.sin.sin_family = AF_INET;
+	*ip_version            = 0;
+
+	if ( sscanf( vec->ptr, "%u.%u.%u.%u:%u%n", &a, &b, &c, &d, &port, &len ) == 5 ) {
+
+		/*
+		 * Bind to a specific IPv4 address, e.g. 192.168.1.5:8080
+		 */
+
+		so->lsa.sin.sin_addr.s_addr = htonl( (a << 24) | (b << 16) | (c << 8) | d );
+		so->lsa.sin.sin_port        = htons( (uint16_t)port );
+
 		*ip_version = 4;
+	}
 
 #if defined(USE_IPV6)
-	} else if (sscanf(vec->ptr, "[%49[^]]]:%u%n", buf, &port, &len) == 2
-	           && XX_httplib_inet_pton( AF_INET6, buf, &so->lsa.sin6, sizeof(so->lsa.sin6))) {
-		/* IPv6 address, examples: see above */
-		/* so->lsa.sin6.sin6_family = AF_INET6; already set by httplib_inet_pton
+	else if ( sscanf( vec->ptr, "[%49[^]]]:%u%n", buf, &port, &len ) == 2  &&  XX_httplib_inet_pton( AF_INET6, buf, &so->lsa.sin6, sizeof(so->lsa.sin6) ) ) {
+
+		/*
+		 * IPv6 address, examples: see above
+		 * so->lsa.sin6.sin6_family = AF_INET6; already set by httplib_inet_pton
 		 */
-		so->lsa.sin6.sin6_port = htons((uint16_t)port);
+
+		so->lsa.sin6.sin6_port = htons( (uint16_t)port );
 		*ip_version = 6;
-#endif
+	}
+#endif  /* USE_IPV6 */
 
-	} else if ((vec->ptr[0] == '+')
-	           && (sscanf(vec->ptr + 1, "%u%n", &port, &len) == 1)) {
+	else if ( vec->ptr[0] == '+'  &&  sscanf( vec->ptr + 1, "%u%n", &port, &len ) == 1 ) {
 
-		/* Port is specified with a +, bind to IPv6 and IPv4, INADDR_ANY */
-		/* Add 1 to len for the + character we skipped before */
+		/*
+		 * Port is specified with a +, bind to IPv6 and IPv4, INADDR_ANY
+		 * Add 1 to len for the + character we skipped before
+		 */
+
 		len++;
 
 #if defined(USE_IPV6)
-		/* Set socket family to IPv6, do not use IPV6_V6ONLY */
+
+		/*
+		 * Set socket family to IPv6, do not use IPV6_V6ONLY
+		 */
+
 		so->lsa.sin6.sin6_family = AF_INET6;
-		so->lsa.sin6.sin6_port = htons((uint16_t)port);
+		so->lsa.sin6.sin6_port   = htons(( uint16_t)port );
+
 		*ip_version = 4 + 6;
-#else
-		/* Bind to IPv4 only, since IPv6 is not built in. */
-		so->lsa.sin.sin_port = htons((uint16_t)port);
-		*ip_version = 4;
-#endif
 
-	} else if (sscanf(vec->ptr, "%u%n", &port, &len) == 1) {
-		/* If only port is specified, bind to IPv4, INADDR_ANY */
-		so->lsa.sin.sin_port = htons((uint16_t)port);
+#else  /* USE_IPV6 */
+
+		/*
+		 * Bind to IPv4 only, since IPv6 is not built in.
+		 */
+
+		so->lsa.sin.sin_port = htons( (uint16_t)port );
 		*ip_version = 4;
 
-	} else {
-		/* Parsing failure. Make port invalid. */
+#endif  /* USE_IPV6 */
+
+	}
+	
+	else if ( sscanf( vec->ptr, "%u%n", &port, &len ) == 1 ) {
+
+		/*
+		 * If only port is specified, bind to IPv4, INADDR_ANY
+		 */
+
+		so->lsa.sin.sin_port = htons( (uint16_t)port );
+		*ip_version = 4;
+
+	}
+	
+	else {
+		/*
+		 * Parsing failure. Make port invalid.
+		 */
+
 		port = 0;
-		len = 0;
+		len  = 0;
 	}
 
-	/* sscanf and the option splitting code ensure the following condition
+	/*
+	 * sscanf and the option splitting code ensure the following condition
 	 */
-	if ((len < 0) && ((unsigned)len > (unsigned)vec->len)) {
+
+	if ( len < 0 && ((unsigned)len) > ((unsigned)vec->len) ) {
+
 		*ip_version = 0;
-		return 0;
+		return false;
 	}
-	ch = vec->ptr[len]; /* Next character after the port number */
-	so->is_ssl    = (ch == 's');
-	so->ssl_redir = (ch == 'r');
 
-	/* Make sure the port is valid and vector ends with 's', 'r' or ',' */
-	if (XX_httplib_is_valid_port(port) && (ch == '\0' || ch == 's' || ch == 'r' || ch == ',')) return 1;
+	ch            = vec->ptr[len]; /* Next character after the port number */
+	so->is_ssl    = ( ch == 's' );
+	so->ssl_redir = ( ch == 'r' );
 
-	/* Reset ip_version to 0 of there is an error */
+	/*
+	 * Make sure the port is valid and vector ends with 's', 'r' or ','
+	 */
+
+	if ( XX_httplib_is_valid_port( port )  &&  ( ch == '\0'  ||  ch == 's'  ||  ch == 'r'  ||  ch == ',' ) ) return true;
+
+	/*
+	 * Reset ip_version to 0 if there is an error
+	 */
+
 	*ip_version = 0;
-	return 0;
+	return false;
 
 }  /* parse_port_string */
-

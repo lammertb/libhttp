@@ -23,5 +23,6 @@ The function `httplib_strncasecmp()` is a helper function to compare two strings
 ### See Also
 
 * [`httplib_strcasecmp();`](httplib_strcasecmp.md)
+* [`httplib_strcasestr();`](httplib_strcasestr.md)
 * [`httplib_strdup();`](httplib_strdup.md)
 * [`httplib_strndup();`](httplib_strndup.md)

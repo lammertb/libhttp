@@ -23,5 +23,6 @@ If the source string is longer than will fit in the receiving buffer, the remain
 ### See Also
 
 * [`httplib_strcasecmp();`](httplib_strcasecmp.md)
+* [`httplib_strcasestr();`](httplib_strcasestr.md)
 * [`httplib_strncasecmp();`](httplib_strncasecmp.md)
 * [`httplib_strndup();`](httplib_strndup.md)

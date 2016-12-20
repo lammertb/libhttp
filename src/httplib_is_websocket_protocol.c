@@ -50,12 +50,12 @@ bool XX_httplib_is_websocket_protocol( const struct httplib_connection *conn ) {
 	upgrade = httplib_get_header(conn, "Upgrade");
 	if (upgrade == NULL) return false; /* fail early, don't waste time checking other header * fields */
 
-	if (!XX_httplib_strcasestr(upgrade, "websocket")) return false;
+	if ( httplib_strcasestr(upgrade, "websocket") == NULL ) return false;
 
 	connection = httplib_get_header(conn, "Connection");
 	if (connection == NULL) return false;
 
-	if (!XX_httplib_strcasestr(connection, "upgrade")) return false;
+	if ( httplib_strcasestr(connection, "upgrade") == NULL ) return false;
 
 	/* The headers "Host", "Sec-WebSocket-Key", "Sec-WebSocket-Protocol" and
 	 * "Sec-WebSocket-Version" are also required.
