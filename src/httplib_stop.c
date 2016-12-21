@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
@@ -38,18 +38,28 @@ void httplib_stop( struct httplib_context *ctx ) {
 
 	pthread_t mt;
 
-	if ( ctx == NULL ) return; 
-	/* We don't use a lock here. Calling httplib_stop with the same ctx from
-	 * two threads is not allowed. */
+	if ( ctx == NULL ) return;
+
+	/*
+	 * We don't use a lock here. Calling httplib_stop with the same ctx from
+	 * two threads is not allowed.
+	 */
+
 	mt = ctx->masterthreadid;
 	if ( mt == 0 ) return;
 
 	ctx->masterthreadid = 0;
 
-	/* Set stop flag, so all threads know they have to exit. */
+	/*
+	 * Set stop flag, so all threads know they have to exit.
+	 */
+
 	ctx->stop_flag = 1;
 
-	/* Wait until everything has stopped. */
+	/*
+	 * Wait until everything has stopped.
+	 */
+
 	while ( ctx->stop_flag != 2 ) httplib_sleep( 10 );
 
 	XX_httplib_join_thread(  mt  );

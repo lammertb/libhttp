@@ -22,41 +22,52 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
 #include "httplib_memory.h"
 #include "httplib_string.h"
 
-/* Alternative alloc_vprintf() for non-compliant C runtimes */
+/*
+ * Alternative alloc_vprintf() for non-compliant C runtimes
+ */
+
 static int alloc_vprintf2( char **buf, const char *fmt, va_list ap ) {
 
 	va_list ap_copy;
-	size_t size = MG_BUF_LEN / 4;
-	int len = -1;
+	size_t size;
+	int len;
 
+	size = MG_BUF_LEN / 4;
+	len  = -1;
 	*buf = NULL;
-	while (len < 0) {
-		if (*buf) httplib_free( *buf );
+
+	while ( len < 0 ) {
+
+		if ( *buf != NULL ) httplib_free( *buf );
 
 		size *= 4;
 		*buf = httplib_malloc( size );
-		if (!*buf) break;
+		if ( *buf == NULL ) break;
 
-		va_copy(ap_copy, ap);
-		len = vsnprintf_impl(*buf, size - 1, fmt, ap_copy);
-		va_end(ap_copy);
-		(*buf)[size - 1] = 0;
+		va_copy( ap_copy, ap );
+		len = vsnprintf_impl( *buf, size - 1, fmt, ap_copy );
+		va_end( ap_copy );
+
+		(*buf)[size-1] = 0;
 	}
 
 	return len;
 }
 
 
-/* Print message to buffer. If buffer is large enough to hold the message,
+/*
+ * Print message to buffer. If buffer is large enough to hold the message,
  * return buffer. If buffer is to small, allocate large enough buffer on heap,
- * and return allocated buffer. */
+ * and return allocated buffer.
+ */
+
 static int alloc_vprintf( char **out_buf, char *prealloc_buf, size_t prealloc_size, const char *fmt, va_list ap ) {
 
 	va_list ap_copy;
@@ -71,37 +82,60 @@ static int alloc_vprintf( char **out_buf, char *prealloc_buf, size_t prealloc_si
 	 * On second pass, actually print the message.
 	 */
 
-	va_copy(ap_copy, ap);
-	len = vsnprintf_impl(NULL, 0, fmt, ap_copy);
-	va_end(ap_copy);
+	va_copy( ap_copy, ap );
+	len = vsnprintf_impl( NULL, 0, fmt, ap_copy );
+	va_end( ap_copy );
 
-	if (len < 0) {
-		/* C runtime is not standard compliant, vsnprintf() returned -1.
+	if ( len < 0 ) {
+
+		/*
+		 * C runtime is not standard compliant, vsnprintf() returned -1.
 		 * Switch to alternative code path that uses incremental allocations.
 		*/
-		va_copy(ap_copy, ap);
-		len = alloc_vprintf2(out_buf, fmt, ap);
-		va_end(ap_copy);
 
-	} else if ((size_t)(len) >= prealloc_size) {
-		/* The pre-allocated buffer not large enough. */
-		/* Allocate a new buffer. */
+		va_copy( ap_copy, ap );
+		len = alloc_vprintf2( out_buf, fmt, ap );
+		va_end( ap_copy );
+
+	}
+	
+	else if ( (size_t)(len) >= prealloc_size ) {
+
+		/*
+		 * The pre-allocated buffer not large enough.
+		 * Allocate a new buffer.
+		 */
+
 		*out_buf = httplib_malloc( (size_t)(len) + 1 );
-		if (!*out_buf) {
-			/* Allocation failed. Return -1 as "out of memory" error. */
+		if ( *out_buf == NULL ) {
+
+			/*
+			 * Allocation failed. Return -1 as "out of memory" error.
+			 */
+
 			return -1;
 		}
-		/* Buffer allocation successful. Store the string there. */
-		va_copy(ap_copy, ap);
-		vsnprintf_impl(*out_buf, (size_t)(len) + 1, fmt, ap_copy);
-		va_end(ap_copy);
 
-	} else {
-		/* The pre-allocated buffer is large enough.
-		 * Use it to store the string and return the address. */
-		va_copy(ap_copy, ap);
-		vsnprintf_impl(prealloc_buf, prealloc_size, fmt, ap_copy);
-		va_end(ap_copy);
+		/*
+		 * Buffer allocation successful. Store the string there.
+		 */
+
+		va_copy( ap_copy, ap );
+		vsnprintf_impl( *out_buf, (size_t)(len) + 1, fmt, ap_copy );
+		va_end( ap_copy );
+
+	}
+	
+	else {
+		/*
+		 * The pre-allocated buffer is large enough.
+		 * Use it to store the string and return the address.
+		 */
+
+		va_copy( ap_copy, ap );
+		vsnprintf_impl( prealloc_buf, prealloc_size, fmt, ap_copy );
+		va_end( ap_copy );
+
 		*out_buf = prealloc_buf;
 	}
 
@@ -113,11 +147,13 @@ static int alloc_vprintf( char **out_buf, char *prealloc_buf, size_t prealloc_si
 int XX_httplib_vprintf( struct httplib_connection *conn, const char *fmt, va_list ap ) {
 
 	char mem[MG_BUF_LEN];
-	char *buf = NULL;
+	char *buf;
 	int len;
 
-	if ((len = alloc_vprintf(&buf, mem, sizeof(mem), fmt, ap)) > 0) len = httplib_write(conn, buf, (size_t)len);
-	if (buf != mem && buf != NULL) httplib_free( buf );
+	buf = NULL;
+
+	if ( (len = alloc_vprintf( &buf, mem, sizeof(mem), fmt, ap )) > 0 ) len = httplib_write( conn, buf, (size_t)len );
+	if ( buf != mem  &&  buf != NULL ) httplib_free( buf );
 
 	return len;
 

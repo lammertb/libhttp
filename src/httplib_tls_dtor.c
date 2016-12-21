@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
@@ -39,12 +39,14 @@
 
 void XX_httplib_tls_dtor( void *key ) {
 
-	struct httplib_workerTLS *tls = (struct httplib_workerTLS *)key;
+	struct httplib_workerTLS *tls;
+
+	tls = key;
 	/* key == httplib_pthread_getspecific( XX_httplib_sTlsKey ); */
 
 	if ( tls != NULL ) {
 
-		if (tls->is_master == 2) {
+		if ( tls->is_master == 2 ) {
 
 			tls->is_master = -3; /* Mark memory as dead */
 			httplib_free( tls );

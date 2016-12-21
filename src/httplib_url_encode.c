@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
@@ -31,19 +31,31 @@ int httplib_url_encode( const char *src, char *dst, size_t dst_len ) {
 
 	static const char *dont_escape = "._-$,;~()";
 	static const char *hex = "0123456789abcdef";
-	char *pos = dst;
-	const char *end = dst + dst_len - 1;
+	char *pos;
+	const char *end;
 
-	for (; *src != '\0' && pos < end; src++, pos++) {
-		if (isalnum(*(const unsigned char *)src)
-		    || strchr(dont_escape, *(const unsigned char *)src) != NULL) {
-			*pos = *src;
-		} else if (pos + 2 < end) {
+	if ( dst == NULL  ||  dst_len < 1 )                  return 0;
+	if ( src == NULL                  ) { dst[0] = '\0'; return 0; }
+
+	pos = dst;
+	end = dst + dst_len - 1;
+
+	while ( *src != '\0'  &&  pos < end ) {
+
+		if ( isalnum(*(const unsigned char *)src)  ||  strchr( dont_escape, *(const unsigned char *)src ) != NULL ) *pos = *src;
+		
+		else if ( pos + 2 < end ) {
+
 			pos[0] = '%';
 			pos[1] = hex[(*(const unsigned char *)src) >> 4];
 			pos[2] = hex[(*(const unsigned char *)src) & 0xf];
-			pos += 2;
-		} else break;
+			pos   += 2;
+		}
+		
+		else break;
+
+		src++;
+		pos++;
 	}
 
 	*pos = '\0';

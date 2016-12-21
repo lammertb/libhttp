@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
@@ -52,12 +52,19 @@ int64_t httplib_store_body( struct httplib_connection *conn, const char *path ) 
 	ret = XX_httplib_put_dir( conn, path );
 	if ( ret < 0 ) {
 
-		/* -1 for path too long,
-		 * -2 for path can not be created. */
+		/*
+		 * -1 for path too long,
+		 * -2 for path can not be created.
+		 */
+
 		return ret;
 	}
 	if ( ret != 1 ) {
-		/* Return 0 means, path itself is a directory. */
+
+		/*
+		 * Return 0 means, path itself is a directory.
+		 */
+
 		return 0;
 	}
 

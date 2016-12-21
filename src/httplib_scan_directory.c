@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
@@ -36,38 +36,44 @@ int XX_httplib_scan_directory( struct httplib_connection *conn, const char *dir,
 	struct de de;
 	int truncated;
 
-	if ((dirp = httplib_opendir( dir)) == NULL) {
-		return 0;
-	} else {
-		de.conn = conn;
+	dirp = httplib_opendir( dir );
+	if ( dirp == NULL ) return 0;
 
-		while ((dp = httplib_readdir(dirp)) != NULL) {
-			/* Do not show current dir and hidden files */
-			if (!strcmp(dp->d_name, ".") || !strcmp(dp->d_name, "..") || XX_httplib_must_hide_file(conn, dp->d_name)) continue;
+	de.conn = conn;
 
-			XX_httplib_snprintf( conn, &truncated, path, sizeof(path), "%s/%s", dir, dp->d_name);
+	while ( (dp = httplib_readdir(dirp)) != NULL ) {
 
-			/* If we don't memset stat structure to zero, mtime will have
-			 * garbage and strftime() will segfault later on in
-			 * XX_httplib_print_dir_entry(). memset is required only if XX_httplib_stat()
-			 * fails. For more details, see
-			 * http://code.google.com/p/mongoose/issues/detail?id=79 */
-			memset(&de.file, 0, sizeof(de.file));
+		/*
+		 * Do not show current dir and hidden files
+		 */
 
-			if (truncated) {
-				/* If the path is not complete, skip processing. */
-				continue;
-			}
+		if ( ! strcmp( dp->d_name, "." )  ||  ! strcmp(dp->d_name, "..")  ||  XX_httplib_must_hide_file( conn, dp->d_name ) ) continue;
 
-			if (!XX_httplib_stat(conn, path, &de.file)) {
-				httplib_cry(conn, "%s: XX_httplib_stat(%s) failed: %s", __func__, path, strerror(ERRNO));
-			}
-			de.file_name = dp->d_name;
-			cb(&de, data);
+		XX_httplib_snprintf( conn, &truncated, path, sizeof(path), "%s/%s", dir, dp->d_name );
+
+		/*
+		 * If we don't memset stat structure to zero, mtime will have
+		 * garbage and strftime() will segfault later on in
+		 * XX_httplib_print_dir_entry(). memset is required only if XX_httplib_stat()
+		 * fails. For more details, see
+		 * http://code.google.com/p/mongoose/issues/detail?id=79
+		 */
+
+		memset( &de.file, 0, sizeof(de.file) );
+
+		if ( truncated ) continue; /* If the path is not complete, skip processing. */
+
+		if ( ! XX_httplib_stat( conn, path, &de.file ) ) {
+
+			httplib_cry( conn, "%s: XX_httplib_stat(%s) failed: %s", __func__, path, strerror(ERRNO) );
 		}
 
-		httplib_closedir(dirp);
+		de.file_name = dp->d_name;
+		cb( &de, data );
 	}
+
+	httplib_closedir( dirp );
+
 	return 1;
 
 }  /* XX_httplib_scan_directory */

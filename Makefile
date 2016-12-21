@@ -253,7 +253,7 @@ OBJLIST =									\
 	${OBJDIR}httplib_is_valid_http_method${OBJEXT}				\
 	${OBJDIR}httplib_is_valid_port${OBJEXT}					\
 	${OBJDIR}httplib_is_websocket_protocol${OBJEXT}				\
-	${OBJDIR}httplib_join_thread${OBJEXT}					\
+	${OBJDIR}httplib_pthread_join${OBJEXT}					\
 	${OBJDIR}httplib_kill${OBJEXT}						\
 	${OBJDIR}httplib_load_dll${OBJEXT}					\
 	${OBJDIR}httplib_lock_unlock_connection${OBJEXT}			\
@@ -817,7 +817,7 @@ ${OBJDIR}httplib_is_websocket_protocol${OBJEXT}				: ${SRCDIR}httplib_is_websock
 									  ${SRCDIR}httplib_main.h					\
 									  ${INCDIR}libhttp.h
 
-${OBJDIR}httplib_join_thread${OBJEXT}					: ${SRCDIR}httplib_join_thread.c				\
+${OBJDIR}httplib_pthread_join${OBJEXT}					: ${SRCDIR}httplib_pthread_join.c				\
 									  ${SRCDIR}httplib_main.h					\
 									  ${INCDIR}libhttp.h
 

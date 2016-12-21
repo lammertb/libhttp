@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
@@ -36,17 +36,24 @@ int httplib_url_decode( const char *src, int src_len, char *dst, int dst_len, in
 	int a;
 	int b;
 
-	for (i = j = 0; (i < src_len) && (j < (dst_len - 1)); i++, j++) {
-		if (i < src_len - 2 && src[i] == '%'
-		    && isxdigit(*(const unsigned char *)(src + i + 1))
-		    && isxdigit(*(const unsigned char *)(src + i + 2))) {
-			a = tolower(*(const unsigned char *)(src + i + 1));
-			b = tolower(*(const unsigned char *)(src + i + 2));
+	i = 0;
+	j = 0;
+
+	while ( i < src_len  &&  j < dst_len-1 ) {
+
+		if ( i < src_len - 2  &&  src[i] == '%'  &&  isxdigit(*(const unsigned char *)(src + i + 1))  &&  isxdigit(*(const unsigned char *)(src + i + 2)) ) {
+
+			a      = tolower(*(const unsigned char *)(src + i + 1));
+			b      = tolower(*(const unsigned char *)(src + i + 2));
 			dst[j] = (char)((HEXTOI(a) << 4) | HEXTOI(b));
-			i += 2;
-		} else if (is_form_url_encoded && src[i] == '+') {
-			dst[j] = ' ';
-		} else dst[j] = src[i];
+			i     += 2;
+		}
+
+		else if (is_form_url_encoded && src[i] == '+') dst[j] = ' ';
+		else                                           dst[j] = src[i];
+
+		i++;
+		j++;
 	}
 
 	dst[j] = '\0'; /* Null-terminate the destination */

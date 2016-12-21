@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
@@ -41,17 +41,19 @@ static void *	worker_thread_run( struct worker_thread_args *thread_args );
  * operating system.
  */
 
-#ifdef _WIN32
-unsigned __stdcall XX_httplib_worker_thread( void *thread_func_param ) {
-#else
-void *XX_httplib_worker_thread( void *thread_func_param ) {
-#endif
+LIBHTTP_THREAD XX_httplib_worker_thread( void *thread_func_param ) {
 
-	struct worker_thread_args *pwta = (struct worker_thread_args *)thread_func_param;
-	worker_thread_run( pwta );
-	httplib_free( thread_func_param );
+	struct worker_thread_args *pwta;
 
-	return 0;
+	if ( thread_func_param != NULL ) {
+
+		pwta = thread_func_param;
+
+		worker_thread_run( pwta );
+		httplib_free( thread_func_param );
+	}
+
+	return LIBHTTP_THREAD_RETNULL;
 
 }  /* XX_httplib_worker_thread */
 
@@ -70,45 +72,56 @@ static void *worker_thread_run( struct worker_thread_args *thread_args ) {
 	struct httplib_connection *conn;
 	struct httplib_workerTLS tls;
 
+	if ( thread_args == NULL ) return NULL;
+
+	ctx = thread_args->ctx;
+
 	XX_httplib_set_thread_name( "worker" );
 
 	tls.is_master  = 0;
-	tls.thread_idx = (unsigned)httplib_atomic_inc(&XX_httplib_thread_idx_max);
+	tls.thread_idx = (unsigned)httplib_atomic_inc( & XX_httplib_thread_idx_max );
 #if defined(_WIN32)
-	tls.pthread_cond_helper_mutex = CreateEvent(NULL, FALSE, FALSE, NULL);
+	tls.pthread_cond_helper_mutex = CreateEvent( NULL, FALSE, FALSE, NULL );
 #endif
 
 	if ( ctx->callbacks.init_thread != NULL ) ctx->callbacks.init_thread( ctx, 1 ); /* call init_thread for a worker thread (type 1) */
 
 	conn = httplib_calloc( 1, sizeof(*conn) + MAX_REQUEST_SIZE );
-	if ( conn == NULL ) httplib_cry( XX_httplib_fc(ctx), "%s", "Cannot create new connection struct, OOM");
+	if ( conn == NULL ) httplib_cry( XX_httplib_fc(ctx), "%s", "Cannot create new connection struct, OOM" );
 	
 	else {
 		httplib_pthread_setspecific( XX_httplib_sTlsKey, &tls );
 
 		conn->buf_size               = MAX_REQUEST_SIZE;
-		conn->buf                    = (char *)(conn + 1);
+		conn->buf                    = (char *)(conn+1);
 		conn->ctx                    = ctx;
 		conn->thread_index           = thread_args->index;
 		conn->request_info.user_data = ctx->user_data;
-		/* Allocate a mutex for this connection to allow communication both
+
+		/*
+		 * Allocate a mutex for this connection to allow communication both
 		 * within the request handler and from elsewhere in the application
 		 */
+
 		pthread_mutex_init( & conn->mutex, &XX_httplib_pthread_mutex_attr );
 
-		/* Call XX_httplib_consume_socket() even when ctx->stop_flag > 0, to let it
+		/*
+		 * Call XX_httplib_consume_socket() even when ctx->stop_flag > 0, to let it
 		 * signal sq_empty condvar to wake up the master waiting in
-		 * produce_socket() */
-		while (XX_httplib_consume_socket(ctx, &conn->client, conn->thread_index)) {
+		 * produce_socket()
+		 */
 
-			conn->conn_birth_time = time(NULL);
+		while ( XX_httplib_consume_socket( ctx, &conn->client, conn->thread_index ) ) {
 
-/* Fill in IP, port info early so even if SSL setup below fails,
- * error handler would have the corresponding info.
- * Thanks to Johannes Winkelmann for the patch.
- */
+			conn->conn_birth_time = time( NULL );
+
+			/*
+			 * Fill in IP, port info early so even if SSL setup below fails,
+			 * error handler would have the corresponding info.
+			 * Thanks to Johannes Winkelmann for the patch.
+			 */
 #if defined(USE_IPV6)
-			if ( conn->client.rsa.sa.sa_family == AF_INET6 ) conn->request_info.remote_port = ntohs(conn->client.rsa.sin6.sin6_port);
+			if ( conn->client.rsa.sa.sa_family == AF_INET6 ) conn->request_info.remote_port = ntohs( conn->client.rsa.sin6.sin6_port );
 			
 			else
 #endif
@@ -116,22 +129,34 @@ static void *worker_thread_run( struct worker_thread_args *thread_args ) {
 				conn->request_info.remote_port = ntohs(conn->client.rsa.sin.sin_port);
 			}
 
-			XX_httplib_sockaddr_to_string(conn->request_info.remote_addr, sizeof(conn->request_info.remote_addr), &conn->client.rsa);
+			XX_httplib_sockaddr_to_string( conn->request_info.remote_addr, sizeof(conn->request_info.remote_addr), &conn->client.rsa );
 
 			conn->request_info.is_ssl = conn->client.is_ssl;
 
-			if (conn->client.is_ssl) {
+			if ( conn->client.is_ssl ) {
 #ifndef NO_SSL
-				/* HTTPS connection */
+				/*
+				 * HTTPS connection
+				 */
+
 				if ( XX_httplib_sslize( conn, conn->ctx->ssl_ctx, SSL_accept ) ) {
 
-					/* Get SSL client certificate information (if set) */
+					/*
+					 * Get SSL client certificate information (if set)
+					 */
+
 					XX_httplib_ssl_get_client_cert_info( conn );
 
-					/* process HTTPS connection */
+					/*
+					 * process HTTPS connection
+					 */
+
 					XX_httplib_process_new_connection( conn );
 
-					/* Free client certificate info */
+					/*
+					 * Free client certificate info
+					 */
+
 					if ( conn->request_info.client_cert != NULL ) {
 
 						httplib_free( (void *)conn->request_info.client_cert->subject );
