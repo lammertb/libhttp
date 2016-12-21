@@ -62,7 +62,7 @@ void httplib_stop( struct httplib_context *ctx ) {
 
 	while ( ctx->stop_flag != 2 ) httplib_sleep( 10 );
 
-	XX_httplib_join_thread(  mt  );
+	httplib_pthread_join( mt, NULL );
 	XX_httplib_free_context( ctx );
 
 #if defined(_WIN32)

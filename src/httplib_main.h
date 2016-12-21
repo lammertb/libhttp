@@ -843,7 +843,6 @@ bool			XX_httplib_is_put_or_delete_method( const struct httplib_connection *conn
 bool			XX_httplib_is_valid_http_method( const char *method );
 int			XX_httplib_is_valid_port( unsigned long port );
 bool			XX_httplib_is_websocket_protocol( const struct httplib_connection *conn );
-int			XX_httplib_join_thread( pthread_t threadid );
 void *			XX_httplib_load_dll( struct httplib_context *ctx, const char *dll_name, struct ssl_func *sw );
 void			XX_httplib_log_access( const struct httplib_connection *conn );
 int			XX_httplib_match_prefix(const char *pattern, size_t pattern_len, const char *str);

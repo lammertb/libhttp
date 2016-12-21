@@ -106,6 +106,7 @@ LibHTTP is often used as HTTP and HTTPS library inside a larger application.  A 
 * [`httplib_pthread_cond_timedwait( cv, mutex, abstime );`](api/httplib_pthread_cond_timedwait.md)
 * [`httplib_pthread_cond_wait( cv, mutex );`](api/httplib_pthread_cond_wait.md)
 * [`httplib_pthread_getspecific( key );`](api/httplib_pthread_getspecific.md)
+* [`httplib_pthread_join( thread, value_ptr );`](api/httplib_pthread_join.md)
 * [`httplib_pthread_key_create( key, destructor );`](api/httplib_pthread_key_create.md)
 * [`httplib_pthread_key_delete( key );`](api/httplib_pthread_key_delete.md)
 * [`httplib_pthread_mutex_destroy( mutex );`](api/httplib_pthread_mutex_destroy.md)

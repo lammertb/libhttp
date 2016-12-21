@@ -147,7 +147,7 @@ static void master_thread_run(void *thread_func_param) {
 	workerthreadcount = ctx->cfg_worker_threads;
 	for (i=0; i<workerthreadcount; i++) {
 
-		if ( ctx->workerthreadids[i] != 0 ) XX_httplib_join_thread(ctx->workerthreadids[i]);
+		if ( ctx->workerthreadids[i] != 0 ) httplib_pthread_join( ctx->workerthreadids[i], NULL );
 	}
 
 #if !defined(NO_SSL)

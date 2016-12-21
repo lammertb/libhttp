@@ -122,7 +122,7 @@ void httplib_close_connection( struct httplib_connection *conn ) {
 
 		for (i=0; i<client_ctx->cfg_worker_threads; i++) {
 
-			if ( client_ctx->workerthreadids[i] != 0 ) XX_httplib_join_thread( client_ctx->workerthreadids[i] );
+			if ( client_ctx->workerthreadids[i] != 0 ) httplib_pthread_join( client_ctx->workerthreadids[i], NULL );
 		}
 
 		httplib_free( client_ctx->workerthreadids );

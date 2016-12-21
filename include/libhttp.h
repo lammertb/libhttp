@@ -978,6 +978,7 @@ LIBHTTP_API int			httplib_pthread_cond_signal( pthread_cond_t *cv );
 LIBHTTP_API int			httplib_pthread_cond_timedwait( pthread_cond_t *cv, pthread_mutex_t *mutex, const struct timespec *abstime );
 LIBHTTP_API int			httplib_pthread_cond_wait( pthread_cond_t *cv, pthread_mutex_t *mutex );
 LIBHTTP_API void *		httplib_pthread_getspecific( pthread_key_t key );
+LIBHTTP_API int			httplib_pthread_join( pthread_t thread, void **value_ptr );
 LIBHTTP_API int			httplib_pthread_key_create( pthread_key_t *key, void (*destructor)(void *) );
 LIBHTTP_API int			httplib_pthread_key_delete( pthread_key_t key );
 LIBHTTP_API int			httplib_pthread_mutex_destroy( pthread_mutex_t *mutex );
