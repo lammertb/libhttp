@@ -31,8 +31,6 @@
 
 #include "httplib_main.h"
 
-#if defined(_WIN32)  &&  !defined(HAVE_POLL)
-
 /*
  * int httplib_poll( struct pollfd *pfd, unsigned int n, int milliseconds );
  *
@@ -79,5 +77,3 @@ LIBHTTP_API int httplib_poll( struct pollfd *pfd, unsigned int n, int millisecon
 #endif  /* _WIN32 */
 
 }  /* httplib_poll */
-
-#endif
