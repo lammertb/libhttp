@@ -22,12 +22,15 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
 
-/* Send len bytes from the opened file to the client. */
+/*
+ * Send len bytes from the opened file to the client.
+ */
+
 void XX_httplib_send_file_data( struct httplib_connection *conn, struct file *filep, int64_t offset, int64_t len ) {
 
 	char buf[MG_BUF_LEN];
@@ -38,7 +41,10 @@ void XX_httplib_send_file_data( struct httplib_connection *conn, struct file *fi
 
 	if ( filep == NULL  ||  conn == NULL ) return;
 
-	/* Sanity check the offset */
+	/*
+	 * Sanity check the offset
+	 */
+
 	size   = (filep->size > INT64_MAX) ? INT64_MAX : (int64_t)(filep->size);
 	offset = (offset < 0) ? 0 : ((offset > size) ? size : offset);
 
@@ -70,8 +76,11 @@ void XX_httplib_send_file_data( struct httplib_connection *conn, struct file *fi
 			int loop_cnt = 0;
 
 			do {
-				/* 2147479552 (0x7FFFF000) is a limit found by experiment on
-				 * 64 bit Linux (2^31 minus one memory page of 4k?). */
+				/* 
+				 * 2147479552 (0x7FFFF000) is a limit found by experiment on
+				 * 64 bit Linux (2^31 minus one memory page of 4k?).
+				 */
+
 				size_t sf_tosend = (size_t)((len < 0x7FFFF000) ? len : 0x7FFFF000);
 				sf_sent = sendfile(conn->client.sock, sf_file, &sf_offs, sf_tosend);
 
@@ -83,48 +92,74 @@ void XX_httplib_send_file_data( struct httplib_connection *conn, struct file *fi
 
 				}
 
-			  	else if (loop_cnt == 0) {
-					/* This file can not be sent using sendfile.
+			  	else if ( loop_cnt == 0 ) {
+					/*
+					 * This file can not be sent using sendfile.
 					 * This might be the case for pseudo-files in the
 					 * /sys/ and /proc/ file system.
-					 * Use the regular user mode copy code instead. */
+					 * Use the regular user mode copy code instead.
+					 */
+
 					break;
-				} else if (sf_sent == 0) {
-					/* No error, but 0 bytes sent. May be EOF? */
+				}
+				
+				else if ( sf_sent == 0 ) {
+
+					/*
+					 * No error, but 0 bytes sent. May be EOF?
+					 */
+
 					return;
 				}
 				loop_cnt++;
 
-			} while ((len > 0) && (sf_sent >= 0));
+			} while ( len > 0  &&  sf_sent >= 0 );
 
-			if (sf_sent > 0) {
-				return; /* OK */
-			}
+			if ( sf_sent > 0 ) return; /* OK */
 
-			/* sf_sent<0 means error, thus fall back to the classic way */
-			/* This is always the case, if sf_file is not a "normal" file,
-			 * e.g., for sending data from the output of a CGI process. */
+			/*
+			 * sf_sent<0 means error, thus fall back to the classic way
+			 * This is always the case, if sf_file is not a "normal" file,
+			 * e.g., for sending data from the output of a CGI process.
+			 */
+
 			offset = (int64_t)sf_offs;
 		}
 #endif
-		if ((offset > 0) && (fseeko(filep->fp, offset, SEEK_SET) != 0)) {
-			httplib_cry(conn, "%s: fseeko() failed: %s", __func__, strerror(ERRNO));
-			XX_httplib_send_http_error( conn, 500, "%s", "Error: Unable to access file at requested position.");
-		} else {
-			while (len > 0) {
-				/* Calculate how much to read from the file in the buffer */
+		if ( offset > 0  &&  fseeko( filep->fp, offset, SEEK_SET ) != 0 ) {
+
+			httplib_cry( conn, "%s: fseeko() failed: %s", __func__, strerror(ERRNO) );
+			XX_httplib_send_http_error( conn, 500, "%s", "Error: Unable to access file at requested position." );
+		}
+		
+		else {
+			while ( len > 0 ) {
+
+				/*
+				 * Calculate how much to read from the file in the buffer
+				 */
+
 				to_read = sizeof(buf);
 				if ((int64_t)to_read > len) to_read = (int)len;
 
-				/* Read from file, exit the loop on error */
-				if ((num_read = (int)fread(buf, 1, (size_t)to_read, filep->fp)) <= 0) break;
+				/*
+				 * Read from file, exit the loop on error
+				 */
 
-				/* Send read bytes to the client, exit the loop on error */
-				if ((num_written = httplib_write(conn, buf, (size_t)num_read)) != num_read) break;
+				if ( (num_read = (int)fread(buf, 1, (size_t)to_read, filep->fp )) <= 0 ) break;
 
-				/* Both read and were successful, adjust counters */
+				/*
+				 * Send read bytes to the client, exit the loop on error
+				 */
+
+				if ( (num_written = httplib_write( conn, buf, (size_t)num_read )) != num_read ) break;
+
+				/*
+				 * Both read and were successful, adjust counters
+				 */
+
 				conn->num_bytes_sent += num_written;
-				len -= num_written;
+				len                  -= num_written;
 			}
 		}
 	}

@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
@@ -39,26 +39,34 @@
 
 int XX_httplib_ssl_use_pem_file( struct httplib_context *ctx, const char *pem ) {
 
-	if (SSL_CTX_use_certificate_file(ctx->ssl_ctx, pem, 1) == 0) {
-		httplib_cry( XX_httplib_fc(ctx), "%s: cannot open certificate file %s: %s", __func__, pem, XX_httplib_ssl_error());
+	if ( SSL_CTX_use_certificate_file( ctx->ssl_ctx, pem, 1 ) == 0 ) {
+
+		httplib_cry( XX_httplib_fc(ctx), "%s: cannot open certificate file %s: %s", __func__, pem, XX_httplib_ssl_error() );
 		return 0;
 	}
 
-	/* could use SSL_CTX_set_default_passwd_cb_userdata */
-	if (SSL_CTX_use_PrivateKey_file(ctx->ssl_ctx, pem, 1) == 0) {
-		httplib_cry( XX_httplib_fc(ctx), "%s: cannot open private key file %s: %s", __func__, pem, XX_httplib_ssl_error());
+	/*
+	 * could use SSL_CTX_set_default_passwd_cb_userdata
+	 */
+
+	if ( SSL_CTX_use_PrivateKey_file( ctx->ssl_ctx, pem, 1 ) == 0 ) {
+
+		httplib_cry( XX_httplib_fc(ctx), "%s: cannot open private key file %s: %s", __func__, pem, XX_httplib_ssl_error() );
 		return 0;
 	}
 
-	if (SSL_CTX_check_private_key(ctx->ssl_ctx) == 0) {
-		httplib_cry( XX_httplib_fc(ctx), "%s: certificate and private key do not match: %s", __func__, pem);
+	if ( SSL_CTX_check_private_key( ctx->ssl_ctx ) == 0 ) {
+
+		httplib_cry( XX_httplib_fc(ctx), "%s: certificate and private key do not match: %s", __func__, pem );
 		return 0;
 	}
 
-	if (SSL_CTX_use_certificate_chain_file(ctx->ssl_ctx, pem) == 0) {
-		httplib_cry( XX_httplib_fc(ctx), "%s: cannot use certificate chain file %s: %s", __func__, pem, XX_httplib_ssl_error());
+	if ( SSL_CTX_use_certificate_chain_file( ctx->ssl_ctx, pem ) == 0 ) {
+
+		httplib_cry( XX_httplib_fc(ctx), "%s: cannot use certificate chain file %s: %s", __func__, pem, XX_httplib_ssl_error() );
 		return 0;
 	}
+
 	return 1;
 
 }  /* XX_httplib_ssl_use_pem_file */

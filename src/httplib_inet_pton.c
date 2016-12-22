@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
@@ -30,36 +30,47 @@
 
 int XX_httplib_inet_pton( int af, const char *src, void *dst, size_t dstlen ) {
 
-	struct addrinfo hints, *res, *ressave;
-	int func_ret = 0;
+	struct addrinfo hints;
+	struct addrinfo *res;
+	struct addrinfo *ressave;
+	int func_ret;
 	int gai_ret;
 
-	memset(&hints, 0, sizeof(struct addrinfo));
+	func_ret = 0;
+
+	memset( & hints, 0, sizeof(struct addrinfo) );
 	hints.ai_family = af;
 
-	gai_ret = getaddrinfo(src, NULL, &hints, &res);
-	if (gai_ret != 0) {
-		/* gai_strerror could be used to convert gai_ret to a string */
-		/* POSIX return values: see
+	gai_ret = getaddrinfo( src, NULL, &hints, &res );
+
+	if ( gai_ret != 0 ) {
+
+		/*
+		 * gai_strerror could be used to convert gai_ret to a string
+		 * POSIX return values: see
 		 * http://pubs.opengroup.org/onlinepubs/9699919799/functions/freeaddrinfo.html
-		 */
-		/* Windows return values: see
+		 *
+		 * Windows return values: see
 		 * https://msdn.microsoft.com/en-us/library/windows/desktop/ms738520%28v=vs.85%29.aspx
 		 */
+
 		return 0;
 	}
 
 	ressave = res;
 
-	while (res) {
-		if (dstlen >= res->ai_addrlen) {
-			memcpy(dst, res->ai_addr, res->ai_addrlen);
+	while ( res ) {
+
+		if ( dstlen >= res->ai_addrlen ) {
+
+			memcpy( dst, res->ai_addr, res->ai_addrlen );
 			func_ret = 1;
 		}
 		res = res->ai_next;
 	}
 
-	freeaddrinfo(ressave);
+	freeaddrinfo( ressave );
+
 	return func_ret;
 
 }  /* XX_httplib_inet_pton */

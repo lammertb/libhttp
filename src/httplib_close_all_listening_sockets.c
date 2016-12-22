@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
@@ -41,12 +41,15 @@ void XX_httplib_close_all_listening_sockets( struct httplib_context *ctx ) {
 
 	if ( ctx == NULL ) return;
 
-	for (i = 0; i < ctx->num_listening_sockets; i++) {
-		closesocket(ctx->listening_sockets[i].sock);
+	for (i=0; i<ctx->num_listening_sockets; i++) {
+
+		closesocket( ctx->listening_sockets[i].sock );
 		ctx->listening_sockets[i].sock = INVALID_SOCKET;
 	}
+
 	httplib_free( ctx->listening_sockets    );
 	httplib_free( ctx->listening_socket_fds );
+
 	ctx->listening_sockets    = NULL;
 	ctx->listening_socket_fds = NULL;
 

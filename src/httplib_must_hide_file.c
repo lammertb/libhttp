@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
@@ -37,10 +37,6 @@ int XX_httplib_must_hide_file( struct httplib_connection *conn, const char *path
 	pw_pattern = "**" PASSWORDS_FILE_NAME "$";
 	pattern    = conn->ctx->config[HIDE_FILES];
 
-	return XX_httplib_match_prefix(pw_pattern, strlen(pw_pattern), path) > 0
-	       || (pattern != NULL
-	           && XX_httplib_match_prefix(pattern, strlen(pattern), path) > 0);
-
-	return 0;
+	return XX_httplib_match_prefix( pw_pattern, strlen(pw_pattern), path) > 0 || (pattern != NULL && XX_httplib_match_prefix(pattern, strlen(pattern), path) > 0);
 
 }  /* XX_httplib_must_hide_file */

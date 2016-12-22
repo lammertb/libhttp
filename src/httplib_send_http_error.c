@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
@@ -40,93 +40,136 @@ void XX_httplib_send_http_error( struct httplib_connection *conn, int status, co
 	int truncated;
 	int has_body;
 	char date[64];
-	time_t curtime = time(NULL);
-	const char *error_handler = NULL;
+	time_t curtime;
+	const char *error_handler;
 	struct file error_page_file = STRUCT_FILE_INITIALIZER;
-	const char *error_page_file_ext, *tstr;
+	const char *error_page_file_ext;
+	const char *tstr;
+	const char *status_text;
 
-	const char *status_text = httplib_get_response_code_text(conn, status);
+	if ( conn == NULL ) return;
 
-	if (conn == NULL) return;
+	curtime       = time( NULL );
+	error_handler = NULL;
+	status_text   = httplib_get_response_code_text( conn, status );
 
 	conn->status_code = status;
-	if (conn->in_error_handler || conn->ctx->callbacks.http_error == NULL
-	    || conn->ctx->callbacks.http_error(conn, status)) {
-		if (!conn->in_error_handler) {
-			/* Send user defined error pages, if defined */
-			error_handler = conn->ctx->config[ERROR_PAGES];
+
+	if ( conn->in_error_handler  ||  conn->ctx->callbacks.http_error == NULL  ||  conn->ctx->callbacks.http_error( conn, status ) ) {
+
+		if ( ! conn->in_error_handler ) {
+
+			/*
+			 * Send user defined error pages, if defined
+			 */
+
+			error_handler       = conn->ctx->config[ERROR_PAGES];
 			error_page_file_ext = conn->ctx->config[INDEX_FILES];
-			page_handler_found = 0;
-			if (error_handler != NULL) {
-				for (scope = 1; (scope <= 3) && !page_handler_found; scope++) {
-					switch (scope) {
-					case 1: /* Handler for specific error, e.g. 404 error */
-						XX_httplib_snprintf(conn, &truncated, buf, sizeof(buf) - 32, "%serror%03u.", error_handler, status);
-						break;
-					case 2: /* Handler for error group, e.g., 5xx error handler
-					         * for all server errors (500-599) */
-						XX_httplib_snprintf(conn, &truncated, buf, sizeof(buf) - 32, "%serror%01uxx.", error_handler, status / 100);
-						break;
-					default: /* Handler for all errors */
-						XX_httplib_snprintf(conn, &truncated, buf, sizeof(buf) - 32, "%serror.", error_handler);
-						break;
+			page_handler_found  = 0;
+
+			if ( error_handler != NULL ) {
+
+				for (scope=1; (scope <= 3) && ! page_handler_found; scope++) {
+
+					switch ( scope ) {
+
+						case 1 :
+							/*
+							 * Handler for specific error, e.g. 404 error
+							 */
+
+							XX_httplib_snprintf( conn, &truncated, buf, sizeof(buf) - 32, "%serror%03u.", error_handler, status );
+							break;
+
+						case 2 :
+							/*
+							 * Handler for error group, e.g., 5xx error handler
+						         * for all server errors (500-599)
+							 */
+
+							XX_httplib_snprintf( conn, &truncated, buf, sizeof(buf) - 32, "%serror%01uxx.", error_handler, status / 100 );
+							break;
+
+						default :
+							/*
+							 * Handler for all errors
+							 */
+
+							XX_httplib_snprintf( conn, &truncated, buf, sizeof(buf) - 32, "%serror.", error_handler );
+							break;
 					}
 
-					/* String truncation in buf may only occur if error_handler
+					/*
+					 * String truncation in buf may only occur if error_handler
 					 * is too long. This string is from the config, not from a
-					 * client. */
-					(void)truncated;
+					 * client.
+					 */
 
-					len = (int)strlen(buf);
+					len  = (int)strlen( buf );
+					tstr = strchr( error_page_file_ext, '.' );
 
-					tstr = strchr(error_page_file_ext, '.');
+					while ( tstr ) {
 
-					while (tstr) {
-						for (i = 1; i < 32 && tstr[i] != 0 && tstr[i] != ',';
-						     i++)
-							buf[len + i - 1] = tstr[i];
+						for (i=1; i<32 && tstr[i] != 0 && tstr[i] != ','; i++) buf[len + i - 1] = tstr[i];
 						buf[len + i - 1] = 0;
-						if (XX_httplib_stat(conn, buf, &error_page_file)) {
+
+						if ( XX_httplib_stat( conn, buf, &error_page_file ) ) {
+
 							page_handler_found = 1;
 							break;
 						}
-						tstr = strchr(tstr + i, '.');
+						tstr = strchr( tstr + i, '.' );
 					}
 				}
 			}
 
-			if (page_handler_found) {
+			if ( page_handler_found ) {
+
 				conn->in_error_handler = 1;
-				XX_httplib_handle_file_based_request(conn, buf, &error_page_file);
+				XX_httplib_handle_file_based_request( conn, buf, &error_page_file );
 				conn->in_error_handler = 0;
+
 				return;
 			}
 		}
 
-		/* No custom error page. Send default error page. */
-		XX_httplib_gmt_time_string(date, sizeof(date), &curtime);
+		/*
+		 * No custom error page. Send default error page.
+		 */
 
-		/* Errors 1xx, 204 and 304 MUST NOT send a body */
+		XX_httplib_gmt_time_string( date, sizeof(date), &curtime );
+
+		/*
+		 * Errors 1xx, 204 and 304 MUST NOT send a body
+		 */
+
 		has_body = (status > 199 && status != 204 && status != 304);
 
 		conn->must_close = 1;
-		httplib_printf(conn, "HTTP/1.1 %d %s\r\n", status, status_text);
-		XX_httplib_send_no_cache_header(conn);
-		if (has_body) httplib_printf(conn, "%s", "Content-Type: text/plain; charset=utf-8\r\n");
-		httplib_printf(conn, "Date: %s\r\n" "Connection: close\r\n\r\n", date);
+		httplib_printf( conn, "HTTP/1.1 %d %s\r\n", status, status_text );
+		XX_httplib_send_no_cache_header( conn );
 
-		/* Errors 1xx, 204 and 304 MUST NOT send a body */
-		if (has_body) {
-			httplib_printf(conn, "Error %d: %s\n", status, status_text);
+		if ( has_body ) httplib_printf( conn, "%s", "Content-Type: text/plain; charset=utf-8\r\n" );
+		httplib_printf( conn, "Date: %s\r\n" "Connection: close\r\n\r\n", date );
 
-			if (fmt != NULL) {
-				va_start(ap, fmt);
-				XX_httplib_vsnprintf(conn, NULL, buf, sizeof(buf), fmt, ap);
-				va_end(ap);
-				httplib_write(conn, buf, strlen(buf));
+		/*
+		 * Errors 1xx, 204 and 304 MUST NOT send a body
+		 */
+
+		if ( has_body ) {
+
+			httplib_printf( conn, "Error %d: %s\n", status, status_text );
+
+			if ( fmt != NULL ) {
+
+				va_start( ap, fmt );
+				XX_httplib_vsnprintf( conn, NULL, buf, sizeof(buf), fmt, ap );
+				va_end( ap );
+				httplib_write( conn, buf, strlen(buf) );
 			}
-
-		} else {
+		}
+		
+		else {
 			/* No body allowed. Close the connection. */
 		}
 	}

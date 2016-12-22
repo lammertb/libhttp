@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
@@ -36,7 +36,9 @@
 
 void httplib_set_websocket_handler( struct httplib_context *ctx, const char *uri, httplib_websocket_connect_handler connect_handler, httplib_websocket_ready_handler ready_handler, httplib_websocket_data_handler data_handler, httplib_websocket_close_handler close_handler, void *cbdata ) {
 
-	int is_delete_request = (connect_handler == NULL) && (ready_handler == NULL) && (data_handler == NULL) && (close_handler == NULL);
+	int is_delete_request;
+
+	is_delete_request = (connect_handler == NULL) && (ready_handler == NULL) && (data_handler == NULL) && (close_handler == NULL);
 	XX_httplib_set_handler_type(ctx, uri, WEBSOCKET_HANDLER, is_delete_request, NULL, connect_handler, ready_handler, data_handler, close_handler, NULL, cbdata);
 
 }  /* httplib_set_websocket_handler */

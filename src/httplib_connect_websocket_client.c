@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
@@ -46,8 +46,8 @@ struct httplib_connection *httplib_connect_websocket_client(const char *host,
                             const char *origin,
                             httplib_websocket_data_handler data_func,
                             httplib_websocket_close_handler close_func,
-                            void *user_data)
-{
+                            void *user_data ) {
+
 	struct httplib_connection *conn = NULL;
 
 #if defined(USE_WEBSOCKET)
@@ -56,7 +56,7 @@ struct httplib_connection *httplib_connect_websocket_client(const char *host,
 	static const char *magic = "x3JJHMbDL1EzLkh9GBhXDw==";
 	static const char *handshake_req;
 
-	if (origin != NULL) {
+	if ( origin != NULL ) {
 		handshake_req = "GET %s HTTP/1.1\r\n"
 		                "Host: %s\r\n"
 		                "Upgrade: websocket\r\n"
@@ -65,7 +65,9 @@ struct httplib_connection *httplib_connect_websocket_client(const char *host,
 		                "Sec-WebSocket-Version: 13\r\n"
 		                "Origin: %s\r\n"
 		                "\r\n";
-	} else {
+	}
+	
+	else {
 		handshake_req = "GET %s HTTP/1.1\r\n"
 		                "Host: %s\r\n"
 		                "Upgrade: websocket\r\n"
@@ -75,43 +77,61 @@ struct httplib_connection *httplib_connect_websocket_client(const char *host,
 		                "\r\n";
 	}
 
-	/* Establish the client connection and request upgrade */
+	/*
+	 * Establish the client connection and request upgrade
+	 */
+
 	conn = httplib_download(host, port, use_ssl, error_buffer, error_buffer_size, handshake_req, path, host, magic, origin);
 
-	/* Connection object will be null if something goes wrong */
-	if (conn == NULL || (strcmp(conn->request_info.request_uri, "101") != 0)) {
-		if (!*error_buffer) {
-			/* if there is a connection, but it did not return 101,
-			 * error_buffer is not yet set */
-			XX_httplib_snprintf(conn, NULL, error_buffer, error_buffer_size, "Unexpected server reply");
+	/*
+	 * Connection object will be null if something goes wrong
+	 */
+
+	if ( conn == NULL  ||  strcmp(conn->request_info.request_uri, "101") ) {
+
+		if ( ! *error_buffer ) {
+
+			/*
+			 * if there is a connection, but it did not return 101,
+			 * error_buffer is not yet set
+			 */
+
+			XX_httplib_snprintf( conn, NULL, error_buffer, error_buffer_size, "Unexpected server reply" );
 		}
-		if (conn != NULL) {
+		if ( conn != NULL ) {
+
 			httplib_free( conn );
 			conn = NULL;
 		}
 		return conn;
 	}
 
-	/* For client connections, httplib_context is fake. Since we need to set a
-	 * callback function, we need to create a copy and modify it. */
-	newctx = httplib_malloc(sizeof(struct httplib_context));
-	memcpy(newctx, conn->ctx, sizeof(struct httplib_context));
+	/*
+	 * For client connections, httplib_context is fake. Since we need to set a
+	 * callback function, we need to create a copy and modify it.
+	 */
+
+	newctx = httplib_malloc(   sizeof(struct httplib_context) );
+	memcpy( newctx, conn->ctx, sizeof(struct httplib_context) );
 
 	newctx->user_data          = user_data;
-	newctx->context_type       = 2;       /* client context type */
-	newctx->cfg_worker_threads = 1; /* one worker thread will be created */
-	newctx->workerthreadids    = httplib_calloc(newctx->cfg_worker_threads, sizeof(pthread_t));
+	newctx->context_type       = 2;			/* client context type			*/
+	newctx->cfg_worker_threads = 1;			/* one worker thread will be created	*/
+	newctx->workerthreadids    = httplib_calloc( newctx->cfg_worker_threads, sizeof(pthread_t) );
 	conn->ctx                  = newctx;
-	thread_data                = httplib_calloc(sizeof(struct websocket_client_thread_data), 1);
+	thread_data                = httplib_calloc( sizeof(struct websocket_client_thread_data), 1 );
 	thread_data->conn          = conn;
 	thread_data->data_handler  = data_func;
 	thread_data->close_handler = close_func;
 	thread_data->callback_data = NULL;
 
-	/* Start a thread to read the websocket client connection
+	/*
+	 * Start a thread to read the websocket client connection
 	 * This thread will automatically stop when httplib_disconnect is
-	 * called on the client connection */
-	if (XX_httplib_start_thread_with_id( XX_httplib_websocket_client_thread, (void *)thread_data, newctx->workerthreadids) != 0) {
+	 * called on the client connection
+	 */
+
+	if ( XX_httplib_start_thread_with_id( XX_httplib_websocket_client_thread, (void *)thread_data, newctx->workerthreadids) != 0 ) {
 
 		httplib_free( thread_data             );
 		httplib_free( newctx->workerthreadids );
@@ -121,17 +141,16 @@ struct httplib_connection *httplib_connect_websocket_client(const char *host,
 		conn = NULL;
 	}
 #else
-	/* Appease "unused parameter" warnings */
-	(void)host;
-	(void)port;
-	(void)use_ssl;
-	(void)error_buffer;
-	(void)error_buffer_size;
-	(void)path;
-	(void)origin;
-	(void)user_data;
-	(void)data_func;
-	(void)close_func;
+	UNUSED_PARAMETER(host);
+	UNUSED_PARAMETER(port);
+	UNUSED_PARAMETER(use_ssl);
+	UNUSED_PARAMETER(error_buffer);
+	UNUSED_PARAMETER(error_buffer_size);
+	UNUSED_PARAMETER(path);
+	UNUSED_PARAMETER(origin);
+	UNUSED_PARAMETER(user_data);
+	UNUSED_PARAMETER(data_func);
+	UNUSED_PARAMETER(close_func);
 #endif
 
 	return conn;

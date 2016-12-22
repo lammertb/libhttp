@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
@@ -31,19 +31,28 @@
 
 void XX_httplib_dir_scan_callback( struct de *de, void *data ) {
 
-	struct dir_scan_data *dsd = (struct dir_scan_data *)data;
+	struct dir_scan_data *dsd;
 
-	if (dsd->entries == NULL || dsd->num_entries >= dsd->arr_size) {
+	dsd = data;
+
+	if ( dsd->entries == NULL  ||  dsd->num_entries >= dsd->arr_size ) {
+
 		dsd->arr_size *= 2;
-		dsd->entries = XX_httplib_realloc2(dsd->entries, dsd->arr_size * sizeof(dsd->entries[0]));
+		dsd->entries   = XX_httplib_realloc2( dsd->entries, dsd->arr_size * sizeof(dsd->entries[0]) );
 	}
-	if (dsd->entries == NULL) {
-		/* TODO(lsm, low): propagate an error to the caller */
+	if ( dsd->entries == NULL ) {
+
+		/*
+		 * TODO(lsm, low): propagate an error to the caller
+		 */
+
 		dsd->num_entries = 0;
-	} else {
-		dsd->entries[dsd->num_entries].file_name = XX_httplib_strdup(de->file_name);
-		dsd->entries[dsd->num_entries].file = de->file;
-		dsd->entries[dsd->num_entries].conn = de->conn;
+	}
+	
+	else {
+		dsd->entries[dsd->num_entries].file_name = XX_httplib_strdup( de->file_name );
+		dsd->entries[dsd->num_entries].file      = de->file;
+		dsd->entries[dsd->num_entries].conn      = de->conn;
 		dsd->num_entries++;
 	}
 

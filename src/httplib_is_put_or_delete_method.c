@@ -22,17 +22,26 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
 
+/*
+ * bool XX_httplib_is_put_or_delete_method( const struct httplib_connection *conn );
+ *
+ * The function XX_httplib_is_put_or_delete_method() returns true of the method
+ * of the request on a connection is one which writes at the file level on the
+ * server like PUT, DELETE, MKCOL and PATCH.
+ */
+
 bool XX_httplib_is_put_or_delete_method( const struct httplib_connection *conn ) {
+
+	const char *s;
 
 	if ( conn == NULL ) return false;
 
-	const char *s = conn->request_info.request_method;
-
-	return s != NULL && (!strcmp(s, "PUT") || !strcmp(s, "DELETE") || !strcmp(s, "MKCOL") || !strcmp(s, "PATCH"));
+	s = conn->request_info.request_method;
+	return  s != NULL  &&  ( ! strcmp( s, "PUT" )  ||  ! strcmp( s, "DELETE" )  ||  ! strcmp( s, "MKCOL" )  ||  ! strcmp( s, "PATCH" ) );
 
 }  /* X_httplib_is_put_or_delete_method */

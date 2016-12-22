@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
@@ -37,40 +37,48 @@
 
 void XX_httplib_redirect_to_https_port( struct httplib_connection *conn, int ssl_index ) {
 
-	char host[1025];
+	char host[1024+1];
 	const char *host_header;
 	size_t hostlen;
+	char *pos;
+
+	if ( conn == NULL ) return;
 
 	host_header = httplib_get_header(conn, "Host");
-	hostlen = sizeof(host);
-	if (host_header != NULL) {
-		char *pos;
+	hostlen     = sizeof( host );
+
+	if ( host_header != NULL ) {
 
 		httplib_strlcpy( host, host_header, hostlen );
 		host[hostlen - 1] = '\0';
 		pos = strchr(host, ':');
 		if (pos != NULL) *pos = '\0';
-	} else {
-		/* Cannot get host from the Host: header.
-		 * Fallback to our IP address. */
-		if (conn) XX_httplib_sockaddr_to_string(host, hostlen, &conn->client.lsa);
+	}
+	
+	else {
+		/*
+		 * Cannot get host from the Host: header.
+		 * Fallback to our IP address.
+		 */
+
+		XX_httplib_sockaddr_to_string( host, hostlen, &conn->client.lsa );
 	}
 
-	/* Send host, port, uri and (if it exists) ?query_string */
-	if (conn) {
-		httplib_printf(conn,
-		          "HTTP/1.1 302 Found\r\nLocation: https://%s:%d%s%s%s\r\n\r\n",
-		          host,
+	/*
+	 * Send host, port, uri and (if it exists) ?query_string
+	 */
+
+	httplib_printf( conn, "HTTP/1.1 302 Found\r\nLocation: https://%s:%d%s%s%s\r\n\r\n",
+	          host,
 #if defined(USE_IPV6)
-		          (conn->ctx->listening_sockets[ssl_index].lsa.sa.sa_family
-		           == AF_INET6)
-		              ? (int)ntohs(conn->ctx->listening_sockets[ssl_index].lsa.sin6.sin6_port)
-		              :
+	          (conn->ctx->listening_sockets[ssl_index].lsa.sa.sa_family
+	           == AF_INET6)
+	              ? (int)ntohs(conn->ctx->listening_sockets[ssl_index].lsa.sin6.sin6_port)
+	              :
 #endif
-		              (int)ntohs(conn->ctx->listening_sockets[ssl_index].lsa.sin.sin_port),
-		          conn->request_info.local_uri,
-		          (conn->request_info.query_string == NULL) ? "" : "?",
-		          (conn->request_info.query_string == NULL) ? "" : conn->request_info.query_string);
-	}
+	              (int)ntohs(conn->ctx->listening_sockets[ssl_index].lsa.sin.sin_port),
+	          conn->request_info.local_uri,
+	          (conn->request_info.query_string == NULL) ? "" : "?",
+	          (conn->request_info.query_string == NULL) ? "" : conn->request_info.query_string);
 
 }  /* XX_httplib_redirect_to_https_port */

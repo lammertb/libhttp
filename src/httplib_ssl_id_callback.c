@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
@@ -50,30 +50,46 @@ unsigned long XX_httplib_ssl_id_callback( void ) {
 #ifdef __clang__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunreachable-code"
-/* For every compiler, either "sizeof(pthread_t) > sizeof(unsigned long)"
+/*
+ * For every compiler, either "sizeof(pthread_t) > sizeof(unsigned long)"
  * or not, so one of the two conditions will be unreachable by construction.
  * Unfortunately the C standard does not define a way to check this at
  * compile time, since the #if preprocessor conditions can not use the sizeof
- * operator as an argument. */
+ * operator as an argument.
+ */
+
 #endif /* __clang__ */
 
-	if (sizeof(pthread_t) > sizeof(unsigned long)) {
-		/* This is the problematic case for CRYPTO_set_id_callback:
-		 * The OS pthread_t can not be cast to unsigned long. */
+	if ( sizeof(pthread_t) > sizeof(unsigned long) ) {
+
+		/*
+		 * This is the problematic case for CRYPTO_set_id_callback:
+		 * The OS pthread_t can not be cast to unsigned long.
+		 */
+
 		struct httplib_workerTLS *tls = httplib_pthread_getspecific( XX_httplib_sTlsKey );
-		if (tls == NULL) {
-			/* SSL called from an unknown thread: Create some thread index.
+
+		if ( tls == NULL ) {
+
+			/*
+			 * SSL called from an unknown thread: Create some thread index.
 			 */
+
 			tls = httplib_malloc( sizeof(struct httplib_workerTLS) );
-			tls->is_master = -2; /* -2 means "3rd party thread" */
-			tls->thread_idx = (unsigned)httplib_atomic_inc(&XX_httplib_thread_idx_max);
+			tls->is_master  = -2; /* -2 means "3rd party thread" */
+			tls->thread_idx = (unsigned) httplib_atomic_inc( & XX_httplib_thread_idx_max );
 			httplib_pthread_setspecific( XX_httplib_sTlsKey, tls );
 		}
+
 		return tls->thread_idx;
-	} else {
-		/* pthread_t may be any data type, so a simple cast to unsigned long
+	}
+	else {
+		/*
+		 * pthread_t may be any data type, so a simple cast to unsigned long
 		 * can rise a warning/error, depending on the platform.
-		 * Here memcpy is used as an anything-to-anything cast. */
+		 * Here memcpy is used as an anything-to-anything cast.
+		 */
+
 		unsigned long ret = 0;
 		pthread_t t       = httplib_pthread_self();
 		memcpy(&ret, &t, sizeof(pthread_t));

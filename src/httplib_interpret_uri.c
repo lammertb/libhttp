@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
@@ -49,8 +49,8 @@ void XX_httplib_interpret_uri( struct httplib_connection *conn, char *filename, 
 /* TODO (high): Restructure this function */
 
 #if !defined(NO_FILES)
-	const char *uri = conn->request_info.local_uri;
-	const char *root = conn->ctx->config[DOCUMENT_ROOT];
+	const char *uri;
+	const char *root;
 	const char *rewrite;
 	struct vec a;
 	struct vec b;
@@ -65,63 +65,87 @@ void XX_httplib_interpret_uri( struct httplib_connection *conn, char *filename, 
 	UNUSED_PARAMETER( filename_buf_len );
 #endif  /* NO_FILES */
 
-	memset(filep, 0, sizeof(*filep));
-	*filename           = 0;
-	*is_found           = false;
-	*is_script_resource = false;
-	*is_put_or_delete_request = XX_httplib_is_put_or_delete_method(conn);
+	if ( conn == NULL  ||  conn->ctx == NULL  ||  filep == NULL ) return;
+
+	uri  = conn->request_info.local_uri;
+	root = conn->ctx->config[DOCUMENT_ROOT];
+
+	memset( filep, 0, sizeof(*filep) );
+
+	*filename                 = 0;
+	*is_found                 = false;
+	*is_script_resource       = false;
+	*is_put_or_delete_request = XX_httplib_is_put_or_delete_method( conn );
 
 #if defined(USE_WEBSOCKET)
-	*is_websocket_request = XX_httplib_is_websocket_protocol(conn);
+	*is_websocket_request     = XX_httplib_is_websocket_protocol( conn );
 #if !defined(NO_FILES)
-	if (*is_websocket_request && conn->ctx->config[WEBSOCKET_ROOT]) {
-		root = conn->ctx->config[WEBSOCKET_ROOT];
-	}
+	if ( *is_websocket_request  &&  conn->ctx->config[WEBSOCKET_ROOT] ) root = conn->ctx->config[WEBSOCKET_ROOT];
 #endif /* !NO_FILES */
 #else  /* USE_WEBSOCKET */
 	*is_websocket_request = false;
 #endif /* USE_WEBSOCKET */
 
 #if !defined(NO_FILES)
-	/* Note that root == NULL is a regular use case here. This occurs,
+	/*
+	 * Note that root == NULL is a regular use case here. This occurs,
 	 * if all requests are handled by callbacks, so the WEBSOCKET_ROOT
-	 * config is not required. */
-	if (root == NULL) {
-		/* all file related outputs have already been set to 0, just return
+	 * config is not required.
+	 */
+
+	if ( root == NULL ) {
+
+		/*
+		 * all file related outputs have already been set to 0, just return
 		 */
+
 		return;
 	}
 
-	/* Using buf_len - 1 because memmove() for PATH_INFO may shift part
+	/*
+	 * Using buf_len - 1 because memmove() for PATH_INFO may shift part
 	 * of the path one byte on the right.
-	 * If document_root is NULL, leave the file empty. */
-	XX_httplib_snprintf( conn, &truncated, filename, filename_buf_len - 1, "%s%s", root, uri);
+	 * If document_root is NULL, leave the file empty.
+	 */
 
-	if (truncated) goto interpret_cleanup;
+	XX_httplib_snprintf( conn, &truncated, filename, filename_buf_len - 1, "%s%s", root, uri );
+
+	if ( truncated ) goto interpret_cleanup;
 
 	rewrite = conn->ctx->config[REWRITE];
-	while ((rewrite = XX_httplib_next_option(rewrite, &a, &b)) != NULL) {
-		if ((match_len = XX_httplib_match_prefix(a.ptr, a.len, uri)) > 0) {
-			XX_httplib_snprintf(conn, &truncated, filename, filename_buf_len - 1, "%.*s%s", (int)b.len, b.ptr, uri + match_len);
+
+	while ( (rewrite = XX_httplib_next_option( rewrite, &a, &b )) != NULL ) {
+
+		match_len = XX_httplib_match_prefix( a.ptr, a.len, uri );
+
+		if ( match_len > 0 ) {
+
+			XX_httplib_snprintf( conn, &truncated, filename, filename_buf_len - 1, "%.*s%s", (int)b.len, b.ptr, uri + match_len );
 			break;
 		}
 	}
 
-	if (truncated) goto interpret_cleanup;
+	if ( truncated ) goto interpret_cleanup;
 
-	/* Local file path and name, corresponding to requested URI
-	 * is now stored in "filename" variable. */
-	if (XX_httplib_stat(conn, filename, filep)) {
+	/*
+	 * Local file path and name, corresponding to requested URI
+	 * is now stored in "filename" variable.
+	 */
+
+	if ( XX_httplib_stat( conn, filename, filep ) ) {
 #if !defined(NO_CGI)
-		/* File exists. Check if it is a script type. */
+
+		/*
+		 * File exists. Check if it is a script type.
+		 */
+
 		if (0
 #if !defined(NO_CGI)
-		    || XX_httplib_match_prefix(conn->ctx->config[CGI_EXTENSIONS],
-		                    strlen(conn->ctx->config[CGI_EXTENSIONS]),
-		                    filename) > 0
+		    || XX_httplib_match_prefix(conn->ctx->config[CGI_EXTENSIONS], strlen(conn->ctx->config[CGI_EXTENSIONS]), filename) > 0
 #endif
 		    ) {
-			/* The request addresses a CGI script or a Lua script. The URI
+			/*
+			 * The request addresses a CGI script or a Lua script. The URI
 			 * corresponds to the script itself (like /path/script.cgi),
 			 * and there is no additional resource path
 			 * (like /path/script.cgi/something).
@@ -130,63 +154,89 @@ void XX_httplib_interpret_uri( struct httplib_connection *conn, char *filename, 
 			 * file.
 			 * Requests that read or write from/to a resource, like GET and
 			 * POST requests, should call the script and return the
-			 * generated response. */
-			*is_script_resource = !*is_put_or_delete_request;
+			 * generated response.
+			 */
+
+			*is_script_resource = ! *is_put_or_delete_request;
 		}
+
 #endif /* !defined(NO_CGI) */
+
 		*is_found = true;
 		return;
 	}
 
-	/* If we can't find the actual file, look for the file
+	/*
+	 * If we can't find the actual file, look for the file
 	 * with the same name but a .gz extension. If we find it,
 	 * use that and set the gzipped flag in the file struct
 	 * to indicate that the response need to have the content-
 	 * encoding: gzip header.
-	 * We can only do this if the browser declares support. */
-	if ((accept_encoding = httplib_get_header(conn, "Accept-Encoding")) != NULL) {
-		if (strstr(accept_encoding, "gzip") != NULL) {
-			XX_httplib_snprintf( conn, &truncated, gz_path, sizeof(gz_path), "%s.gz", filename);
+	 * We can only do this if the browser declares support.
+	 */
 
-			if (truncated) {
-				goto interpret_cleanup;
-			}
+	if ( (accept_encoding = httplib_get_header( conn, "Accept-Encoding" )) != NULL ) {
 
-			if (XX_httplib_stat(conn, gz_path, filep)) {
-				if (filep) {
+		if ( strstr( accept_encoding, "gzip" ) != NULL ) {
+
+			XX_httplib_snprintf( conn, &truncated, gz_path, sizeof(gz_path), "%s.gz", filename );
+
+			if ( truncated ) goto interpret_cleanup;
+
+			if ( XX_httplib_stat( conn, gz_path, filep ) ) {
+
+				if ( filep ) {
+
 					filep->gzipped = 1;
 					*is_found      = true;
 				}
-				/* Currently gz files can not be scripts. */
+
+				/*
+				 * Currently gz files can not be scripts.
+				 */
+
 				return;
 			}
 		}
 	}
 
 #if !defined(NO_CGI)
-	/* Support PATH_INFO for CGI scripts. */
-	for (p = filename + strlen(filename); p > filename + 1; p--) {
-		if (*p == '/') {
+
+	/*
+	 * Support PATH_INFO for CGI scripts.
+	 */
+
+	for (p = filename+strlen(filename); p > filename + 1; p--) {
+
+		if ( *p == '/' ) {
+
 			*p = '\0';
+
 			if ((0
 #if !defined(NO_CGI)
-			     || XX_httplib_match_prefix(conn->ctx->config[CGI_EXTENSIONS],
-			                     strlen(conn->ctx->config[CGI_EXTENSIONS]),
-			                     filename) > 0
+			     || XX_httplib_match_prefix(conn->ctx->config[CGI_EXTENSIONS], strlen(conn->ctx->config[CGI_EXTENSIONS]), filename) > 0
 #endif
 			     ) && XX_httplib_stat(conn, filename, filep)) {
-				/* Shift PATH_INFO block one character right, e.g.
+
+				/*
+				 * Shift PATH_INFO block one character right, e.g.
 				 * "/x.cgi/foo/bar\x00" => "/x.cgi\x00/foo/bar\x00"
 				 * conn->path_info is pointing to the local variable "path"
 				 * declared in XX_httplib_handle_request(), so PATH_INFO is not valid
-				 * after XX_httplib_handle_request returns. */
+				 * after XX_httplib_handle_request returns.
+				 */
+
 				conn->path_info = p + 1;
-				memmove(p + 2, p + 1, strlen(p + 1) + 1); /* +1 is for
-				                                           * trailing \0 */
-				p[1] = '/';
+
+				memmove( p + 2, p + 1, strlen(p + 1) + 1 ); /* +1 is for trailing \0 */
+
+				p[1]                = '/';
 				*is_script_resource = true;
+
 				break;
-			} else *p = '/';
+			}
+			
+			else *p = '/';
 		}
 	}
 #endif /* !defined(NO_CGI) */
@@ -194,8 +244,13 @@ void XX_httplib_interpret_uri( struct httplib_connection *conn, char *filename, 
 	return;
 
 #if !defined(NO_FILES)
-/* Reset all outputs */
+
+/*
+ * Reset all outputs
+ */
+
 interpret_cleanup:
+
 	memset( filep, 0, sizeof(*filep) );
 
 	*filename                 = 0;
@@ -203,6 +258,7 @@ interpret_cleanup:
 	*is_script_resource       = false;
 	*is_websocket_request     = false;
 	*is_put_or_delete_request = false;
+
 #endif /* !defined(NO_FILES) */
 
 }  /* XX_httplib_interpret_uri */

@@ -22,26 +22,32 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
 
 #if !defined(NO_FILES)
+
 int XX_httplib_is_authorized_for_put( struct httplib_connection *conn ) {
 
-	if ( conn == NULL ) return 0;
-
 	struct file file = STRUCT_FILE_INITIALIZER;
-	const char *passfile = conn->ctx->config[PUT_DELETE_PASSWORDS_FILE];
-	int ret = 0;
+	const char *passfile;
+	int ret;
 
-	if (passfile != NULL && XX_httplib_fopen(conn, passfile, "r", &file)) {
-		ret = XX_httplib_authorize(conn, &file);
-		XX_httplib_fclose(&file);
+	if ( conn == NULL  ||  conn->ctx == NULL ) return 0;
+
+	passfile = conn->ctx->config[PUT_DELETE_PASSWORDS_FILE];
+	ret      = 0;
+
+	if ( passfile != NULL  &&  XX_httplib_fopen( conn, passfile, "r", &file ) ) {
+
+		ret = XX_httplib_authorize( conn, &file );
+		XX_httplib_fclose( & file );
 	}
 
 	return ret;
 
 }  /* XX_httplib_is_authorized_for_put */
+
 #endif

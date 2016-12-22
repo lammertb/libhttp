@@ -28,23 +28,23 @@
 #include "httplib_main.h"
 
 /*
- * XX_httplib_read_auth_file( struct file *filep, struct read_auth_file_struct *workdata );
+ * bool XX_httplib_read_auth_file( struct file *filep, struct read_auth_file_struct *workdata );
  *
  * The function XX_httpib_read_auth_file() loops over the password file to
  * read its contents. Include statements are honored which lets the routine
  * also open and scan child files.
  */
 
-int XX_httplib_read_auth_file( struct file *filep, struct read_auth_file_struct *workdata ) {
+bool XX_httplib_read_auth_file( struct file *filep, struct read_auth_file_struct *workdata ) {
 
 	char *p;
 	int is_authorized;
 	struct file fp;
 	size_t l;
 
-	if ( filep == NULL  ||  workdata == NULL ) return 0;
+	if ( filep == NULL  ||  workdata == NULL ) return false;
 
-	is_authorized = 0;
+	is_authorized = false;
 
 	/*
 	 * Loop over passwords file

@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
@@ -31,37 +31,33 @@
 #if defined(_WIN32)
 
 #if !defined(NO_SSL_DL) && !defined(NO_SSL)
-/* If SSL is loaded dynamically, dlopen/dlclose is required. */
-/* Create substitutes for POSIX functions in Win32. */
 
+/*
+ * If SSL is loaded dynamically, dlopen/dlclose is required.
+ * Create substitutes for POSIX functions in Win32.
+ */
 
 static HANDLE dlopen( const char *dll_name, int flags ) {
 
 	wchar_t wbuf[PATH_MAX];
 
-	(void)flags;
-	XX_httplib_path_to_unicode(NULL, dll_name, wbuf, ARRAY_SIZE(wbuf));
-	return LoadLibraryW(wbuf);
+	UNUSED_PARAMETER(flags);
+
+	XX_httplib_path_to_unicode( NULL, dll_name, wbuf, ARRAY_SIZE(wbuf) );
+	return LoadLibraryW( wbuf );
 
 }  /* dlopen */
 
 
 static int dlclose( void *handle ) {
 
-	int result;
-
-	if ( FreeLibrary((HMODULE)handle) != 0 ) result = 0;
-	else                                     result = -1;
-
-	return result;
+	return ( FreeLibrary((HMODULE)handle) != 0 ) ? 0 : -1;
 
 }  /* dlclose */
 
-#endif
+#endif  /* ! NO_SSL_DL  &&  ! NO_SSL */
 
-#endif
-
-
+#endif  /* _WIN32 */
 
 /*
  * XX_httplib_load_dll( struct httplib_context *ctx, const char *dll_name, struct ssl_func *sw );
@@ -71,9 +67,8 @@ static int dlclose( void *handle ) {
  * error occured.
  */
 
-#if !defined(NO_SSL)
+#if !defined(NO_SSL)  &&  !defined(NO_SSL_DL)
 
-#if !defined(NO_SSL_DL)
 void *XX_httplib_load_dll( struct httplib_context *ctx, const char *dll_name, struct ssl_func *sw ) {
 
 	union {
@@ -83,31 +78,48 @@ void *XX_httplib_load_dll( struct httplib_context *ctx, const char *dll_name, st
 	void *dll_handle;
 	struct ssl_func *fp;
 
-	if ((dll_handle = dlopen(dll_name, RTLD_LAZY)) == NULL) {
-		httplib_cry( XX_httplib_fc(ctx), "%s: cannot load %s", __func__, dll_name);
+	dll_handle = dlopen( dll_name, RTLD_LAZY );
+
+	if ( dll_handle == NULL ) {
+
+		httplib_cry( XX_httplib_fc(ctx), "%s: cannot load %s", __func__, dll_name );
 		return NULL;
 	}
 
-	for (fp = sw; fp->name != NULL; fp++) {
+	for (fp=sw; fp->name != NULL; fp++) {
 #ifdef _WIN32
-		/* GetProcAddress() returns pointer to function */
-		u.fp = (void (*)(void))dlsym(dll_handle, fp->name);
-#else
-		/* dlsym() on UNIX returns void *. ISO C forbids casts of data
+
+		/*
+		 * GetProcAddress() returns pointer to function
+		 */
+
+		u.fp = (void (*)(void))dlsym( dll_handle, fp->name );
+
+#else  /* _WIN32 */
+
+		/*
+		 * dlsym() on UNIX returns void *. ISO C forbids casts of data
 		 * pointers to function pointers. We need to use a union to make a
-		 * cast. */
-		u.p = dlsym(dll_handle, fp->name);
+		 * cast.
+		 */
+
+		u.p = dlsym( dll_handle, fp->name );
+
 #endif /* _WIN32 */
-		if (u.fp == NULL) {
-			httplib_cry( XX_httplib_fc(ctx), "%s: %s: cannot find %s", __func__, dll_name, fp->name);
-			dlclose(dll_handle);
+
+		if ( u.fp == NULL ) {
+
+			httplib_cry( XX_httplib_fc(ctx), "%s: %s: cannot find %s", __func__, dll_name, fp->name );
+			dlclose( dll_handle );
+
 			return NULL;
-		} else fp->ptr = u.fp;
+		}
+		
+		else fp->ptr = u.fp;
 	}
 
 	return dll_handle;
 
 }  /* XX_httplib_load_dll */
-#endif /* NO_SSL_DL */
 
-#endif /* !NO_SSL */
+#endif /* !NO_SSL_DL  &&  !NO_SSL  */

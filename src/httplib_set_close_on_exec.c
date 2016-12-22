@@ -22,21 +22,23 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
 
 #if defined(_WIN32)
 
-/* conn parameter may be NULL */
+/*
+ * conn parameter may be NULL
+ */
+
 void XX_httplib_set_close_on_exec( SOCKET sock, struct httplib_connection *conn ) {
 
-	(void)conn; /* Unused. */
+	UNUSED_PARAMETER(conn);
 #if defined(_WIN32_WCE)
-	(void)sock;
 #else
-	SetHandleInformation((HANDLE)(intptr_t)sock, HANDLE_FLAG_INHERIT, 0);
+	SetHandleInformation( (HANDLE)(intptr_t)sock, HANDLE_FLAG_INHERIT, 0 );
 #endif
 
 }  /* XX_httplib_set_close_on_exec */
@@ -44,11 +46,15 @@ void XX_httplib_set_close_on_exec( SOCKET sock, struct httplib_connection *conn 
 
 #else
 
-/* conn may be NULL */
+/*
+ * conn may be NULL
+ */
+
 void XX_httplib_set_close_on_exec( SOCKET fd, struct httplib_connection *conn ) {
 
-	if (fcntl(fd, F_SETFD, FD_CLOEXEC) != 0) {
-		if (conn) { httplib_cry(conn, "%s: fcntl(F_SETFD FD_CLOEXEC) failed: %s", __func__, strerror(ERRNO)); }
+	if ( fcntl( fd, F_SETFD, FD_CLOEXEC ) != 0 ) {
+
+		if ( conn != NULL ) httplib_cry(conn, "%s: fcntl(F_SETFD FD_CLOEXEC) failed: %s", __func__, strerror(ERRNO) );
 	}
 
 }  /* XX_httplib_set_close_on_exec */

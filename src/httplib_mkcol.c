@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
@@ -48,22 +48,32 @@ void XX_httplib_mkcol( struct httplib_connection *conn, const char *path ) {
 
 	curtime = time( NULL );
 
-	/* TODO (mid): Check the XX_httplib_send_http_error situations in this function */
+	/*
+	 * TODO (mid): Check the XX_httplib_send_http_error situations in this function
+	 */
 
-	memset(&de.file, 0, sizeof(de.file));
-	if (!XX_httplib_stat(conn, path, &de.file)) {
-		httplib_cry(conn, "%s: XX_httplib_stat(%s) failed: %s", __func__, path, strerror(ERRNO));
+	memset( & de.file, 0, sizeof(de.file) );
+
+	if ( ! XX_httplib_stat( conn, path, & de.file ) ) {
+
+		httplib_cry( conn, "%s: XX_httplib_stat(%s) failed: %s", __func__, path, strerror(ERRNO) );
 	}
 
-	if (de.file.last_modified) {
-		/* TODO (high): This check does not seem to make any sense ! */
-		XX_httplib_send_http_error( conn, 405, "Error: mkcol(%s): %s", path, strerror(ERRNO));
+	if ( de.file.last_modified ) {
+
+		/*
+		 * TODO (high): This check does not seem to make any sense !
+		 */
+
+		XX_httplib_send_http_error( conn, 405, "Error: mkcol(%s): %s", path, strerror(ERRNO) );
 		return;
 	}
 
 	body_len = conn->data_len - conn->request_len;
-	if (body_len > 0) {
-		XX_httplib_send_http_error( conn, 415, "Error: mkcol(%s): %s", path, strerror(ERRNO));
+
+	if ( body_len > 0 ) {
+
+		XX_httplib_send_http_error( conn, 415, "Error: mkcol(%s): %s", path, strerror(ERRNO) );
 		return;
 	}
 
@@ -72,13 +82,13 @@ void XX_httplib_mkcol( struct httplib_connection *conn, const char *path ) {
 	if ( rc == 0 ) {
 
 		conn->status_code = 201;
-		XX_httplib_gmt_time_string(date, sizeof(date), &curtime);
-		httplib_printf(conn, "HTTP/1.1 %d Created\r\n" "Date: %s\r\n", conn->status_code, date);
-		XX_httplib_send_static_cache_header(conn);
-		httplib_printf(conn, "Content-Length: 0\r\n" "Connection: %s\r\n\r\n", XX_httplib_suggest_connection_header(conn));
+		XX_httplib_gmt_time_string( date, sizeof(date), &curtime );
+		httplib_printf( conn, "HTTP/1.1 %d Created\r\n" "Date: %s\r\n", conn->status_code, date );
+		XX_httplib_send_static_cache_header( conn );
+		httplib_printf( conn, "Content-Length: 0\r\n" "Connection: %s\r\n\r\n", XX_httplib_suggest_connection_header(conn) );
 	}
 	
-	else if (rc == -1) {
+	else if ( rc == -1 ) {
 
 		if      ( errno == EEXIST ) XX_httplib_send_http_error( conn, 405, "Error: mkcol(%s): %s", path, strerror( ERRNO ) );
 		else if ( errno == EACCES ) XX_httplib_send_http_error( conn, 403, "Error: mkcol(%s): %s", path, strerror( ERRNO ) );

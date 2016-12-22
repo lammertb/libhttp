@@ -36,18 +36,20 @@
 
 #else
 
-#define _XOPEN_SOURCE 600 /* For PATH_MAX on linux */
-/* This should also be sufficient for "realpath", according to
+#define _XOPEN_SOURCE 600
+
+/*
+ * For PATH_MAX on linux
+ *
+ * This should also be sufficient for "realpath", according to
  * http://man7.org/linux/man-pages/man3/realpath.3.html, but in
- * reality it does not seem to work. */
-/* In case this causes a problem, disable the warning:
+ * reality it does not seem to work.
+ *
+ * In case this causes a problem, disable the warning:
  * #pragma GCC diagnostic ignored "-Wimplicit-function-declaration"
  * #pragma clang diagnostic ignored "-Wimplicit-function-declaration"
  */
-#endif
 
-#ifndef IGNORE_UNUSED_RESULT
-#define IGNORE_UNUSED_RESULT(a) ((void)((a) && 1))
 #endif
 
 #if defined(__cplusplus) && (__cplusplus >= 201103L)
@@ -73,13 +75,12 @@
 
 #include "libhttp.h"
 
-#define printf                                                                 \
-	DO_NOT_USE_THIS_FUNCTION__USE_fprintf /* Required for unit testing */
+#define printf DO_NOT_USE_THIS_FUNCTION__USE_fprintf /* Required for unit testing */
 
 #if defined(_WIN32)  /* WINDOWS / UNIX include block */
 #ifndef _WIN32_WINNT
 #define _WIN32_WINNT 0x0501 /* for tdm-gcc so we can use getconsolewindow */
-#endif
+#endif  /* _WIN32_WINNT */
 #undef UNICODE
 #include <windows.h>
 #include <winsvc.h>
@@ -94,11 +95,11 @@ static int guard = 0; /* test if any dialog is already open */
 
 #ifndef PATH_MAX
 #define PATH_MAX MAX_PATH
-#endif
+#endif  /* PATH_MAX */
 
 #ifndef S_ISDIR
 #define S_ISDIR(x) ((x)&_S_IFDIR)
-#endif
+#endif  /* S_ISDIR */
 
 #define DIRSEP '\\'
 #define snprintf _snprintf

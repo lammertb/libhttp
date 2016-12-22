@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
@@ -43,72 +43,106 @@ static void do_ssi_include(struct httplib_connection *conn, const char *ssi, cha
 
 	if ( conn == NULL ) return;
 
-	/* sscanf() is safe here, since send_ssi_file() also uses buffer
+	/*
+	 * sscanf() is safe here, since send_ssi_file() also uses buffer
 	 * of size MG_BUF_LEN to get the tag. So strlen(tag) is
-	 * always < MG_BUF_LEN. */
-	if (sscanf(tag, " virtual=\"%511[^\"]\"", file_name) == 1) {
-		/* File name is relative to the webserver root */
-		file_name[511] = 0;
-		XX_httplib_snprintf(conn, &truncated, path, sizeof(path), "%s/%s", conn->ctx->config[DOCUMENT_ROOT], file_name);
+	 * always < MG_BUF_LEN.
+	 */
 
-	} else if (sscanf(tag, " abspath=\"%511[^\"]\"", file_name) == 1) {
-		/* File name is relative to the webserver working directory
-		 * or it is absolute system path */
-		file_name[511] = 0;
-		XX_httplib_snprintf(conn, &truncated, path, sizeof(path), "%s", file_name);
+	if ( sscanf( tag, " virtual=\"%511[^\"]\"", file_name ) == 1 ) {
 
-	} else if (sscanf(tag, " file=\"%511[^\"]\"", file_name) == 1
-	           || sscanf(tag, " \"%511[^\"]\"", file_name) == 1) {
-		/* File name is relative to the currect document */
-		file_name[511] = 0;
-		XX_httplib_snprintf(conn, &truncated, path, sizeof(path), "%s", ssi);
+		/*
+		 * File name is relative to the webserver root
+		 */
 
-		if (!truncated) {
-			if ((p = strrchr(path, '/')) != NULL) p[1] = '\0';
-			len = strlen(path);
-			XX_httplib_snprintf(conn, &truncated, path + len, sizeof(path) - len, "%s", file_name);
+		file_name[511] = 0;
+		XX_httplib_snprintf( conn, &truncated, path, sizeof(path), "%s/%s", conn->ctx->config[DOCUMENT_ROOT], file_name );
+
+	}
+	
+	else if ( sscanf( tag, " abspath=\"%511[^\"]\"", file_name ) == 1 ) {
+
+		/*
+		 * File name is relative to the webserver working directory
+		 * or it is absolute system path
+		 */
+
+		file_name[511] = 0;
+		XX_httplib_snprintf( conn, &truncated, path, sizeof(path), "%s", file_name );
+
+	}
+	
+	else if ( sscanf( tag, " file=\"%511[^\"]\"", file_name ) == 1  ||  sscanf( tag, " \"%511[^\"]\"", file_name ) == 1 ) {
+
+		/*
+		 * File name is relative to the currect document
+		 */
+
+		file_name[511] = 0;
+		XX_httplib_snprintf( conn, &truncated, path, sizeof(path), "%s", ssi );
+
+		if ( ! truncated ) {
+
+			if ( (p = strrchr( path, '/' )) != NULL) p[1] = '\0';
+			len = strlen( path );
+			XX_httplib_snprintf( conn, &truncated, path + len, sizeof(path) - len, "%s", file_name );
 		}
 
-	} else {
-		httplib_cry(conn, "Bad SSI #include: [%s]", tag);
+	}
+	
+	else {
+		httplib_cry( conn, "Bad SSI #include: [%s]", tag );
 		return;
 	}
 
-	if (truncated) {
-		httplib_cry(conn, "SSI #include path length overflow: [%s]", tag);
+	if ( truncated ) {
+
+		httplib_cry( conn, "SSI #include path length overflow: [%s]", tag );
 		return;
 	}
 
-	if (!XX_httplib_fopen(conn, path, "rb", &file)) {
-		httplib_cry(conn, "Cannot open SSI #include: [%s]: fopen(%s): %s", tag, path, strerror(ERRNO));
-	} else {
-		XX_httplib_fclose_on_exec(&file, conn);
-		if (XX_httplib_match_prefix(conn->ctx->config[SSI_EXTENSIONS], strlen(conn->ctx->config[SSI_EXTENSIONS]), path) > 0) {
+	if ( ! XX_httplib_fopen( conn, path, "rb", &file ) ) {
+
+		httplib_cry( conn, "Cannot open SSI #include: [%s]: fopen(%s): %s", tag, path, strerror(ERRNO) );
+	}
+	
+	else {
+		XX_httplib_fclose_on_exec( & file, conn );
+
+		if ( XX_httplib_match_prefix( conn->ctx->config[SSI_EXTENSIONS], strlen( conn->ctx->config[SSI_EXTENSIONS] ), path) > 0 ) {
 
 			send_ssi_file(conn, path, &file, include_level + 1);
-		} else {
-			XX_httplib_send_file_data(conn, &file, 0, INT64_MAX);
 		}
-		XX_httplib_fclose(&file);
+		
+		else XX_httplib_send_file_data(conn, &file, 0, INT64_MAX);
+
+		XX_httplib_fclose( & file );
 	}
-}
+
+}  /* do_ssi_include */
 
 
 #if !defined(NO_POPEN)
-static void do_ssi_exec(struct httplib_connection *conn, char *tag) {
+static void do_ssi_exec( struct httplib_connection *conn, char *tag ) {
 
 	char cmd[1024] = "";
 	struct file file = STRUCT_FILE_INITIALIZER;
 
-	if (sscanf(tag, " \"%1023[^\"]\"", cmd) != 1) {
-		httplib_cry(conn, "Bad SSI #exec: [%s]", tag);
-	} else {
+	if ( sscanf(tag, " \"%1023[^\"]\"", cmd) != 1 ) {
+
+		httplib_cry( conn, "Bad SSI #exec: [%s]", tag );
+	}
+	
+	else {
 		cmd[1023] = 0;
-		if ((file.fp = popen(cmd, "r")) == NULL) {
-			httplib_cry(conn, "Cannot SSI #exec: [%s]: %s", cmd, strerror(ERRNO));
-		} else {
-			XX_httplib_send_file_data(conn, &file, 0, INT64_MAX);
-			pclose(file.fp);
+		if ( (file.fp = popen( cmd, "r" ) ) == NULL ) {
+
+			httplib_cry( conn, "Cannot SSI #exec: [%s]: %s", cmd, strerror(ERRNO) );
+		}
+		
+		else {
+			XX_httplib_send_file_data( conn, &file, 0, INT64_MAX );
+			pclose( file.fp );
 		}
 	}
 }
@@ -134,60 +168,100 @@ static void send_ssi_file( struct httplib_connection *conn, const char *path, st
 	int len;
 	int in_ssi_tag;
 
-	if (include_level > 10) {
-		httplib_cry(conn, "SSI #include level is too deep (%s)", path);
+	if ( include_level > 10 ) {
+
+		httplib_cry( conn, "SSI #include level is too deep (%s)", path );
 		return;
 	}
 
-	in_ssi_tag = len = offset = 0;
-	while ((ch = httplib_fgetc(filep, offset)) != EOF) {
-		if (in_ssi_tag && ch == '>') {
+	in_ssi_tag = 0;
+	len        = 0;
+	offset     = 0;
+
+	while ( (ch = httplib_fgetc( filep, offset )) != EOF ) {
+
+		if ( in_ssi_tag  &&  ch == '>' ) {
+
 			in_ssi_tag = 0;
 			buf[len++] = (char)ch;
-			buf[len] = '\0';
-			/* assert(len <= (int) sizeof(buf)); */
-			if (len > (int)sizeof(buf)) break;
-			if (len < 6 || memcmp(buf, "<!--#", 5) != 0) {
-				/* Not an SSI tag, pass it */
+			buf[len]   = '\0';
+
+			if ( len > (int)sizeof(buf) ) break;
+
+			if ( len < 6  ||  memcmp( buf, "<!--#", 5 ) != 0 ) {
+
+				/*
+				 * Not an SSI tag, pass it
+				 */
+
 				httplib_write( conn, buf, (size_t)len );
-			} else {
-				if (!memcmp(buf + 5, "include", 7)) {
-					do_ssi_include(conn, path, buf + 12, include_level);
+			}
+			
+			else {
+				if ( ! memcmp( buf + 5, "include", 7 ) ) {
+
+					do_ssi_include( conn, path, buf + 12, include_level );
 #if !defined(NO_POPEN)
-				} else if (!memcmp(buf + 5, "exec", 4)) {
+				}
+				else if (!memcmp(buf + 5, "exec", 4)) {
+
 					do_ssi_exec(conn, buf + 9);
 #endif /* !NO_POPEN */
-				} else httplib_cry(conn, "%s: unknown SSI " "command: \"%s\"", path, buf);
+				}
+				else httplib_cry( conn, "%s: unknown SSI " "command: \"%s\"", path, buf );
 			}
+
 			len = 0;
-		} else if (in_ssi_tag) {
-			if (len == 5 && memcmp(buf, "<!--#", 5) != 0) {
-				/* Not an SSI tag */
+		}
+		
+		else if ( in_ssi_tag ) {
+
+			if ( len == 5  &&  memcmp( buf, "<!--#", 5 ) != 0 ) {
+
+				/*
+				 * Not an SSI tag
+				 */
+
 				in_ssi_tag = 0;
-			} else if (len == (int)sizeof(buf) - 2) {
-				httplib_cry(conn, "%s: SSI tag is too large", path);
+			}
+			
+			else if ( len == (int)sizeof(buf) - 2 ) {
+
+				httplib_cry( conn, "%s: SSI tag is too large", path );
 				len = 0;
 			}
+
 			buf[len++] = (char)(ch & 0xff);
-		} else if (ch == '<') {
+		}
+		
+		else if ( ch == '<' ) {
+
 			in_ssi_tag = 1;
-			if (len > 0) {
-				httplib_write(conn, buf, (size_t)len);
-			}
+
+			if ( len > 0 ) httplib_write( conn, buf, (size_t)len );
+
 			len = 0;
 			buf[len++] = (char)(ch & 0xff);
-		} else {
+		}
+		
+		else {
 			buf[len++] = (char)(ch & 0xff);
+
 			if (len == (int)sizeof(buf)) {
+
 				httplib_write(conn, buf, (size_t)len);
 				len = 0;
 			}
 		}
 	}
 
-	/* Send the rest of buffered data */
-	if (len > 0) httplib_write(conn, buf, (size_t)len);
-}
+	/*
+	 * Send the rest of buffered data
+	 */
+
+	if (len > 0) httplib_write( conn, buf, (size_t)len );
+
+}  /* send_ssi_file */
 
 
 void XX_httplib_handle_ssi_file_request( struct httplib_connection *conn, const char *path, struct file *filep ) {
@@ -202,28 +276,40 @@ void XX_httplib_handle_ssi_file_request( struct httplib_connection *conn, const 
 
 	curtime = time( NULL );
 
-	if (httplib_get_header(conn, "Origin")) {
-		/* Cross-origin resource sharing (CORS). */
+	if ( httplib_get_header( conn, "Origin" ) ) {
+
+		/*
+		 * Cross-origin resource sharing (CORS).
+		 */
+
 		cors1 = "Access-Control-Allow-Origin: ";
 		cors2 = conn->ctx->config[ACCESS_CONTROL_ALLOW_ORIGIN];
 		cors3 = "\r\n";
-	} else {
+	}
+	
+	else {
 		cors1 = "";
 		cors2 = "";
 		cors3 = "";
 	}
 
-	if (!XX_httplib_fopen(conn, path, "rb", filep)) {
-		/* File exists (precondition for calling this function),
-		 * but can not be opened by the server. */
+	if ( ! XX_httplib_fopen( conn, path, "rb", filep ) ) {
+
+		/*
+		 * File exists (precondition for calling this function),
+		 * but can not be opened by the server.
+		 */
+
 		XX_httplib_send_http_error(conn, 500, "Error: Cannot read file\nfopen(%s): %s", path, strerror(ERRNO));
-	} else {
+	}
+	
+	else {
 		conn->must_close = 1;
-		XX_httplib_gmt_time_string(date, sizeof(date), &curtime);
-		XX_httplib_fclose_on_exec(filep, conn);
+		XX_httplib_gmt_time_string( date, sizeof(date), &curtime );
+		XX_httplib_fclose_on_exec( filep, conn );
 		httplib_printf(conn, "HTTP/1.1 200 OK\r\n");
-		XX_httplib_send_no_cache_header(conn);
-		httplib_printf(conn,
+		XX_httplib_send_no_cache_header( conn );
+		httplib_printf( conn,
 		          "%s%s%s"
 		          "Date: %s\r\n"
 		          "Content-Type: text/html\r\n"
@@ -232,9 +318,9 @@ void XX_httplib_handle_ssi_file_request( struct httplib_connection *conn, const 
 		          cors2,
 		          cors3,
 		          date,
-		          XX_httplib_suggest_connection_header(conn));
-		send_ssi_file(conn, path, filep, 0);
-		XX_httplib_fclose(filep);
+		          XX_httplib_suggest_connection_header( conn ) );
+		send_ssi_file( conn, path, filep, 0 );
+		XX_httplib_fclose( filep );
 	}
 
 }  /* XX_httplib_handle_ssi_file_request */

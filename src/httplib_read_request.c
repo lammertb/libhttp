@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
@@ -42,39 +42,48 @@
 int XX_httplib_read_request( FILE *fp, struct httplib_connection *conn, char *buf, int bufsiz, int *nread ) {
 
 	int request_len;
-	int n = 0;
+	int n;
 	struct timespec last_action_time;
 	double request_timeout;
 
 	if ( conn == NULL ) return 0;
 
-	memset(&last_action_time, 0, sizeof(last_action_time));
+	n = 0;
 
-	if (conn->ctx->config[REQUEST_TIMEOUT]) {
-		/* value of request_timeout is in seconds, config in milliseconds */
-		request_timeout = atof(conn->ctx->config[REQUEST_TIMEOUT]) / 1000.0;
-	} else request_timeout = -1.0;
+	memset( & last_action_time, 0, sizeof(last_action_time) );
 
-	request_len = XX_httplib_get_request_len(buf, *nread);
+	if ( conn->ctx->config[REQUEST_TIMEOUT] != NULL ) {
 
-	/* first time reading from this connection */
-	clock_gettime(CLOCK_MONOTONIC, &last_action_time);
+		/*
+		 * value of request_timeout is in seconds, config in milliseconds
+		 */
 
-	while (
-	    (conn->ctx->stop_flag == 0) && (*nread < bufsiz) && (request_len == 0)
-	    && ((XX_httplib_difftimespec(&last_action_time, &(conn->req_time))
-	         <= request_timeout) || (request_timeout < 0))
-	    && ((n = XX_httplib_pull(fp, conn, buf + *nread, bufsiz - *nread, request_timeout))
-	        > 0)) {
+		request_timeout = atof( conn->ctx->config[REQUEST_TIMEOUT] ) / 1000.0;
+	}
+	
+	else request_timeout = -1.0;
+
+	request_len = XX_httplib_get_request_len( buf, *nread );
+
+	/*
+	 * first time reading from this connection
+	 */
+
+	clock_gettime( CLOCK_MONOTONIC, & last_action_time );
+
+	while ( (conn->ctx->stop_flag == 0)  &&
+		(*nread < bufsiz)            &&
+		(request_len == 0)           &&
+		((XX_httplib_difftimespec(&last_action_time, &(conn->req_time)) <= request_timeout) || (request_timeout < 0)) &&
+		((n = XX_httplib_pull(fp, conn, buf + *nread, bufsiz - *nread, request_timeout)) > 0)) {
+
 		*nread += n;
-		/* assert(*nread <= bufsiz); */
-		if (*nread > bufsiz) {
-			return -2;
-		}
-		request_len = XX_httplib_get_request_len(buf, *nread);
-		if (request_timeout > 0.0) clock_gettime(CLOCK_MONOTONIC, &last_action_time);
+		if ( *nread > bufsiz ) return -2;
+
+		request_len = XX_httplib_get_request_len( buf, *nread );
+		if ( request_timeout > 0.0 ) clock_gettime( CLOCK_MONOTONIC, & last_action_time );
 	}
 
-	return ((request_len <= 0) && (n <= 0)) ? -1 : request_len;
+	return ( request_len <= 0  &&   n <= 0 ) ? -1 : request_len;
 
 }  /* XX_httplib_read_request */

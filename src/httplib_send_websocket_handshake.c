@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
@@ -41,43 +41,59 @@
 int XX_httplib_send_websocket_handshake( struct httplib_connection *conn, const char *websock_key ) {
 
 	static const char *magic = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
-	const char *protocol = NULL;
+	const char *protocol;
 	char buf[100];
 	char sha[20];
 	char b64_sha[sizeof(sha) * 2];
 	SHA1_CTX sha_ctx;
 	int truncated;
 
-	/* Calculate Sec-WebSocket-Accept reply from Sec-WebSocket-Key. */
-	XX_httplib_snprintf(conn, &truncated, buf, sizeof(buf), "%s%s", websock_key, magic);
-	if (truncated) {
+	protocol = NULL;
+
+	/*
+	 * Calculate Sec-WebSocket-Accept reply from Sec-WebSocket-Key.
+	 */
+
+	XX_httplib_snprintf( conn, &truncated, buf, sizeof(buf), "%s%s", websock_key, magic );
+	if ( truncated ) {
+
 		conn->must_close = 1;
 		return 0;
 	}
 
-	SHA1Init(&sha_ctx);
-	SHA1Update(&sha_ctx, (unsigned char *)buf, (uint32_t)strlen(buf));
-	SHA1Final((unsigned char *)sha, &sha_ctx);
+	SHA1Init( & sha_ctx );
+	SHA1Update( & sha_ctx, (unsigned char *)buf, (uint32_t)strlen(buf) );
+	SHA1Final( (unsigned char *)sha, &sha_ctx );
 
-	XX_httplib_base64_encode((unsigned char *)sha, sizeof(sha), b64_sha);
-	httplib_printf(conn,
+	XX_httplib_base64_encode( (unsigned char *)sha, sizeof(sha), b64_sha );
+	httplib_printf( conn,
 	          "HTTP/1.1 101 Switching Protocols\r\n"
 	          "Upgrade: websocket\r\n"
 	          "Connection: Upgrade\r\n"
 	          "Sec-WebSocket-Accept: %s\r\n",
-	          b64_sha);
-	protocol = httplib_get_header(conn, "Sec-WebSocket-Protocol");
-	if (protocol) {
-		/* The protocol is a comma seperated list of names. */
-		/* The server must only return one value from this list. */
-		/* First check if it is a list or just a single value. */
+	          b64_sha );
+
+	protocol = httplib_get_header( conn, "Sec-WebSocket-Protocol" );
+	if ( protocol ) {
+		/*
+		 * The protocol is a comma seperated list of names.
+		 * The server must only return one value from this list.
+		 * First check if it is a list or just a single value.
+		 */
 		const char *sep = strchr(protocol, ',');
 		if (sep == NULL) {
-			/* Just a single protocol -> accept it. */
+
+			/*
+			 * Just a single protocol -> accept it.
+			 */
+
 			httplib_printf(conn, "Sec-WebSocket-Protocol: %s\r\n\r\n", protocol);
-		} else {
-			/* Multiple protocols -> accept the first one. */
-			/* This is just a quick fix if the client offers multiple
+		}
+		
+		else {
+			/*
+			 * Multiple protocols -> accept the first one.
+			 * This is just a quick fix if the client offers multiple
 			 * protocols. In order to get the behavior intended by
 			 * RFC 6455 (https://tools.ietf.org/rfc/rfc6455.txt), it is
 			 * required to have a list of websocket subprotocols accepted
@@ -86,12 +102,15 @@ int XX_httplib_send_websocket_handshake( struct httplib_connection *conn, const 
 			 * handshake by not returning a Sec-Websocket-Protocol header if
 			 * no subprotocol is acceptable.
 			 */
-			httplib_printf(conn, "Sec-WebSocket-Protocol: %.*s\r\n\r\n", (int)(sep - protocol), protocol);
+
+			httplib_printf( conn, "Sec-WebSocket-Protocol: %.*s\r\n\r\n", (int)(sep - protocol), protocol );
 		}
-		/* TODO: Real subprotocol negotiation instead of just taking the first
-		 * websocket subprotocol suggested by the client. */
+		/*
+		 * TODO: Real subprotocol negotiation instead of just taking the first
+		 * websocket subprotocol suggested by the client.
+		 */
 	}
-	else httplib_printf(conn, "%s", "\r\n");
+	else httplib_printf( conn, "%s", "\r\n" );
 
 	return 1;
 

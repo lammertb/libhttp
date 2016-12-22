@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
@@ -41,23 +41,25 @@ bool XX_httplib_is_websocket_protocol( const struct httplib_connection *conn ) {
 	const char *upgrade;
 	const char *connection;
 
-	/* A websocket protocoll has the following HTTP headers:
+	/*
+	 * A websocket protocol has the following HTTP headers:
 	 *
 	 * Connection: Upgrade
 	 * Upgrade: Websocket
 	 */
 
-	upgrade = httplib_get_header(conn, "Upgrade");
-	if (upgrade == NULL) return false; /* fail early, don't waste time checking other header * fields */
+	upgrade = httplib_get_header( conn, "Upgrade" );
+	if ( upgrade == NULL ) return false; /* fail early, don't waste time checking other header * fields */
 
 	if ( httplib_strcasestr(upgrade, "websocket") == NULL ) return false;
 
-	connection = httplib_get_header(conn, "Connection");
-	if (connection == NULL) return false;
+	connection = httplib_get_header( conn, "Connection" );
+	if ( connection == NULL ) return false;
 
-	if ( httplib_strcasestr(connection, "upgrade") == NULL ) return false;
+	if ( httplib_strcasestr( connection, "upgrade" ) == NULL ) return false;
 
-	/* The headers "Host", "Sec-WebSocket-Key", "Sec-WebSocket-Protocol" and
+	/*
+	 * The headers "Host", "Sec-WebSocket-Key", "Sec-WebSocket-Protocol" and
 	 * "Sec-WebSocket-Version" are also required.
 	 * Don't check them here, since even an unsupported websocket protocol
 	 * request still IS a websocket request (in contrast to a standard HTTP

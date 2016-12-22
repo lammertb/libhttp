@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
@@ -42,51 +42,60 @@ int XX_httplib_parse_http_headers( char **buf, struct httplib_request_info *ri )
 
 	ri->num_headers = 0;
 
-	for (i = 0; i < (int)ARRAY_SIZE(ri->http_headers); i++) {
-		char *dp = *buf;
-		while ((*dp != ':') && (*dp >= 33) && (*dp <= 126)) {
-			dp++;
-		}
-		if (dp == *buf) {
-			/* End of headers reached. */
-			break;
-		}
-		if (*dp != ':') {
-			/* This is not a valid field. */
-			return -1;
-		}
+	for (i=0; i<(int)ARRAY_SIZE(ri->http_headers); i++) {
 
-		/* End of header key (*dp == ':') */
-		/* Truncate here and set the key name */
+		char *dp = *buf;
+
+		while ( *dp != ':'  &&  *dp >= 33  &&  *dp <= 126 ) dp++;
+
+		if (  dp == *buf ) break;	/* End of headers reached.	*/
+		if ( *dp != ':'  ) return -1;	/* This is not a valid field.	*/
+
+		/*
+		 * End of header key (*dp == ':')
+		 * Truncate here and set the key name
+		 */
+
 		*dp = 0;
 		ri->http_headers[i].name = *buf;
 		do {
 			dp++;
 		} while (*dp == ' ');
 
-		/* The rest of the line is the value */
+		/*
+		 * The rest of the line is the value
+		 */
+
 		ri->http_headers[i].value = dp;
-		*buf = dp + strcspn(dp, "\r\n");
-		if (((*buf)[0] != '\r') || ((*buf)[1] != '\n')) {
-			*buf = NULL;
-		}
+		*buf                      = dp + strcspn(dp, "\r\n");
+
+		if ( (*buf)[0] != '\r'  ||  (*buf)[1] != '\n' ) *buf = NULL;
 
 
-		ri->num_headers = i + 1;
-		if (*buf) {
+		ri->num_headers = i+1;
+
+		if ( *buf ) {
+
 			(*buf)[0] = 0;
 			(*buf)[1] = 0;
-			*buf += 2;
-		} else {
+			*buf     += 2;
+		}
+		
+		else {
 			*buf = dp;
 			break;
 		}
 
-		if ((*buf)[0] == '\r') {
-			/* This is the end of the header */
+		if ( (*buf)[0] == '\r' ) {
+
+			/*
+			 * This is the end of the header
+			 */
+
 			break;
 		}
 	}
+
 	return ri->num_headers;
 
 }  /* XX_httplib_parse_http_headers */

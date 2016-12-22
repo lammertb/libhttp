@@ -22,14 +22,14 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
 #include "httplib_utils.h"
 
-int XX_httplib_lowercase(const char *s) {
+int XX_httplib_lowercase( const char *s ) {
 
-	return tolower(*(const unsigned char *)s);
+	return tolower( *(const unsigned char *)s );
 
 }  /* XX_httplib_lowercase */

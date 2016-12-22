@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
@@ -65,21 +65,23 @@ void XX_httplib_prepare_cgi_environment( struct httplib_connection *conn, const 
 	XX_httplib_addenv( env, "DOCUMENT_ROOT=%s",                 conn->ctx->config[DOCUMENT_ROOT]         );
 	XX_httplib_addenv( env, "SERVER_SOFTWARE=%s/%s", "LibHTTP", httplib_version()                             );
 
-	/* Prepare the environment block */
+	/*
+	 * Prepare the environment block
+	 */
+
 	XX_httplib_addenv( env, "%s", "GATEWAY_INTERFACE=CGI/1.1" );
 	XX_httplib_addenv( env, "%s", "SERVER_PROTOCOL=HTTP/1.1"  );
 	XX_httplib_addenv( env, "%s", "REDIRECT_STATUS=200"       ); /* For PHP */
 
 #if defined(USE_IPV6)
-	if (conn->client.lsa.sa.sa_family == AF_INET6) {
-		XX_httplib_addenv(env, "SERVER_PORT=%d", ntohs(conn->client.lsa.sin6.sin6_port));
-	} else
+	if ( conn->client.lsa.sa.sa_family == AF_INET6 ) XX_httplib_addenv( env, "SERVER_PORT=%d", ntohs(conn->client.lsa.sin6.sin6_port) );
+	else
 #endif
 	{
-		XX_httplib_addenv(env, "SERVER_PORT=%d", ntohs(conn->client.lsa.sin.sin_port));
+		XX_httplib_addenv( env, "SERVER_PORT=%d", ntohs( conn->client.lsa.sin.sin_port ) );
 	}
 
-	XX_httplib_sockaddr_to_string(src_addr, sizeof(src_addr), &conn->client.rsa);
+	XX_httplib_sockaddr_to_string( src_addr, sizeof(src_addr), &conn->client.rsa );
 
 	XX_httplib_addenv( env, "REMOTE_ADDR=%s",    src_addr                          );
 	XX_httplib_addenv( env, "REQUEST_METHOD=%s", conn->request_info.request_method );
@@ -87,14 +89,13 @@ void XX_httplib_prepare_cgi_environment( struct httplib_connection *conn, const 
 	XX_httplib_addenv( env, "REQUEST_URI=%s",    conn->request_info.request_uri    );
 	XX_httplib_addenv( env, "LOCAL_URI=%s",      conn->request_info.local_uri      );
 
-	/* SCRIPT_NAME */
-	XX_httplib_addenv(env,
-	       "SCRIPT_NAME=%.*s",
-	       (int)strlen(conn->request_info.local_uri)
-	           - ((conn->path_info == NULL) ? 0 : (int)strlen(conn->path_info)),
-	       conn->request_info.local_uri);
+	/*
+	 * SCRIPT_NAME
+	 */
 
-	XX_httplib_addenv(env, "SCRIPT_FILENAME=%s", prog);
+	XX_httplib_addenv( env, "SCRIPT_NAME=%.*s", (int)strlen(conn->request_info.local_uri) - ((conn->path_info == NULL) ? 0 : (int)strlen(conn->path_info)), conn->request_info.local_uri);
+
+	XX_httplib_addenv( env, "SCRIPT_FILENAME=%s", prog );
 
 	if ( conn->path_info == NULL ) XX_httplib_addenv( env, "PATH_TRANSLATED=%s",   conn->ctx->config[DOCUMENT_ROOT]                  );
 	else                           XX_httplib_addenv( env, "PATH_TRANSLATED=%s%s", conn->ctx->config[DOCUMENT_ROOT], conn->path_info );
@@ -102,14 +103,18 @@ void XX_httplib_prepare_cgi_environment( struct httplib_connection *conn, const 
 	XX_httplib_addenv(env, "HTTPS=%s", (conn->ssl == NULL) ? "off" : "on");
 
 	if ( (s = httplib_get_header( conn, "Content-Type" ) )   != NULL ) XX_httplib_addenv( env, "CONTENT_TYPE=%s",   s                               );
-	if ( conn->request_info.query_string                != NULL ) XX_httplib_addenv( env, "QUERY_STRING=%s",   conn->request_info.query_string );
+	if ( conn->request_info.query_string                     != NULL ) XX_httplib_addenv( env, "QUERY_STRING=%s",   conn->request_info.query_string );
 	if ( (s = httplib_get_header( conn, "Content-Length" ) ) != NULL ) XX_httplib_addenv( env, "CONTENT_LENGTH=%s", s                               );
-	if ( (s = getenv( "PATH" ))                         != NULL ) XX_httplib_addenv( env, "PATH=%s",           s                               );
-	if ( conn->path_info                                != NULL ) XX_httplib_addenv( env, "PATH_INFO=%s",      conn->path_info                 );
+	if ( (s = getenv( "PATH" ))                              != NULL ) XX_httplib_addenv( env, "PATH=%s",           s                               );
+	if ( conn->path_info                                     != NULL ) XX_httplib_addenv( env, "PATH_INFO=%s",      conn->path_info                 );
 
 	if (conn->status_code > 0) {
-		/* CGI error handler should show the status code */
-		XX_httplib_addenv(env, "STATUS=%d", conn->status_code);
+
+		/*
+		 * CGI error handler should show the status code
+		 */
+
+		XX_httplib_addenv( env, "STATUS=%d", conn->status_code );
 	}
 
 #if defined(_WIN32)
@@ -125,33 +130,46 @@ void XX_httplib_prepare_cgi_environment( struct httplib_connection *conn, const 
 	if ( (s = getenv("PERLLIB"            )) != NULL ) XX_httplib_addenv( env, "PERLLIB=%s",           s );
 
 	if (conn->request_info.remote_user != NULL) {
-		XX_httplib_addenv(env, "REMOTE_USER=%s", conn->request_info.remote_user);
-		XX_httplib_addenv(env, "%s", "AUTH_TYPE=Digest");
+
+		XX_httplib_addenv( env, "REMOTE_USER=%s", conn->request_info.remote_user );
+		XX_httplib_addenv( env, "%s",             "AUTH_TYPE=Digest"             );
 	}
 
-	/* Add all headers as HTTP_* variables */
-	for (i = 0; i < conn->request_info.num_headers; i++) {
+	/*
+	 * Add all headers as HTTP_* variables
+	 */
 
-		XX_httplib_snprintf(conn, &truncated, http_var_name, sizeof(http_var_name), "HTTP_%s", conn->request_info.http_headers[i].name);
+	for (i=0; i<conn->request_info.num_headers; i++) {
 
-		if (truncated) {
-			httplib_cry(conn, "%s: HTTP header variable too long [%s]", __func__, conn->request_info.http_headers[i].name);
+		XX_httplib_snprintf( conn, & truncated, http_var_name, sizeof(http_var_name), "HTTP_%s", conn->request_info.http_headers[i].name );
+
+		if ( truncated ) {
+			httplib_cry( conn, "%s: HTTP header variable too long [%s]", __func__, conn->request_info.http_headers[i].name );
 			continue;
 		}
 
-		/* Convert variable name into uppercase, and change - to _ */
-		for (p = http_var_name; *p != '\0'; p++) {
+		/*
+		 * Convert variable name into uppercase, and change - to _
+		 */
+
+		for (p=http_var_name; *p != '\0'; p++) {
+
 			if (*p == '-') *p = '_';
 			*p = (char)toupper(*(unsigned char *)p);
 		}
 
-		XX_httplib_addenv(env, "%s=%s", http_var_name, conn->request_info.http_headers[i].value);
+		XX_httplib_addenv( env, "%s=%s", http_var_name, conn->request_info.http_headers[i].value );
 	}
 
-	/* Add user-specified variables */
+	/*
+	 * Add user-specified variables
+	 */
+
 	s = conn->ctx->config[CGI_ENVIRONMENT];
-	while ((s = XX_httplib_next_option(s, &var_vec, NULL)) != NULL) {
-		XX_httplib_addenv(env, "%.*s", (int)var_vec.len, var_vec.ptr);
+
+	while ( (s = XX_httplib_next_option( s, &var_vec, NULL )) != NULL ) {
+
+		XX_httplib_addenv( env, "%.*s", (int)var_vec.len, var_vec.ptr );
 	}
 
 	env->var[env->varused] = NULL;

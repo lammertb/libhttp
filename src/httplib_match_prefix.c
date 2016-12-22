@@ -22,13 +22,16 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
 #include "httplib_utils.h"
 
-/* Perform case-insensitive match of string against pattern */
+/*
+ * Perform case-insensitive match of string against pattern
+ */
+
 int XX_httplib_match_prefix(const char *pattern, size_t pattern_len, const char *str) {
 
 	const char *or_str;
@@ -37,33 +40,48 @@ int XX_httplib_match_prefix(const char *pattern, size_t pattern_len, const char 
 	int len;
 	int res;
 
-	if ((or_str = (const char *)memchr(pattern, '|', pattern_len)) != NULL) {
-		res = XX_httplib_match_prefix(pattern, (size_t)(or_str - pattern), str);
+	or_str = (const char *)memchr( pattern, '|', pattern_len );
+	if ( or_str != NULL ) {
+
+		res = XX_httplib_match_prefix( pattern, (size_t)(or_str - pattern), str );
 		return (res > 0) ? res : XX_httplib_match_prefix(or_str + 1, (size_t)((pattern + pattern_len) - (or_str + 1)), str);
 	}
 
-	for (i = 0, j = 0; i < pattern_len; i++, j++) {
-		if (pattern[i] == '?' && str[j] != '\0') {
-			continue;
-		} else if (pattern[i] == '$') {
-			return (str[j] == '\0') ? j : -1;
-		} else if (pattern[i] == '*') {
+	i = 0;
+	j = 0;
+
+	while ( i<pattern_len ) {
+
+		if ( pattern[i] == '?'  &&  str[j] != '\0' ) continue;
+		if ( pattern[i] == '$'                     ) return (str[j] == '\0') ? j : -1;
+		
+		if (pattern[i] == '*') {
+
 			i++;
-			if (pattern[i] == '*') {
+			if ( pattern[i] == '*' ) {
+
 				i++;
 				len = (int)strlen(str + j);
-			} else {
-				len = (int)strcspn(str + j, "/");
 			}
-			if (i == pattern_len) return j + len;
+			
+			else len = (int)strcspn(str + j, "/");
+
+			if ( i == pattern_len ) return j + len;
+
 			do {
-				res = XX_httplib_match_prefix(pattern + i, pattern_len - i, str + j + len);
-			} while (res == -1 && len-- > 0);
+				res = XX_httplib_match_prefix( pattern + i, pattern_len - i, str + j + len );
+
+			} while ( res == -1  &&  len-- > 0 );
+
 			return (res == -1) ? -1 : j + res + len;
-		} else if (XX_httplib_lowercase(&pattern[i]) != XX_httplib_lowercase(&str[j])) {
-			return -1;
 		}
+		
+		else if ( XX_httplib_lowercase(&pattern[i] ) != XX_httplib_lowercase( &str[j] ) ) return -1;
+
+		i++;
+		j++;
 	}
+
 	return j;
 
 }  /* XX_httplib_match_prefix */

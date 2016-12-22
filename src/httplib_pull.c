@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.9
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
@@ -84,9 +84,10 @@ int XX_httplib_pull( FILE *fp, struct httplib_connection *conn, char *buf, int l
 
 			if (nread <= 0) {
 
-				err = SSL_get_error(conn->ssl, nread);
-				if      ( err == SSL_ERROR_SYSCALL    && (nread == -1)) err = ERRNO;
-				else if ( err == SSL_ERROR_WANT_READ  || (err == SSL_ERROR_WANT_WRITE)) nread = 0;
+				err = SSL_get_error( conn->ssl, nread );
+
+				if      ( err == SSL_ERROR_SYSCALL    &&  nread == -1                 ) err   = ERRNO;
+				else if ( err == SSL_ERROR_WANT_READ  ||  err == SSL_ERROR_WANT_WRITE ) nread = 0;
 				
 				else return -1;
 			}
@@ -96,49 +97,77 @@ int XX_httplib_pull( FILE *fp, struct httplib_connection *conn, char *buf, int l
 		}
 		
 		else {
-			nread = (int)recv(conn->client.sock, buf, (len_t)len, 0);
+			nread = (int)recv( conn->client.sock, buf, (len_t)len, 0 );
 			err   = (nread < 0) ? ERRNO : 0;
 			if (nread == 0) return -1; /* shutdown of the socket at client side */
 		}
 
 		if ( conn->ctx->stop_flag ) return -1;
 
-		if ((nread > 0) || (nread == 0 && len == 0)) {
-			/* some data has been read, or no data was requested */
+		if ( nread > 0  || (nread == 0 && len == 0) ) {
+
+			/*
+			 * some data has been read, or no data was requested
+			 */
+
 			return nread;
 		}
 
 		if (nread < 0) {
-/* socket error - check errno */
+
+			/*
+			 * socket error - check errno
+			 */
 #ifdef _WIN32
-			if (err == WSAEWOULDBLOCK) {
-				/* standard case if called from close_socket_gracefully */
+			if ( err == WSAEWOULDBLOCK ) {
+
+				/*
+				 * standard case if called from close_socket_gracefully
+				 */
+
 				return -1;
-			} else if (err == WSAETIMEDOUT) {
-				/* timeout is handled by the while loop  */
-			} else return -1;
+			}
+			
+			else if ( err == WSAETIMEDOUT ) {
+
+				/*
+				 * timeout is handled by the while loop
+				 */
+			}
+			
+			else return -1;
 #else
-			/* TODO: POSIX returns either EAGAIN or EWOULDBLOCK in both cases,
+			/*
+			 * TODO: POSIX returns either EAGAIN or EWOULDBLOCK in both cases,
 			 * if the timeout is reached and if the socket was set to non-
 			 * blocking in close_socket_gracefully, so we can not distinguish
 			 * here. We have to wait for the timeout in both cases for now.
 			 */
-			if (err == EAGAIN || err == EWOULDBLOCK || err == EINTR) {
-				/* EAGAIN/EWOULDBLOCK:
-				 * standard case if called from close_socket_gracefully
-				 * => should return -1 */
-				/* or timeout occured
-				 * => the code must stay in the while loop */
 
-				/* EINTR can be generated on a socket with a timeout set even
+			if ( err == EAGAIN  ||  err == EWOULDBLOCK  ||  err == EINTR ) {
+
+				/*
+				 * EAGAIN/EWOULDBLOCK:
+				 * standard case if called from close_socket_gracefully
+				 * => should return -1
+				 * or timeout occured
+				 * => the code must stay in the while loop
+				 *
+				 * EINTR can be generated on a socket with a timeout set even
 				 * when SA_RESTART is effective for all relevant signals
 				 * (see signal(7)).
-				 * => stay in the while loop */
-			} else return -1;
+				 * => stay in the while loop
+				 */
+
+			}
+			
+			else return -1;
 #endif
 		}
-		if (timeout > 0) clock_gettime(CLOCK_MONOTONIC, &now);
-	} while ((timeout <= 0) || (XX_httplib_difftimespec(&now, &start) <= timeout));
+
+		if ( timeout > 0 ) clock_gettime( CLOCK_MONOTONIC, &now );
+
+	} while ( timeout <= 0  ||  XX_httplib_difftimespec( & now,  & start ) <= timeout );
 
 	/*
 	 * Timeout occured, but no data available.

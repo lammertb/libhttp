@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
@@ -38,89 +38,153 @@
 
 void XX_httplib_handle_websocket_request( struct httplib_connection *conn, const char *path, int is_callback_resource, httplib_websocket_connect_handler ws_connect_handler, httplib_websocket_ready_handler ws_ready_handler, httplib_websocket_data_handler ws_data_handler, httplib_websocket_close_handler ws_close_handler, void *cbData ) {
 
-	const char *websock_key = httplib_get_header(conn, "Sec-WebSocket-Key");
-	const char *version = httplib_get_header(conn, "Sec-WebSocket-Version");
-	int lua_websock = 0;
+	const char *websock_key;
+	const char *version;
+	int lua_websock;
+	const char *key1;
+	const char *key2;
+	char key3[8];
 
-	(void)path;
+	UNUSED_PARAMETER(path);
 
-	/* Step 1: Check websocket protocol version. */
-	/* Step 1.1: Check Sec-WebSocket-Key. */
-	if (!websock_key) {
-		/* The RFC standard version (https://tools.ietf.org/html/rfc6455)
+	if ( conn == NULL ) return;
+
+	websock_key = httplib_get_header( conn, "Sec-WebSocket-Key"     );
+	version     = httplib_get_header( conn, "Sec-WebSocket-Version" );
+	lua_websock = 0;
+
+	/*
+	 * Step 1: Check websocket protocol version.
+	 * Step 1.1: Check Sec-WebSocket-Key.
+	 */
+
+	if ( websock_key == NULL ) {
+
+		/*
+		 * The RFC standard version (https://tools.ietf.org/html/rfc6455)
 		 * requires a Sec-WebSocket-Key header.
-		 */
-		/* It could be the hixie draft version
+		 *
+		 * It could be the hixie draft version
 		 * (http://tools.ietf.org/html/draft-hixie-thewebsocketprotocol-76).
 		 */
-		const char *key1 = httplib_get_header(conn, "Sec-WebSocket-Key1");
-		const char *key2 = httplib_get_header(conn, "Sec-WebSocket-Key2");
-		char key3[8];
 
-		if ((key1 != NULL) && (key2 != NULL)) {
-			/* This version uses 8 byte body data in a GET request */
+		key1 = httplib_get_header( conn, "Sec-WebSocket-Key1" );
+		key2 = httplib_get_header( conn, "Sec-WebSocket-Key2" );
+
+		if ( key1 != NULL  &&  key2 != NULL ) {
+
+			/*
+			 * This version uses 8 byte body data in a GET request
+			 */
+
 			conn->content_len = 8;
-			if (8 == httplib_read(conn, key3, 8)) {
-				/* This is the hixie version */
-				XX_httplib_send_http_error(conn, 426, "%s", "Protocol upgrade to RFC 6455 required");
+
+			if ( httplib_read( conn, key3, 8 ) == 8 ) {
+
+				/*
+				 * This is the hixie version
+				 */
+
+				XX_httplib_send_http_error( conn, 426, "%s", "Protocol upgrade to RFC 6455 required" );
 				return;
 			}
 		}
-		/* This is an unknown version */
-		XX_httplib_send_http_error(conn, 400, "%s", "Malformed websocket request");
+
+		/*
+		 * This is an unknown version
+		 */
+
+		XX_httplib_send_http_error( conn, 400, "%s", "Malformed websocket request" );
 		return;
 	}
 
-	/* Step 1.2: Check websocket protocol version. */
-	/* The RFC version (https://tools.ietf.org/html/rfc6455) is 13. */
-	if (version == NULL || strcmp(version, "13") != 0) {
-		/* Reject wrong versions */
-		XX_httplib_send_http_error(conn, 426, "%s", "Protocol upgrade required");
+	/*
+	 * Step 1.2: Check websocket protocol version.
+	 * The RFC version (https://tools.ietf.org/html/rfc6455) is 13.
+	 */
+
+	if (  version == NULL  ||  strcmp( version, "13" ) != 0 ) {
+
+		/*
+		 * Reject wrong versions
+		 */
+
+		XX_httplib_send_http_error( conn, 426, "%s", "Protocol upgrade required" );
 		return;
 	}
 
-	/* Step 1.3: Could check for "Host", but we do not really nead this
-	 * value for anything, so just ignore it. */
+	/*
+	 * Step 1.3: Could check for "Host", but we do not really nead this
+	 * value for anything, so just ignore it.
+	 */
 
-	/* Step 2: If a callback is responsible, call it. */
-	if (is_callback_resource) {
-		if (ws_connect_handler != NULL
-		    && ws_connect_handler(conn, cbData) != 0) {
-			/* C callback has returned non-zero, do not proceed with
+	/*
+	 * Step 2: If a callback is responsible, call it.
+	 */
+
+	if ( is_callback_resource ) {
+
+		if ( ws_connect_handler != NULL  &&  ws_connect_handler( conn, cbData ) != 0 ) {
+
+			/*
+			 * C callback has returned non-zero, do not proceed with
 			 * handshake.
+			 *
+			 * Note that C callbacks are no longer called when Lua is
+			 * responsible, so C can no longer filter callbacks for Lua.
 			 */
-			/* Note that C callbacks are no longer called when Lua is
-			 * responsible, so C can no longer filter callbacks for Lua. */
+
 			return;
 		}
 	}
 
-	/* Step 4: Check if there is a responsible websocket handler. */
-	if (!is_callback_resource && !lua_websock) {
-		/* There is no callback, an Lua is not responsible either. */
+	/*
+	 * Step 4: Check if there is a responsible websocket handler.
+	 */
+
+	if ( ! is_callback_resource  &&   ! lua_websock ) {
+
+		/*
+		 * There is no callback, an Lua is not responsible either. */
 		/* Reply with a 404 Not Found or with nothing at all?
 		 * TODO (mid): check the websocket standards, how to reply to
-		 * requests to invalid websocket addresses. */
-		XX_httplib_send_http_error(conn, 404, "%s", "Not found");
+		 * requests to invalid websocket addresses.
+		 */
+
+		XX_httplib_send_http_error( conn, 404, "%s", "Not found" );
 		return;
 	}
 
-	/* Step 5: The websocket connection has been accepted */
-	if (!XX_httplib_send_websocket_handshake(conn, websock_key)) {
-		XX_httplib_send_http_error(conn, 500, "%s", "Websocket handshake failed");
+	/*
+	 * Step 5: The websocket connection has been accepted
+	 */
+
+	if ( ! XX_httplib_send_websocket_handshake( conn, websock_key ) ) {
+
+		XX_httplib_send_http_error( conn, 500, "%s", "Websocket handshake failed" );
 		return;
 	}
 
-	/* Step 6: Call the ready handler */
-	if (is_callback_resource) {
-		if (ws_ready_handler != NULL) ws_ready_handler(conn, cbData);
+	/*
+	 * Step 6: Call the ready handler
+	 */
+
+	if ( is_callback_resource ) {
+
+		if ( ws_ready_handler != NULL ) ws_ready_handler( conn, cbData );
 	}
 
-	/* Step 7: Enter the read loop */
+	/*
+	 * Step 7: Enter the read loop
+	 */
+
 	if (is_callback_resource) XX_httplib_read_websocket(conn, ws_data_handler, cbData);
 
-	/* Step 8: Call the close handler */
-	if (ws_close_handler) ws_close_handler(conn, cbData);
+	/*
+	 * Step 8: Call the close handler
+	 */
+
+	if ( ws_close_handler ) ws_close_handler( conn, cbData );
 
 }  /* XX_httplib_handle_websocket_request */
 

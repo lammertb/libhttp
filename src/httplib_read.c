@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.9
+ * Release: 2.0
  */
 
 #include "httplib_main.h"

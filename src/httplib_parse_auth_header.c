@@ -22,13 +22,16 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
 #include "httplib_string.h"
 
-/* Return 1 on success. Always initializes the ah structure. */
+/*
+ * Return 1 on success. Always initializes the ah structure.
+ */
+
 int XX_httplib_parse_auth_header(struct httplib_connection *conn, char *buf, size_t buf_size, struct ah *ah) {
 
 	char *name;
@@ -37,33 +40,44 @@ int XX_httplib_parse_auth_header(struct httplib_connection *conn, char *buf, siz
 	const char *auth_header;
 	uint64_t nonce;
 
-	if (!ah || !conn) return 0;
+	if ( ah == NULL  ||  conn == NULL ) return 0;
 
-	memset(ah, 0, sizeof(*ah));
-	if ((auth_header = httplib_get_header(conn, "Authorization")) == NULL || httplib_strncasecmp(auth_header, "Digest ", 7) != 0) return 0;
+	memset( ah, 0, sizeof(*ah) );
+	if ( (auth_header = httplib_get_header( conn, "Authorization" )) == NULL  ||  httplib_strncasecmp( auth_header, "Digest ", 7 ) != 0 ) return 0;
 
-	/* Make modifiable copy of the auth header */
+	/*
+	 * Make modifiable copy of the auth header
+	 */
+
 	httplib_strlcpy( buf, auth_header + 7, buf_size );
 	s = buf;
 
-	/* Parse authorization header */
+	/*
+	 * Parse authorization header
+	 */
+
 	for (;;) {
-		/* Gobble initial spaces */
-		while (isspace(*(unsigned char *)s)) {
-			s++;
-		}
-		name = XX_httplib_skip_quoted(&s, "=", " ", 0);
-		/* Value is either quote-delimited, or ends at first comma or space. */
+
+		/*
+		 * Gobble initial spaces
+		 */
+
+		while ( isspace(*(unsigned char *)s) ) s++;
+
+		name = XX_httplib_skip_quoted( &s, "=", " ", 0 );
+
+		/* 
+		 * Value is either quote-delimited, or ends at first comma or space.
+		 */
+
 		if (s[0] == '\"') {
+
 			s++;
-			value = XX_httplib_skip_quoted(&s, "\"", " ", '\\');
-			if (s[0] == ',') {
-				s++;
-			}
-		} else {
-			value = XX_httplib_skip_quoted(&s, ", ", " ", 0); /* IE uses commas, FF uses
-			                                        * spaces */
+			value = XX_httplib_skip_quoted( &s, "\"", " ", '\\' );
+			if (s[0] == ',') s++;
 		}
+		
+		else value = XX_httplib_skip_quoted( &s, ", ", " ", 0 ); /* IE uses commas, FF uses spaces */
 		if (*name == '\0') break;
 
 		if      ( ! strcmp( name, "username" ) ) ah->user     = value;
@@ -76,43 +90,59 @@ int XX_httplib_parse_auth_header(struct httplib_connection *conn, char *buf, siz
 	}
 
 #ifndef NO_NONCE_CHECK
-	/* Read the nonce from the response. */
-	if (ah->nonce == NULL) return 0;
-	s = NULL;
-	nonce = strtoull(ah->nonce, &s, 10);
-	if ((s == NULL) || (*s != 0)) {
-		return 0;
-	}
 
-	/* Convert the nonce from the client to a number. */
+	/*
+	 * Read the nonce from the response.
+	 */
+
+	if ( ah->nonce == NULL ) return 0;
+	s     = NULL;
+	nonce = strtoull( ah->nonce, &s, 10 )
+		;
+	if ( s == NULL  ||  *s != 0 ) return 0;
+
+	/*
+	 * Convert the nonce from the client to a number.
+	 */
+
 	nonce ^= conn->ctx->auth_nonce_mask;
 
-	/* The converted number corresponds to the time the nounce has been
-	 * created. This should not be earlier than the server start. */
-	/* Server side nonce check is valuable in all situations but one:
+	/*
+	 * The converted number corresponds to the time the nounce has been
+	 * created. This should not be earlier than the server start.
+	 * Server side nonce check is valuable in all situations but one:
 	 * if the server restarts frequently, but the client should not see
-	 * that, so the server should accept nonces from previous starts. */
-	/* However, the reasonable default is to not accept a nonce from a
+	 * that, so the server should accept nonces from previous starts.
+	 * However, the reasonable default is to not accept a nonce from a
 	 * previous start, so if anyone changed the access rights between
-	 * two restarts, a new login is required. */
-	if (nonce < (uint64_t)conn->ctx->start_time) {
-		/* nonce is from a previous start of the server and no longer valid
-		 * (replay attack?) */
+	 * two restarts, a new login is required.
+	 */
+
+	if ( nonce < (uint64_t)conn->ctx->start_time ) {
+
+		/*
+		 * nonce is from a previous start of the server and no longer valid
+		 * (replay attack?)
+		 */
+
 		return 0;
 	}
+
 	/* Check if the nonce is too high, so it has not (yet) been used by the
-	 * server. */
-	if (nonce >= ((uint64_t)conn->ctx->start_time + conn->ctx->nonce_count)) {
-		return 0;
-	}
+	 * server.
+	 */
+
+	if ( nonce >= ( (uint64_t)conn->ctx->start_time + conn->ctx->nonce_count ) ) return 0;
 #else
-	(void)nonce;
+	UNUSED_PARAMETER(nonce);
 #endif
 
-	/* CGI needs it as REMOTE_USER */
-	if (ah->user != NULL) {
-		conn->request_info.remote_user = XX_httplib_strdup(ah->user);
-	} else return 0;
+	/*
+	 * CGI needs it as REMOTE_USER
+	 */
+
+	if ( ah->user != NULL ) conn->request_info.remote_user = XX_httplib_strdup( ah->user );
+       	else return 0;
 
 	return 1;
 

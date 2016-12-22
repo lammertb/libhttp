@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
@@ -32,21 +32,18 @@
 static void	master_thread_run( void *thread_func_param );
 
 /*
- * ... XX_httplib_master_thread( void *thread_func_param );
+ * LIBHTTP_THREAD XX_httplib_master_thread( void *thread_func_param );
  *
  * The function XX_httplib_master_thread() runs the master thread of the
  * webserver. Due to operating system differences there are two different
  * function headers.
  */
 
-#ifdef _WIN32
-unsigned __stdcall XX_httplib_master_thread( void *thread_func_param ) {
-#else
-void *XX_httplib_master_thread( void *thread_func_param ) {
-#endif
+LIBHTTP_THREAD XX_httplib_master_thread( void *thread_func_param ) {
 
 	master_thread_run( thread_func_param );
-	return 0;
+
+	return LIBHTTP_THREAD_RETNULL;
 
 }  /* XX_httplib_master_thread */
 
@@ -71,97 +68,141 @@ static void master_thread_run(void *thread_func_param) {
 
 	XX_httplib_set_thread_name( "master" );
 
-/* Increase priority of the master thread */
+/*
+ * Increase priority of the master thread
+ */
+
 #if defined(_WIN32)
-	SetThreadPriority( GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL );
+	 SetThreadPriority( GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL );
 #elif defined(USE_MASTER_THREAD_PRIORITY)
-	int min_prio = sched_get_priority_min(SCHED_RR);
-	int max_prio = sched_get_priority_max(SCHED_RR);
+	int min_prio = sched_get_priority_min( SCHED_RR );
+	int max_prio = sched_get_priority_max( SCHED_RR );
+
 	if ((min_prio >= 0) && (max_prio >= 0)
 	    && ((USE_MASTER_THREAD_PRIORITY) <= max_prio)
 	    && ((USE_MASTER_THREAD_PRIORITY) >= min_prio)) {
+
 		struct sched_param sched_param = {0};
 		sched_param.sched_priority = (USE_MASTER_THREAD_PRIORITY);
 		pthread_setschedparam( httplib_pthread_self(), SCHED_RR,  & sched_param );
 	}
 #endif
 
-/* Initialize thread local storage */
+/*
+ * Initialize thread local storage
+ */
+
 #if defined(_WIN32)
-	tls.pthread_cond_helper_mutex = CreateEvent(NULL, FALSE, FALSE, NULL);
+	tls.pthread_cond_helper_mutex = CreateEvent( NULL, FALSE, FALSE, NULL );
 #endif
 	tls.is_master = 1;
 	httplib_pthread_setspecific( XX_httplib_sTlsKey, &tls );
 
-	if (ctx->callbacks.init_thread) {
-		/* Callback for the master thread (type 0) */
-		ctx->callbacks.init_thread(ctx, 0);
+	if ( ctx->callbacks.init_thread ) {
+
+		/*
+		 * Callback for the master thread (type 0)
+		 */
+
+		ctx->callbacks.init_thread( ctx, 0 );
 	}
 
-	/* Server starts *now* */
+	/*
+	 * Server starts *now*
+	 */
+
 	ctx->start_time = time( NULL );
 
-	/* Start the server */
+	/*
+	 * Start the server
+	 */
+
 	pfd = ctx->listening_socket_fds;
-	while (ctx->stop_flag == 0) {
-		for (i = 0; i < ctx->num_listening_sockets; i++) {
-			pfd[i].fd = ctx->listening_sockets[i].sock;
+
+	while ( ctx->stop_flag == 0 ) {
+
+		for (i=0; i<ctx->num_listening_sockets; i++) {
+
+			pfd[i].fd     = ctx->listening_sockets[i].sock;
 			pfd[i].events = POLLIN;
 		}
 
-		if (poll(pfd, ctx->num_listening_sockets, 200) > 0) {
-			for (i = 0; i < ctx->num_listening_sockets; i++) {
-				/* NOTE(lsm): on QNX, poll() returns POLLRDNORM after the
+		if ( poll( pfd, ctx->num_listening_sockets, 200 ) > 0 ) {
+
+			for (i=0; i<ctx->num_listening_sockets; i++) {
+
+				/*
+				 * NOTE(lsm): on QNX, poll() returns POLLRDNORM after the
 				 * successful poll, and POLLIN is defined as
 				 * (POLLRDNORM | POLLRDBAND)
 				 * Therefore, we're checking pfd[i].revents & POLLIN, not
-				 * pfd[i].revents == POLLIN. */
-				if (ctx->stop_flag == 0 && (pfd[i].revents & POLLIN)) {
-					XX_httplib_accept_new_connection(&ctx->listening_sockets[i], ctx);
-				}
+				 * pfd[i].revents == POLLIN.
+				 */
+
+				if ( ctx->stop_flag == 0  &&  (pfd[i].revents & POLLIN)) XX_httplib_accept_new_connection( & ctx->listening_sockets[i], ctx );
 			}
 		}
 	}
 
-	/* Here stop_flag is 1 - Initiate shutdown. */
+	/*
+	 * Here stop_flag is 1 - Initiate shutdown.
+	 */
 
-	/* Stop signal received: somebody called httplib_stop. Quit. */
-	XX_httplib_close_all_listening_sockets(ctx);
+	/*
+	 * Stop signal received: somebody called httplib_stop. Quit.
+	 */
 
-	/* Wakeup workers that are waiting for connections to handle. */
+	XX_httplib_close_all_listening_sockets( ctx );
+
+	/*
+	 * Wakeup workers that are waiting for connections to handle.
+	 */
+
 	httplib_pthread_mutex_lock( & ctx->thread_mutex );
+
 #if defined(ALTERNATIVE_QUEUE)
+
 	for (i=0; i<ctx->cfg_worker_threads; i++) {
 
 		event_signal( ctx->client_wait_events[i]i );
 
-		/* Since we know all sockets, we can shutdown the connections. */
-		if (ctx->client_socks[i].in_use) shutdown( ctx->client_socks[i].sock, SHUTDOWN_BOTH );
+		/*
+		 * Since we know all sockets, we can shutdown the connections.
+		 */
+
+		if ( ctx->client_socks[i].in_use ) shutdown( ctx->client_socks[i].sock, SHUTDOWN_BOTH );
 	}
 #else
 	httplib_pthread_cond_broadcast( & ctx->sq_full );
 #endif
 	httplib_pthread_mutex_unlock( & ctx->thread_mutex );
 
-	/* Join all worker threads to avoid leaking threads. */
+	/*
+	 * Join all worker threads to avoid leaking threads.
+	 */
+
 	workerthreadcount = ctx->cfg_worker_threads;
+
 	for (i=0; i<workerthreadcount; i++) {
 
 		if ( ctx->workerthreadids[i] != 0 ) httplib_pthread_join( ctx->workerthreadids[i], NULL );
 	}
 
 #if !defined(NO_SSL)
-	if (ctx->ssl_ctx != NULL) XX_httplib_uninitialize_ssl(ctx);
+	if ( ctx->ssl_ctx != NULL ) XX_httplib_uninitialize_ssl( ctx );
 #endif
 
 #if defined(_WIN32)
-	CloseHandle(tls.pthread_cond_helper_mutex);
+	CloseHandle( tls.pthread_cond_helper_mutex );
 #endif
 	httplib_pthread_setspecific( XX_httplib_sTlsKey, NULL );
 
-	/* Signal httplib_stop() that we're done.
+	/*
+	 * Signal httplib_stop() that we're done.
 	 * WARNING: This must be the very last thing this
-	 * thread does, as ctx becomes invalid after this line. */
+	 * thread does, as ctx becomes invalid after this line.
+	 */
+
 	ctx->stop_flag = 2;
 
 }  /* master_thread_run */

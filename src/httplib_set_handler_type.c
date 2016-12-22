@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
@@ -38,104 +38,140 @@
 
 void XX_httplib_set_handler_type( struct httplib_context *ctx, const char *uri, int handler_type, int is_delete_request, httplib_request_handler handler, httplib_websocket_connect_handler connect_handler, httplib_websocket_ready_handler ready_handler, httplib_websocket_data_handler data_handler, httplib_websocket_close_handler close_handler, httplib_authorization_handler auth_handler, void *cbdata ) {
 
-	struct httplib_handler_info *tmp_rh, **lastref;
-	size_t urilen = strlen(uri);
+	struct httplib_handler_info *tmp_rh;
+	struct httplib_handler_info **lastref;
+	size_t urilen;
 
-	if (handler_type == WEBSOCKET_HANDLER) {
-		/* assert(handler == NULL); */
-		/* assert(is_delete_request || connect_handler!=NULL ||
-		 *        ready_handler!=NULL || data_handler!=NULL ||
-		 *        close_handler!=NULL);
-		 */
-		/* assert(auth_handler == NULL); */
-		if (handler != NULL) return;
-		if (!is_delete_request && connect_handler == NULL && ready_handler == NULL && data_handler == NULL && close_handler == NULL) return;
-		if (auth_handler != NULL) return;
-	} else if (handler_type == REQUEST_HANDLER) {
-		/* assert(connect_handler==NULL && ready_handler==NULL &&
-		 *        data_handler==NULL && close_handler==NULL); */
-		/* assert(is_delete_request || (handler!=NULL));
-		 */
-		/* assert(auth_handler == NULL); */
-		if (connect_handler != NULL || ready_handler != NULL || data_handler != NULL || close_handler != NULL) return;
-		if (!is_delete_request && (handler == NULL)) return;
-		if (auth_handler != NULL) return;
-	} else { /* AUTH_HANDLER */
-		     /* assert(handler == NULL); */
-		     /* assert(connect_handler==NULL && ready_handler==NULL &&
-		      *        data_handler==NULL && close_handler==NULL); */
-		/* assert(auth_handler != NULL); */
-		if (handler != NULL) return;
-		if (connect_handler != NULL || ready_handler != NULL || data_handler != NULL || close_handler != NULL) return;
-		if (!is_delete_request && (auth_handler == NULL)) return;
+	if ( uri == NULL ) return;
+
+	urilen = strlen( uri );
+
+	if ( handler_type == WEBSOCKET_HANDLER ) {
+
+		if (   handler != NULL                                                                                                                ) return;
+		if ( ! is_delete_request  &&  connect_handler == NULL  &&  ready_handler == NULL  &&  data_handler == NULL  &&  close_handler == NULL ) return;
+		if (   auth_handler != NULL                                                                                                           ) return;
+	}
+	
+	else if ( handler_type == REQUEST_HANDLER ) {
+
+		if (   connect_handler != NULL  ||  ready_handler != NULL  ||  data_handler != NULL  ||  close_handler != NULL ) return;
+		if ( ! is_delete_request  &&  handler == NULL                                                                  ) return;
+		if (   auth_handler != NULL                                                                                    ) return;
+	}
+	
+	else { /* AUTH_HANDLER */
+		if (   handler != NULL                                                                                         ) return;
+		if (   connect_handler != NULL  ||  ready_handler != NULL  ||  data_handler != NULL  ||  close_handler != NULL ) return;
+		if ( ! is_delete_request  &&  auth_handler == NULL                                                             ) return;
 	}
 
 	if ( ctx == NULL ) return;
 
-	httplib_lock_context(ctx);
+	httplib_lock_context( ctx );
 
-	/* first try to find an existing handler */
-	lastref = &(ctx->handlers);
-	for (tmp_rh = ctx->handlers; tmp_rh != NULL; tmp_rh = tmp_rh->next) {
-		if (tmp_rh->handler_type == handler_type) {
-			if (urilen == tmp_rh->uri_len && !strcmp(tmp_rh->uri, uri)) {
-				if (!is_delete_request) {
-					/* update existing handler */
-					if (handler_type == REQUEST_HANDLER) {
+	/*
+	 * first try to find an existing handler
+	 */
+
+	lastref = & ctx->handlers;
+
+	for ( tmp_rh=ctx->handlers; tmp_rh != NULL; tmp_rh=tmp_rh->next ) {
+
+		if ( tmp_rh->handler_type == handler_type ) {
+
+			if ( urilen == tmp_rh->uri_len  &&  ! strcmp( tmp_rh->uri, uri ) ) {
+
+				if ( ! is_delete_request ) {
+
+					/*
+					 * update existing handler
+					 */
+
+					if ( handler_type == REQUEST_HANDLER ) {
+
 						tmp_rh->handler = handler;
-					} else if (handler_type == WEBSOCKET_HANDLER) {
+					}
+					
+					else if ( handler_type == WEBSOCKET_HANDLER ) {
+
 						tmp_rh->connect_handler = connect_handler;
-						tmp_rh->ready_handler = ready_handler;
-						tmp_rh->data_handler = data_handler;
-						tmp_rh->close_handler = close_handler;
-					} else { /* AUTH_HANDLER */
+						tmp_rh->ready_handler   = ready_handler;
+						tmp_rh->data_handler    = data_handler;
+						tmp_rh->close_handler   = close_handler;
+					}
+					
+					else { /* AUTH_HANDLER */
 						tmp_rh->auth_handler = auth_handler;
 					}
+
 					tmp_rh->cbdata = cbdata;
-				} else {
-					/* remove existing handler */
+				}
+				
+				else {
+					/*
+					 * remove existing handler
+					 */
 					*lastref = tmp_rh->next;
 					httplib_free( tmp_rh->uri );
 					httplib_free( tmp_rh      );
 				}
+
 				httplib_unlock_context(ctx);
 				return;
 			}
 		}
-		lastref = &(tmp_rh->next);
+		lastref = & tmp_rh->next;
 	}
 
-	if (is_delete_request) {
-		/* no handler to set, this was a remove request to a non-existing
-		 * handler */
-		httplib_unlock_context(ctx);
+	if ( is_delete_request ) {
+
+		/*
+		 * no handler to set, this was a remove request to a non-existing
+		 * handler
+		 */
+
+		httplib_unlock_context( ctx );
 		return;
 	}
 
 	tmp_rh = httplib_calloc( sizeof(struct httplib_handler_info), 1 );
 
-	if (tmp_rh == NULL) {
+	if ( tmp_rh == NULL ) {
 
-		httplib_unlock_context(ctx);
-		httplib_cry( XX_httplib_fc(ctx), "%s", "Cannot create new request handler struct, OOM");
+		httplib_unlock_context( ctx );
+		httplib_cry( XX_httplib_fc(ctx), "%s", "Cannot create new request handler struct, OOM" );
+
 		return;
 	}
-	tmp_rh->uri = XX_httplib_strdup(uri);
-	if (!tmp_rh->uri) {
-		httplib_unlock_context(ctx);
+
+	tmp_rh->uri = XX_httplib_strdup( uri );
+
+	if ( tmp_rh->uri == NULL ) {
+
+		httplib_unlock_context( ctx );
 		httplib_free( tmp_rh );
-		httplib_cry( XX_httplib_fc(ctx), "%s", "Cannot create new request handler struct, OOM");
+		httplib_cry( XX_httplib_fc(ctx), "%s", "Cannot create new request handler struct, OOM" );
+
 		return;
 	}
+
 	tmp_rh->uri_len = urilen;
-	if (handler_type == REQUEST_HANDLER) {
+
+	if ( handler_type == REQUEST_HANDLER ) {
+
 		tmp_rh->handler = handler;
-	} else if (handler_type == WEBSOCKET_HANDLER) {
+	}
+	
+	else if ( handler_type == WEBSOCKET_HANDLER ) {
+
 		tmp_rh->connect_handler = connect_handler;
 		tmp_rh->ready_handler   = ready_handler;
 		tmp_rh->data_handler    = data_handler;
 		tmp_rh->close_handler   = close_handler;
-	} else { /* AUTH_HANDLER */
+	}
+	
+	else { /* AUTH_HANDLER */
 		tmp_rh->auth_handler = auth_handler;
 	}
 	tmp_rh->cbdata = cbdata;

@@ -22,13 +22,20 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
 
-int XX_httplib_is_valid_port(unsigned long port) {
+/*
+ * int XX_httplib_is_valid_port( unsigned long port );
+ *
+ * The function XX_httplib_is_valid_port() returns true, if the port number
+ * specified is a valid port for socket communication.
+ */
 
-	return (port < 0xffff);
+int XX_httplib_is_valid_port( unsigned long port ) {
+
+	return ( port < 0xffff );
 
 }  /* XX_httplib_is_valid_port */

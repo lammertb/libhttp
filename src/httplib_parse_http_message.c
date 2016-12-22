@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
@@ -48,11 +48,15 @@ int XX_httplib_parse_http_message( char *buf, int len, struct httplib_request_in
 	int request_length;
 	char *start_line;
 
-	request_length = XX_httplib_get_request_len(buf, len);
+	request_length = XX_httplib_get_request_len( buf, len );
 
-	if (request_length > 0) {
-		/* Reset attributes. DO NOT TOUCH is_ssl, remote_ip, remote_addr,
-		 * remote_port */
+	if ( request_length > 0 ) {
+
+		/*
+		 * Reset attributes. DO NOT TOUCH is_ssl, remote_ip, remote_addr,
+		 * remote_port
+		 */
+
 		ri->remote_user    = NULL;
 		ri->request_method = NULL;
 		ri->request_uri    = NULL;
@@ -61,33 +65,48 @@ int XX_httplib_parse_http_message( char *buf, int len, struct httplib_request_in
 
 		buf[request_length - 1] = '\0';
 
-		/* RFC says that all initial whitespaces should be ingored */
-		while (*buf != '\0' && isspace(*(unsigned char *)buf)) {
-			buf++;
-		}
+		/*
+		 * RFC says that all initial whitespaces should be ingored
+		 */
+
+		while (*buf != '\0'  &&  isspace( *(unsigned char *)buf) ) buf++;
+
 		start_line         = XX_httplib_skip( &buf, "\r\n" );
 		ri->request_method = XX_httplib_skip( &start_line, " " );
 		ri->request_uri    = XX_httplib_skip( &start_line, " " );
 		ri->http_version   = start_line;
 
-		/* HTTP message could be either HTTP request:
+		/*
+		 * HTTP message could be either HTTP request:
 		 * "GET / HTTP/1.0 ..."
 		 * or a HTTP response:
 		 *  "HTTP/1.0 200 OK ..."
 		 * otherwise it is invalid.
 		 */
-		is_request = XX_httplib_is_valid_http_method(ri->request_method);
-		if ((is_request && memcmp(ri->http_version, "HTTP/", 5) != 0)
-		    || (!is_request && memcmp(ri->request_method, "HTTP/", 5) != 0)) {
-			/* Not a valid request or response: invalid */
+
+		is_request = XX_httplib_is_valid_http_method( ri->request_method );
+
+		if ( (  is_request  &&  memcmp( ri->http_version,   "HTTP/", 5 ) != 0 ) || 
+		     ( !is_request  &&  memcmp( ri->request_method, "HTTP/", 5 ) != 0 )   ) {
+
+			/*
+			 * Not a valid request or response: invalid
+			 */
+
 			return -1;
 		}
-		if (is_request) ri->http_version += 5;
-		if (XX_httplib_parse_http_headers(&buf, ri) < 0) {
-			/* Error while parsing headers */
+
+		if ( is_request ) ri->http_version += 5;
+		if ( XX_httplib_parse_http_headers( &buf, ri ) < 0 ) {
+
+			/*
+			 * Error while parsing headers
+			 */
+
 			return -1;
 		}
 	}
+
 	return request_length;
 
 }  /* XX_httplib_parse_http_message */

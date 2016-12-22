@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
@@ -44,37 +44,41 @@ void XX_httplib_log_access( const struct httplib_connection *conn ) {
 	char date[64];
 	char src_addr[IP_ADDR_STR_LEN];
 	struct tm *tm;
-
 	const char *referer;
 	const char *user_agent;
-
 	char buf[4096];
 
-	if (!conn || !conn->ctx) return;
+	if ( conn == NULL  ||  conn->ctx == NULL ) return;
 
-	if (conn->ctx->config[ACCESS_LOG_FILE] != NULL) {
-		if (XX_httplib_fopen(conn, conn->ctx->config[ACCESS_LOG_FILE], "a+", &fi) == 0) fi.fp = NULL;
-	} else fi.fp = NULL;
+	if ( conn->ctx->config[ACCESS_LOG_FILE] != NULL ) {
 
-	/* Log is written to a file and/or a callback. If both are not set,
-	 * executing the rest of the function is pointless. */
-	if ((fi.fp == NULL) && (conn->ctx->callbacks.log_access == NULL)) return;
+		if ( XX_httplib_fopen( conn, conn->ctx->config[ACCESS_LOG_FILE], "a+", &fi ) == 0 ) fi.fp = NULL;
+	}
+	else fi.fp = NULL;
 
-	tm = localtime(&conn->conn_birth_time);
-	if (tm != NULL) {
-		strftime(date, sizeof(date), "%d/%b/%Y:%H:%M:%S %z", tm);
-	} else {
+	/*
+	 * Log is written to a file and/or a callback. If both are not set,
+	 * executing the rest of the function is pointless.
+	 */
+
+	if ( fi.fp == NULL  &&  conn->ctx->callbacks.log_access == NULL ) return;
+
+	tm = localtime( & conn->conn_birth_time );
+
+	if ( tm != NULL ) strftime( date, sizeof(date), "%d/%b/%Y:%H:%M:%S %z", tm );
+	else {
 		httplib_strlcpy( date, "01/Jan/1970:00:00:00 +0000", sizeof(date) );
 		date[sizeof(date) - 1] = '\0';
 	}
 
-	ri = &conn->request_info;
+	ri = & conn->request_info;
 
-	XX_httplib_sockaddr_to_string(src_addr, sizeof(src_addr), &conn->client.rsa);
-	referer = header_val(conn, "Referer");
-	user_agent = header_val(conn, "User-Agent");
+	XX_httplib_sockaddr_to_string( src_addr, sizeof(src_addr), &conn->client.rsa );
 
-	XX_httplib_snprintf(conn,
+	referer    = header_val( conn, "Referer"    );
+	user_agent = header_val( conn, "User-Agent" );
+
+	XX_httplib_snprintf( conn,
 	            NULL, /* Ignore truncation in access log */
 	            buf,
 	            sizeof(buf),
@@ -90,16 +94,18 @@ void XX_httplib_log_access( const struct httplib_connection *conn ) {
 	            conn->status_code,
 	            conn->num_bytes_sent,
 	            referer,
-	            user_agent);
+	            user_agent );
 
-	if (conn->ctx->callbacks.log_access) conn->ctx->callbacks.log_access(conn, buf);
+	if ( conn->ctx->callbacks.log_access != NULL ) conn->ctx->callbacks.log_access( conn, buf );
 
-	if (fi.fp) {
-		flockfile(fi.fp);
-		fprintf(fi.fp, "%s\n", buf);
-		fflush(fi.fp);
-		funlockfile(fi.fp);
-		XX_httplib_fclose(&fi);
+	if ( fi.fp ) {
+
+		flockfile(   fi.fp              );
+		fprintf(     fi.fp, "%s\n", buf );
+		fflush(      fi.fp              );
+		funlockfile( fi.fp              );
+
+		XX_httplib_fclose( &fi );
 	}
 
 }  /* XX_httplib_log_access */
@@ -117,7 +123,9 @@ static const char *header_val( const struct httplib_connection *conn, const char
 
 	const char *header_value;
 
-	if ((header_value = httplib_get_header(conn, header)) == NULL) return "-";
-	else                                                      return header_value;
+	header_value = httplib_get_header( conn, header );
+
+	if ( header_value == NULL ) return "-";
+	else                        return header_value;
 
 }  /* header_val */

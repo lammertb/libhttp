@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
@@ -33,12 +33,13 @@ void XX_httplib_send_authorization_request( struct httplib_connection *conn ) {
 
 	char date[64];
 	time_t curtime;
+	uint64_t nonce;
 
 	if ( conn == NULL  ||  conn->ctx == NULL ) return;
 
 	curtime = time( NULL );
 
-	uint64_t nonce = (uint64_t)(conn->ctx->start_time);
+	nonce = (uint64_t)conn->ctx->start_time;
 
 	httplib_pthread_mutex_lock( & conn->ctx->nonce_mutex );
 	nonce += conn->ctx->nonce_count;
@@ -47,13 +48,13 @@ void XX_httplib_send_authorization_request( struct httplib_connection *conn ) {
 
 	nonce ^= conn->ctx->auth_nonce_mask;
 	conn->status_code = 401;
-	conn->must_close = 1;
+	conn->must_close  = 1;
 
-	XX_httplib_gmt_time_string(date, sizeof(date), &curtime);
+	XX_httplib_gmt_time_string( date, sizeof(date), &curtime );
 
-	httplib_printf(conn, "HTTP/1.1 401 Unauthorized\r\n");
-	XX_httplib_send_no_cache_header(conn);
-	httplib_printf(conn,
+	httplib_printf( conn, "HTTP/1.1 401 Unauthorized\r\n" );
+	XX_httplib_send_no_cache_header( conn );
+	httplib_printf( conn,
 	          "Date: %s\r\n"
 	          "Connection: %s\r\n"
 	          "Content-Length: 0\r\n"
@@ -62,6 +63,6 @@ void XX_httplib_send_authorization_request( struct httplib_connection *conn ) {
 	          date,
 	          XX_httplib_suggest_connection_header(conn),
 	          conn->ctx->config[AUTHENTICATION_DOMAIN],
-	          nonce);
+	          nonce );
 
 }  /* XX_httplib_send_authorization_request */

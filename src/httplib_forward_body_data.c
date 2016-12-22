@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
@@ -42,74 +42,97 @@ int XX_httplib_forward_body_data( struct httplib_connection *conn, FILE *fp, SOC
 	char buf[MG_BUF_LEN];
 	int to_read;
 	int nread;
-	int success = 0;
+	int success;
 	int64_t buffered_len;
-	double timeout = -1.0;
+	double timeout;
 
-	if ( conn == NULL ) return 0;
-	if (conn->ctx->config[REQUEST_TIMEOUT]) {
-		timeout = atoi(conn->ctx->config[REQUEST_TIMEOUT]) / 1000.0;
-	}
+	if ( conn == NULL  ||  conn->ctx == NULL ) return 0;
+
+	success = 0;
+	timeout = -1.0;
+	if ( conn->ctx->config[REQUEST_TIMEOUT] != NULL ) timeout = atof( conn->ctx->config[REQUEST_TIMEOUT] ) / 1000.0;
 
 	expect = httplib_get_header(conn, "Expect");
-	/* assert(fp != NULL); */
-	if (!fp) {
-		XX_httplib_send_http_error(conn, 500, "%s", "Error: NULL File");
+
+	if ( fp == NULL ) {
+
+		XX_httplib_send_http_error( conn, 500, "%s", "Error: NULL File" );
 		return 0;
 	}
 
-	if (conn->content_len == -1 && !conn->is_chunked) {
-		/* Content length is not specified by the client. */
-		XX_httplib_send_http_error(conn, 411, "%s", "Error: Client did not specify content length");
-	} else if ((expect != NULL)
-	           && (httplib_strcasecmp(expect, "100-continue") != 0)) {
-		/* Client sent an "Expect: xyz" header and xyz is not 100-continue. */
-		XX_httplib_send_http_error(conn, 417, "Error: Can not fulfill expectation %s", expect);
-	} else {
-		if (expect != NULL) {
-			(void)httplib_printf(conn, "%s", "HTTP/1.1 100 Continue\r\n\r\n");
+	if ( conn->content_len == -1  &&  ! conn->is_chunked ) {
+
+		/*
+		 * Content length is not specified by the client.
+		 */
+
+		XX_httplib_send_http_error( conn, 411, "%s", "Error: Client did not specify content length" );
+
+	}
+	
+	else if ( expect != NULL  &&  httplib_strcasecmp( expect, "100-continue" ) != 0 ) {
+
+		/*
+		 * Client sent an "Expect: xyz" header and xyz is not 100-continue.
+		 */
+
+		XX_httplib_send_http_error( conn, 417, "Error: Can not fulfill expectation %s", expect );
+
+	}
+	
+	else {
+		if ( expect != NULL ) {
+
+			httplib_printf(conn, "%s", "HTTP/1.1 100 Continue\r\n\r\n");
 			conn->status_code = 100;
-		} else conn->status_code = 200;
+		}
+		
+		else conn->status_code = 200;
 
-		buffered_len = (int64_t)(conn->data_len) - (int64_t)conn->request_len
-		               - conn->consumed_content;
+		buffered_len = (int64_t)(conn->data_len) - (int64_t)conn->request_len - conn->consumed_content;
 
-		/* assert(buffered_len >= 0); */
-		/* assert(conn->consumed_content == 0); */
+		if ( buffered_len < 0  ||  conn->consumed_content != 0 ) {
 
-		if ((buffered_len < 0) || (conn->consumed_content != 0)) {
-			XX_httplib_send_http_error(conn, 500, "%s", "Error: Size mismatch");
+			XX_httplib_send_http_error( conn, 500, "%s", "Error: Size mismatch" );
 			return 0;
 		}
 
-		if (buffered_len > 0) {
-			if ((int64_t)buffered_len > conn->content_len) {
-				buffered_len = (int)conn->content_len;
-			}
+		if ( buffered_len > 0 ) {
+
+			if ((int64_t)buffered_len > conn->content_len) buffered_len = (int)conn->content_len;
+
 			body = conn->buf + conn->request_len + conn->consumed_content;
-			XX_httplib_push_all(conn->ctx, fp, sock, ssl, body, (int64_t)buffered_len);
+			XX_httplib_push_all( conn->ctx, fp, sock, ssl, body, (int64_t)buffered_len );
 			conn->consumed_content += buffered_len;
 		}
 
 		nread = 0;
-		while (conn->consumed_content < conn->content_len) {
+
+		while ( conn->consumed_content < conn->content_len ) {
+
 			to_read = sizeof(buf);
-			if ((int64_t)to_read > conn->content_len - conn->consumed_content) {
-				to_read = (int)(conn->content_len - conn->consumed_content);
-			}
-			nread = XX_httplib_pull(NULL, conn, buf, to_read, timeout);
-			if (nread <= 0 || XX_httplib_push_all(conn->ctx, fp, sock, ssl, buf, nread) != nread) break;
+			if ( (int64_t)to_read > conn->content_len - conn->consumed_content ) to_read = (int)(conn->content_len - conn->consumed_content);
+
+			nread = XX_httplib_pull( NULL, conn, buf, to_read, timeout );
+			if ( nread <= 0  ||  XX_httplib_push_all( conn->ctx, fp, sock, ssl, buf, nread ) != nread ) break;
 			conn->consumed_content += nread;
 		}
 
-		if (conn->consumed_content == conn->content_len) success = (nread >= 0);
+		if ( conn->consumed_content == conn->content_len ) success = (nread >= 0);
 
-		/* Each error code path in this function must send an error */
-		if (!success) {
-			/* NOTE: Maybe some data has already been sent. */
+		/*
+		 * Each error code path in this function must send an error
+		 */
+
+		if ( ! success ) {
+
+			/*
+			 * NOTE: Maybe some data has already been sent. */
 			/* TODO (low): If some data has been sent, a correct error
-			 * reply can no longer be sent, so just close the connection */
-			XX_httplib_send_http_error(conn, 500, "%s", "");
+			 * reply can no longer be sent, so just close the connection
+			 */
+
+			XX_httplib_send_http_error( conn, 500, "%s", "" );
 		}
 	}
 

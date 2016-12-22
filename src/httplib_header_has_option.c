@@ -22,24 +22,27 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
 
-/* A helper function for checking if a comma separated list of values contains
+/*
+ * A helper function for checking if a comma separated list of values contains
  * the given option (case insensitvely).
- * 'header' can be NULL, in which case false is returned. */
+ * 'header' can be NULL, in which case false is returned.
+ */
+
 int XX_httplib_header_has_option( const char *header, const char *option ) {
 
 	struct vec opt_vec;
 	struct vec eq_vec;
 
-	assert(option != NULL);
-	assert(option[0] != '\0');
+	if ( option == NULL  ||  option[0] == '\0' ) return false;
 
-	while ((header = XX_httplib_next_option(header, &opt_vec, &eq_vec)) != NULL) {
-		if (httplib_strncasecmp(option, opt_vec.ptr, opt_vec.len) == 0) return 1;
+	while ( (header = XX_httplib_next_option( header, &opt_vec, &eq_vec )) != NULL ) {
+
+		if ( httplib_strncasecmp( option, opt_vec.ptr, opt_vec.len ) == 0 ) return 1;
 	}
 
 	return 0;

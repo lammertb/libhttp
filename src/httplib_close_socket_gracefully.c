@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
@@ -41,13 +41,19 @@ void XX_httplib_close_socket_gracefully( struct httplib_connection *conn ) {
 	int n;
 #endif
 	struct linger linger;
-	int error_code = 0;
-	socklen_t opt_len = sizeof(error_code);
+	int error_code;
+	socklen_t opt_len;
 
 	if ( conn == NULL ) return;
 
-	/* Set linger option to avoid socket hanging out after close. This
-	 * prevent ephemeral port exhaust problem under high QPS. */
+	error_code = 0;
+	opt_len    = sizeof(error_code);
+
+	/*
+	 * Set linger option to avoid socket hanging out after close. This
+	 * prevent ephemeral port exhaust problem under high QPS.
+	 */
+
 	linger.l_onoff  = 1;
 	linger.l_linger = 1;
 
@@ -55,30 +61,42 @@ void XX_httplib_close_socket_gracefully( struct httplib_connection *conn ) {
 
 	if (error_code == ECONNRESET) {
 		/* Socket already closed by client/peer, close socket without linger */
-	} else {
-		if (setsockopt(conn->client.sock, SOL_SOCKET, SO_LINGER, (char *)&linger, sizeof(linger)) != 0) {
-			httplib_cry(conn, "%s: setsockopt(SOL_SOCKET SO_LINGER) failed: %s", __func__, strerror(ERRNO));
+	}
+	
+	else {
+		if ( setsockopt( conn->client.sock, SOL_SOCKET, SO_LINGER, (char *)&linger, sizeof(linger) ) != 0 ) {
+
+			httplib_cry( conn, "%s: setsockopt(SOL_SOCKET SO_LINGER) failed: %s", __func__, strerror(ERRNO) );
 		}
 	}
 
-	/* Send FIN to the client */
-	shutdown(conn->client.sock, SHUTDOWN_WR);
-	XX_httplib_set_non_blocking_mode(conn->client.sock);
+	/*
+	 * Send FIN to the client
+	 */
+
+	shutdown( conn->client.sock, SHUTDOWN_WR );
+	XX_httplib_set_non_blocking_mode( conn->client.sock );
 
 #if defined(_WIN32)
-	/* Read and discard pending incoming data. If we do not do that and
-	 * close
+	/*
+	 * Read and discard pending incoming data. If we do not do that and close
 	 * the socket, the data in the send buffer may be discarded. This
 	 * behaviour is seen on Windows, when client keeps sending data
 	 * when server decides to close the connection; then when client
-	 * does recv() it gets no data back. */
+	 * does recv() it gets no data back.
+	 */
+
 	do {
-		n = XX_httplib_pull( NULL, conn, buf, sizeof(buf), 1E-10 /* TODO: allow 0 as timeout */);
-	} while (n > 0);
+		n = XX_httplib_pull( NULL, conn, buf, sizeof(buf), 1E-10 /* TODO: allow 0 as timeout */ );
+	} while ( n > 0 );
 #endif
 
-	/* Now we know that our FIN is ACK-ed, safe to close */
-	closesocket(conn->client.sock);
+	/*
+	 * Now we know that our FIN is ACK-ed, safe to close
+	 */
+
+	closesocket( conn->client.sock );
+
 	conn->client.sock = INVALID_SOCKET;
 
 }  /* XX_httplib_close_socket_gracefully */

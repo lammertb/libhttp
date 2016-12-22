@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
@@ -30,22 +30,26 @@
 
 #if defined(_WIN32)
 
-/* For Windows, change all slashes to backslashes in path names. */
+/*
+ * For Windows, change all slashes to backslashes in path names.
+ */
+
 static void change_slashes_to_backslashes( char *path ) {
 
 	int i;
 
 	for (i = 0; path[i] != '\0'; i++) {
-		if (path[i] == '/') {
-			path[i] = '\\';
-		}
 
-		/* remove double backslash (check i > 0 to preserve UNC paths,
-		 * like \\server\file.txt) */
-		if ((path[i] == '\\') && (i > 0)) {
-			while (path[i + 1] == '\\' || path[i + 1] == '/') {
-				memmove(path + i + 1, path + i + 2, strlen(path + i + 1));
-			}
+		if (path[i] == '/') path[i] = '\\';
+
+		/*
+		 * remove double backslash (check i > 0 to preserve UNC paths,
+		 * like \\server\file.txt)
+		 */
+
+		if ( path[i] == '\\'  &&  i > 0 ) {
+
+			while ( path[i+1] == '\\'  ||  path[i+1] == '/' ) memmove( path+i+1, path+i+2, strlen( path+i+1 ) );
 		}
 	}
 
@@ -61,7 +65,8 @@ static int httplib_wcscasecmp( const wchar_t *s1, const wchar_t *s2 ) {
 		diff = tolower(*s1) - tolower(*s2);
 		s1++;
 		s2++;
-	} while (diff == 0 && s1[-1] != '\0');
+
+	} while ( diff == 0  &&  s1[-1] != '\0' );
 
 	return diff;
 
@@ -82,16 +87,22 @@ void XX_httplib_path_to_unicode( const char *path, wchar_t *wbuf, size_t wbuf_le
 	XX_httplib_strlcpy(buf, path, sizeof(buf));
 	change_slashes_to_backslashes(buf);
 
-	/* Convert to Unicode and back. If doubly-converted string does not
-	 * match the original, something is fishy, reject. */
-	memset(wbuf, 0, wbuf_len * sizeof(wchar_t));
-	MultiByteToWideChar(CP_UTF8, 0, buf, -1, wbuf, (int)wbuf_len);
-	WideCharToMultiByte( CP_UTF8, 0, wbuf, (int)wbuf_len, buf2, sizeof(buf2), NULL, NULL);
+	/*
+	 * Convert to Unicode and back. If doubly-converted string does not
+	 * match the original, something is fishy, reject.
+	 */
+
+	memset( wbuf, 0, wbuf_len * sizeof(wchar_t) );
+	MultiByteToWideChar( CP_UTF8, 0, buf,  -1, wbuf, (int)wbuf_len );
+	WideCharToMultiByte( CP_UTF8, 0, wbuf, (int)wbuf_len, buf2, sizeof(buf2), NULL, NULL );
 
 	if ( strcmp(buf, buf2) != 0 ) wbuf[0] = L'\0';
 
-	/* TODO: Add a configuration to switch between case sensitive and
-	 * case insensitive URIs for Windows server. */
+	/*
+	 * TODO: Add a configuration to switch between case sensitive and
+	 * case insensitive URIs for Windows server.
+	 */
+
 	/*
 	if (conn) {
 	    if (conn->ctx->config[WINDOWS_CASE_SENSITIVE]) {
@@ -101,26 +112,39 @@ void XX_httplib_path_to_unicode( const char *path, wchar_t *wbuf, size_t wbuf_le
 	*/
 
 #if !defined(_WIN32_WCE)
-	/* Only accept a full file path, not a Windows short (8.3) path. */
-	memset(wbuf2, 0, ARRAY_SIZE(wbuf2) * sizeof(wchar_t));
-	long_len = GetLongPathNameW(wbuf, wbuf2, ARRAY_SIZE(wbuf2) - 1);
-	if (long_len == 0) {
+	/*
+	 * Only accept a full file path, not a Windows short (8.3) path.
+	 */
+
+	memset( wbuf2, 0, ARRAY_SIZE(wbuf2) * sizeof(wchar_t) );
+	long_len = GetLongPathNameW( wbuf, wbuf2, ARRAY_SIZE(wbuf2) - 1 );
+
+	if ( long_len == 0 ) {
+
 		err = GetLastError();
-		if (err == ERROR_FILE_NOT_FOUND) {
-			/* File does not exist. This is not always a problem here. */
+		if ( err == ERROR_FILE_NOT_FOUND ) {
+
+			/*
+			 * File does not exist. This is not always a problem here.
+			 */
+
 			return;
 		}
 	}
-	if ((long_len >= ARRAY_SIZE(wbuf2)) || (fcompare(wbuf, wbuf2) != 0)) {
-		/* Short name is used. */
+	if ( long_len >= ARRAY_SIZE(wbuf2)  ||  fcompare( wbuf, wbuf2 ) != 0 ) {
+
+		/*
+		 * Short name is used.
+		 */
+
 		wbuf[0] = L'\0';
 	}
 #else
-	(void)long_len;
-	(void)wbuf2;
-	(void)err;
+	UNUSED_PARAMETER(long_len);
+	UNUSED_PARAMETER(wbuf2);
+	UNUSED_PARAMETER(err);
 
-	if (strchr(path, '~')) wbuf[0] = L'\0';
+	if ( strchr( path, '~' ) ) wbuf[0] = L'\0';
 #endif
 
 }  /* XX_httplib_path_to_unicode */

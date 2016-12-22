@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
@@ -41,24 +41,39 @@ void XX_httplib_produce_socket( struct httplib_context *ctx, const struct socket
 	unsigned int i;
 
 	for (;;) {
-		for (i = 0; i < ctx->cfg_worker_threads; i++) {
-			/* find a free worker slot and signal it */
-			if (ctx->client_socks[i].in_use == 0) {
-				ctx->client_socks[i] = *sp;
+
+		for (i=0; i<ctx->cfg_worker_threads; i++) {
+
+			/*
+			 * find a free worker slot and signal it
+			 */
+
+			if ( ctx->client_socks[i].in_use == 0 ) {
+
+				ctx->client_socks[i]        = *sp;
 				ctx->client_socks[i].in_use = 1;
+
 				event_signal(ctx->client_wait_events[i]);
+
 				return;
 			}
 		}
-		/* queue is full */
-		httplib_sleep(1);
+
+		/*
+		 * queue is full
+		 */
+
+		httplib_sleep( 1 );
 	}
 
 }  /* XX_httplib_produce_socket */
 
 #else /* ALTERNATIVE_QUEUE */
 
-/* Master thread adds accepted socket to a queue */
+/*
+ * Master thread adds accepted socket to a queue
+ */
+
 void XX_httplib_produce_socket(struct httplib_context *ctx, const struct socket *sp) {
 
 #define QUEUE_SIZE(ctx) ((int)(ARRAY_SIZE(ctx->queue)))
@@ -67,21 +82,27 @@ void XX_httplib_produce_socket(struct httplib_context *ctx, const struct socket 
 
 	httplib_pthread_mutex_lock( & ctx->thread_mutex );
 
-	/* If the queue is full, wait */
-	while (ctx->stop_flag == 0 && ctx->sq_head - ctx->sq_tail >= QUEUE_SIZE(ctx)) {
+	/*
+	 * If the queue is full, wait
+	 */
 
-		httplib_pthread_cond_wait( & ctx->sq_empty,  & ctx->thread_mutex );
+	while ( ctx->stop_flag == 0  &&  ctx->sq_head-ctx->sq_tail >= QUEUE_SIZE(ctx) ) {
+
+		httplib_pthread_cond_wait( & ctx->sq_empty, & ctx->thread_mutex );
 	}
 
-	if (ctx->sq_head - ctx->sq_tail < QUEUE_SIZE(ctx)) {
-		/* Copy socket to the queue and increment head */
+	if ( ctx->sq_head - ctx->sq_tail < QUEUE_SIZE(ctx) ) {
+
+		/*
+		 * Copy socket to the queue and increment head
+		 */
+
 		ctx->queue[ctx->sq_head % QUEUE_SIZE(ctx)] = *sp;
 		ctx->sq_head++;
 	}
 
 	httplib_pthread_cond_signal(  & ctx->sq_full      );
 	httplib_pthread_mutex_unlock( & ctx->thread_mutex );
-#undef QUEUE_SIZE
 
 }  /* XX_httplib_produce_socket */
 

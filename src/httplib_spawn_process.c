@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
@@ -54,83 +54,97 @@ pid_t XX_httplib_spawn_process( struct httplib_connection *conn, const char *pro
 	STARTUPINFOA si;
 	PROCESS_INFORMATION pi = {0};
 
-	(void)envp;
+	UNUSED_PARAMETER(envp);
 
-	memset(&si, 0, sizeof(si));
+	memset( &si, 0, sizeof(si) );
 	si.cb = sizeof(si);
 
 	si.dwFlags = STARTF_USESTDHANDLES | STARTF_USESHOWWINDOW;
 	si.wShowWindow = SW_HIDE;
 
 	me = GetCurrentProcess();
-	DuplicateHandle( me, (HANDLE)_get_osfhandle(fdin[0]), me, &si.hStdInput, 0, TRUE, DUPLICATE_SAME_ACCESS);
-	DuplicateHandle( me, (HANDLE)_get_osfhandle(fdout[1]), me, &si.hStdOutput, 0, TRUE, DUPLICATE_SAME_ACCESS);
-	DuplicateHandle( me, (HANDLE)_get_osfhandle(fderr[1]), me, &si.hStdError, 0, TRUE, DUPLICATE_SAME_ACCESS);
+	DuplicateHandle( me, (HANDLE)_get_osfhandle(fdin[0]),  me, &si.hStdInput,  0, TRUE, DUPLICATE_SAME_ACCESS );
+	DuplicateHandle( me, (HANDLE)_get_osfhandle(fdout[1]), me, &si.hStdOutput, 0, TRUE, DUPLICATE_SAME_ACCESS );
+	DuplicateHandle( me, (HANDLE)_get_osfhandle(fderr[1]), me, &si.hStdError,  0, TRUE, DUPLICATE_SAME_ACCESS );
 
-	/* Mark handles that should not be inherited. See
+	/*
+	 * Mark handles that should not be inherited. See
 	 * https://msdn.microsoft.com/en-us/library/windows/desktop/ms682499%28v=vs.85%29.aspx
 	 */
-	SetHandleInformation((HANDLE)_get_osfhandle(fdin[1]), HANDLE_FLAG_INHERIT, 0);
-	SetHandleInformation((HANDLE)_get_osfhandle(fdout[0]), HANDLE_FLAG_INHERIT, 0);
-	SetHandleInformation((HANDLE)_get_osfhandle(fderr[0]), HANDLE_FLAG_INHERIT, 0);
 
-	/* If CGI file is a script, try to read the interpreter line */
+	SetHandleInformation( (HANDLE)_get_osfhandle(fdin[1]),  HANDLE_FLAG_INHERIT, 0 );
+	SetHandleInformation( (HANDLE)_get_osfhandle(fdout[0]), HANDLE_FLAG_INHERIT, 0 );
+	SetHandleInformation( (HANDLE)_get_osfhandle(fderr[0]), HANDLE_FLAG_INHERIT, 0 );
+
+	/*
+	 * If CGI file is a script, try to read the interpreter line
+	 */
+
 	interp = conn->ctx->config[CGI_INTERPRETER];
-	if (interp == NULL) {
-		buf[0] = buf[1] = '\0';
 
-		/* Read the first line of the script into the buffer */
-		XX_httplib_snprintf( conn, &truncated, cmdline, sizeof(cmdline), "%s/%s", dir, prog);
+	if ( interp == NULL ) {
 
-		if (truncated) {
+		buf[0] = '\0';
+		buf[1] = '\0';
+
+		/*
+		 * Read the first line of the script into the buffer
+		 */
+
+		XX_httplib_snprintf( conn, &truncated, cmdline, sizeof(cmdline), "%s/%s", dir, prog );
+
+		if ( truncated ) {
+
 			pi.hProcess = (pid_t)-1;
 			goto spawn_cleanup;
 		}
 
-		if (XX_httplib_fopen(conn, cmdline, "r", &file)) {
+		if ( XX_httplib_fopen( conn, cmdline, "r", &file ) ) {
 			p = (char *)file.membuf;
-			XX_httplib_fgets(buf, sizeof(buf), &file, &p);
-			XX_httplib_fclose(&file);
+			XX_httplib_fgets( buf, sizeof(buf), &file, &p );
+			XX_httplib_fclose( & file );
 			buf[sizeof(buf) - 1] = '\0';
 		}
 
-		if (buf[0] == '#' && buf[1] == '!') {
-			trim_trailing_whitespaces(buf + 2);
-		} else {
-			buf[2] = '\0';
-		}
+		if ( buf[0] == '#'  &&  buf[1] == '!' ) trim_trailing_whitespaces( buf + 2 );
+		else                                    buf[2] = '\0';
+
 		interp = buf + 2;
 	}
 
-	if (interp[0] != '\0') {
-		GetFullPathNameA(interp, sizeof(full_interp), full_interp, NULL);
+	if ( interp[0] != '\0' ) {
+
+		GetFullPathNameA( interp, sizeof(full_interp), full_interp, NULL );
 		interp = full_interp;
 	}
-	GetFullPathNameA(dir, sizeof(full_dir), full_dir, NULL);
 
-	if (interp[0] != '\0') {
-		XX_httplib_snprintf(conn, &truncated, cmdline, sizeof(cmdline), "\"%s\" \"%s\\%s\"", interp, full_dir, prog);
-	} else {
-		XX_httplib_snprintf(conn, &truncated, cmdline, sizeof(cmdline), "\"%s\\%s\"", full_dir, prog);
-	}
+	GetFullPathNameA( dir, sizeof(full_dir), full_dir, NULL );
 
-	if (truncated) {
+	if ( interp[0] != '\0' ) XX_httplib_snprintf( conn, &truncated, cmdline, sizeof(cmdline), "\"%s\" \"%s\\%s\"", interp, full_dir, prog);
+	else                     XX_httplib_snprintf( conn, &truncated, cmdline, sizeof(cmdline), "\"%s\\%s\"",                full_dir, prog);
+
+	if ( truncated ) {
+
 		pi.hProcess = (pid_t)-1;
 		goto spawn_cleanup;
 	}
 
-	if (CreateProcessA(NULL, cmdline, NULL, NULL, TRUE, CREATE_NEW_PROCESS_GROUP, envblk, NULL, &si, &pi) == 0) {
+	if ( CreateProcessA( NULL, cmdline, NULL, NULL, TRUE, CREATE_NEW_PROCESS_GROUP, envblk, NULL, &si, &pi ) == 0 ) {
+
 		httplib_cry( conn, "%s: CreateProcess(%s): %ld", __func__, cmdline, (long)ERRNO);
 		pi.hProcess = (pid_t)-1;
-		/* goto spawn_cleanup; */
+
+		/*
+		 * goto spawn_cleanup;
+		 */
 	}
 
 spawn_cleanup:
-	CloseHandle(si.hStdOutput);
-	CloseHandle(si.hStdError);
-	CloseHandle(si.hStdInput);
+	CloseHandle( si.hStdOutput );
+	CloseHandle( si.hStdError  );
+	CloseHandle( si.hStdInput  );
 
-	if (pi.hThread != NULL) CloseHandle(pi.hThread);
+	if ( pi.hThread != NULL ) CloseHandle( pi.hThread );
 
 	return (pid_t)pi.hProcess;
 
@@ -146,49 +160,73 @@ pid_t XX_httplib_spawn_process( struct httplib_connection *conn, const char *pro
 	pid_t pid;
 	const char *interp;
 
-	(void)envblk;
+	UNUSED_PARAMETER(envblk);
 
 	if ( conn == NULL ) return 0;
 
-	if ((pid = fork()) == -1) {
-		/* Parent */
-		XX_httplib_send_http_error(conn, 500, "Error: Creating CGI process\nfork(): %s", strerror(ERRNO));
-	} else if (pid == 0) {
-		/* Child */
-		if      ( chdir( dir        ) !=  0 ) httplib_cry(conn, "%s: chdir(%s): %s", __func__,   dir,      strerror(ERRNO));
-		else if ( dup2( fdin[0], 0  ) == -1 ) httplib_cry(conn, "%s: dup2(%d, 0): %s", __func__, fdin[0],  strerror(ERRNO));
-		else if ( dup2( fdout[1], 1 ) == -1 ) httplib_cry(conn, "%s: dup2(%d, 1): %s", __func__, fdout[1], strerror(ERRNO));
-		else if ( dup2( fderr[1], 2 ) == -1 ) httplib_cry(conn, "%s: dup2(%d, 2): %s", __func__, fderr[1], strerror(ERRNO));
+	if ( (pid = fork()) == -1 ) {
+
+		/*
+		 * Parent
+		 */
+
+		XX_httplib_send_http_error( conn, 500, "Error: Creating CGI process\nfork(): %s", strerror(ERRNO) );
+	}
+	
+	else if ( pid == 0 ) {
+
+		/*
+		 * Child
+		 */
+
+		if      ( chdir( dir        ) !=  0 ) httplib_cry( conn, "%s: chdir(%s): %s", __func__,   dir,      strerror(ERRNO) );
+		else if ( dup2( fdin[0], 0  ) == -1 ) httplib_cry( conn, "%s: dup2(%d, 0): %s", __func__, fdin[0],  strerror(ERRNO) );
+		else if ( dup2( fdout[1], 1 ) == -1 ) httplib_cry( conn, "%s: dup2(%d, 1): %s", __func__, fdout[1], strerror(ERRNO) );
+		else if ( dup2( fderr[1], 2 ) == -1 ) httplib_cry( conn, "%s: dup2(%d, 2): %s", __func__, fderr[1], strerror(ERRNO) );
 		else {
-			/* Keep stderr and stdout in two different pipes.
+			/*
+			 * Keep stderr and stdout in two different pipes.
 			 * Stdout will be sent back to the client,
-			 * stderr should go into a server error log. */
-			close(fdin[0]);
-			close(fdout[1]);
-			close(fderr[1]);
+			 * stderr should go into a server error log.
+			 */
 
-			/* Close write end fdin and read end fdout and fderr */
-			close(fdin[1]);
-			close(fdout[0]);
-			close(fderr[0]);
+			close( fdin[0]  );
+			close( fdout[1] );
+			close( fderr[1] );
 
-			/* After exec, all signal handlers are restored to their default
+			/*
+			 * Close write end fdin and read end fdout and fderr
+			 */
+
+			close( fdin[1]  );
+			close( fdout[0] );
+			close( fderr[0] );
+
+			/*
+			 * After exec, all signal handlers are restored to their default
 			 * values, with one exception of SIGCHLD. According to
 			 * POSIX.1-2001 and Linux's implementation, SIGCHLD's handler will
 			 * leave unchanged after exec if it was set to be ignored. Restore
-			 * it to default action. */
-			signal(SIGCHLD, SIG_DFL);
+			 * it to default action.
+			 */
+
+			signal( SIGCHLD, SIG_DFL );
 
 			interp = conn->ctx->config[CGI_INTERPRETER];
-			if (interp == NULL) {
-				execle(prog, prog, NULL, envp);
-				httplib_cry(conn, "%s: execle(%s): %s", __func__, prog, strerror(ERRNO));
-			} else {
-				execle(interp, interp, prog, NULL, envp);
-				httplib_cry(conn, "%s: execle(%s %s): %s", __func__, interp, prog, strerror(ERRNO));
+
+			if ( interp == NULL ) {
+
+				execle( prog, prog, NULL, envp );
+				httplib_cry( conn, "%s: execle(%s): %s", __func__, prog, strerror(ERRNO) );
+			}
+			
+			else {
+				execle( interp, interp, prog, NULL, envp );
+				httplib_cry( conn, "%s: execle(%s %s): %s", __func__, interp, prog, strerror(ERRNO) );
 			}
 		}
-		exit(EXIT_FAILURE);
+
+		exit( EXIT_FAILURE );
 	}
 
 	return pid;

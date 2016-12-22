@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
@@ -58,31 +58,35 @@ int XX_httplib_initialize_ssl( struct httplib_context *ctx ) {
 	size_t size;
 
 #if !defined(NO_SSL_DL)
-	if (!cryptolib_dll_handle) {
-		cryptolib_dll_handle = XX_httplib_load_dll(ctx, CRYPTO_LIB, XX_httplib_crypto_sw);
-		if (!cryptolib_dll_handle) return 0;
+	if ( ! cryptolib_dll_handle ) {
+
+		cryptolib_dll_handle = XX_httplib_load_dll( ctx, CRYPTO_LIB, XX_httplib_crypto_sw );
+		if ( ! cryptolib_dll_handle ) return 0;
 	}
 #endif /* NO_SSL_DL */
 
-	if (httplib_atomic_inc(&XX_httplib_cryptolib_users) > 1) return 1;
+	if ( httplib_atomic_inc( & XX_httplib_cryptolib_users ) > 1 ) return 1;
 
-	/* Initialize locking callbacks, needed for thread safety.
+	/*
+	 * Initialize locking callbacks, needed for thread safety.
 	 * http://www.openssl.org/support/faq.html#PROG1
 	 */
+
 	i = CRYPTO_num_locks();
-	if (i < 0) i = 0;
+	if ( i < 0 ) i = 0;
+
 	size = sizeof(pthread_mutex_t) * ((size_t)(i));
-	if ((XX_httplib_ssl_mutexes = httplib_malloc( size )) == NULL) {
-		httplib_cry( XX_httplib_fc(ctx), "%s: cannot allocate mutexes: %s", __func__, XX_httplib_ssl_error());
+
+	if ( (XX_httplib_ssl_mutexes = httplib_malloc( size )) == NULL ) {
+
+		httplib_cry( XX_httplib_fc(ctx), "%s: cannot allocate mutexes: %s", __func__, XX_httplib_ssl_error() );
 		return 0;
 	}
 
-	for (i = 0; i < CRYPTO_num_locks(); i++) {
-		pthread_mutex_init(&XX_httplib_ssl_mutexes[i], &XX_httplib_pthread_mutex_attr);
-	}
+	for (i=0; i<CRYPTO_num_locks(); i++) pthread_mutex_init( & XX_httplib_ssl_mutexes[i], &XX_httplib_pthread_mutex_attr);
 
 	CRYPTO_set_locking_callback( & XX_httplib_ssl_locking_callback );
-	CRYPTO_set_id_callback( & XX_httplib_ssl_id_callback );
+	CRYPTO_set_id_callback(      & XX_httplib_ssl_id_callback      );
 
 	return 1;
 

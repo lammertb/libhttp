@@ -22,24 +22,20 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
 
-void XX_httplib_sockaddr_to_string(char *buf, size_t len, const union usa *usa) {
+void XX_httplib_sockaddr_to_string( char *buf, size_t len, const union usa *usa ) {
+
+	if ( usa == NULL  ||  buf == NULL  ||  len < 1 ) return;
 
 	buf[0] = '\0';
 
-	if (!usa) return;
-
-	if (usa->sa.sa_family == AF_INET) {
-		getnameinfo(&usa->sa, sizeof(usa->sin), buf, (unsigned)len, NULL, 0, NI_NUMERICHOST);
-	}
+	if      ( usa->sa.sa_family == AF_INET  ) getnameinfo(&usa->sa, sizeof(usa->sin),  buf, (unsigned)len, NULL, 0, NI_NUMERICHOST );
 #if defined(USE_IPV6)
-	else if (usa->sa.sa_family == AF_INET6) {
-		getnameinfo(&usa->sa, sizeof(usa->sin6), buf, (unsigned)len, NULL, 0, NI_NUMERICHOST);
-	}
+	else if ( usa->sa.sa_family == AF_INET6 ) getnameinfo(&usa->sa, sizeof(usa->sin6), buf, (unsigned)len, NULL, 0, NI_NUMERICHOST );
 #endif
 
 }  /* XX_httplib_sockaddr_to_string */

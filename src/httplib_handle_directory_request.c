@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
@@ -33,28 +33,30 @@ void XX_httplib_handle_directory_request( struct httplib_connection *conn, const
 
 	unsigned int i;
 	int sort_direction;
-	struct dir_scan_data data = {NULL, 0, 128};
+	struct dir_scan_data data = { NULL, 0, 128 };
 	char date[64];
-	time_t curtime = time(NULL);
+	time_t curtime;
 
-	if (!XX_httplib_scan_directory(conn, dir, &data, XX_httplib_dir_scan_callback)) {
-		XX_httplib_send_http_error(conn, 500, "Error: Cannot open directory\nopendir(%s): %s", dir, strerror(ERRNO));
+	if ( conn == NULL )                                                                                             return;
+	if ( dir  == NULL ) { XX_httplib_send_http_error( conn, 500, "Internal server error\nOpening NULL directory" ); return; }
+
+	if ( ! XX_httplib_scan_directory( conn, dir, & data, XX_httplib_dir_scan_callback ) ) {
+
+		XX_httplib_send_http_error( conn, 500, "Error: Cannot open directory\nopendir(%s): %s", dir, strerror(ERRNO) );
 		return;
 	}
 
-	XX_httplib_gmt_time_string(date, sizeof(date), &curtime);
+	curtime = time( NULL );
+	XX_httplib_gmt_time_string( date, sizeof(date), &curtime );
 
-	if (!conn) return;
-
-	sort_direction = ((conn->request_info.query_string != NULL) && (conn->request_info.query_string[1] == 'd')) ? 'a' : 'd';
+	sort_direction = ( conn->request_info.query_string != NULL  &&  conn->request_info.query_string[1] == 'd' ) ? 'a' : 'd';
 
 	conn->must_close = 1;
-	httplib_printf(conn, "HTTP/1.1 200 OK\r\n");
-	XX_httplib_send_static_cache_header(conn);
-	httplib_printf(conn, "Date: %s\r\n" "Connection: close\r\n" "Content-Type: text/html; charset=utf-8\r\n\r\n", date);
+	httplib_printf( conn, "HTTP/1.1 200 OK\r\n" );
+	XX_httplib_send_static_cache_header( conn );
+	httplib_printf( conn, "Date: %s\r\n" "Connection: close\r\n" "Content-Type: text/html; charset=utf-8\r\n\r\n", date );
 
-	conn->num_bytes_sent +=
-	    httplib_printf(conn,
+	conn->num_bytes_sent += httplib_printf( conn,
 	              "<html><head><title>Index of %s</title>"
 	              "<style>th {text-align: left;}</style></head>"
 	              "<body><h1>Index of %s</h1><pre><table cellpadding=\"0\">"
@@ -66,33 +68,39 @@ void XX_httplib_handle_directory_request( struct httplib_connection *conn, const
 	              conn->request_info.local_uri,
 	              sort_direction,
 	              sort_direction,
-	              sort_direction);
+	              sort_direction );
 
-	/* Print first entry - link to a parent directory */
-	conn->num_bytes_sent +=
-	    httplib_printf(conn,
+	/*
+	 * Print first entry - link to a parent directory
+	 */
+
+	conn->num_bytes_sent += httplib_printf(conn,
 	              "<tr><td><a href=\"%s%s\">%s</a></td>"
 	              "<td>&nbsp;%s</td><td>&nbsp;&nbsp;%s</td></tr>\n",
 	              conn->request_info.local_uri,
 	              "..",
 	              "Parent directory",
 	              "-",
-	              "-");
+	              "-" );
 
-	/* Sort and print directory entries */
-	if (data.entries != NULL) {
-		qsort(data.entries,
-		      (size_t)data.num_entries,
-		      sizeof(data.entries[0]),
-		      XX_httplib_compare_dir_entries);
-		for (i = 0; i < data.num_entries; i++) {
-			XX_httplib_print_dir_entry(&data.entries[i]);
+	/*
+	 * Sort and print directory entries
+	 */
+
+	if ( data.entries != NULL ) {
+
+		qsort( data.entries, (size_t)data.num_entries, sizeof(data.entries[0]), XX_httplib_compare_dir_entries );
+
+		for (i=0; i<data.num_entries; i++) {
+
+			XX_httplib_print_dir_entry( & data.entries[i] );
 			httplib_free( data.entries[i].file_name );
 		}
+
 		httplib_free( data.entries );
 	}
 
-	conn->num_bytes_sent += httplib_printf(conn, "%s", "</table></body></html>");
-	conn->status_code = 200;
+	conn->num_bytes_sent += httplib_printf( conn, "%s", "</table></body></html>" );
+	conn->status_code     = 200;
 
 }  /* XX_httplib_handle_directory_request */

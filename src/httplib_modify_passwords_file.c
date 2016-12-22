@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
@@ -39,81 +39,118 @@ int httplib_modify_passwords_file( const char *fname, const char *domain, const 
 	FILE *fp2;
 
 	found = 0;
-	fp = fp2 = NULL;
+	fp    = NULL;
+	fp2   = NULL;
 
-	/* Regard empty password as no password - remove user record. */
-	if (pass != NULL && pass[0] == '\0') pass = NULL;
-
-	/* Other arguments must not be empty */
-	if (fname == NULL || domain == NULL || user == NULL) return 0;
-
-	/* Using the given file format, user name and domain must not contain ':'
+	/*
+	 * Regard empty password as no password - remove user record.
 	 */
+
+	if ( pass != NULL  &&  pass[0] == '\0' ) pass = NULL;
+
+	/* 
+	 * Other arguments must not be empty
+	 */
+
+	if ( fname == NULL  ||  domain == NULL  ||  user == NULL ) return 0;
+
+	/*
+	 * Using the given file format, user name and domain must not contain ':'
+	 */
+
 	if ( strchr( user,   ':' ) != NULL ) return 0;
 	if ( strchr( domain, ':' ) != NULL ) return 0;
 
-	/* Do not allow control characters like newline in user name and domain.
-	 * Do not allow excessively long names either. */
-	for (i = 0; i < 255 && user[i] != 0; i++) {
-		if (iscntrl(user[i])) return 0;
-	}
-	if (user[i]) { return 0; }
-	for (i = 0; i < 255 && domain[i] != 0; i++) {
-		if (iscntrl(domain[i])) return 0;
-	}
+	/*
+	 * Do not allow control characters like newline in user name and domain.
+	 * Do not allow excessively long names either.
+	 */
+
+	for (i=0; i<255  &&  user[i] != 0; i++) { if (iscntrl(user[i])) return 0; }
+	if ( user[i] ) return 0;
+
+	for (i=0; i<255  &&  domain[i] != 0; i++) { if (iscntrl(domain[i])) return 0; }
 	if (domain[i]) return 0;
 
-	/* The maximum length of the path to the password file is limited */
+	/*
+	 * The maximum length of the path to the password file is limited
+	 */
+
 	if ((strlen(fname) + 4) >= PATH_MAX) return 0;
 
-	/* Create a temporary file name. Length has been checked before. */
+	/*
+	 * Create a temporary file name. Length has been checked before.
+	 */
+
 	strcpy(tmp, fname);
 	strcat(tmp, ".tmp");
 
-	/* Create the file if does not exist */
-	/* Use of fopen here is OK, since fname is only ASCII */
-	if ((fp = fopen(fname, "a+")) != NULL) { (void)fclose(fp); }
+	/*
+	 * Create the file if does not exist
+	 * Use of fopen here is OK, since fname is only ASCII
+	 */
 
-	/* Open the given file and temporary file */
-	if ((fp = fopen(fname, "r")) == NULL) {
-		return 0;
-	} else if ((fp2 = fopen(tmp, "w+")) == NULL) {
-		fclose(fp);
+	if ( (fp = fopen( fname, "a+" )) != NULL ) fclose(fp);
+
+	/*
+	 * Open the given file and temporary file
+	 */
+
+	if ( (fp = fopen( fname, "r" )) == NULL ) return 0;
+	
+	else if ( (fp2 = fopen( tmp, "w+" )) == NULL ) {
+
+		fclose( fp );
 		return 0;
 	}
 
-	/* Copy the stuff to temporary file */
-	while (fgets(line, sizeof(line), fp) != NULL) {
-		if (sscanf(line, "%255[^:]:%255[^:]:%*s", u, d) != 2) {
-			continue;
-		}
+	/*
+	 * Copy the stuff to temporary file
+	 */
+
+	while ( fgets( line, sizeof(line), fp ) != NULL ) {
+
+		if ( sscanf(line, "%255[^:]:%255[^:]:%*s", u, d) != 2 ) continue;
+
 		u[255] = 0;
 		d[255] = 0;
 
-		if (!strcmp(u, user) && !strcmp(d, domain)) {
+		if ( ! strcmp( u, user )  &&  ! strcmp( d, domain ) ) {
+
 			found++;
-			if (pass != NULL) {
-				httplib_md5(ha1, user, ":", domain, ":", pass, NULL);
-				fprintf(fp2, "%s:%s:%s\n", user, domain, ha1);
+			if ( pass != NULL ) {
+
+				httplib_md5( ha1, user, ":", domain, ":", pass, NULL );
+				fprintf( fp2, "%s:%s:%s\n", user, domain, ha1 );
 			}
-		} else {
-			fprintf(fp2, "%s", line);
 		}
+		
+		else fprintf( fp2, "%s", line );
 	}
 
-	/* If new user, just add it */
-	if (!found && pass != NULL) {
-		httplib_md5(ha1, user, ":", domain, ":", pass, NULL);
-		fprintf(fp2, "%s:%s:%s\n", user, domain, ha1);
+	/*
+	 * If new user, just add it
+	 */
+
+	if ( ! found  &&  pass != NULL ) {
+
+		httplib_md5( ha1, user, ":", domain, ":", pass, NULL );
+		fprintf( fp2, "%s:%s:%s\n", user, domain, ha1 );
 	}
 
-	/* Close files */
-	fclose(fp);
-	fclose(fp2);
+	/*
+	 * Close files
+	 */
 
-	/* Put the temp file in place of real file */
-	IGNORE_UNUSED_RESULT(remove(fname));
-	IGNORE_UNUSED_RESULT(rename(tmp, fname));
+	fclose( fp  );
+	fclose( fp2 );
+
+	/*
+	 * Put the temp file in place of real file
+	 */
+
+	remove( fname      );
+	rename( tmp, fname );
 
 	return 1;
 

@@ -22,42 +22,49 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
 #include "httplib_string.h"
 
 /* Return 1 if request is authorised, 0 otherwise. */
-int XX_httplib_check_authorization( struct httplib_connection *conn, const char *path ) {
+bool XX_httplib_check_authorization( struct httplib_connection *conn, const char *path ) {
 
 	char fname[PATH_MAX];
 	struct vec uri_vec;
 	struct vec filename_vec;
 	const char *list;
 	struct file file = STRUCT_FILE_INITIALIZER;
-	int authorized = 1;
+	bool authorized;
 	int truncated;
 
-	if (!conn || !conn->ctx) return 0;
+	if ( conn == NULL  ||  conn->ctx == NULL ) return false;
+
+	authorized = true;
 
 	list = conn->ctx->config[PROTECT_URI];
-	while ((list = XX_httplib_next_option(list, &uri_vec, &filename_vec)) != NULL) {
-		if (!memcmp(conn->request_info.local_uri, uri_vec.ptr, uri_vec.len)) {
-			XX_httplib_snprintf(conn, &truncated, fname, sizeof(fname), "%.*s", (int)filename_vec.len, filename_vec.ptr);
 
-			if (truncated || !XX_httplib_fopen(conn, fname, "r", &file)) {
-				httplib_cry(conn, "%s: cannot open %s: %s", __func__, fname, strerror(errno));
+	while ( (list = XX_httplib_next_option( list, &uri_vec, &filename_vec )) != NULL ) {
+
+		if ( ! memcmp( conn->request_info.local_uri, uri_vec.ptr, uri_vec.len ) ) {
+
+			XX_httplib_snprintf( conn, &truncated, fname, sizeof(fname), "%.*s", (int)filename_vec.len, filename_vec.ptr );
+
+			if ( truncated  ||  ! XX_httplib_fopen( conn, fname, "r", &file ) ) {
+
+				httplib_cry( conn, "%s: cannot open %s: %s", __func__, fname, strerror(errno) );
 			}
 			break;
 		}
 	}
 
-	if (!XX_httplib_is_file_opened(&file)) XX_httplib_open_auth_file(conn, path, &file);
+	if ( ! XX_httplib_is_file_opened( & file ) ) XX_httplib_open_auth_file( conn, path, & file );
 
-	if (XX_httplib_is_file_opened(&file)) {
-		authorized = XX_httplib_authorize(conn, &file);
-		XX_httplib_fclose(&file);
+	if ( XX_httplib_is_file_opened( & file ) ) {
+
+		authorized = XX_httplib_authorize( conn, & file );
+		XX_httplib_fclose( & file );
 	}
 
 	return authorized;

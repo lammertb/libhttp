@@ -22,53 +22,71 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
 
-/* Skip the characters until one of the delimiters characters found.
+/*
+ * Skip the characters until one of the delimiters characters found.
  * 0-terminate resulting word. Skip the delimiter and following whitespaces.
  * Advance pointer to buffer to the next word. Return found 0-terminated word.
- * Delimiters can be quoted with quotechar. */
-char * XX_httplib_skip_quoted( char **buf, const char *delimiters, const char *whitespace, char quotechar ) {
+ * Delimiters can be quoted with quotechar.
+ */
+
+char *XX_httplib_skip_quoted( char **buf, const char *delimiters, const char *whitespace, char quotechar ) {
 
 	char *p;
 	char *begin_word;
 	char *end_word;
 	char *end_whitespace;
 
+	if ( buf == NULL  ||  *buf == NULL ) return NULL;
+
 	begin_word = *buf;
-	end_word = begin_word + strcspn(begin_word, delimiters);
+	end_word   = begin_word + strcspn( begin_word, delimiters );
 
-	/* Check for quotechar */
-	if (end_word > begin_word) {
+	/*
+	 * Check for quotechar
+	 */
+
+	if ( end_word > begin_word ) {
+
 		p = end_word - 1;
-		while (*p == quotechar) {
-			/* While the delimiter is quoted, look for the next delimiter. */
-			/* This happens, e.g., in calls from XX_httplib_parse_auth_header,
-			 * if the user name contains a " character. */
 
-			/* If there is anything beyond end_word, copy it. */
-			if (*end_word != '\0') {
-				size_t end_off = strcspn(end_word + 1, delimiters);
-				memmove(p, end_word, end_off + 1);
-				p += end_off; /* p must correspond to end_word - 1 */
+		while ( *p == quotechar ) {
+
+			/*
+			 * While the delimiter is quoted, look for the next delimiter.
+			 * This happens, e.g., in calls from XX_httplib_parse_auth_header,
+			 * if the user name contains a " character.
+			 *
+			 * If there is anything beyond end_word, copy it.
+			 */
+
+			if ( *end_word != '\0' ) {
+
+				size_t end_off = strcspn( end_word + 1, delimiters );
+				memmove( p, end_word, end_off + 1 );
+				p        += end_off; /* p must correspond to end_word - 1 */
 				end_word += end_off + 1;
-			} else {
+			}
+			
+			else {
 				*p = '\0';
 				break;
 			}
 		}
+		
 		for (p++; p < end_word; p++) *p = '\0';
 	}
 
-	if (*end_word == '\0') {
-		*buf = end_word;
-	} else {
-		end_whitespace = end_word + 1 + strspn(end_word + 1, whitespace);
+	if (*end_word == '\0') *buf = end_word;
+	
+	else {
+		end_whitespace = end_word+1 + strspn( end_word+1, whitespace );
 
-		for (p = end_word; p < end_whitespace; p++) *p = '\0';
+		for (p=end_word; p<end_whitespace; p++) *p = '\0';
 
 		*buf = end_whitespace;
 	}

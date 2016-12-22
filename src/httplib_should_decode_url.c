@@ -22,15 +22,16 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
 
-int XX_httplib_should_decode_url( const struct httplib_connection *conn ) {
+bool XX_httplib_should_decode_url( const struct httplib_connection *conn ) {
 
-	if ( conn == NULL  ||  conn->ctx == NULL ) return 0;
+	if ( conn == NULL  ||  conn->ctx   == NULL ) return false;
+	if ( conn->ctx->config[DECODE_URL] == NULL ) return false;
 
-	return (httplib_strcasecmp(conn->ctx->config[DECODE_URL], "yes") == 0);
+	return ( ! httplib_strcasecmp( conn->ctx->config[DECODE_URL], "yes" ) );
 
 }  /* XX_httplib_should_decode_url */

@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
@@ -51,94 +51,151 @@ void XX_httplib_put_file( struct httplib_connection *conn, const char *path ) {
 
 	curtime = time( NULL );
 
-	if (XX_httplib_stat(conn, path, &file)) {
-		/* File already exists */
+	if ( XX_httplib_stat( conn, path, &file ) ) {
+
+		/*
+		 * File already exists
+		 */
+
 		conn->status_code = 200;
 
-		if (file.is_directory) {
-			/* This is an already existing directory,
-			 * so there is nothing to do for the server. */
+		if ( file.is_directory ) {
+
+			/*
+			 * This is an already existing directory,
+			 * so there is nothing to do for the server.
+			 */
+
 			rc = 0;
 
-		} else {
-			/* File exists and is not a directory. */
-			/* Can it be replaced? */
+		}
+		
+		else {
+			/*
+			 * File exists and is not a directory.
+			 * Can it be replaced?
+			 */
 
-			if (file.membuf != NULL) {
-				/* This is an "in-memory" file, that can not be replaced */
-				XX_httplib_send_http_error( conn, 405, "Error: Put not possible\nReplacing %s is not supported", path);
+			if ( file.membuf != NULL ) {
+
+				/*
+				 * This is an "in-memory" file, that can not be replaced
+				 */
+
+				XX_httplib_send_http_error( conn, 405, "Error: Put not possible\nReplacing %s is not supported", path );
 				return;
 			}
 
-			/* Check if the server may write this file */
-			if (access(path, W_OK) == 0) {
-				/* Access granted */
+			/*
+			 * Check if the server may write this file
+			 */
+
+			if ( access( path, W_OK ) == 0 ) {
+
+				/*
+				 * Access granted
+				 */
+
 				conn->status_code = 200;
-				rc = 1;
-			} else {
-				XX_httplib_send_http_error( conn, 403, "Error: Put not possible\nReplacing %s is not allowed", path);
+				rc                = 1;
+			}
+			
+			else {
+				XX_httplib_send_http_error( conn, 403, "Error: Put not possible\nReplacing %s is not allowed", path );
 				return;
 			}
 		}
-	} else {
-		/* File should be created */
+	}
+	
+	else {
+		/*
+		 * File should be created
+		 */
+
 		conn->status_code = 201;
-		rc = XX_httplib_put_dir(conn, path);
+		rc                = XX_httplib_put_dir( conn, path );
 	}
 
-	if (rc == 0) {
-		/* XX_httplib_put_dir returns 0 if path is a directory */
-		XX_httplib_gmt_time_string(date, sizeof(date), &curtime);
-		httplib_printf(conn, "HTTP/1.1 %d %s\r\n", conn->status_code, httplib_get_response_code_text(NULL, conn->status_code));
-		XX_httplib_send_no_cache_header(conn);
-		httplib_printf(conn, "Date: %s\r\n" "Content-Length: 0\r\n" "Connection: %s\r\n\r\n", date, XX_httplib_suggest_connection_header(conn));
+	if ( rc == 0 ) {
 
-		/* Request to create a directory has been fulfilled successfully.
-		 * No need to put a file. */
+		/*
+		 * XX_httplib_put_dir returns 0 if path is a direct ory
+		 */
+
+		XX_httplib_gmt_time_string( date, sizeof(date), &curtime );
+		httplib_printf( conn, "HTTP/1.1 %d %s\r\n", conn->status_code, httplib_get_response_code_text( NULL, conn->status_code ) );
+		XX_httplib_send_no_cache_header( conn );
+		httplib_printf( conn, "Date: %s\r\n" "Content-Length: 0\r\n" "Connection: %s\r\n\r\n", date, XX_httplib_suggest_connection_header( conn ) );
+
+		/*
+		 * Request to create a directory has been fulfilled successfully.
+		 * No need to put a file.
+		 */
+
 		return;
 	}
 
-	if (rc == -1) {
-		/* XX_httplib_put_dir returns -1 if the path is too long */
-		XX_httplib_send_http_error(conn, 414, "Error: Path too long\nput_dir(%s): %s", path, strerror(ERRNO));
+	if ( rc == -1 ) {
+
+		/*
+		 * XX_httplib_put_dir returns -1 if the path is too long
+		 */
+
+		XX_httplib_send_http_error( conn, 414, "Error: Path too long\nput_dir(%s): %s", path, strerror(ERRNO) );
 		return;
 	}
 
-	if (rc == -2) {
-		/* XX_httplib_put_dir returns -2 if the directory can not be created */
-		XX_httplib_send_http_error(conn, 500, "Error: Can not create directory\nput_dir(%s): %s", path, strerror(ERRNO));
+	if ( rc == -2 ) {
+
+		/*
+		 * XX_httplib_put_dir returns -2 if the directory can not be created
+		 */
+
+		XX_httplib_send_http_error( conn, 500, "Error: Can not create directory\nput_dir(%s): %s", path, strerror(ERRNO) );
 		return;
 	}
 
-	/* A file should be created or overwritten. */
-	if (!XX_httplib_fopen(conn, path, "wb+", &file) || file.fp == NULL) {
-		XX_httplib_fclose(&file);
-		XX_httplib_send_http_error(conn, 500, "Error: Can not create file\nfopen(%s): %s", path, strerror(ERRNO));
+	/*
+	 * A file should be created or overwritten.
+	 */
+
+	if ( ! XX_httplib_fopen( conn, path, "wb+", &file)  ||  file.fp == NULL ) {
+
+		XX_httplib_fclose( & file );
+		XX_httplib_send_http_error( conn, 500, "Error: Can not create file\nfopen(%s): %s", path, strerror(ERRNO) );
 		return;
 	}
 
-	XX_httplib_fclose_on_exec(&file, conn);
-	range = httplib_get_header(conn, "Content-Range");
-	r1 = r2 = 0;
-	if (range != NULL && XX_httplib_parse_range_header(range, &r1, &r2) > 0) {
+	XX_httplib_fclose_on_exec( & file, conn );
+
+	range = httplib_get_header( conn, "Content-Range" );
+	r1    = 0;
+	r2    = 0;
+
+	if ( range != NULL  &&  XX_httplib_parse_range_header( range, &r1, &r2 ) > 0 ) {
+
 		conn->status_code = 206; /* Partial content */
-		fseeko(file.fp, r1, SEEK_SET);
+		fseeko( file.fp, r1, SEEK_SET );
 	}
 
-	if (!XX_httplib_forward_body_data(conn, file.fp, INVALID_SOCKET, NULL)) {
-		/* XX_httplib_forward_body_data failed.
+	if ( ! XX_httplib_forward_body_data( conn, file.fp, INVALID_SOCKET, NULL ) ) {
+
+		/*
+		 * XX_httplib_forward_body_data failed.
 		 * The error code has already been sent to the client,
-		 * and conn->status_code is already set. */
-		XX_httplib_fclose(&file);
+		 * and conn->status_code is already set.
+		 */
+
+		XX_httplib_fclose( & file );
 		return;
 	}
 
-	XX_httplib_gmt_time_string(date, sizeof(date), &curtime);
-	httplib_printf(conn, "HTTP/1.1 %d %s\r\n", conn->status_code, httplib_get_response_code_text(NULL, conn->status_code));
-	XX_httplib_send_no_cache_header(conn);
-	httplib_printf(conn, "Date: %s\r\n" "Content-Length: 0\r\n" "Connection: %s\r\n\r\n", date, XX_httplib_suggest_connection_header(conn));
+	XX_httplib_gmt_time_string( date, sizeof(date), &curtime );
+	httplib_printf( conn, "HTTP/1.1 %d %s\r\n", conn->status_code, httplib_get_response_code_text( NULL, conn->status_code ) );
+	XX_httplib_send_no_cache_header( conn );
+	httplib_printf( conn, "Date: %s\r\n" "Content-Length: 0\r\n" "Connection: %s\r\n\r\n", date, XX_httplib_suggest_connection_header( conn ) );
 
-	XX_httplib_fclose(&file);
+	XX_httplib_fclose( & file );
 
 }  /* XX_httplib_put_file */
 

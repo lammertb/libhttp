@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  *
  * ============
- * Release: 1.8
+ * Release: 2.0
  */
 
 #include "httplib_main.h"
@@ -53,16 +53,16 @@ void XX_httplib_print_dir_entry( struct de *de ) {
 	 * So, string truncation checks are not required here.
 	 */
 
-	tm = localtime(&de->file.last_modified);
+	tm = localtime( &de->file.last_modified );
 	if ( tm != NULL ) strftime( mod, sizeof(mod), "%d-%b-%Y %H:%M", tm );
 	
 	else {
 		httplib_strlcpy( mod, "01-Jan-1970 00:00", sizeof(mod) );
 		mod[sizeof(mod) - 1] = '\0';
 	}
-	httplib_url_encode(de->file_name, href, sizeof(href));
-	de->conn->num_bytes_sent +=
-	    httplib_printf(de->conn,
+
+	httplib_url_encode( de->file_name, href, sizeof(href) );
+	de->conn->num_bytes_sent += httplib_printf( de->conn,
 	              "<tr><td><a href=\"%s%s%s\">%s%s</a></td>"
 	              "<td>&nbsp;%s</td><td>&nbsp;&nbsp;%s</td></tr>\n",
 	              de->conn->request_info.local_uri,
@@ -71,6 +71,6 @@ void XX_httplib_print_dir_entry( struct de *de ) {
 	              de->file_name,
 	              de->file.is_directory ? "/" : "",
 	              mod,
-	              size);
+	              size );
 
 }  /* XX_httplib_print_dir_entry */
