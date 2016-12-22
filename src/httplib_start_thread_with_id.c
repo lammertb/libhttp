@@ -27,40 +27,33 @@
 
 #include "httplib_main.h"
 
-#if defined(_WIN32)
-
 /*
- * Start a thread storing the thread context.
- */
-
-int XX_httplib_start_thread_with_id( unsigned(__stdcall *f)(void *), void *p, pthread_t *threadidptr ) {
-
-	uintptr_t uip;
-	HANDLE threadhandle;
-	int result;
-
-	result = -1;
-
-	uip = _beginthreadex( NULL, 0, (unsigned(__stdcall *)(void *))f, p, 0, NULL );
-	threadhandle = (HANDLE)uip;
-	if ( uip != (uintptr_t)(-1L)  &&   threadidptr != NULL ) {
-
-		*threadidptr = threadhandle;
-		result       = 0;
-	}
-
-	return result;
-
-}  /* XX_httplib_start_thread_with_id */
-
-
-#else
-
-/*
- * Start a thread storing the thread context.
+ * int XX_httplib_start_thread_with_id( httplib_thread_func_t func, void *param, pthread_t *threadidptr );
+ *
+ * The function XX_httplib_start_thread_with_id() starts a thread and returns
+ * an identifier for the thread back through a parameter. The function returns
+ * 0 when successful and a non zero value if a problem occurs.
  */
 
 int XX_httplib_start_thread_with_id( httplib_thread_func_t func, void *param, pthread_t *threadidptr ) {
+
+#if defined(_WIN32)
+
+	uintptr_t uip;
+	HANDLE threadhandle;
+
+	uip          = _beginthreadex( NULL, 0, func, param, 0, NULL );
+	threadhandle = (HANDLE)uip;
+
+	if ( uip != (uintptr_t)(-1L)  &&   threadidptr != NULL ) {
+
+		*threadidptr = threadhandle;
+		return 0;
+	}
+
+	return -1;
+
+#else  /* _WIN32 */
 
 	pthread_t thread_id;
 	pthread_attr_t attr;
@@ -84,6 +77,6 @@ int XX_httplib_start_thread_with_id( httplib_thread_func_t func, void *param, pt
 
 	return result;
 
-}  /* XX_httplib_start_thread_with_id */
-
 #endif /* _WIN32 */
+
+}  /* XX_httplib_start_thread_with_id */
