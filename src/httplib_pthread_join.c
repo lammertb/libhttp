@@ -50,14 +50,14 @@ int httplib_pthread_join( pthread_t thread, void **value_ptr ) {
 	UNUSED_PARAMETER(value_ptr);
 
 	result  = -1;
-	dwevent = WaitForSingleObject( threadid, INFINITE );
+	dwevent = WaitForSingleObject( thread, INFINITE );
 
 	if ( dwevent == WAIT_FAILED ) {
 	}
 	
 	else if ( dwevent == WAIT_OBJECT_0 ) {
 
-		CloseHandle( threadid );
+		CloseHandle( thread );
 		result = 0;
 	}
 

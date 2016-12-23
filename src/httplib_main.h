@@ -270,11 +270,6 @@ typedef long off_t;
 #define fileno(x) (_fileno(x))
 #endif /* !fileno MINGW #defines fileno */
 
-typedef struct {
-	CRITICAL_SECTION	threadIdSec;
-	struct httplib_workerTLS *	waiting_thread; /* The chain of threads */
-} pthread_cond_t;
-
 #ifndef __clockid_t_defined
 typedef DWORD clockid_t;
 #endif  /* __clockid_t_defined */
@@ -291,14 +286,6 @@ typedef DWORD clockid_t;
 #define _TIMESPEC_DEFINED
 #endif  /* _MSC_VER  &&  _MSC_VER >= 1900 */
 
-#ifndef _TIMESPEC_DEFINED
-struct timespec {
-	time_t tv_sec; /* seconds */
-	long tv_nsec;  /* nanoseconds */
-};
-#endif /* _TIMESPEC_DEFINED */
-
-#define pid_t HANDLE /* MINGW typedefs pid_t to int. Using #define here. */
 
 /* Mark required libraries */
 #if defined(_MSC_VER)
@@ -491,10 +478,11 @@ typedef struct ssl_st SSL;
 typedef struct ssl_method_st SSL_METHOD;
 typedef struct ssl_ctx_st SSL_CTX;
 typedef struct x509_store_ctx_st X509_STORE_CTX;
-typedef struct x509_name X509_NAME;
+// typedef struct x509_name X509_NAME;
 typedef struct asn1_integer ASN1_INTEGER;
 typedef struct evp_md EVP_MD;
 typedef struct x509 X509;
+typedef struct x509_name X509_NAMEX;
 
 #endif  /* NO_SSL_DL */
 #endif  /* NO_SSL */
@@ -845,6 +833,7 @@ int			XX_httplib_is_valid_port( unsigned long port );
 bool			XX_httplib_is_websocket_protocol( const struct httplib_connection *conn );
 void *			XX_httplib_load_dll( struct httplib_context *ctx, const char *dll_name, struct ssl_func *sw );
 void			XX_httplib_log_access( const struct httplib_connection *conn );
+LIBHTTP_THREAD		XX_httplib_master_thread( void *thread_func_param );
 int			XX_httplib_match_prefix(const char *pattern, size_t pattern_len, const char *str);
 void			XX_httplib_mkcol( struct httplib_connection *conn, const char *path );
 int			XX_httplib_must_hide_file( struct httplib_connection *conn, const char *path );
@@ -900,11 +889,13 @@ char *			XX_httplib_skip( char **buf, const char *delimiters );
 char *			XX_httplib_skip_quoted( char **buf, const char *delimiters, const char *whitespace, char quotechar );
 void			XX_httplib_sockaddr_to_string(char *buf, size_t len, const union usa *usa );
 pid_t			XX_httplib_spawn_process( struct httplib_connection *conn, const char *prog, char *envblk, char *envp[], int fdin[2], int fdout[2], int fderr[2], const char *dir );
+int			XX_httplib_start_thread_with_id( httplib_thread_func_t func, void *param, pthread_t *threadidptr );
 int			XX_httplib_stat( struct httplib_connection *conn, const char *path, struct file *filep );
 int			XX_httplib_substitute_index_file( struct httplib_connection *conn, char *path, size_t path_len, struct file *filep );
 const char *		XX_httplib_suggest_connection_header( const struct httplib_connection *conn );
 LIBHTTP_THREAD		XX_httplib_websocket_client_thread( void *data );
 int			XX_httplib_websocket_write_exec( struct httplib_connection *conn, int opcode, const char *data, size_t dataLen, uint32_t masking_key );
+LIBHTTP_THREAD		XX_httplib_worker_thread( void *thread_func_param );
 
 
 
@@ -924,18 +915,10 @@ void			md5_finish( md5_state_t *pms, md5_byte_t digest[16] );
 
 
 #ifdef _WIN32
-unsigned __stdcall	XX_httplib_master_thread( void *thread_func_param );
-int			XX_httplib_start_thread_with_id( unsigned(__stdcall *f)(void *), void *p, pthread_t *threadidptr );
-unsigned __stdcall	XX_httplib_worker_thread( void *thread_func_param );
-
 extern struct pthread_mutex_undefined_struct *	XX_httplib_pthread_mutex_attr;
 #else  /* _WIN32 */
-void *			XX_httplib_master_thread( void *thread_func_param );
-int			XX_httplib_start_thread_with_id( httplib_thread_func_t func, void *param, pthread_t *threadidptr );
-void *			XX_httplib_worker_thread( void *thread_func_param );
-
-extern pthread_mutexattr_t	XX_httplib_pthread_mutex_attr;
+extern pthread_mutexattr_t			XX_httplib_pthread_mutex_attr;
 #endif /* _WIN32 */
 
-extern const struct uriprot_tp	XX_httplib_abs_uri_protocols[];
+extern const struct uriprot_tp		XX_httplib_abs_uri_protocols[];
 extern struct httplib_option		XX_httplib_config_options[];

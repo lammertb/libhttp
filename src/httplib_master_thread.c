@@ -127,7 +127,7 @@ static void master_thread_run(void *thread_func_param) {
 			pfd[i].events = POLLIN;
 		}
 
-		if ( poll( pfd, ctx->num_listening_sockets, 200 ) > 0 ) {
+		if ( httplib_poll( pfd, ctx->num_listening_sockets, 200 ) > 0 ) {
 
 			for (i=0; i<ctx->num_listening_sockets; i++) {
 

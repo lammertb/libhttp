@@ -84,8 +84,8 @@ void XX_httplib_path_to_unicode( const char *path, wchar_t *wbuf, size_t wbuf_le
 	DWORD err;
 	int (*fcompare)(const wchar_t *, const wchar_t *) = httplib_wcscasecmp;
 
-	XX_httplib_strlcpy(buf, path, sizeof(buf));
-	change_slashes_to_backslashes(buf);
+	httplib_strlcpy( buf, path, sizeof(buf) );
+	change_slashes_to_backslashes( buf );
 
 	/*
 	 * Convert to Unicode and back. If doubly-converted string does not

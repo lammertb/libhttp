@@ -40,7 +40,7 @@ pthread_t httplib_pthread_self( void ) {
 
 #if defined(_WIN32)
 
-	return GetCurrentThreadId();
+	return (pthread_t)GetCurrentThreadId();
 
 #else  /* _WIN32 */
 

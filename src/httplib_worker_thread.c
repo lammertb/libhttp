@@ -103,7 +103,7 @@ static void *worker_thread_run( struct worker_thread_args *thread_args ) {
 		 * within the request handler and from elsewhere in the application
 		 */
 
-		pthread_mutex_init( & conn->mutex, &XX_httplib_pthread_mutex_attr );
+		httplib_pthread_mutex_init( & conn->mutex, &XX_httplib_pthread_mutex_attr );
 
 		/*
 		 * Call XX_httplib_consume_socket() even when ctx->stop_flag > 0, to let it

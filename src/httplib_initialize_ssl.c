@@ -83,7 +83,7 @@ int XX_httplib_initialize_ssl( struct httplib_context *ctx ) {
 		return 0;
 	}
 
-	for (i=0; i<CRYPTO_num_locks(); i++) pthread_mutex_init( & XX_httplib_ssl_mutexes[i], &XX_httplib_pthread_mutex_attr);
+	for (i=0; i<CRYPTO_num_locks(); i++) httplib_pthread_mutex_init( & XX_httplib_ssl_mutexes[i], &XX_httplib_pthread_mutex_attr);
 
 	CRYPTO_set_locking_callback( & XX_httplib_ssl_locking_callback );
 	CRYPTO_set_id_callback(      & XX_httplib_ssl_id_callback      );

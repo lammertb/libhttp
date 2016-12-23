@@ -28,7 +28,7 @@
 #include "httplib_main.h"
 
 /*
- * int httplib_pthread_setspecific( pthread_key_t key, const void *value );
+ * int httplib_pthread_setspecific( pthread_key_t key, void *value );
  *
  * The platform independent function httplib_pthread_setspecific() is used to
  * set a key value for a previously obtained thread specific key. The function
@@ -38,7 +38,7 @@
  * function call is used.
  */
 
-int httplib_pthread_setspecific( pthread_key_t key, const void *value ) {
+int httplib_pthread_setspecific( pthread_key_t key, void *value ) {
 
 #if defined(_WIN32)
 

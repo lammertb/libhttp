@@ -49,10 +49,10 @@ LIBHTTP_API DIR *httplib_opendir( const char *name ) {
 
 	dir = NULL;
 
-	if      ( name                                      == NULL ) SetLastError( ERROR_BAD_ARGUMENTS );
-	else if ( (dir = XX_httplib_malloc( sizeof(*dir) )) == NULL ) SetLastError( ERROR_NOT_ENOUGH_MEMORY );
+	if      ( name                                   == NULL ) SetLastError( ERROR_BAD_ARGUMENTS );
+	else if ( (dir = httplib_malloc( sizeof(*dir) )) == NULL ) SetLastError( ERROR_NOT_ENOUGH_MEMORY );
 	else {
-		XX_httplib_path_to_unicode( conn, name, wpath, ARRAY_SIZE(wpath) );
+		XX_httplib_path_to_unicode( name, wpath, ARRAY_SIZE(wpath) );
 		attrs = GetFileAttributesW( wpath );
 
 		if (attrs != 0xFFFFFFFF  &&  ((attrs & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY) ) {
@@ -62,7 +62,7 @@ LIBHTTP_API DIR *httplib_opendir( const char *name ) {
 			dir->result.d_name[0] = '\0';
 		}
 		else {
-			XX_httplib_free( dir );
+			httplib_free( dir );
 			dir = NULL;
 		}
 	}

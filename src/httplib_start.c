@@ -105,12 +105,12 @@ struct httplib_context *httplib_start( const struct httplib_callbacks *callbacks
 #endif
 	httplib_pthread_setspecific( XX_httplib_sTlsKey, & tls );
 
-	ok =  0 == pthread_mutex_init( & ctx->thread_mutex, &XX_httplib_pthread_mutex_attr );
+	ok =  0 == httplib_pthread_mutex_init( & ctx->thread_mutex, &XX_httplib_pthread_mutex_attr );
 #if !defined(ALTERNATIVE_QUEUE)
 	ok &= 0 == httplib_pthread_cond_init(  & ctx->sq_empty, NULL );
 	ok &= 0 == httplib_pthread_cond_init(  & ctx->sq_full,  NULL );
 #endif
-	ok &= 0 == pthread_mutex_init( & ctx->nonce_mutex,  & XX_httplib_pthread_mutex_attr );
+	ok &= 0 == httplib_pthread_mutex_init( & ctx->nonce_mutex,  & XX_httplib_pthread_mutex_attr );
 
 	if ( ! ok ) {
 

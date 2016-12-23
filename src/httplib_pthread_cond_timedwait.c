@@ -26,6 +26,7 @@
  */
 
 #include "httplib_main.h"
+#include "httplib_pthread.h"
 
 /*
  * int httplib_pthread_cond_timedwait( pthread_cond_t *cv, pthread_mutex *mutex, const struct timespec *abstime );
@@ -53,7 +54,7 @@ int httplib_pthread_cond_timedwait( pthread_cond_t *cv, pthread_mutex_t *mutex, 
 	int64_t nswaitrel;
 	DWORD mswaitrel;
 
-	tls = pthread_getspecific( XX_httplib_sTlsKey );
+	tls = httplib_pthread_getspecific( XX_httplib_sTlsKey );
 
 	/* Add this thread to cv's waiting list */
 	EnterCriticalSection( & cv->threadIdSec );
@@ -81,7 +82,7 @@ int httplib_pthread_cond_timedwait( pthread_cond_t *cv, pthread_mutex_t *mutex, 
 	
 	else mswaitrel = INFINITE;
 
-	pthread_mutex_unlock( mutex );
+	httplib_pthread_mutex_unlock( mutex );
 	ok = ( WaitForSingleObject( tls->pthread_cond_helper_mutex, mswaitrel ) == WAIT_OBJECT_0 );
 
 	if ( ! ok ) {
@@ -110,7 +111,7 @@ int httplib_pthread_cond_timedwait( pthread_cond_t *cv, pthread_mutex_t *mutex, 
 		if ( ok ) WaitForSingleObject( tls->pthread_cond_helper_mutex, INFINITE );
 	}
 	/* This thread has been removed from cv's waiting list */
-	pthread_mutex_lock( mutex );
+	httplib_pthread_mutex_lock( mutex );
 
 	return ok ? 0 : -1;
 

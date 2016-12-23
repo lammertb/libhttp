@@ -80,7 +80,7 @@ int XX_httplib_stat( struct httplib_connection *conn, const char *path, struct f
 		return 1;
 	}
 
-	XX_httplib_path_to_unicode( conn, path, wbuf, ARRAY_SIZE(wbuf) );
+	XX_httplib_path_to_unicode( path, wbuf, ARRAY_SIZE(wbuf) );
 
 	if ( GetFileAttributesExW( wbuf, GetFileExInfoStandard, &info ) != 0 ) {
 

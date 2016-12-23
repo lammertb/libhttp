@@ -54,6 +54,7 @@ int XX_httplib_set_sock_timeout( SOCKET sock, int milliseconds ) {
 #ifdef _WIN32
 
 	DWORD tv = (DWORD)milliseconds;
+	r0       = 0;
 
 #else  /* _WIN32 */
 

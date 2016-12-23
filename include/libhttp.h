@@ -45,6 +45,14 @@
 
 #include <stdio.h>
 #include <stddef.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <time.h>
+
+#if defined(_WIN32)
+#include <winsock2.h>
+#include <windows.h>
+#endif /* _WIN32 */
 
 /*
  * For our Posix emulation functions to open and close directories we need
@@ -73,6 +81,15 @@
 typedef HANDLE		pthread_t;
 typedef HANDLE		pthread_mutex_t;
 typedef DWORD		pthread_key_t;
+typedef void		pthread_condattr_t;
+typedef void		pthread_mutexattr_t;
+
+typedef struct {
+	CRITICAL_SECTION		threadIdSec;
+	struct httplib_workerTLS *	waiting_thread; /* The chain of threads */
+} pthread_cond_t;
+
+#define pid_t HANDLE /* MINGW typedefs pid_t to int. Using #define here. */
 
 #else  /* _WIN32 */
 
@@ -793,9 +810,25 @@ enum {
 LIBHTTP_API int httplib_handle_form_request(struct httplib_connection *conn, struct httplib_form_data_handler *fdh);
 
 
+#ifndef LIBHTTP_THREAD
+
+#if defined(_WIN32)
+#define LIBHTTP_THREAD			unsigned __stdcall
+#define LIBHTTP_THREAD_TYPE		unsigned
+#define LIBHTTP_THREAD_CALLING_CONV	__stdcall
+#define LIBHTTP_THREAD_RETNULL		0
+#else  /* _WIN32 */
+#define LIBHTTP_THREAD			void *
+#define LIBHTTP_THREAD_TYPE		void *
+#define LIBHTTP_THREAD_CALLING_CONV
+#define LIBHTTP_THREAD_RETNULL		NULL
+#endif  /* _WIN32 */
+
+#endif  /* LIBHTTP_THREAD */
+
 /* Convenience function -- create detached thread.
    Return: 0 on success, non-0 on error. */
-typedef void *(*httplib_thread_func_t)(void *);
+typedef LIBHTTP_THREAD_TYPE (LIBHTTP_THREAD_CALLING_CONV *httplib_thread_func_t)(void *);
 LIBHTTP_API int httplib_start_thread(httplib_thread_func_t f, void *p);
 
 
@@ -865,8 +898,7 @@ LIBHTTP_API void httplib_cry(const struct httplib_connection *conn, PRINTF_FORMA
      On success, valid httplib_connection object.
      On error, NULL. Se error_buffer for details.
 */
-LIBHTTP_API struct httplib_connection *
-httplib_connect_websocket_client(const char *host,
+LIBHTTP_API struct httplib_connection *httplib_connect_websocket_client( const char *host,
                             int port,
                             int use_ssl,
                             char *error_buffer,
@@ -940,18 +972,6 @@ LIBHTTP_API int httplib_get_response(struct httplib_connection *conn, char *ebuf
 */
 LIBHTTP_API unsigned httplib_check_feature(unsigned feature);
 
-#ifndef LIBHTTP_THREAD
-
-#if defined(_WIN32)
-#define LIBHTTP_THREAD			unsigned __stcall
-#define LIBHTTP_THREAD_RETNULL		0
-#else  /* _WIN32 */
-#define LIBHTTP_THREAD			void *
-#define LIBHTTP_THREAD_RETNULL		NULL
-#endif  /* _WIN32 */
-
-#endif  /* LIBHTTP_THREAD */
-
 typedef void (*httplib_alloc_callback_func)( const char *file, unsigned line, const char *action, int64_t current_bytes, int64_t total_blocks, int64_t total_bytes );
 
 #define				httplib_calloc(a, b) XX_httplib_calloc_ex(a, b, __FILE__, __LINE__)
@@ -987,7 +1007,7 @@ LIBHTTP_API int			httplib_pthread_mutex_lock( pthread_mutex_t *mutex );
 LIBHTTP_API int			httplib_pthread_mutex_trylock( pthread_mutex_t *mutex );
 LIBHTTP_API int			httplib_pthread_mutex_unlock( pthread_mutex_t *mutex );
 LIBHTTP_API pthread_t		httplib_pthread_self( void );
-LIBHTTP_API int			httplib_pthread_setspecific( pthread_key_t key, const void *value );
+LIBHTTP_API int			httplib_pthread_setspecific( pthread_key_t key, void *value );
 LIBHTTP_API struct dirent *	httplib_readdir( DIR *dir );
 LIBHTTP_API int			httplib_remove( const char *path );
 LIBHTTP_API void		httplib_send_file( struct httplib_connection *conn, const char *path, const char *mime_type, const char *additional_headers );

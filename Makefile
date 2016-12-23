@@ -1409,6 +1409,7 @@ ${OBJDIR}httplib_pthread_cond_signal${OBJEXT}				: ${SRCDIR}httplib_pthread_cond
 
 ${OBJDIR}httplib_pthread_cond_timedwait${OBJEXT}			: ${SRCDIR}httplib_pthread_cond_timedwait.c			\
 									  ${SRCDIR}httplib_main.h					\
+									  ${SRCDIR}httplib_pthread.h					\
 									  ${INCDIR}libhttp.h
 
 ${OBJDIR}httplib_pthread_cond_wait${OBJEXT}				: ${SRCDIR}httplib_pthread_cond_wait.c				\

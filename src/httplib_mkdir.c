@@ -46,6 +46,8 @@ LIBHTTP_API int httplib_mkdir( const char *path, int mode ) {
 
 	wchar_t wbuf[PATH_MAX];
 
+	UNUSED_PARAMETER(mode);
+
 	XX_httplib_path_to_unicode( path, wbuf, ARRAY_SIZE(wbuf) );
 	return ( CreateDirectoryW( wbuf, NULL ) ) ? 0 : -1;
 
