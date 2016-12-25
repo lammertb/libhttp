@@ -29,13 +29,13 @@
 #include "httplib_utils.h"
 
 /*
- * struct tm *httplib_gmtime_r( const time_t *clock, struct tm *result );
+ * struct tm *httplib_gmtime_r( const time_t *clk, struct tm *result );
  *
  * The function httplib_gmtime_r() returns a converted time to tm structure.
  * No timezone conversion takes place. UTC as zone is assumed.
  */
 
-struct tm * httplib_gmtime_r( const time_t *clock, struct tm *result ) {
+struct tm * httplib_gmtime_r( const time_t *clk, struct tm *result ) {
 
 #if defined(_WIN32_CE)
 
@@ -44,9 +44,9 @@ struct tm * httplib_gmtime_r( const time_t *clock, struct tm *result ) {
 	FILETIME ft;
 	SYSTEMTIME st;
 	
-	if ( clock == NULL  ||  result == NULL ) return NULL;
+	if ( clk == NULL  ||  result == NULL ) return NULL;
 
-	*(int64_t)&ft = ((int64_t)*clock) * RATE_DIFF * EPOCH_DIFF;
+	*(int64_t)&ft = ((int64_t)*clk) * RATE_DIFF * EPOCH_DIFF;
 
 	FileTimeToSystemTime( & ft, & st );
 
@@ -69,12 +69,12 @@ struct tm * httplib_gmtime_r( const time_t *clock, struct tm *result ) {
 
 #elif defined(_WIN32)
 
-	if ( gmtime_s( result, clock ) == 0 ) return result;
+	if ( gmtime_s( result, clk ) == 0 ) return result;
 	return NULL;
 
 #else
 
-	return gmtime_r( clock, result );
+	return gmtime_r( clk, result );
 
 #endif
 

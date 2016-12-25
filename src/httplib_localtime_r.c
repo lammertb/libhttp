@@ -37,14 +37,14 @@ const int		XX_httplib_days_per_month[] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 3
 #endif  /* _WIN32_WCE */
 
 /*
- * struct tm *httplib_localtime_r( const time_t *clock, struct tm *result );
+ * struct tm *httplib_localtime_r( const time_t *clk, struct tm *result );
  *
  * The function localtime_s() returns a converted time to tm structure. This
  * function is not available on all operating systems and this version offers
  * a subsitute for use on Windows CE.
  */
 
-struct tm *httplib_localtime_r( const time_t *clock, struct tm *result ) {
+struct tm *httplib_localtime_r( const time_t *clk, struct tm *result ) {
 
 #if defined(_WIN32_WCE)
 
@@ -55,9 +55,9 @@ struct tm *httplib_localtime_r( const time_t *clock, struct tm *result ) {
 	SYSTEMTIME st;
 	TIME_ZONE_INFORMATION tzinfo;
 
-	if ( clock == NULL  ||  result == NULL ) return NULL;
+	if ( clk == NULL  ||  result == NULL ) return NULL;
 
-	*(int64_t *)&ft = ((int64_t)*clock) * RATE_DIFF + EPOCH_DIFF;
+	*(int64_t *)&ft = ((int64_t)*clk) * RATE_DIFF + EPOCH_DIFF;
 
 	FileTimeToLocalFileTime( & ft,  & lft );
 	FileTimeToSystemTime(    & lft, & st  );
@@ -81,12 +81,12 @@ struct tm *httplib_localtime_r( const time_t *clock, struct tm *result ) {
 
 #elif defined(_WIN32)
 
-	if ( localtime_s( result, clock ) == 0 ) return result;
+	if ( localtime_s( result, clk ) == 0 ) return result;
 	return NULL;
 
 #else
 
-	return localtime_r( clock, result );
+	return localtime_r( clk, result );
 
 #endif
 
