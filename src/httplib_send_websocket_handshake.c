@@ -29,6 +29,8 @@
 #include "httplib_string.h"
 #include "httplib_utils.h"
 
+#define B64_SHA_LEN	(sizeof(sha)*2)
+
 /*
  * int XX_httplib_send_websocket_handshake( struct httplib_connection *conn, const char *websock_key );
  *
@@ -44,7 +46,7 @@ int XX_httplib_send_websocket_handshake( struct httplib_connection *conn, const 
 	const char *protocol;
 	char buf[100];
 	char sha[20];
-	char b64_sha[sizeof(sha) * 2];
+	char b64_sha[B64_SHA_LEN];
 	SHA1_CTX sha_ctx;
 	int truncated;
 
@@ -65,7 +67,7 @@ int XX_httplib_send_websocket_handshake( struct httplib_connection *conn, const 
 	SHA1Update( & sha_ctx, (unsigned char *)buf, (uint32_t)strlen(buf) );
 	SHA1Final( (unsigned char *)sha, &sha_ctx );
 
-	XX_httplib_base64_encode( (unsigned char *)sha, sizeof(sha), b64_sha );
+	httplib_base64_encode( (unsigned char *)sha, sizeof(sha), b64_sha, B64_SHA_LEN );
 	httplib_printf( conn,
 	          "HTTP/1.1 101 Switching Protocols\r\n"
 	          "Upgrade: websocket\r\n"

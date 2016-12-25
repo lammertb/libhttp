@@ -986,6 +986,7 @@ LIBHTTP_API void *		XX_httplib_realloc_ex( void *memory, size_t newsize, const c
 
 LIBHTTP_API int			httplib_atomic_dec( volatile int *addr );
 LIBHTTP_API int			httplib_atomic_inc( volatile int *addr );
+LIBHTTP_API int			httplib_base64_encode( const unsigned char *src, int src_len, char *dst, int dst_len );
 LIBHTTP_API int			httplib_closedir( DIR *dir );
 LIBHTTP_API int			httplib_kill( pid_t pid, int sig_num );
 LIBHTTP_API int			httplib_mkdir( const char *path, int mode );
