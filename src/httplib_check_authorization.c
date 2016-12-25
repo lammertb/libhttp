@@ -37,7 +37,7 @@ bool XX_httplib_check_authorization( struct httplib_connection *conn, const char
 	const char *list;
 	struct file file = STRUCT_FILE_INITIALIZER;
 	bool authorized;
-	int truncated;
+	bool truncated;
 
 	if ( conn == NULL  ||  conn->ctx == NULL ) return false;
 

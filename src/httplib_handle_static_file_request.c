@@ -50,7 +50,7 @@ void XX_httplib_handle_static_file_request( struct httplib_connection *conn, con
 	int64_t r2;
 	struct vec mime_vec;
 	int n;
-	int truncated;
+	bool truncated;
 	char gz_path[PATH_MAX];
 	const char *encoding;
 	const char *cors1;

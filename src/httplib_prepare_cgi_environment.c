@@ -48,7 +48,7 @@ void XX_httplib_prepare_cgi_environment( struct httplib_connection *conn, const 
 	char src_addr[IP_ADDR_STR_LEN];
 	char http_var_name[128];
 	int i;
-	int truncated;
+	bool truncated;
 
 	if ( conn == NULL  ||  prog == NULL  ||  env == NULL ) return;
 
@@ -141,7 +141,7 @@ void XX_httplib_prepare_cgi_environment( struct httplib_connection *conn, const 
 
 	for (i=0; i<conn->request_info.num_headers; i++) {
 
-		XX_httplib_snprintf( conn, & truncated, http_var_name, sizeof(http_var_name), "HTTP_%s", conn->request_info.http_headers[i].name );
+		XX_httplib_snprintf( conn, &truncated, http_var_name, sizeof(http_var_name), "HTTP_%s", conn->request_info.http_headers[i].name );
 
 		if ( truncated ) {
 			httplib_cry( conn, "%s: HTTP header variable too long [%s]", __func__, conn->request_info.http_headers[i].name );

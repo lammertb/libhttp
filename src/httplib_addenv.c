@@ -45,7 +45,7 @@ void XX_httplib_addenv( struct cgi_environment *env, const char *fmt, ... ) {
 
 	size_t n;
 	size_t space;
-	int truncated;
+	bool truncated;
 	char *added;
 	va_list ap;
 

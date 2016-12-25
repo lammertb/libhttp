@@ -37,7 +37,7 @@ void XX_httplib_open_auth_file( struct httplib_connection *conn, const char *pat
 	const char *e;
 	const char *gpass;
 	struct file file = STRUCT_FILE_INITIALIZER;
-	int truncated;
+	bool truncated;
 
 	if ( conn == NULL  ||  conn->ctx == NULL ) return;
 

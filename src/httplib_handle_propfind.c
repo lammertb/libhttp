@@ -75,7 +75,7 @@ static void print_dav_dir_entry( struct de *de, void *data ) {
 
 	char href[PATH_MAX];
 	char href_encoded[PATH_MAX * 3 /* worst case */];
-	int truncated;
+	bool truncated;
 	struct httplib_connection *conn;
 
 	conn = data;

@@ -48,7 +48,7 @@ int XX_httplib_send_websocket_handshake( struct httplib_connection *conn, const 
 	char sha[20];
 	char b64_sha[B64_SHA_LEN];
 	SHA1_CTX sha_ctx;
-	int truncated;
+	bool truncated;
 
 	protocol = NULL;
 

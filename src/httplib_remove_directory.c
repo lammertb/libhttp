@@ -41,7 +41,7 @@ int XX_httplib_remove_directory( struct httplib_connection *conn, const char *di
 	struct dirent *dp;
 	DIR *dirp;
 	struct de de;
-	int truncated;
+	bool truncated;
 	int ok;
 
 	ok = 1;

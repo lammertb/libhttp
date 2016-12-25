@@ -39,9 +39,11 @@ static void do_ssi_include(struct httplib_connection *conn, const char *ssi, cha
 	char *p;
 	struct file file = STRUCT_FILE_INITIALIZER;
 	size_t len;
-	int truncated = 0;
+	bool truncated;
 
 	if ( conn == NULL ) return;
+
+	truncated = false;
 
 	/*
 	 * sscanf() is safe here, since send_ssi_file() also uses buffer

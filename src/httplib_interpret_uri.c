@@ -57,7 +57,7 @@ void XX_httplib_interpret_uri( struct httplib_connection *conn, char *filename, 
 	int match_len;
 	char gz_path[PATH_MAX];
 	char const *accept_encoding;
-	int truncated;
+	bool truncated;
 #if !defined(NO_CGI)
 	char *p;
 #endif  /* !NO_CGI */

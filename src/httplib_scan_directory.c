@@ -34,7 +34,7 @@ int XX_httplib_scan_directory( struct httplib_connection *conn, const char *dir,
 	struct dirent *dp;
 	DIR *dirp;
 	struct de de;
-	int truncated;
+	bool truncated;
 
 	dirp = httplib_opendir( dir );
 	if ( dirp == NULL ) return 0;

@@ -37,7 +37,7 @@ void XX_httplib_send_http_error( struct httplib_connection *conn, int status, co
 	int i;
 	int page_handler_found;
 	int scope;
-	int truncated;
+	bool truncated;
 	int has_body;
 	char date[64];
 	time_t curtime;

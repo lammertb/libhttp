@@ -45,7 +45,7 @@ void XX_httplib_handle_cgi_request( struct httplib_connection *conn, const char 
 	int headers_len;
 	int data_len;
 	int i;
-	int truncated;
+	bool truncated;
 	int fdin[2]  = {-1, -1};
 	int fdout[2] = {-1, -1};
 	int fderr[2] = {-1, -1};
