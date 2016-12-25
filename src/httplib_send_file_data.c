@@ -25,7 +25,9 @@
  * Release: 2.0
  */
 
+#if defined(__GNUC__)
 #include <sys/sendfile.h>
+#endif  /* __GNUC__ */
 #include "httplib_main.h"
 
 /*
