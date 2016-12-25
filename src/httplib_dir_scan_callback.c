@@ -50,7 +50,7 @@ void XX_httplib_dir_scan_callback( struct de *de, void *data ) {
 	}
 	
 	else {
-		dsd->entries[dsd->num_entries].file_name = XX_httplib_strdup( de->file_name );
+		dsd->entries[dsd->num_entries].file_name = httplib_strdup( de->file_name );
 		dsd->entries[dsd->num_entries].file      = de->file;
 		dsd->entries[dsd->num_entries].conn      = de->conn;
 		dsd->num_entries++;

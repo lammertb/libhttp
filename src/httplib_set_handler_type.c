@@ -145,7 +145,7 @@ void XX_httplib_set_handler_type( struct httplib_context *ctx, const char *uri, 
 		return;
 	}
 
-	tmp_rh->uri = XX_httplib_strdup( uri );
+	tmp_rh->uri = httplib_strdup( uri );
 
 	if ( tmp_rh->uri == NULL ) {
 

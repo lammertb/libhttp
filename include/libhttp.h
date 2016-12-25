@@ -1014,6 +1014,7 @@ LIBHTTP_API void		httplib_send_file( struct httplib_connection *conn, const char
 LIBHTTP_API void		httplib_set_alloc_callback_func( httplib_alloc_callback_func log_func );
 LIBHTTP_API int			httplib_strcasecmp( const char *s1, const char *s2 );
 LIBHTTP_API const char *	httplib_strcasestr( const char *big_str, const char *small_str );
+LIBHTTP_API char *		httplib_strdup( const char *str );
 LIBHTTP_API void		httplib_strlcpy( char *dst, const char *src, size_t len );
 LIBHTTP_API int			httplib_strncasecmp( const char *s1, const char *s2, size_t len );
 LIBHTTP_API char *		httplib_strndup( const char *str, size_t len );

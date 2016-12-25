@@ -163,7 +163,7 @@ struct httplib_context *httplib_start( const struct httplib_callbacks *callbacks
 			httplib_free( ctx->config[idx] );
 		}
 
-		ctx->config[idx] = XX_httplib_strdup( value );
+		ctx->config[idx] = httplib_strdup( value );
 	}
 
 	/*
@@ -173,7 +173,7 @@ struct httplib_context *httplib_start( const struct httplib_callbacks *callbacks
 	for (i=0; XX_httplib_config_options[i].name != NULL; i++) {
 
 		default_value = XX_httplib_config_options[i].default_value;
-		if ( ctx->config[i] == NULL  &&  default_value != NULL ) ctx->config[i] = XX_httplib_strdup( default_value );
+		if ( ctx->config[i] == NULL  &&  default_value != NULL ) ctx->config[i] = httplib_strdup( default_value );
 	}
 
 #if defined(NO_FILES)

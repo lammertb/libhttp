@@ -41,7 +41,7 @@ void XX_httplib_get_system_name( char **sysName ) {
 #if defined(_WIN32)
 #if defined(_WIN32_WCE)
 
-	*sysName = XX_httplib_strdup( "WinCE" );
+	*sysName = httplib_strdup( "WinCE" );
 
 #else  /* _WIN32_WCE */
 
@@ -70,7 +70,7 @@ void XX_httplib_get_system_name( char **sysName ) {
 	(void)dwBuild;
 
 	sprintf( name, "Windows %u.%u", (unsigned)dwMajorVersion, (unsigned)dwMinorVersion );
-	*sysName = XX_httplib_strdup( name );
+	*sysName = httplib_strdup( name );
 
 #endif  /* _WIN32_WCE */
 #else  /* _WIN32 */
@@ -79,7 +79,7 @@ void XX_httplib_get_system_name( char **sysName ) {
 
 	memset( & name, 0, sizeof(name) );
 	uname( & name );
-	*sysName = XX_httplib_strdup( name.sysname );
+	*sysName = httplib_strdup( name.sysname );
 
 #endif  /* _WIN32 */
 

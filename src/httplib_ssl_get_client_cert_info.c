@@ -108,10 +108,10 @@ void XX_httplib_ssl_get_client_cert_info( struct httplib_connection *conn ) {
 
 	if ( conn->request_info.client_cert ) {
 
-		conn->request_info.client_cert->subject = XX_httplib_strdup( str_subject );
-		conn->request_info.client_cert->issuer  = XX_httplib_strdup( str_issuer  );
-		conn->request_info.client_cert->serial  = XX_httplib_strdup( str_serial  );
-		conn->request_info.client_cert->finger  = XX_httplib_strdup( str_finger  );
+		conn->request_info.client_cert->subject = httplib_strdup( str_subject );
+		conn->request_info.client_cert->issuer  = httplib_strdup( str_issuer  );
+		conn->request_info.client_cert->serial  = httplib_strdup( str_serial  );
+		conn->request_info.client_cert->finger  = httplib_strdup( str_finger  );
 	}
 	
 	else {

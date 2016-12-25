@@ -141,7 +141,7 @@ int XX_httplib_parse_auth_header(struct httplib_connection *conn, char *buf, siz
 	 * CGI needs it as REMOTE_USER
 	 */
 
-	if ( ah->user != NULL ) conn->request_info.remote_user = XX_httplib_strdup( ah->user );
+	if ( ah->user != NULL ) conn->request_info.remote_user = httplib_strdup( ah->user );
        	else return 0;
 
 	return 1;

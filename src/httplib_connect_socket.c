@@ -93,7 +93,7 @@ int XX_httplib_connect_socket( struct httplib_context *ctx, const char *host, in
 		 */
 
 		size_t l = strlen(host+1);
-		char *h  = (l > 1) ? XX_httplib_strdup(host+1) : NULL;
+		char *h  = (l > 1) ? httplib_strdup(host+1) : NULL;
 
 		if ( h != NULL ) {
 
