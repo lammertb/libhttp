@@ -54,7 +54,8 @@ void XX_httplib_handle_cgi_request( struct httplib_connection *conn, const char 
 	const char *connection_state;
 	char *pbuf;
 	char dir[PATH_MAX];
-	char *p;
+	char *ptr;
+	const char *cptr;
 	struct httplib_request_info ri;
 	struct cgi_environment blk;
 	FILE *in;
@@ -90,11 +91,16 @@ void XX_httplib_handle_cgi_request( struct httplib_connection *conn, const char 
 		goto done;
 	}
 
-	if ( (p = strrchr(dir, '/')) != NULL ) *p++ = '\0';
+	if ( (ptr = strrchr(dir, '/')) != NULL ) {
+
+		*ptr++ = '\0';
+		cptr   = ptr;
+	}
 	
 	else {
-		dir[0] = '.', dir[1] = '\0';
-		p = (char *)prog;
+		dir[0] = '.';
+		dir[1] = '\0';
+		cptr   = prog;
 	}
 
 	if ( pipe(fdin) != 0  ||  pipe(fdout) != 0  ||  pipe(fderr) != 0 ) {
@@ -106,7 +112,7 @@ void XX_httplib_handle_cgi_request( struct httplib_connection *conn, const char 
 		goto done;
 	}
 
-	pid = XX_httplib_spawn_process( conn, p, blk.buf, blk.var, fdin, fdout, fderr, dir );
+	pid = XX_httplib_spawn_process( conn, cptr, blk.buf, blk.var, fdin, fdout, fderr, dir );
 
 	if ( pid == (pid_t)-1 ) {
 

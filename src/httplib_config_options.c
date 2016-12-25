@@ -88,4 +88,8 @@ struct httplib_option XX_httplib_config_options[] = {
  * compatible sizes
  */
 
-httplib_static_assert((sizeof(XX_httplib_config_options) / sizeof(XX_httplib_config_options[0])) == (NUM_OPTIONS + 1), "XX_httplib_config_options and enum not sync");
+/*
+ * TODO: LJB: Move to test functions
+ */
+
+// httplib_static_assert((sizeof(XX_httplib_config_options) / sizeof(XX_httplib_config_options[0])) == (NUM_OPTIONS + 1), "XX_httplib_config_options and enum not sync");

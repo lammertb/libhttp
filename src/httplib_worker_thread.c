@@ -71,6 +71,10 @@ static void *worker_thread_run( struct worker_thread_args *thread_args ) {
 	struct httplib_context *ctx = thread_args->ctx;
 	struct httplib_connection *conn;
 	struct httplib_workerTLS tls;
+	union {
+		const void *	con;
+		void *		var;
+	} ptr;
 
 	if ( thread_args == NULL ) return NULL;
 
@@ -159,11 +163,11 @@ static void *worker_thread_run( struct worker_thread_args *thread_args ) {
 
 					if ( conn->request_info.client_cert != NULL ) {
 
-						httplib_free( (void *)conn->request_info.client_cert->subject );
-						httplib_free( (void *)conn->request_info.client_cert->issuer  );
-						httplib_free( (void *)conn->request_info.client_cert->serial  );
-						httplib_free( (void *)conn->request_info.client_cert->finger  );
-						httplib_free( (void *)conn->request_info.client_cert          );
+						ptr.con = conn->request_info.client_cert->subject; httplib_free( ptr.var );
+						ptr.con = conn->request_info.client_cert->issuer;  httplib_free( ptr.var );
+						ptr.con = conn->request_info.client_cert->serial;  httplib_free( ptr.var );
+						ptr.con = conn->request_info.client_cert->finger;  httplib_free( ptr.var );
+						httplib_free( conn->request_info.client_cert );
 
 						conn->request_info.client_cert = NULL;
 					}

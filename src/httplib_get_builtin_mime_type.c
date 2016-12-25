@@ -589,7 +589,7 @@ const char *httplib_get_builtin_mime_type( const char *path ) {
 
 
 /*
- * const char *XX_httplib_builtin_mime_ext( int index );
+ * const char *XX_httplib_builtin_mime_ext( int idx );
  *
  * The function XX_httplib_builtin_mime_ext() returns the file extension of
  * a MIME type as stored in a specific location in the list with MIME types.
@@ -597,19 +597,19 @@ const char *httplib_get_builtin_mime_type( const char *path ) {
  * If the index is invalid, NULL is returned.
  */
 
-const char *XX_httplib_builtin_mime_ext( int index ) {
+const char *XX_httplib_builtin_mime_ext( int idx ) {
 
-	if ( index <  0              ) return NULL;
-	if ( index >= NUM_MIME_TYPES ) return NULL;
+	if ( idx <  0              ) return NULL;
+	if ( idx >= NUM_MIME_TYPES ) return NULL;
 
-	return builtin_mime_types[index].extension;
+	return builtin_mime_types[idx].extension;
 
 }  /* XX_httplib_builtin_mime_ext */
 
 
 
 /*
- * const char *XX_httplib_builtin_mime_type( int index );
+ * const char *XX_httplib_builtin_mime_type( int idx );
  *
  * The function XX_httplib_builtin_mime_type() returns the MIME type of of a
  * record stored in a specific location in the list with MIME types.
@@ -617,11 +617,11 @@ const char *XX_httplib_builtin_mime_ext( int index ) {
  * If the index is invalid, NULL is returned.
  */
 
-const char *XX_httplib_builtin_mime_type( int index ) {
+const char *XX_httplib_builtin_mime_type( int idx ) {
 
-	if ( index <  0              ) return NULL;
-	if ( index >= NUM_MIME_TYPES ) return NULL;
+	if ( idx <  0              ) return NULL;
+	if ( idx >= NUM_MIME_TYPES ) return NULL;
 
-	return builtin_mime_types[index].mime_type;
+	return builtin_mime_types[idx].mime_type;
 
 }  /* XX_httplib_builtin_mime_type */

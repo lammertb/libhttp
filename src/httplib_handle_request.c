@@ -59,6 +59,10 @@ void XX_httplib_handle_request( struct httplib_connection *conn ) {
 	void *callback_data;
 	httplib_authorization_handler auth_handler;
 	void *auth_callback_data;
+	union {
+		const char *	con;
+		char *		var;
+	} ptr;
 #if !defined(NO_FILES)
 	time_t curtime = time( NULL );
 	char date[64];
@@ -92,8 +96,9 @@ void XX_httplib_handle_request( struct httplib_connection *conn ) {
 	 * 1.1. split into url and query string
 	 */
 
-	conn->request_info.query_string = strchr( ri->request_uri, '?' );
-	if ( conn->request_info.query_string != NULL ) *((char *)conn->request_info.query_string++) = '\0';
+	ptr.var = strchr( ri->request_uri, '?' );
+	if ( ptr.var != NULL ) *(ptr.var++) = '\0';
+	conn->request_info.query_string = ptr.var;
 
 	/*
 	 * 1.2. do a https redirect, if required. Do not decode URIs yet.
@@ -124,14 +129,16 @@ void XX_httplib_handle_request( struct httplib_connection *conn ) {
 	 * 1.3. decode url (if config says so)
 	 */
 
-	if ( XX_httplib_should_decode_url( conn ) ) httplib_url_decode( ri->local_uri, uri_len, (char *)ri->local_uri, uri_len + 1, 0 );
+	ptr.con = ri->local_uri;
+	if ( XX_httplib_should_decode_url( conn ) ) httplib_url_decode( ptr.con, uri_len, ptr.var, uri_len + 1, 0 );
 
 	/*
 	 * 1.4. clean URIs, so a path like allowed_dir/../forbidden_file is
 	 * not possible
 	 */
 
-	XX_httplib_remove_double_dots_and_double_slashes( (char *)ri->local_uri );
+	ptr.con = ri->local_uri;
+	XX_httplib_remove_double_dots_and_double_slashes( ptr.var );
 
 	/*
 	 * step 1. completed, the url is known now

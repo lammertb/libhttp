@@ -47,7 +47,7 @@
 static int is_big_endian(void) {
 
 	static const int n = 1;
-	return ((char *)&n)[0] == 0;
+	return ((const char *)&n)[0] == 0;
 }
 
 

@@ -46,6 +46,10 @@ void XX_httplib_process_new_connection( struct httplib_connection *conn ) {
 	const char *hostend;
 	int reqerr;
 	int uri_type;
+	union {
+		const void *	con;
+		void *		var;
+	} ptr;
 
 	if ( conn == NULL  ||  conn->ctx == NULL ) return;
 
@@ -150,7 +154,8 @@ void XX_httplib_process_new_connection( struct httplib_connection *conn ) {
 
 		if ( ri->remote_user != NULL ) {
 
-			httplib_free( (void *) ri->remote_user );
+			ptr.con = ri->remote_user;
+			httplib_free( ptr.var );
 
 			/*
 			 * Important! When having connections with and without auth

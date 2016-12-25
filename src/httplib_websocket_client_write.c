@@ -87,7 +87,7 @@ static void mask_data( const char *in, size_t in_len, uint32_t masking_key, char
 
 		while ( i+3 < in_len ) {
 
-			*(uint32_t *)(void *)(out + i) = *(uint32_t *)(void *)(in + i) ^ masking_key;
+			*(uint32_t *)(void *)(out + i) = *(const uint32_t *)(const void *)(in + i) ^ masking_key;
 			i += 4;
 		}
 	}
@@ -99,7 +99,7 @@ static void mask_data( const char *in, size_t in_len, uint32_t masking_key, char
 
 		while ( i < in_len ) {
 
-			*(uint8_t *)(void *)(out + i) = *(uint8_t *)(void *)(in + i) ^ *(((uint8_t *)&masking_key) + (i % 4));
+			*(uint8_t *)(void *)(out + i) = *(const uint8_t *)(const void *)(in + i) ^ *(((uint8_t *)&masking_key) + (i % 4));
 			i++;
 		}
 	}

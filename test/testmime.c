@@ -40,7 +40,7 @@
 int main( void ) {
 
 	int a;
-	int index;
+	int idx;
 	int problems;
 	const char *p1;
 	const char *p2;
@@ -48,11 +48,11 @@ int main( void ) {
 
 	problems = 0;
 
-	p1    = XX_httplib_builtin_mime_ext( 0 );
-	index = 1;
+	p1  = XX_httplib_builtin_mime_ext( 0 );
+	idx = 1;
 	do {
 	
-		p2 = XX_httplib_builtin_mime_ext( index );
+		p2 = XX_httplib_builtin_mime_ext( idx );
 
 		if ( p1 == NULL  || p2 == NULL ) break;
 
@@ -62,7 +62,7 @@ int main( void ) {
 			problems++;
 		}
 
-		index++;
+		idx++;
 		p1 = p2;
 
 	} while ( p1 != NULL  &&  p2 != NULL );
@@ -70,7 +70,7 @@ int main( void ) {
 
 	printf( "Mime type of CSV: \"%s\"\n", httplib_get_builtin_mime_type( "car.CsV" ) );
 
-	for (a=0; a<index; a++) {
+	for (a=0; a<idx; a++) {
 
 		XX_httplib_snprintf( NULL, NULL, buffer, BUFLEN, "filename%s", XX_httplib_builtin_mime_ext( a ) );
 		p1 = XX_httplib_builtin_mime_type( a );

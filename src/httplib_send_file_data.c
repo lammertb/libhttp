@@ -25,6 +25,7 @@
  * Release: 2.0
  */
 
+#include <sys/sendfile.h>
 #include "httplib_main.h"
 
 /*

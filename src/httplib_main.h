@@ -98,9 +98,14 @@ char static_assert_replacement[1];
 #define httplib_static_assert(cond, txt) extern char static_assert_replacement[(cond) ? 1 : -1]
 #endif  /* _MSC_VER  &&  _MSC_VER >= 1600 */
 
-httplib_static_assert(sizeof(int) == 4 || sizeof(int) == 8, "int data type size check");
-httplib_static_assert(sizeof(void *) == 4 || sizeof(void *) == 8, "pointer data type size check");
-httplib_static_assert(sizeof(void *) >= sizeof(int), "data type size check");
+/*
+ * TODO: LJB: Following asserts should not be in this section but in the test routines
+ * because older GCC versions (4.4.7) throw errors on this
+ */
+
+// httplib_static_assert(sizeof(int) == 4 || sizeof(int) == 8, "int data type size check");
+// httplib_static_assert(sizeof(void *) == 4 || sizeof(void *) == 8, "pointer data type size check");
+// httplib_static_assert(sizeof(void *) >= sizeof(int), "data type size check");
 
 
 /* DTL -- including winsock2.h works better if lean and mean */
@@ -505,7 +510,11 @@ extern CRITICAL_SECTION			global_log_file_lock;
 #define MAX_CGI_ENVIR_VARS (256)
 #define MG_BUF_LEN (8192)
 
-httplib_static_assert(MAX_REQUEST_SIZE >= 256, "request size length must be a positive number");
+/*
+ * TODO: LJB: Move to test functions
+ */
+
+// httplib_static_assert(MAX_REQUEST_SIZE >= 256, "request size length must be a positive number");
 
 
 /* Describes listening socket, or socket which was accept()-ed by the master
@@ -742,10 +751,12 @@ typedef struct {
 	unsigned char buffer[64];
 } SHA1_CTX;
 
+/*
+ * TODO: LJB: Move to test functions
+ */
 
-
-httplib_static_assert(MAX_WORKER_THREADS >= 1, "worker threads must be a positive number");
-httplib_static_assert(sizeof(size_t) == 4 || sizeof(size_t) == 8, "size_t data type size check");
+// httplib_static_assert(MAX_WORKER_THREADS >= 1, "worker threads must be a positive number");
+// httplib_static_assert(sizeof(size_t) == 4 || sizeof(size_t) == 8, "size_t data type size check");
 
 /* va_copy should always be a macro, C99 and C++11 - DTL */
 #ifndef va_copy

@@ -37,10 +37,13 @@
 
 bool XX_httplib_read_auth_file( struct file *filep, struct read_auth_file_struct *workdata ) {
 
-	char *p;
 	int is_authorized;
 	struct file fp;
 	size_t l;
+	union {
+		const char *	con;
+		char *		var;
+	} ptr;
 
 	if ( filep == NULL  ||  workdata == NULL ) return false;
 
@@ -50,9 +53,9 @@ bool XX_httplib_read_auth_file( struct file *filep, struct read_auth_file_struct
 	 * Loop over passwords file
 	 */
 
-	p = (char *)filep->membuf;
+	ptr.con = filep->membuf;
 
-	while ( XX_httplib_fgets( workdata->buf, sizeof(workdata->buf), filep, &p ) != NULL ) {
+	while ( XX_httplib_fgets( workdata->buf, sizeof(workdata->buf), filep, &ptr.var ) != NULL ) {
 
 		l = strlen( workdata->buf );
 

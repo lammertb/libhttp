@@ -125,7 +125,7 @@ struct ssl_func {
 #define X509_get_serialNumber			(*(ASN1_INTEGER * (*)(X509 *))XX_httplib_crypto_sw[15].ptr)
 #define i2c_ASN1_INTEGER			(*(int (*)(ASN1_INTEGER *, unsigned char **))XX_httplib_crypto_sw[16].ptr)
 #define EVP_get_digestbyname			(*(const EVP_MD *(*)(const char *))XX_httplib_crypto_sw[17].ptr)
-#define ASN1_digest				(*(int (*)(int (*)(), const EVP_MD *, char *, unsigned char *, unsigned int *))XX_httplib_crypto_sw[18].ptr)
+#define ASN1_digest				(*(int (*)(int (*)(void), const EVP_MD *, char *, unsigned char *, unsigned int *))XX_httplib_crypto_sw[18].ptr)
 #define i2d_X509				(*(int (*)(X509 *, unsigned char **))XX_httplib_crypto_sw[19].ptr)
 
 #endif  /* NO_SSL_DL */
