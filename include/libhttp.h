@@ -839,8 +839,6 @@ LIBHTTP_API const char *	httplib_get_builtin_mime_type( const char *file_name );
 LIBHTTP_API const char *httplib_get_response_code_text(struct httplib_connection *conn, int response_code);
 
 
-/* Return LibHTTP version. */
-LIBHTTP_API const char *httplib_version(void);
 
 
 /* URL-decode input buffer into destination buffer.
@@ -1019,6 +1017,7 @@ LIBHTTP_API char *		httplib_strdup( const char *str );
 LIBHTTP_API void		httplib_strlcpy( char *dst, const char *src, size_t len );
 LIBHTTP_API int			httplib_strncasecmp( const char *s1, const char *s2, size_t len );
 LIBHTTP_API char *		httplib_strndup( const char *str, size_t len );
+LIBHTTP_API const char *	httplib_version( void );
 
 #ifdef __cplusplus
 }

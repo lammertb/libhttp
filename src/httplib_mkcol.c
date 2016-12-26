@@ -32,7 +32,8 @@
  * void XX_httplib_mkcol( struct httplib_connection *conn, const char *path );
  *
  * The function XX_httplib_mkcol() handles a MKCOL command from a remote
- * client.
+ * client. The MKCOL method is used to create a new collection resource at the
+ * location specificied by the request URI.
  */
 
 #if !defined(NO_FILES)

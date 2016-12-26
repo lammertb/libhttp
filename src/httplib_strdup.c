@@ -20,13 +20,9 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
- *
- * ============
- * Release: 2.0
  */
 
 #include "httplib_main.h"
-#include "httplib_string.h"
 
 /*
  * char *httplib_strdup( const char *str );
@@ -41,10 +37,10 @@
  * the returned value is NULL.
  */
 
-char *httplib_strdup( const char *str ) {
+LIBHTTP_API char *httplib_strdup( const char *str ) {
 
 	if ( str == NULL ) return NULL;
 
-	return httplib_strndup(str, strlen( str ) );
+	return httplib_strndup( str, strlen( str ) );
 
 }  /* httplib_strdup */

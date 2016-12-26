@@ -20,17 +20,13 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
- *
- * ============
- * Release: 2.0
  */
 
 #include "httplib_main.h"
 #include "httplib_memory.h"
-#include "httplib_string.h"
 
 /*
- * char *httplib_strndup( const char *ptr, size_t len );
+ * char *httplib_strndup( const char *str, size_t len );
  *
  * The function strndup() duplicates a string with a maximum given length to a
  * new string in a newly allocated block of memory. The function is equivalent
@@ -46,11 +42,16 @@
  * the duplicate.
  */
 
-LIBHTTP_API char *httplib_strndup( const char *ptr, size_t len ) {
+LIBHTTP_API char *httplib_strndup( const char *str, size_t len ) {
 
 	char *p;
 
-	if ( (p = httplib_malloc( len+1 )) != NULL ) httplib_strlcpy( p, ptr, len+1 );
+	if ( str == NULL ) return NULL;
+
+	p = httplib_malloc( len+1 );
+	if ( p == NULL ) return NULL;
+
+	httplib_strlcpy( p, str, len+1 );
 
 	return p;
 

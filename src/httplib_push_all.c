@@ -29,39 +29,43 @@
 #include "httplib_ssl.h"
 #include "httplib_utils.h"
 
-/*
- * static int push( struct httplib_context *ctx, FILE *fp, SOCKET sock, SSL *ssl, const char *buf, int len, double timeout );
- *
- * The function push() writes data to the I/O chanel, opened file descriptor,
- * socket or SSL descriptor. The function returns the number of bytes which
- * were actually written.
- */
-
-static int push( struct httplib_context *ctx, FILE *fp, SOCKET sock, SSL *ssl, const char *buf, int len, double timeout ) {
-
-	struct timespec start;
-	struct timespec now;
-	int n;
-	int err;
-
 #ifdef _WIN32
 	typedef int len_t;
 #else
 	typedef size_t len_t;
 #endif
 
+/*
+ * static int64_t push( struct httplib_context *ctx, FILE *fp, SOCKET sock, SSL *ssl, const char *buf, int64_t len, double timeout );
+ *
+ * The function push() writes data to the I/O channel, opened file descriptor,
+ * socket or SSL descriptor. The function returns the number of bytes which
+ * were actually written. A negative value is returned if an error is
+ * encountered.
+ *
+ * Although we specify the number of bytes in a 64 bit integer, the OS functins
+ * may not be able to handle that. We therefore cap the amount of bytes to
+ * write to the maximum integer and size_t value, whatever is the smallest. The
+ * function push() will be called automatically again if not all bytes have
+ * been written.
+ */
+
+static int64_t push( struct httplib_context *ctx, FILE *fp, SOCKET sock, SSL *ssl, const char *buf, int64_t len, double timeout ) {
+
+	struct timespec start;
+	struct timespec now;
+	int n;
+	int err;
+
 	if ( ctx == NULL ) return -1;
 #ifdef NO_SSL
 	if ( ssl != NULL ) return -1;
-#endif
+#endif  /* NO_SSL */
 
-	if ( timeout > 0 ) {
+	if ( len > (int64_t)SIZE_T_MAX ) len = SIZE_T_MAX;
+	if ( len > (int64_t)INT_MAX    ) len = INT_MAX;
 
-		memset( & start, 0, sizeof(start) );
-		memset( & now,   0, sizeof(now)   );
-
-		clock_gettime( CLOCK_MONOTONIC, &start );
-	}
+	if ( timeout > 0.0 ) clock_gettime( CLOCK_MONOTONIC, &start );
 
 	do {
 
@@ -84,7 +88,7 @@ static int push( struct httplib_context *ctx, FILE *fp, SOCKET sock, SSL *ssl, c
 		}
 		
 		else
-#endif
+#endif  /* NO_SSL */
 		if ( fp != NULL ) {
 
 			n = (int)fwrite( buf, 1, (size_t)len, fp );
@@ -113,14 +117,7 @@ static int push( struct httplib_context *ctx, FILE *fp, SOCKET sock, SSL *ssl, c
 
 		if ( ctx->stop_flag ) return -1;
 
-		if ( n > 0  ||  (n == 0 && len == 0) ) {
-
-			/*
-			 * some data has been read, or no data was requested
-			 */
-
-			return n;
-		}
+		if ( n > 0  ||  (n == 0 && len == 0) ) return n;
 
 		if ( n < 0 ) {
 
@@ -139,9 +136,9 @@ static int push( struct httplib_context *ctx, FILE *fp, SOCKET sock, SSL *ssl, c
 		 * ==> Fix the TODOs above first.
 		 */
 
-		if ( timeout > 0 ) clock_gettime( CLOCK_MONOTONIC, &now );
+		if ( timeout > 0.0 ) clock_gettime( CLOCK_MONOTONIC, &now );
 
-	} while ( timeout <= 0  ||  XX_httplib_difftimespec( &now, &start ) <= timeout );
+	} while ( timeout <= 0.0  ||  XX_httplib_difftimespec( &now, &start ) <= timeout );
 
 	return -1;
 
@@ -171,31 +168,18 @@ int64_t XX_httplib_push_all( struct httplib_context *ctx, FILE *fp, SOCKET sock,
 
 	while ( len > 0  &&  ctx->stop_flag == 0 ) {
 
-		n = push( ctx, fp, sock, ssl, buf + nwritten, (int)len, timeout );
+		n = push( ctx, fp, sock, ssl, buf + nwritten, len, timeout );
 
 		if ( n < 0 ) {
 
-			/*
-			 * Propagate the error
-			 */
-
-			if ( nwritten == 0 ) nwritten = n;
-			break;
+			if ( nwritten == 0 ) return n;
+			else                 return nwritten;
 		}
 		
-		else if ( n == 0 ) {
-
-			/*
-			 * No more data to write
-			 */
-
-			break;
-		}
+		if ( n == 0 ) return nwritten;
 		
-		else {
-			nwritten += n;
-			len      -= n;
-		}
+		nwritten += n;
+		len      -= n;
 	}
 
 	return nwritten;

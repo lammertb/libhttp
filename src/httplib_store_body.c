@@ -30,7 +30,9 @@
 /*
  * int64_t httplib_store_body( struct httplib_connection *conn, const char *path );
  *
- * The function httplib_store_body() stores in incoming body for future processing.
+ * The function httplib_store_body() stores in incoming body for future
+ * processing. The function returns the number of bytes actually read, or a
+ * negative number to indicate a failure.
  */
 
 int64_t httplib_store_body( struct httplib_connection *conn, const char *path ) {
@@ -59,6 +61,7 @@ int64_t httplib_store_body( struct httplib_connection *conn, const char *path ) 
 
 		return ret;
 	}
+
 	if ( ret != 1 ) {
 
 		/*
@@ -84,12 +87,7 @@ int64_t httplib_store_body( struct httplib_connection *conn, const char *path ) 
 		ret = httplib_read( conn, buf, sizeof(buf) );
 	}
 
-	/*
-	 * TODO: XX_httplib_fclose should return an error,
-	 * and every caller should check and handle it.
-	 */
-
-	if ( fclose(fi.fp) != 0 ) {
+	if ( XX_httplib_fclose( & fi ) != 0 ) {
 
 		XX_httplib_remove_bad_file( conn, path );
 		return -14;

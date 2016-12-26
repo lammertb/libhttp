@@ -20,13 +20,9 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
- *
- * ============
- * Release: 2.0
  */
 
 #include "httplib_main.h"
-#include "httplib_string.h"
 
 /*
  * void httplib_strlcpy( char *dst, const char *src, size_t len );
@@ -45,15 +41,15 @@
 
 LIBHTTP_API void httplib_strlcpy( char *dst, const char *src, size_t len ) {
 
-	if ( dst == NULL  ||  len == 0 )             return;
-	if ( src == NULL               ) { *dst = 0; return; }
+	if ( dst == NULL  ||  len == 0 )                return;
+	if ( src == NULL               ) { *dst = '\0'; return; }
 
-	while ( len > 1  &&  *src ) {
-
+	while ( len > 1  &&  *src != '\0' ) {
+		
 		*dst++ = *src++;
 		len--;
 	}
 
-	*dst = 0;
+	*dst = '\0';
 
 }  /* httplib_strlcpy */

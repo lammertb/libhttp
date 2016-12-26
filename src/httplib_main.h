@@ -613,37 +613,36 @@ struct httplib_context {
  * struct httplib_connection;
  */
 
-struct httplib_connection {
-	struct httplib_request_info request_info;
-	struct httplib_context *ctx;
-	SSL *ssl;				/* SSL descriptor									*/
-	SSL_CTX *client_ssl_ctx;		/* SSL context for client connections							*/
-	struct socket client;			/* Connected client									*/
-	time_t conn_birth_time;			/* Time (wall clock) when connection was established					*/
-	struct timespec req_time;		/* Time (since system start) when the request was received				*/
-	int64_t num_bytes_sent;			/* Total bytes sent to client								*/
-	int64_t content_len;			/* Content-Length header value								*/
-	int64_t consumed_content;		/* How many bytes of content have been read						*/
-	int is_chunked;				/* Transfer-Encoding is chunked: 0=no, 1=yes: data available, 2: all data read		*/
-	size_t chunk_remainder;			/* Unread data from the last chunk							*/
-	char *buf;				/* Buffer for received data								*/
-	char *path_info;			/* PATH_INFO part of the URL								*/
-
-	int must_close;				/* 1 if connection must be closed							*/
-	int in_error_handler;			/* 1 if in handler for user defined error pages						*/
-	int internal_error;			/* 1 if an error occured while processing the request					*/
-
-	int buf_size;				/* Buffer size										*/
-	int request_len;			/* Size of the request + headers in a buffer						*/
-	int data_len;				/* Total size of data in a buffer							*/
-	int status_code;			/* HTTP reply status code, e.g. 200							*/
-	int throttle;				/* Throttling, bytes/sec. <= 0 means no throttle					*/
-	time_t last_throttle_time;		/* Last time throttled data was sent							*/
-	int64_t last_throttle_bytes;		/* Bytes sent this second								*/
-	pthread_mutex_t mutex;			/* Used by httplib_(un)lock_connection to ensure atomic transmissions for websockets	*/
-
-	int thread_index;			/* Thread index within ctx								*/
-};
+								/****************************************************************************************/
+struct httplib_connection {					/*											*/
+	struct		httplib_request_info request_info;	/* The request info of the connection							*/
+	struct		httplib_context *ctx;			/* The LibHTTP context of the connection						*/
+	SSL *		ssl;					/* SSL descriptor									*/
+	SSL_CTX *	client_ssl_ctx;				/* SSL context for client connections							*/
+	struct		socket client;				/* Connected client									*/
+	time_t		conn_birth_time;			/* Time (wall clock) when connection was established					*/
+	struct		timespec req_time;			/* Time (since system start) when the request was received				*/
+	int64_t		num_bytes_sent;				/* Total bytes sent to client								*/
+	int64_t		content_len;				/* Content-Length header value								*/
+	int64_t		consumed_content;			/* How many bytes of content have been read						*/
+	int		is_chunked;				/* Transfer-Encoding is chunked: 0=no, 1=yes: data available, 2: all data read		*/
+	size_t		chunk_remainder;			/* Unread data from the last chunk							*/
+	char *		buf;					/* Buffer for received data								*/
+	char *		path_info;				/* PATH_INFO part of the URL								*/
+	int		must_close;				/* 1 if connection must be closed							*/
+	int		in_error_handler;			/* 1 if in handler for user defined error pages						*/
+	int		internal_error;				/* 1 if an error occured while processing the request					*/
+	int		buf_size;				/* Buffer size										*/
+	int		request_len;				/* Size of the request + headers in a buffer						*/
+	int		data_len;				/* Total size of data in a buffer							*/
+	int		status_code;				/* HTTP reply status code, e.g. 200							*/
+	time_t		last_throttle_time;			/* Last time throttled data was sent							*/
+	int64_t		throttle;				/* Throttling, bytes/sec. <= 0 means no throttle					*/
+	int64_t		last_throttle_bytes;			/* Bytes sent this second								*/
+	pthread_mutex_t	mutex;					/* Used by httplib_(un)lock_connection to ensure atomic transmissions for websockets	*/
+	int		thread_index;				/* Thread index within ctx								*/
+};								/*											*/
+								/****************************************************************************************/
 
 struct worker_thread_args {
 	struct httplib_context *ctx;
@@ -673,7 +672,7 @@ struct file {
 	int gzipped; /* set to 1 if the content is gzipped in which case we need a content-encoding: gzip header */
 };
 
-#define STRUCT_FILE_INITIALIZER    { (uint64_t)0, (time_t)0, (FILE *)NULL, (const char *)NULL, 0, 0 } 
+#define STRUCT_FILE_INITIALIZER    { (uint64_t)0, (time_t)0, NULL, NULL, 0, 0 } 
 
 /* Describes a string (chunk of memory). */
 struct vec {
@@ -805,7 +804,7 @@ void			XX_httplib_delete_file( struct httplib_connection *conn, const char *path
 void			XX_httplib_dir_scan_callback( struct de *de, void *data );
 void			XX_httplib_discard_unread_request_data( struct httplib_connection *conn );
 struct httplib_connection *	XX_httplib_fc( struct httplib_context *ctx );
-void			XX_httplib_fclose( struct file *filep );
+int			XX_httplib_fclose( struct file *filep );
 void			XX_httplib_fclose_on_exec( struct file *filep, struct httplib_connection *conn );
 const char *		XX_httplib_fgets( char *buf, size_t size, struct file *filep, char **p );
 bool			XX_httplib_fopen( const struct httplib_connection *conn, const char *path, const char *mode, struct file *filep );

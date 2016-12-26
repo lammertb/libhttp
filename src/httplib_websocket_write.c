@@ -30,7 +30,8 @@
 /*
  * int httplib_websocket_write( struct httplib_connection *conn, int opcode, const char *data, size_t dataLen );
  *
- * The function httplib_websocket_write() writes data over a websocket connection.
+ * The function httplib_websocket_write() writes data over a websocket
+ * connection.
  */
 
 #if defined(USE_WEBSOCKET)

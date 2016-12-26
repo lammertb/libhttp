@@ -58,7 +58,7 @@ int XX_httplib_stat( struct httplib_connection *conn, const char *path, struct f
 
 	memset( filep, 0, sizeof(*filep) );
 
-	if ( conn  &&  XX_httplib_is_file_in_memory( conn, path, filep ) ) {
+	if ( conn != NULL  &&  XX_httplib_is_file_in_memory( conn, path, filep ) ) {
 
 		/*
 		 * filep->is_directory = 0; filep->gzipped = 0; .. already done by

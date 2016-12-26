@@ -20,19 +20,21 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
- *
- * ============
- * Release: 2.0
  */
 
 #include "httplib_main.h"
 
 /*
- * The function httplib_write() writes a number of characters over a
- * connection. The amount of characters written is returned. If an error occurs
+ * The function httplib_write() writes a number of bytes over a connection.
+ * The amount of characters written is returned. If an error occurs
  * the value 0 is returned.
  *
- * The function uses throtteling when necessary for a connection.
+ * The function uses throtteling when necessary for a connection. Throtteling
+ * uses the wall clock. Although this can be dangerous in some situations where
+ * the value of the wall clock is changed externally, it isn't in this case
+ * because the throttle function only looks when the time calue changes, but
+ * doesn't take the actual value of the clock in the calculation. In the latter
+ * case a monotonic clock with guaranteed increase would be a better choice.
  */
 
 int httplib_write( struct httplib_connection *conn, const void *buffie, size_t lennie ) {
@@ -47,7 +49,7 @@ int httplib_write( struct httplib_connection *conn, const void *buffie, size_t l
 	if ( conn == NULL  ||  buffie == NULL  ||  lennie == 0 ) return 0;
 
 	buf = buffie;
-	len = (int64_t)lennie;
+	len = lennie;
 
 	if ( conn->throttle > 0 ) {
 

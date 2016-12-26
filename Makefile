@@ -1281,12 +1281,10 @@ ${OBJDIR}httplib_strcasestr${OBJEXT}					: ${SRCDIR}httplib_strcasestr.c					\
 									  ${INCDIR}libhttp.h
 
 ${OBJDIR}httplib_strdup${OBJEXT}					: ${SRCDIR}httplib_strdup.c					\
-									  ${SRCDIR}httplib_string.h					\
 									  ${SRCDIR}httplib_main.h					\
 									  ${INCDIR}libhttp.h
 
 ${OBJDIR}httplib_strlcpy${OBJEXT}					: ${SRCDIR}httplib_strlcpy.c					\
-									  ${SRCDIR}httplib_string.h					\
 									  ${SRCDIR}httplib_main.h					\
 									  ${INCDIR}libhttp.h
 
@@ -1297,7 +1295,6 @@ ${OBJDIR}httplib_strncasecmp${OBJEXT}					: ${SRCDIR}httplib_strncasecmp.c				\
 
 ${OBJDIR}httplib_strndup${OBJEXT}					: ${SRCDIR}httplib_strndup.c					\
 									  ${SRCDIR}httplib_memory.h					\
-									  ${SRCDIR}httplib_string.h					\
 									  ${SRCDIR}httplib_main.h					\
 									  ${INCDIR}libhttp.h
 
