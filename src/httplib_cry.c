@@ -29,13 +29,13 @@
 #include "httplib_ssl.h"
 
 /*
- * void httplib_cry( const struct httplib_connection *conn, const char *fmt, ... );
+ * void httplib_cry( const struct httplib_context *ctx, const struct httplib_connection *conn, const char *fmt, ... );
  *
  * The function httplib_cry() prints a formatted error message to the opened
  * error log stream.
  */
 
-void httplib_cry( const struct httplib_connection *conn, const char *fmt, ... ) {
+void httplib_cry( const struct httplib_context *ctx, const struct httplib_connection *conn, const char *fmt, ... ) {
 
 	char buf[MG_BUF_LEN];
 	char src_addr[IP_ADDR_STR_LEN];
@@ -48,7 +48,7 @@ void httplib_cry( const struct httplib_connection *conn, const char *fmt, ... ) 
 	va_end( ap );
 	buf[sizeof(buf)-1] = 0;
 
-	if ( conn == NULL  ||  conn->ctx == NULL ) return;
+	if ( conn == NULL  ||  ctx == NULL ) return;
 
 	/*
 	 * Do not lock when getting the callback value, here and below.
@@ -56,11 +56,11 @@ void httplib_cry( const struct httplib_connection *conn, const char *fmt, ... ) 
 	 * same way string option can.
 	 */
 
-	if ( conn->ctx->callbacks.log_message == NULL  ||  conn->ctx->callbacks.log_message( conn, buf ) == 0 ) {
+	if ( ctx->callbacks.log_message == NULL  ||  ctx->callbacks.log_message( conn, buf ) == 0 ) {
 
-		if ( conn->ctx->cfg[ERROR_LOG_FILE] != NULL ) {
+		if ( ctx->cfg[ERROR_LOG_FILE] != NULL ) {
 
-			if ( XX_httplib_fopen( conn, conn->ctx->cfg[ERROR_LOG_FILE], "a+", &fi ) == 0 ) fi.fp = NULL;
+			if ( XX_httplib_fopen( conn, ctx->cfg[ERROR_LOG_FILE], "a+", &fi ) == 0 ) fi.fp = NULL;
 		}
 		
 		else fi.fp = NULL;

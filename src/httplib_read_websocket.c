@@ -140,7 +140,7 @@ void XX_httplib_read_websocket( struct httplib_connection *conn, httplib_websock
 					 * connection
 					 */
 
-					httplib_cry( conn, "websocket out of memory; closing connection" );
+					httplib_cry( conn->ctx, conn, "websocket out of memory; closing connection" );
 					break;
 				}
 			}
@@ -185,7 +185,7 @@ void XX_httplib_read_websocket( struct httplib_connection *conn, httplib_websock
 				
 				if (error) {
 
-					httplib_cry(conn, "Websocket pull failed; closing connection");
+					httplib_cry( conn->ctx, conn, "Websocket pull failed; closing connection" );
 					break;
 				}
 

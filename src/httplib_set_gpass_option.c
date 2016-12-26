@@ -43,9 +43,9 @@ int XX_httplib_set_gpass_option( struct httplib_context *ctx ) {
 
 	path = ctx->cfg[GLOBAL_PASSWORDS_FILE];
 
-	if ( path != NULL  &&  ! XX_httplib_stat( XX_httplib_fc(ctx), path, &file ) ) {
+	if ( path != NULL  &&  ! XX_httplib_stat( NULL, path, &file ) ) {
 
-		httplib_cry( XX_httplib_fc(ctx), "Cannot open %s: %s", path, strerror(ERRNO) );
+		httplib_cry( ctx, NULL, "Cannot open %s: %s", path, strerror(ERRNO) );
 		return 0;
 	}
 	return 1;

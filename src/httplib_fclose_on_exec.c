@@ -36,7 +36,7 @@ void XX_httplib_fclose_on_exec( struct file *filep, struct httplib_connection *c
 #else
 	if ( fcntl( fileno( filep->fp ), F_SETFD, FD_CLOEXEC) != 0 ) {
 
-		httplib_cry( conn, "%s: fcntl(F_SETFD FD_CLOEXEC) failed: %s", __func__, strerror(ERRNO) );
+		if ( conn != NULL  &&  conn->ctx != NULL ) httplib_cry( conn->ctx, conn, "%s: fcntl(F_SETFD FD_CLOEXEC) failed: %s", __func__, strerror(ERRNO) );
 	}
 #endif
 

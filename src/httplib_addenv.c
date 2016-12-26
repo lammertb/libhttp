@@ -36,6 +36,10 @@
  * a CGI script is called. The environment variable has the form
  * VARIABLE=VALUE\0 an is appended to the buffer. This function assumes that
  * env != NULL and also fmt != NULL.
+ *
+ * The function assumes that a connection must be present, otherwise calling a
+ * CGI script has not much value. Therefore the function will return directly
+ * if no connection, or no server context is known.
  */
 
 #if !defined(NO_CGI)
@@ -47,6 +51,8 @@ void XX_httplib_addenv( struct cgi_environment *env, const char *fmt, ... ) {
 	bool truncated;
 	char *added;
 	va_list ap;
+
+	if ( env == NULL  ||  env->conn == NULL  ||  env->conn->ctx == NULL ) return;
 
 	/*
 	 * Calculate how much space is left in the buffer
@@ -73,7 +79,7 @@ void XX_httplib_addenv( struct cgi_environment *env, const char *fmt, ... ) {
 				 * Out of memory
 				 */
 
-				httplib_cry( env->conn, "%s: Cannot allocate memory for CGI variable [%s]", __func__, fmt );
+				httplib_cry( env->conn->ctx, env->conn, "%s: Cannot allocate memory for CGI variable [%s]", __func__, fmt );
 				return;
 			}
 
@@ -127,7 +133,7 @@ void XX_httplib_addenv( struct cgi_environment *env, const char *fmt, ... ) {
 
 	if ( space < 2 ) {
 
-		httplib_cry( env->conn, "%s: Cannot register CGI variable [%s]", __func__, fmt );
+		httplib_cry( env->conn->ctx, env->conn, "%s: Cannot register CGI variable [%s]", __func__, fmt );
 		return;
 	}
 

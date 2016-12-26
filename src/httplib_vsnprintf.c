@@ -60,7 +60,7 @@ void XX_httplib_vsnprintf( const struct httplib_connection *conn, bool *truncate
 
 	else {
 		if ( truncated != NULL ) *truncated = true;
-		httplib_cry( conn, "truncating vsnprintf buffer: [%.*s]", (int)((buflen > 200) ? 200 : (buflen - 1)), buf );
+		if ( conn != NULL  &&  conn->ctx != NULL ) httplib_cry( conn->ctx, conn, "truncating vsnprintf buffer: [%.*s]", (int)((buflen > 200) ? 200 : (buflen - 1)), buf );
 		n = (int)buflen - 1;
 	}
 	buf[n] = '\0';

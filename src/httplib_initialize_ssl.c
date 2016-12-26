@@ -78,7 +78,7 @@ int XX_httplib_initialize_ssl( struct httplib_context *ctx ) {
 
 	if ( (XX_httplib_ssl_mutexes = httplib_malloc( size )) == NULL ) {
 
-		httplib_cry( XX_httplib_fc(ctx), "%s: cannot allocate mutexes: %s", __func__, XX_httplib_ssl_error() );
+		httplib_cry( ctx, NULL, "%s: cannot allocate mutexes: %s", __func__, XX_httplib_ssl_error() );
 		return 0;
 	}
 

@@ -799,7 +799,6 @@ int			XX_httplib_consume_socket( struct httplib_context *ctx, struct socket *sp,
 void			XX_httplib_delete_file( struct httplib_connection *conn, const char *path );
 void			XX_httplib_dir_scan_callback( struct de *de, void *data );
 void			XX_httplib_discard_unread_request_data( struct httplib_connection *conn );
-struct httplib_connection *	XX_httplib_fc( struct httplib_context *ctx );
 int			XX_httplib_fclose( struct file *filep );
 void			XX_httplib_fclose_on_exec( struct file *filep, struct httplib_connection *conn );
 const char *		XX_httplib_fgets( char *buf, size_t size, struct file *filep, char **p );
@@ -877,7 +876,7 @@ void			XX_httplib_send_options( struct httplib_connection *conn );
 int			XX_httplib_send_static_cache_header( struct httplib_connection *conn );
 int			XX_httplib_send_websocket_handshake( struct httplib_connection *conn, const char *websock_key );
 int			XX_httplib_set_acl_option( struct httplib_context *ctx );
-void			XX_httplib_set_close_on_exec( SOCKET sock, struct httplib_connection *conn );
+void			XX_httplib_set_close_on_exec( SOCKET sock, const struct httplib_context *ctx );
 int			XX_httplib_set_gpass_option( struct httplib_context *ctx );
 void			XX_httplib_set_handler_type( struct httplib_context *ctx, const char *uri, int handler_type, int is_delete_request, httplib_request_handler handler, httplib_websocket_connect_handler connect_handler, httplib_websocket_ready_handler ready_handler, httplib_websocket_data_handler data_handler, httplib_websocket_close_handler close_handler, httplib_authorization_handler auth_handler, void *cbdata );
 int			XX_httplib_set_non_blocking_mode( SOCKET sock );

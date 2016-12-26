@@ -54,7 +54,7 @@ void XX_httplib_accept_new_connection( const struct socket *listener, struct htt
 	if ( ! XX_httplib_check_acl( ctx, ntohl(*(uint32_t *)&so.rsa.sin.sin_addr )) ) {
 
 		XX_httplib_sockaddr_to_string( src_addr, sizeof(src_addr), &so.rsa );
-		httplib_cry( XX_httplib_fc(ctx), "%s: %s is not allowed to connect", __func__, src_addr );
+		httplib_cry( ctx, NULL, "%s: %s is not allowed to connect", __func__, src_addr );
 		closesocket( so.sock );
 		so.sock = INVALID_SOCKET;
 	}
@@ -64,14 +64,14 @@ void XX_httplib_accept_new_connection( const struct socket *listener, struct htt
 		 * Put so socket structure into the queue
 		 */
 
-		XX_httplib_set_close_on_exec( so.sock, XX_httplib_fc(ctx) );
+		XX_httplib_set_close_on_exec( so.sock, ctx );
 
 		so.has_ssl   = listener->has_ssl;
 		so.has_redir = listener->has_redir;
 
 		if ( getsockname( so.sock, &so.lsa.sa, &len ) != 0 ) {
 
-			httplib_cry( XX_httplib_fc(ctx), "%s: getsockname() failed: %s", __func__, strerror(ERRNO) );
+			httplib_cry( ctx, NULL, "%s: getsockname() failed: %s", __func__, strerror(ERRNO) );
 		}
 
 		/*
@@ -85,7 +85,7 @@ void XX_httplib_accept_new_connection( const struct socket *listener, struct htt
 
 		if ( setsockopt( so.sock, SOL_SOCKET, SO_KEEPALIVE, (SOCK_OPT_TYPE)&on, sizeof(on) ) != 0 ) {
 
-			httplib_cry( XX_httplib_fc(ctx), "%s: setsockopt(SOL_SOCKET SO_KEEPALIVE) failed: %s", __func__, strerror(ERRNO) );
+			httplib_cry( ctx, NULL, "%s: setsockopt(SOL_SOCKET SO_KEEPALIVE) failed: %s", __func__, strerror(ERRNO) );
 		}
 
 		/*
@@ -101,7 +101,7 @@ void XX_httplib_accept_new_connection( const struct socket *listener, struct htt
 
 			if ( XX_httplib_set_tcp_nodelay( so.sock, 1 ) != 0 ) {
 
-				httplib_cry( XX_httplib_fc(ctx), "%s: setsockopt(IPPROTO_TCP TCP_NODELAY) failed: %s", __func__, strerror(ERRNO) );
+				httplib_cry( ctx, NULL, "%s: setsockopt(IPPROTO_TCP TCP_NODELAY) failed: %s", __func__, strerror(ERRNO) );
 			}
 		}
 

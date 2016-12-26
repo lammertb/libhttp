@@ -121,7 +121,7 @@ int XX_httplib_connect_socket( struct httplib_context *ctx, const char *host, in
 		return 0;
 	}
 
-	XX_httplib_set_close_on_exec( *sock, XX_httplib_fc(ctx) );
+	XX_httplib_set_close_on_exec( *sock, ctx );
 
 	if ( ip_ver == 4  &&  connect( *sock, (struct sockaddr *)&sa->sin,  sizeof(sa->sin)  ) == 0 ) return 1;
 	if ( ip_ver == 6  &&  connect( *sock, (struct sockaddr *)&sa->sin6, sizeof(sa->sin6) ) == 0 ) return 1;

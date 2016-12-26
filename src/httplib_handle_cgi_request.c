@@ -63,7 +63,7 @@ void XX_httplib_handle_cgi_request( struct httplib_connection *conn, const char 
 	struct file fout = STRUCT_FILE_INITIALIZER;
 	pid_t pid = (pid_t)-1;
 
-	if ( conn == NULL ) return;
+	if ( conn == NULL  ||  conn->ctx == NULL ) return;
 
 	in     = NULL;
 	out    = NULL;
@@ -84,7 +84,7 @@ void XX_httplib_handle_cgi_request( struct httplib_connection *conn, const char 
 
 	if ( truncated ) {
 		
-		httplib_cry( conn, "Error: CGI program \"%s\": Path too long", prog );
+		httplib_cry( conn->ctx, conn, "Error: CGI program \"%s\": Path too long", prog );
 		XX_httplib_send_http_error( conn, 500, "Error: %s", "CGI path too long" );
 
 		goto done;
@@ -105,7 +105,7 @@ void XX_httplib_handle_cgi_request( struct httplib_connection *conn, const char 
 	if ( pipe(fdin) != 0  ||  pipe(fdout) != 0  ||  pipe(fderr) != 0 ) {
 
 		status = strerror( ERRNO );
-		httplib_cry( conn, "Error: CGI program \"%s\": Can not create CGI pipes: %s", prog, status );
+		httplib_cry( conn->ctx, conn, "Error: CGI program \"%s\": Can not create CGI pipes: %s", prog, status );
 		XX_httplib_send_http_error( conn, 500, "Error: Cannot create CGI pipe: %s", status );
 
 		goto done;
@@ -116,7 +116,7 @@ void XX_httplib_handle_cgi_request( struct httplib_connection *conn, const char 
 	if ( pid == (pid_t)-1 ) {
 
 		status = strerror(ERRNO);
-		httplib_cry( conn, "Error: CGI program \"%s\": Can not spawn CGI process: %s", prog, status );
+		httplib_cry( conn->ctx, conn, "Error: CGI program \"%s\": Can not spawn CGI process: %s", prog, status );
 		XX_httplib_send_http_error( conn, 500, "Error: Cannot spawn CGI process [%s]: %s", prog, status );
 
 		goto done;
@@ -126,12 +126,12 @@ void XX_httplib_handle_cgi_request( struct httplib_connection *conn, const char 
 	 * Make sure child closes all pipe descriptors. It must dup them to 0,1
 	 */
 
-	XX_httplib_set_close_on_exec( (SOCKET)fdin[0],  conn );		/* stdin read		*/
-	XX_httplib_set_close_on_exec( (SOCKET)fdout[1], conn );		/* stdout write		*/
-	XX_httplib_set_close_on_exec( (SOCKET)fderr[1], conn );		/* stderr write		*/
-	XX_httplib_set_close_on_exec( (SOCKET)fdin[1],  conn );		/* stdin write		*/
-	XX_httplib_set_close_on_exec( (SOCKET)fdout[0], conn );		/* stdout read		*/
-	XX_httplib_set_close_on_exec( (SOCKET)fderr[0], conn );		/* stderr read		*/
+	XX_httplib_set_close_on_exec( (SOCKET)fdin[0],  conn->ctx );		/* stdin read		*/
+	XX_httplib_set_close_on_exec( (SOCKET)fdout[1], conn->ctx );		/* stdout write		*/
+	XX_httplib_set_close_on_exec( (SOCKET)fderr[1], conn->ctx );		/* stderr write		*/
+	XX_httplib_set_close_on_exec( (SOCKET)fdin[1],  conn->ctx );		/* stdin write		*/
+	XX_httplib_set_close_on_exec( (SOCKET)fdout[0], conn->ctx );		/* stdout read		*/
+	XX_httplib_set_close_on_exec( (SOCKET)fderr[0], conn->ctx );		/* stderr read		*/
 
 	/*
 	 * Parent closes only one side of the pipes.
@@ -151,7 +151,7 @@ void XX_httplib_handle_cgi_request( struct httplib_connection *conn, const char 
 	if ( (in = fdopen( fdin[1], "wb" )) == NULL ) {
 
 		status = strerror(ERRNO);
-		httplib_cry( conn, "Error: CGI program \"%s\": Can not open stdin: %s", prog, status );
+		httplib_cry( conn->ctx, conn, "Error: CGI program \"%s\": Can not open stdin: %s", prog, status );
 		XX_httplib_send_http_error( conn, 500, "Error: CGI can not open fdin\nfopen: %s", status );
 
 		goto done;
@@ -160,7 +160,7 @@ void XX_httplib_handle_cgi_request( struct httplib_connection *conn, const char 
 	if ( (out = fdopen( fdout[0], "rb" )) == NULL ) {
 
 		status = strerror(ERRNO);
-		httplib_cry( conn, "Error: CGI program \"%s\": Can not open stdout: %s", prog, status );
+		httplib_cry( conn->ctx, conn, "Error: CGI program \"%s\": Can not open stdout: %s", prog, status );
 		XX_httplib_send_http_error( conn, 500, "Error: CGI can not open fdout\nfopen: %s", status );
 
 		goto done;
@@ -169,7 +169,7 @@ void XX_httplib_handle_cgi_request( struct httplib_connection *conn, const char 
 	if ( (err = fdopen( fderr[0], "rb" )) == NULL ) {
 
 		status = strerror(ERRNO);
-		httplib_cry( conn, "Error: CGI program \"%s\": Can not open stderr: %s", prog, status );
+		httplib_cry( conn->ctx, conn, "Error: CGI program \"%s\": Can not open stderr: %s", prog, status );
 		XX_httplib_send_http_error( conn, 500, "Error: CGI can not open fdout\nfopen: %s", status );
 
 		goto done;
@@ -193,7 +193,7 @@ void XX_httplib_handle_cgi_request( struct httplib_connection *conn, const char 
 			 * Error sending the body data
 			 */
 
-			httplib_cry( conn, "Error: CGI program \"%s\": Forward body data failed", prog );
+			httplib_cry( conn->ctx, conn, "Error: CGI program \"%s\": Forward body data failed", prog );
 
 			goto done;
 		}
@@ -221,7 +221,7 @@ void XX_httplib_handle_cgi_request( struct httplib_connection *conn, const char 
 	if ( buf == NULL ) {
 
 		XX_httplib_send_http_error( conn, 500, "Error: Not enough memory for CGI buffer (%u bytes)", (unsigned int)buflen );
-		httplib_cry( conn, "Error: CGI program \"%s\": Not enough memory for buffer (%u " "bytes)", prog, (unsigned int)buflen );
+		httplib_cry( conn->ctx, conn, "Error: CGI program \"%s\": Not enough memory for buffer (%u " "bytes)", prog, (unsigned int)buflen );
 
 		goto done;
 	}
@@ -238,12 +238,12 @@ void XX_httplib_handle_cgi_request( struct httplib_connection *conn, const char 
 
 		if ( i > 0 ) {
 
-			httplib_cry( conn, "Error: CGI program \"%s\" sent error " "message: [%.*s]", prog, i, buf );
+			httplib_cry( conn->ctx, conn, "Error: CGI program \"%s\" sent error " "message: [%.*s]", prog, i, buf );
 			XX_httplib_send_http_error( conn, 500, "Error: CGI program \"%s\" sent error " "message: [%.*s]", prog, i, buf );
 		}
 		
 		else {
-			httplib_cry( conn, "Error: CGI program sent malformed or too big " "(>%u bytes) HTTP headers: [%.*s]", (unsigned)buflen, data_len, buf );
+			httplib_cry( conn->ctx, conn, "Error: CGI program sent malformed or too big " "(>%u bytes) HTTP headers: [%.*s]", (unsigned)buflen, data_len, buf );
 
 			XX_httplib_send_http_error( conn,
 			                500,

@@ -199,7 +199,6 @@ OBJLIST =									\
 	${OBJDIR}httplib_discard_unread_request_data${OBJEXT}			\
 	${OBJDIR}httplib_download${OBJEXT}					\
 	${OBJDIR}httplib_event_queue${OBJEXT}					\
-	${OBJDIR}httplib_fc${OBJEXT}						\
 	${OBJDIR}httplib_fclose${OBJEXT}					\
 	${OBJDIR}httplib_fclose_on_exec${OBJEXT}				\
 	${OBJDIR}httplib_fgets${OBJEXT}						\
@@ -557,10 +556,6 @@ ${OBJDIR}httplib_download${OBJEXT}					: ${SRCDIR}httplib_download.c					\
 									  ${INCDIR}libhttp.h
 
 ${OBJDIR}httplib_event_queue${OBJEXT}					: ${SRCDIR}httplib_event_queue.c				\
-									  ${SRCDIR}httplib_main.h					\
-									  ${INCDIR}libhttp.h
-
-${OBJDIR}httplib_fc${OBJEXT}						: ${SRCDIR}httplib_fc.c						\
 									  ${SRCDIR}httplib_main.h					\
 									  ${INCDIR}libhttp.h
 

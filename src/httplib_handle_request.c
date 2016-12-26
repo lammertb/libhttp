@@ -118,7 +118,7 @@ void XX_httplib_handle_request( struct httplib_connection *conn ) {
 			 */
 
 			XX_httplib_send_http_error( conn, 503, "%s", "Error: SSL forward not configured properly" );
-			httplib_cry( conn, "Can not redirect to SSL, no SSL port available" );
+			httplib_cry( conn->ctx, conn, "Can not redirect to SSL, no SSL port available" );
 		}
 
 		return;

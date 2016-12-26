@@ -55,10 +55,10 @@ bool XX_httplib_set_uid_option( struct httplib_context *ctx ) {
 
 	if ( uid == NULL ) return true;
 
-	if      ( (pw = getpwnam(uid)) == NULL ) httplib_cry( XX_httplib_fc(ctx), "%s: unknown user [%s]", __func__, uid                  );
-	else if ( setgid(pw->pw_gid)   == -1   ) httplib_cry( XX_httplib_fc(ctx), "%s: setgid(%s): %s",    __func__, uid, strerror(errno) );
-	else if ( setgroups(0, NULL)           ) httplib_cry( XX_httplib_fc(ctx), "%s: setgroups(): %s",   __func__,      strerror(errno) );
-	else if ( setuid(pw->pw_uid)   == -1   ) httplib_cry( XX_httplib_fc(ctx), "%s: setuid(%s): %s",    __func__, uid, strerror(errno) );
+	if      ( (pw = getpwnam(uid)) == NULL ) httplib_cry( ctx, NULL, "%s: unknown user [%s]", __func__, uid                  );
+	else if ( setgid(pw->pw_gid)   == -1   ) httplib_cry( ctx, NULL, "%s: setgid(%s): %s",    __func__, uid, strerror(errno) );
+	else if ( setgroups(0, NULL)           ) httplib_cry( ctx, NULL, "%s: setgroups(): %s",   __func__,      strerror(errno) );
+	else if ( setuid(pw->pw_uid)   == -1   ) httplib_cry( ctx, NULL, "%s: setuid(%s): %s",    __func__, uid, strerror(errno) );
 	else return true;
 
 	return false;

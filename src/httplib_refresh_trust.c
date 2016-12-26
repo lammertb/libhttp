@@ -49,9 +49,11 @@ int XX_httplib_refresh_trust( struct httplib_connection *conn ) {
 	char *pem;
 	int should_verify_peer;
 
-	p_reload_lock = & reload_lock;
+	if ( conn == NULL  ||  conn->ctx == NULL ) return 0;
 
-	pem = conn->ctx->cfg[SSL_CERTIFICATE];
+	p_reload_lock = & reload_lock;
+	pem           = conn->ctx->cfg[SSL_CERTIFICATE];
+
 	if ( pem == NULL  &&  conn->ctx->callbacks.init_ssl == NULL ) return 0;
 
 	if ( stat( pem, &cert_buf ) != -1 ) t = (long int)cert_buf.st_mtime;
@@ -67,7 +69,7 @@ int XX_httplib_refresh_trust( struct httplib_connection *conn ) {
 
 			if ( SSL_CTX_load_verify_locations( conn->ctx->ssl_ctx, conn->ctx->cfg[SSL_CA_FILE], conn->ctx->cfg[SSL_CA_PATH] ) != 1 ) {
 
-				httplib_cry( XX_httplib_fc(conn->ctx),
+				httplib_cry( conn->ctx, conn,
 				       "SSL_CTX_load_verify_locations error: %s "
 				       "ssl_verify_peer requires setting "
 				       "either ssl_ca_path or ssl_ca_file. Is any of them "

@@ -49,7 +49,7 @@ void XX_httplib_prepare_cgi_environment( struct httplib_connection *conn, const 
 	int i;
 	bool truncated;
 
-	if ( conn == NULL  ||  prog == NULL  ||  env == NULL ) return;
+	if ( conn == NULL  ||  conn->ctx == NULL  ||  prog == NULL  ||  env == NULL ) return;
 
 	env->conn    = conn;
 	env->buflen  = CGI_ENVIRONMENT_SIZE;
@@ -139,7 +139,7 @@ void XX_httplib_prepare_cgi_environment( struct httplib_connection *conn, const 
 		XX_httplib_snprintf( conn, &truncated, http_var_name, sizeof(http_var_name), "HTTP_%s", conn->request_info.http_headers[i].name );
 
 		if ( truncated ) {
-			httplib_cry( conn, "%s: HTTP header variable too long [%s]", __func__, conn->request_info.http_headers[i].name );
+			httplib_cry( conn->ctx, conn, "%s: HTTP header variable too long [%s]", __func__, conn->request_info.http_headers[i].name );
 			continue;
 		}
 

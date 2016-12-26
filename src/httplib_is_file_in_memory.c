@@ -38,7 +38,7 @@ bool XX_httplib_is_file_in_memory( const struct httplib_connection *conn, const 
 
 	size_t size;
 
-	if ( conn == NULL  ||  filep == NULL ) return false;
+	if ( conn == NULL  ||  conn->ctx == NULL  ||  filep == NULL ) return false;
 
 	size = 0;
 

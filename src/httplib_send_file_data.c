@@ -49,7 +49,7 @@ void XX_httplib_send_file_data( struct httplib_connection *conn, struct file *fi
 	const char *asc;
 #endif  /* __linux__ */
 
-	if ( filep == NULL  ||  conn == NULL ) return;
+	if ( filep == NULL  ||  conn == NULL  ||  conn->ctx == NULL ) return;
 
 	/*
 	 * Sanity check the offset
@@ -142,7 +142,7 @@ void XX_httplib_send_file_data( struct httplib_connection *conn, struct file *fi
 #endif
 		if ( offset > 0  &&  fseeko( filep->fp, offset, SEEK_SET ) != 0 ) {
 
-			httplib_cry( conn, "%s: fseeko() failed: %s", __func__, strerror(ERRNO) );
+			httplib_cry( conn->ctx, conn, "%s: fseeko() failed: %s", __func__, strerror(ERRNO) );
 			XX_httplib_send_http_error( conn, 500, "%s", "Error: Unable to access file at requested position." );
 		}
 		

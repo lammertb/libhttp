@@ -39,9 +39,11 @@
 
 int XX_httplib_ssl_use_pem_file( struct httplib_context *ctx, const char *pem ) {
 
+	if ( ctx == NULL  ||  pem == NULL ) return 0;
+
 	if ( SSL_CTX_use_certificate_file( ctx->ssl_ctx, pem, 1 ) == 0 ) {
 
-		httplib_cry( XX_httplib_fc(ctx), "%s: cannot open certificate file %s: %s", __func__, pem, XX_httplib_ssl_error() );
+		httplib_cry( ctx, NULL, "%s: cannot open certificate file %s: %s", __func__, pem, XX_httplib_ssl_error() );
 		return 0;
 	}
 
@@ -51,19 +53,19 @@ int XX_httplib_ssl_use_pem_file( struct httplib_context *ctx, const char *pem ) 
 
 	if ( SSL_CTX_use_PrivateKey_file( ctx->ssl_ctx, pem, 1 ) == 0 ) {
 
-		httplib_cry( XX_httplib_fc(ctx), "%s: cannot open private key file %s: %s", __func__, pem, XX_httplib_ssl_error() );
+		httplib_cry( ctx, NULL, "%s: cannot open private key file %s: %s", __func__, pem, XX_httplib_ssl_error() );
 		return 0;
 	}
 
 	if ( SSL_CTX_check_private_key( ctx->ssl_ctx ) == 0 ) {
 
-		httplib_cry( XX_httplib_fc(ctx), "%s: certificate and private key do not match: %s", __func__, pem );
+		httplib_cry( ctx, NULL, "%s: certificate and private key do not match: %s", __func__, pem );
 		return 0;
 	}
 
 	if ( SSL_CTX_use_certificate_chain_file( ctx->ssl_ctx, pem ) == 0 ) {
 
-		httplib_cry( XX_httplib_fc(ctx), "%s: cannot use certificate chain file %s: %s", __func__, pem, XX_httplib_ssl_error() );
+		httplib_cry( ctx, NULL, "%s: cannot use certificate chain file %s: %s", __func__, pem, XX_httplib_ssl_error() );
 		return 0;
 	}
 

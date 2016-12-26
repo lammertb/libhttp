@@ -313,14 +313,6 @@ struct httplib_callbacks {
 LIBHTTP_API struct httplib_context *httplib_start(const struct httplib_callbacks *callbacks, void *user_data, const char **configuration_options);
 
 
-/* Stop the web server.
-
-   Must be called last, when an application wants to stop the web server and
-   release all associated resources. This function blocks until all LibHTTP
-   threads are stopped. Context pointer becomes invalid. */
-LIBHTTP_API void httplib_stop(struct httplib_context *);
-
-
 /* httplib_request_handler
 
    Called when a new request comes in.  This callback is URI based
@@ -857,16 +849,6 @@ LIBHTTP_API int httplib_url_encode(const char *src, char *dst, size_t dst_len);
 LIBHTTP_API char *httplib_md5(char buf[33], ...);
 
 
-/* Print error message to the opened error log stream.
-   This utilizes the provided logging configuration.
-     conn: connection
-     fmt: format string without the line return
-     ...: variable argument list
-   Example:
-     httplib_cry(conn,"i like %s", "logging"); */
-LIBHTTP_API void httplib_cry(const struct httplib_connection *conn, PRINTF_FORMAT_STRING(const char *fmt), ...) PRINTF_ARGS(2, 3);
-
-
 /* utility methods to compare two buffers, case insensitive. */
 
 
@@ -976,6 +958,7 @@ LIBHTTP_API int			httplib_atomic_dec( volatile int *addr );
 LIBHTTP_API int			httplib_atomic_inc( volatile int *addr );
 LIBHTTP_API int			httplib_base64_encode( const unsigned char *src, int src_len, char *dst, int dst_len );
 LIBHTTP_API int			httplib_closedir( DIR *dir );
+LIBHTTP_API void		httplib_cry( const struct httplib_context *ctx, const struct httplib_connection *conn, PRINTF_FORMAT_STRING(const char *fmt), ...) PRINTF_ARGS(3, 4);
 LIBHTTP_API uint64_t		httplib_get_random( void );
 LIBHTTP_API void *		httplib_get_user_connection_data( const struct httplib_connection *conn );
 LIBHTTP_API int			httplib_kill( pid_t pid, int sig_num );
@@ -1004,6 +987,7 @@ LIBHTTP_API int			httplib_remove( const char *path );
 LIBHTTP_API void		httplib_send_file( struct httplib_connection *conn, const char *path, const char *mime_type, const char *additional_headers );
 LIBHTTP_API void		httplib_set_alloc_callback_func( httplib_alloc_callback_func log_func );
 LIBHTTP_API void		httplib_set_user_connection_data( struct httplib_connection *conn, void *data );
+LIBHTTP_API void		httplib_stop( struct httplib_context *ctx );
 LIBHTTP_API int			httplib_strcasecmp( const char *s1, const char *s2 );
 LIBHTTP_API const char *	httplib_strcasestr( const char *big_str, const char *small_str );
 LIBHTTP_API char *		httplib_strdup( const char *str );

@@ -43,7 +43,7 @@ static void do_ssi_include(struct httplib_connection *conn, const char *ssi, cha
 	size_t len;
 	bool truncated;
 
-	if ( conn == NULL ) return;
+	if ( conn == NULL  ||  conn->ctx == NULL ) return;
 
 	truncated = false;
 
@@ -98,19 +98,19 @@ static void do_ssi_include(struct httplib_connection *conn, const char *ssi, cha
 	}
 	
 	else {
-		httplib_cry( conn, "Bad SSI #include: [%s]", tag );
+		httplib_cry( conn->ctx, conn, "Bad SSI #include: [%s]", tag );
 		return;
 	}
 
 	if ( truncated ) {
 
-		httplib_cry( conn, "SSI #include path length overflow: [%s]", tag );
+		httplib_cry( conn->ctx, conn, "SSI #include path length overflow: [%s]", tag );
 		return;
 	}
 
 	if ( ! XX_httplib_fopen( conn, path, "rb", &file ) ) {
 
-		httplib_cry( conn, "Cannot open SSI #include: [%s]: fopen(%s): %s", tag, path, strerror(ERRNO) );
+		httplib_cry( conn->ctx, conn, "Cannot open SSI #include: [%s]: fopen(%s): %s", tag, path, strerror(ERRNO) );
 		return;
 	}
 	
@@ -134,14 +134,14 @@ static void do_ssi_exec( struct httplib_connection *conn, char *tag ) {
 
 	if ( sscanf(tag, " \"%1023[^\"]\"", cmd) != 1 ) {
 
-		httplib_cry( conn, "Bad SSI #exec: [%s]", tag );
+		httplib_cry( conn->ctx, conn, "Bad SSI #exec: [%s]", tag );
 	}
 	
 	else {
 		cmd[1023] = 0;
 		if ( (file.fp = popen( cmd, "r" ) ) == NULL ) {
 
-			httplib_cry( conn, "Cannot SSI #exec: [%s]: %s", cmd, strerror(ERRNO) );
+			httplib_cry( conn->ctx, conn, "Cannot SSI #exec: [%s]: %s", cmd, strerror(ERRNO) );
 		}
 		
 		else {
@@ -174,7 +174,7 @@ static void send_ssi_file( struct httplib_connection *conn, const char *path, st
 
 	if ( include_level > 10 ) {
 
-		httplib_cry( conn, "SSI #include level is too deep (%s)", path );
+		httplib_cry( conn->ctx, conn, "SSI #include level is too deep (%s)", path );
 		return;
 	}
 
@@ -212,7 +212,7 @@ static void send_ssi_file( struct httplib_connection *conn, const char *path, st
 					do_ssi_exec(conn, buf + 9);
 #endif /* !NO_POPEN */
 				}
-				else httplib_cry( conn, "%s: unknown SSI " "command: \"%s\"", path, buf );
+				else httplib_cry( conn->ctx, conn, "%s: unknown SSI " "command: \"%s\"", path, buf );
 			}
 
 			len = 0;
@@ -231,7 +231,7 @@ static void send_ssi_file( struct httplib_connection *conn, const char *path, st
 			
 			else if ( len == (int)sizeof(buf) - 2 ) {
 
-				httplib_cry( conn, "%s: SSI tag is too large", path );
+				httplib_cry( conn->ctx, conn, "%s: SSI tag is too large", path );
 				len = 0;
 			}
 

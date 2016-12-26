@@ -53,7 +53,7 @@ bool XX_httplib_check_authorization( struct httplib_connection *conn, const char
 
 			if ( truncated  ||  ! XX_httplib_fopen( conn, fname, "r", &file ) ) {
 
-				httplib_cry( conn, "%s: cannot open %s: %s", __func__, fname, strerror(errno) );
+				httplib_cry( conn->ctx, conn, "%s: cannot open %s: %s", __func__, fname, strerror(errno) );
 			}
 			break;
 		}

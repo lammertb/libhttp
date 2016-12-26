@@ -45,7 +45,7 @@ void XX_httplib_mkcol( struct httplib_connection *conn, const char *path ) {
 	char date[64];
 	time_t curtime;
 
-	if ( conn == NULL ) return;
+	if ( conn == NULL  ||  conn->ctx == NULL ) return;
 
 	curtime = time( NULL );
 
@@ -57,7 +57,7 @@ void XX_httplib_mkcol( struct httplib_connection *conn, const char *path ) {
 
 	if ( ! XX_httplib_stat( conn, path, & de.file ) ) {
 
-		httplib_cry( conn, "%s: XX_httplib_stat(%s) failed: %s", __func__, path, strerror(ERRNO) );
+		httplib_cry( conn->ctx, conn, "%s: XX_httplib_stat(%s) failed: %s", __func__, path, strerror(ERRNO) );
 	}
 
 	if ( de.file.last_modified ) {

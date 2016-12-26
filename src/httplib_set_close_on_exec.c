@@ -27,36 +27,25 @@
 
 #include "httplib_main.h"
 
-#if defined(_WIN32)
-
 /*
  * conn parameter may be NULL
  */
 
-void XX_httplib_set_close_on_exec( SOCKET sock, struct httplib_connection *conn ) {
+void XX_httplib_set_close_on_exec( SOCKET fd, const struct httplib_context *ctx ) {
 
-	UNUSED_PARAMETER(conn);
-#if defined(_WIN32_WCE)
-#else
+#if defined(_WIN32)
+
+	UNUSED_PARAMETER(ctx);
+
 	SetHandleInformation( (HANDLE)(intptr_t)sock, HANDLE_FLAG_INHERIT, 0 );
-#endif
 
-}  /* XX_httplib_set_close_on_exec */
-
-
-#else
-
-/*
- * conn may be NULL
- */
-
-void XX_httplib_set_close_on_exec( SOCKET fd, struct httplib_connection *conn ) {
+#else  /* _WIN32 */
 
 	if ( fcntl( fd, F_SETFD, FD_CLOEXEC ) != 0 ) {
 
-		if ( conn != NULL ) httplib_cry(conn, "%s: fcntl(F_SETFD FD_CLOEXEC) failed: %s", __func__, strerror(ERRNO) );
+		if ( ctx != NULL ) httplib_cry( ctx, NULL, "%s: fcntl(F_SETFD FD_CLOEXEC) failed: %s", __func__, strerror(ERRNO) );
 	}
 
-}  /* XX_httplib_set_close_on_exec */
+#endif  /* _WIN32 */
 
-#endif /* _WIN32 */
+}  /* XX_httplib_set_close_on_exec */
