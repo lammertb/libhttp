@@ -41,6 +41,13 @@ void XX_httplib_send_file_data( struct httplib_connection *conn, struct file *fi
 	int num_read;
 	int num_written;
 	int64_t size;
+#if defined(__linux__)
+	off_t sf_offs;
+	ssize_t sf_sent;
+	int sf_file;
+	int loop_cnt;
+	const char *asc;
+#endif  /* __linux__ */
 
 	if ( filep == NULL  ||  conn == NULL ) return;
 
@@ -55,6 +62,9 @@ void XX_httplib_send_file_data( struct httplib_connection *conn, struct file *fi
 
 		/*
 		 * file stored in memory
+		 * TODO: LJB: len is 64 bit, but httplib_write may take 32 or
+		 * even 16 bit depending on the platform. This can cause
+		 * interesting bugs when serving large in-memory files.
 		 */
 
 		if (len > size - offset) len = size - offset;
@@ -71,12 +81,13 @@ void XX_httplib_send_file_data( struct httplib_connection *conn, struct file *fi
 		 * sendfile is only available for Linux
 		 */
 
-		if ( conn->ssl == 0  &&  conn->throttle == 0  &&  ! httplib_strcasecmp( conn->ctx->config[ALLOW_SENDFILE_CALL], "yes" ) ) {
+		asc = conn->ctx->cfg[ALLOW_SENDFILE_CALL];
 
-			off_t sf_offs = (off_t)offset;
-			ssize_t sf_sent;
-			int sf_file = fileno(filep->fp);
-			int loop_cnt = 0;
+		if ( conn->ssl == 0  &&  conn->throttle == 0  &&  asc != NULL  &&  ! httplib_strcasecmp( asc, "yes" ) ) {
+
+			sf_offs  = (off_t)offset;
+			sf_file  = fileno( filep->fp );
+			loop_cnt = 0;
 
 			do {
 				/* 
