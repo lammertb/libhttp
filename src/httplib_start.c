@@ -32,7 +32,7 @@
 #include "httplib_string.h"
 #include "httplib_utils.h"
 
-static struct httplib_context *		cleanup( struct httplib_context *ctx );
+static struct httplib_context *		cleanup( struct httplib_context *ctx, PRINTF_FORMAT_STRING(const char *fmt), ...) PRINTF_ARGS(2, 3);
 
 /*
  * struct httplib_context *httplib_start( const struct httplib_callbacks *callbacks, void *user_data, const char **options );
@@ -140,17 +140,8 @@ struct httplib_context *httplib_start( const struct httplib_callbacks *callbacks
 	while ( options  &&  (name = *options++) != NULL ) {
 
 		idx = XX_httplib_get_option_index( name );
-		if ( idx == -1 ) {
-
-			httplib_cry( XX_httplib_fc(ctx), "Invalid option: %s", name );
-			return cleanup( ctx );
-		}
-		
-		if ( (value = *options++)  ==  NULL ) {
-
-			httplib_cry( XX_httplib_fc(ctx), "%s: option value cannot be NULL", name );
-			return cleanup( ctx );
-		}
+		if ( idx                   == -1   ) return cleanup( ctx, "Invalid option: %s",               name );
+		if ( (value = *options++)  == NULL ) return cleanup( ctx , "%s: option value cannot be NULL", name );
 
 		if ( ctx->cfg[idx] != NULL ) {
 
@@ -172,11 +163,7 @@ struct httplib_context *httplib_start( const struct httplib_callbacks *callbacks
 	}
 
 #if defined(NO_FILES)
-	if ( ctx->cfg[DOCUMENT_ROOT] != NULL ) {
-
-		httplib_cry( XX_httplib_fc( ctx ), "%s", "Document root must not be set" );
-		return cleanup( ctx );
-	}
+	if ( ctx->cfg[DOCUMENT_ROOT] != NULL ) return cleanup( ctx, "Document root must not be set" );
 #endif
 
 	XX_httplib_get_system_name( & ctx->systemName );
@@ -186,13 +173,13 @@ struct httplib_context *httplib_start( const struct httplib_callbacks *callbacks
 	 * be initialized before listening ports. UID must be set last.
 	 */
 
-	if ( ! XX_httplib_set_gpass_option( ctx ) ||
+	if ( ! XX_httplib_set_gpass_option( ctx ) ) return cleanup( ctx, "Error setting gpass option" );
 #if !defined(NO_SSL)
-	    ! XX_httplib_set_ssl_option(    ctx ) ||
+	if ( ! XX_httplib_set_ssl_option(   ctx ) ) return cleanup( ctx, "Error setting SSL option"   );
 #endif
-	    ! XX_httplib_set_ports_option(  ctx ) ||
-	    ! XX_httplib_set_uid_option(    ctx ) ||
-	    ! XX_httplib_set_acl_option(    ctx )     ) return cleanup( ctx );
+	if ( ! XX_httplib_set_ports_option( ctx ) ) return cleanup( ctx, "Error setting ports option" );
+	if ( ! XX_httplib_set_uid_option(   ctx ) ) return cleanup( ctx, "Error setting UID option"   );
+	if ( ! XX_httplib_set_acl_option(   ctx ) ) return cleanup( ctx, "Error setting ACL option"   );
 
 #if !defined(_WIN32)
 
@@ -205,67 +192,36 @@ struct httplib_context *httplib_start( const struct httplib_callbacks *callbacks
 
 #endif /* !_WIN32 */
 
-	if ( ctx->cfg[NUM_THREADS] == NULL ) {
-
-		httplib_cry( XX_httplib_fc(ctx), "No worker thread number specified" );
-		return cleanup( ctx );
-	}
+	if ( ctx->cfg[NUM_THREADS] == NULL ) return cleanup( ctx, "No worker thread number specified" );
 
 	workerthreadcount = atoi( ctx->cfg[NUM_THREADS] );
 
-	if ( workerthreadcount > MAX_WORKER_THREADS ) {
-
-		httplib_cry( XX_httplib_fc(ctx), "Too many worker threads" );
-		return cleanup( ctx );
-	}
+	if ( workerthreadcount > MAX_WORKER_THREADS ) return cleanup( ctx, "Too many worker threads" );
 
 	if ( workerthreadcount > 0 ) {
 
-		ctx->cfg_worker_threads = ((unsigned int)(workerthreadcount));
+		ctx->cfg_worker_threads = (unsigned int)(workerthreadcount);
 		ctx->workerthreadids    = httplib_calloc( ctx->cfg_worker_threads, sizeof(pthread_t) );
-
-		if ( ctx->workerthreadids == NULL ) {
-
-			httplib_cry( XX_httplib_fc(ctx), "Not enough memory for worker thread ID array" );
-			return cleanup( ctx );
-		}
+		if ( ctx->workerthreadids == NULL ) return cleanup( ctx, "Not enough memory for worker thread ID array" );
 
 #if defined(ALTERNATIVE_QUEUE)
 
 		ctx->client_wait_events = httplib_calloc( sizeof(ctx->client_wait_events[0]), ctx->cfg_worker_threads );
-
-		if ( ctx->client_wait_events == NULL ) {
-
-			httplib_cry( XX_httplib_fc(ctx), "Not enough memory for worker event array" );
-			return cleanup( ctx );
-		}
+		if ( ctx->client_wait_events == NULL ) return cleanup( ctx, "Not enough memory for worker event array" );
 
 		ctx->client_socks = httplib_calloc( sizeof(ctx->client_socks[0]), ctx->cfg_worker_threads );
-
-		if ( ctx->client_socks == NULL ) {
-
-			httplib_cry( XX_httplib_fc(ctx), "Not enough memory for worker socket array" );
-			return cleanup( ctx );
-		}
+		if ( ctx->client_socks == NULL ) return cleanup( ctx, "Not enough memory for worker socket array" );
 
 		for (i=0; i<ctx->cfg_worker_threads; i++) {
 
 			ctx->client_wait_events[i] = event_create();
-			if ( ctx->client_wait_events[i] == 0 ) {
-
-				httplib_cry( XX_httplib_fc(ctx), "Error creating worker event %u", i );
-				return cleanup( ctx );
-			}
+			if ( ctx->client_wait_events[i] == 0 ) return cleanup( ctx, "Error creating worker event %u", i );
 		}
 #endif
 	}
 
 #if defined(USE_TIMERS)
-	if ( timers_init( ctx ) != 0 ) {
-		
-		httplib_cry( XX_httplib_fc( ctx ), "Error creating timers" );
-		return cleanup( ctx );
-	}
+	if ( timers_init( ctx ) != 0 ) return cleanup( ctx, "Error creating timers" );
 #endif
 
 	/*
@@ -308,10 +264,8 @@ struct httplib_context *httplib_start( const struct httplib_callbacks *callbacks
 
 			if ( i > 0 ) httplib_cry( XX_httplib_fc( ctx ), "Cannot start worker thread %i: error %ld", i + 1, (long)ERRNO );
 			
-			else {
-				httplib_cry( XX_httplib_fc( ctx ), "Cannot create threads: error %ld", (long)ERRNO );
-				return cleanup( ctx );
-			}
+			else return cleanup( ctx, "Cannot create threads: error %ld", (long)ERRNO );
+
 			break;
 		}
 	}
@@ -325,14 +279,24 @@ struct httplib_context *httplib_start( const struct httplib_callbacks *callbacks
 
 
 /* 
- * static struct httplib_context *cleanup( struct httplib_context *ctx );
+ * static struct httplib_context *cleanup( struct httplib_context *ctx, const char *fmt, ... );
  *
  * The function cleanup() is called to do some cleanup work when an error
  * occured initializing a context. The function returns NULL which is then
  * further returned to the calling party.
  */
 
-static struct httplib_context *cleanup( struct httplib_context *ctx ) {
+static struct httplib_context *cleanup( struct httplib_context *ctx, const char *fmt, ... ) {
+
+	va_list ap;
+	char buf[MG_BUF_LEN];
+
+	va_start( ap, fmt );
+	vsnprintf_impl( buf, sizeof(buf), fmt, ap );
+	va_end( ap );
+	buf[sizeof(buf)-1] = 0;
+
+	httplib_cry( XX_httplib_fc( ctx ), "%s", buf );
 
 	if ( ctx != NULL ) XX_httplib_free_context( ctx );
 	httplib_pthread_setspecific( XX_httplib_sTlsKey, NULL );
