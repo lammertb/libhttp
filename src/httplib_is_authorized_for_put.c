@@ -20,33 +20,39 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
- *
- * ============
- * Release: 2.0
  */
 
 #include "httplib_main.h"
 
 #if !defined(NO_FILES)
 
-int XX_httplib_is_authorized_for_put( struct httplib_connection *conn ) {
+/*
+ * bool XX_httplib_is_authorized_for_put( struct httplib_connection *conn );
+ *
+ * The function XX_httplib_is_authorized_for_put() returns true, if the client
+ * on the connection has authorization to use put and equivalent methods to
+ * write information to the server.
+ */
+
+bool XX_httplib_is_authorized_for_put( struct httplib_connection *conn ) {
 
 	struct file file = STRUCT_FILE_INITIALIZER;
 	const char *passfile;
-	int ret;
+	bool ret;
 
 	if ( conn == NULL  ||  conn->ctx == NULL ) return 0;
 
 	passfile = conn->ctx->cfg[PUT_DELETE_PASSWORDS_FILE];
-	ret      = 0;
 
 	if ( passfile != NULL  &&  XX_httplib_fopen( conn, passfile, "r", &file ) ) {
 
 		ret = XX_httplib_authorize( conn, &file );
 		XX_httplib_fclose( & file );
+
+		return ret;
 	}
 
-	return ret;
+	return false;
 
 }  /* XX_httplib_is_authorized_for_put */
 

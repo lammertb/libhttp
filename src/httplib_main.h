@@ -826,7 +826,7 @@ void			XX_httplib_handle_static_file_request( struct httplib_connection *conn, c
 void			XX_httplib_handle_websocket_request( struct httplib_connection *conn, const char *path, int is_callback_resource, httplib_websocket_connect_handler ws_connect_handler, httplib_websocket_ready_handler ws_ready_handler, httplib_websocket_data_handler ws_data_handler, httplib_websocket_close_handler ws_close_handler, void *cbData );
 bool			XX_httplib_header_has_option( const char *header, const char *option );
 void			XX_httplib_interpret_uri( struct httplib_connection *conn, char *filename, size_t filename_buf_len, struct file *filep, bool *is_found, bool *is_script_resource, bool *is_websocket_request, bool *is_put_or_delete_request );
-int			XX_httplib_is_authorized_for_put( struct httplib_connection *conn );
+bool			XX_httplib_is_authorized_for_put( struct httplib_connection *conn );
 bool			XX_httplib_is_file_in_memory( const struct httplib_connection *conn, const char *path, struct file *filep );
 bool			XX_httplib_is_file_opened( const struct file *filep );
 bool			XX_httplib_is_not_modified( const struct httplib_connection *conn, const struct file *filep );
