@@ -26,7 +26,6 @@
  */
 
 #include "httplib_main.h"
-#include "httplib_memory.h"
 
 /*
  * int httplib_closedir( DIR *dir );

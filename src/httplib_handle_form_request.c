@@ -25,7 +25,6 @@
  */
 
 #include "httplib_main.h"
-#include "httplib_memory.h"
 
 static int url_encoded_field_found(const struct httplib_connection *conn,
                         const char *key,

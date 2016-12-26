@@ -26,7 +26,6 @@
  */
 
 #include "httplib_main.h"
-#include "httplib_memory.h"
 
 /*
  * DIR *httplib_opendir( const char *name );

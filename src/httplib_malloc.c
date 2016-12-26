@@ -26,7 +26,6 @@
  */
 
 #include "httplib_main.h"
-#include "httplib_memory.h"
 
 static int64_t				httplib_memory_blocks_used	= 0;
 static int64_t				httplib_memory_bytes_used	= 0;

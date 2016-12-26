@@ -26,7 +26,6 @@
  */
 
 #include "httplib_main.h"
-#include "httplib_memory.h"
 
 /*
  * LIBHTTP_THREAD XX_httplib_websocket_client_thread( void *data );

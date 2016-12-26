@@ -23,7 +23,6 @@
  */
 
 #include "httplib_main.h"
-#include "httplib_memory.h"
 
 /*
  * char *httplib_strndup( const char *str, size_t len );

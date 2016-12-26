@@ -26,20 +26,24 @@
  */
 
 #include "httplib_main.h"
-#include "httplib_memory.h"
 #include "httplib_string.h"
 
 void XX_httplib_dir_scan_callback( struct de *de, void *data ) {
 
 	struct dir_scan_data *dsd;
+	struct de* old_entries;
 
 	dsd = data;
 
 	if ( dsd->entries == NULL  ||  dsd->num_entries >= dsd->arr_size ) {
 
 		dsd->arr_size *= 2;
-		dsd->entries   = XX_httplib_realloc2( dsd->entries, dsd->arr_size * sizeof(dsd->entries[0]) );
+		old_entries    = dsd->entries;
+		dsd->entries   = httplib_realloc( old_entries, dsd->arr_size * sizeof(dsd->entries[0]) );
+
+		if ( dsd->entries == NULL  &&  old_entries != NULL ) httplib_free( old_entries );
 	}
+
 	if ( dsd->entries == NULL ) {
 
 		/*

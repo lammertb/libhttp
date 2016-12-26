@@ -294,7 +294,6 @@ OBJLIST =									\
 	${OBJDIR}httplib_read_request${OBJEXT}					\
 	${OBJDIR}httplib_read_websocket${OBJEXT}				\
 	${OBJDIR}httplib_readdir${OBJEXT}					\
-	${OBJDIR}httplib_realloc2${OBJEXT}					\
 	${OBJDIR}httplib_redirect_to_https_port${OBJEXT}			\
 	${OBJDIR}httplib_refresh_trust${OBJEXT}					\
 	${OBJDIR}httplib_remove${OBJEXT}					\
@@ -433,7 +432,6 @@ ${OBJDIR}httplib_accept_new_connection${OBJEXT}				: ${SRCDIR}httplib_accept_new
 									  ${INCDIR}libhttp.h
 
 ${OBJDIR}httplib_addenv${OBJEXT}					: ${SRCDIR}httplib_addenv.c					\
-									  ${SRCDIR}httplib_memory.h					\
 									  ${SRCDIR}httplib_string.h					\
 									  ${SRCDIR}httplib_utils.h					\
 									  ${SRCDIR}httplib_main.h					\
@@ -476,12 +474,10 @@ ${OBJDIR}httplib_check_password${OBJEXT}				: ${SRCDIR}httplib_check_password.c	
 									  ${INCDIR}libhttp.h
 
 ${OBJDIR}httplib_close_all_listening_sockets${OBJDIR}			: ${SRCDIR}httplib_close_all_listening_sockets.c		\
-									  ${SRCDIR}httplib_memory.h					\
 									  ${SRCDIR}httplib_main.h					\
 									  ${INCDIR}libhttp.h
 
 ${OBJDIR}httplib_close_connection${OBJEXT}				: ${SRCDIR}httplib_close_connection.c				\
-									  ${SRCDIR}httplib_memory.h					\
 									  ${SRCDIR}httplib_pthread.h					\
 									  ${SRCDIR}httplib_ssl.h					\
 									  ${SRCDIR}httplib_main.h					\
@@ -492,7 +488,6 @@ ${OBJDIR}httplib_close_socket_gracefully${OBJEXT}			: ${SRCDIR}httplib_close_soc
 									  ${INCDIR}libhttp.h
 
 ${OBJDIR}httplib_closedir${OBJEXT}					: ${SRCDIR}httplib_closedir.c					\
-									  ${SRCDIR}httplib_memory.h					\
 									  ${SRCDIR}httplib_main.h					\
 									  ${INCDIR}libhttp.h
 
@@ -505,7 +500,6 @@ ${OBJDIR}httplib_config_options${OBJEXT}				: ${SRCDIR}httplib_config_options.c	
 									  ${INCDIR}libhttp.h
 
 ${OBJDIR}httplib_connect_client${OBJEXT}				: ${SRCDIR}httplib_connect_client.c				\
-									  ${SRCDIR}httplib_memory.h					\
 									  ${SRCDIR}httplib_pthread.h					\
 									  ${SRCDIR}httplib_ssl.h					\
 									  ${SRCDIR}httplib_string.h					\
@@ -513,7 +507,6 @@ ${OBJDIR}httplib_connect_client${OBJEXT}				: ${SRCDIR}httplib_connect_client.c	
 									  ${INCDIR}libhttp.h
 
 ${OBJDIR}httplib_connect_socket${OBJEXT}				: ${SRCDIR}httplib_connect_socket.c				\
-									  ${SRCDIR}httplib_memory.h					\
 									  ${SRCDIR}httplib_ssl.h					\
 									  ${SRCDIR}httplib_string.h					\
 									  ${SRCDIR}httplib_utils.h					\
@@ -521,7 +514,6 @@ ${OBJDIR}httplib_connect_socket${OBJEXT}				: ${SRCDIR}httplib_connect_socket.c	
 									  ${INCDIR}libhttp.h
 
 ${OBJDIR}httplib_connect_websocket_client${OBJEXT}			: ${SRCDIR}httplib_connect_websocket_client.c			\
-									  ${SRCDIR}httplib_memory.h					\
 									  ${SRCDIR}httplib_string.h					\
 									  ${SRCDIR}httplib_main.h					\
 									  ${INCDIR}libhttp.h
@@ -551,7 +543,6 @@ ${OBJDIR}httplib_difftimespec${OBJEXT}					: ${SRCDIR}httplib_difftimespec.c				
 									  ${INCDIR}libhttp.h
 
 ${OBJDIR}httplib_dir_scan_callback${OBJEXT}				: ${SRCDIR}httplib_dir_scan_callback.c				\
-									  ${SRCDIR}httplib_memory.h					\
 									  ${SRCDIR}httplib_string.h					\
 									  ${SRCDIR}httplib_main.h					\
 									  ${INCDIR}libhttp.h
@@ -594,7 +585,6 @@ ${OBJDIR}httplib_forward_body_data${OBJEXT}				: ${SRCDIR}httplib_forward_body_d
 									  ${INCDIR}libhttp.h
 
 ${OBJDIR}httplib_free_context${OBJEXT}					: ${SRCDIR}httplib_free_context.c				\
-									  ${SRCDIR}httplib_memory.h					\
 									  ${SRCDIR}httplib_pthread.h					\
 									  ${SRCDIR}httplib_ssl.h					\
 									  ${SRCDIR}httplib_utils.h					\
@@ -715,13 +705,11 @@ ${OBJDIR}httplib_gmt_time_string${OBJEXT}				: ${SRCDIR}httplib_gmt_time_string.
 									  ${INCDIR}libhttp.h
 
 ${OBJDIR}httplib_handle_cgi_request${OBJEXT}				: ${SRCDIR}httplib_handle_cgi_request.c				\
-									  ${SRCDIR}httplib_memory.h					\
 									  ${SRCDIR}httplib_string.h					\
 									  ${SRCDIR}httplib_main.h					\
 									  ${INCDIR}libhttp.h
 
 ${OBJDIR}httplib_handle_directory_request${OBJEXT}			: ${SRCDIR}httplib_handle_directory_request.c			\
-									  ${SRCDIR}httplib_memory.h					\
 									  ${SRCDIR}httplib_utils.h					\
 									  ${SRCDIR}httplib_main.h					\
 									  ${INCDIR}libhttp.h
@@ -731,7 +719,6 @@ ${OBJDIR}httplib_handle_file_based_request${OBJEXT}			: ${SRCDIR}httplib_handle_
 									  ${INCDIR}libhttp.h
 
 ${OBJDIR}httplib_handle_form_request${OBJEXT}				: ${SRCDIR}httplib_handle_form_request.c			\
-									  ${SRCDIR}httplib_memory.h					\
 									  ${SRCDIR}httplib_main.h					\
 									  ${INCDIR}libhttp.h
 
@@ -772,7 +759,6 @@ ${OBJDIR}httplib_inet_pton${OBJEXT}					: ${SRCDIR}httplib_inet_pton.c					\
 									  ${INCDIR}libhttp.h
 
 ${OBJDIR}httplib_initialize_ssl${OBJEXT}				: ${SRCDIR}httplib_initialize_ssl.c				\
-									  ${SRCDIR}httplib_memory.h					\
 									  ${SRCDIR}httplib_pthread.h					\
 									  ${SRCDIR}httplib_ssl.h					\
 									  ${SRCDIR}httplib_utils.h					\
@@ -852,7 +838,6 @@ ${OBJDIR}httplib_lowercase${OBJEXT}					: ${SRCDIR}httplib_lowercase.c					\
 									  ${INCDIR}libhttp.h
 
 ${OBJDIR}httplib_malloc${OBJEXT}					: ${SRCDIR}httplib_malloc.c					\
-									  ${SRCDIR}httplib_memory.h					\
 									  ${SRCDIR}httplib_main.h					\
 									  ${INCDIR}libhttp.h
 
@@ -898,7 +883,6 @@ ${OBJDIR}httplib_open_auth_file${OBJEXT}				: ${SRCDIR}httplib_open_auth_file.c	
 									  ${INCDIR}libhttp.h
 
 ${OBJDIR}httplib_opendir${OBJEXT}					: ${SRCDIR}httplib_opendir.c					\
-									  ${SRCDIR}httplib_memory.h					\
 									  ${SRCDIR}httplib_main.h					\
 									  ${INCDIR}libhttp.h
 
@@ -937,7 +921,6 @@ ${OBJDIR}httplib_poll${OBJEXT}						: ${SRCDIR}httplib_poll.c					\
 									  ${INCDIR}libhttp.h
 
 ${OBJDIR}httplib_prepare_cgi_environment${OBJEXT}			: ${SRCDIR}httplib_prepare_cgi_environment.c			\
-									  ${SRCDIR}httplib_memory.h					\
 									  ${SRCDIR}httplib_ssl.h					\
 									  ${SRCDIR}httplib_string.h					\
 									  ${SRCDIR}httplib_utils.h					\
@@ -955,7 +938,6 @@ ${OBJDIR}httplib_printf${OBJEXT}					: ${SRCDIR}httplib_printf.c					\
 									  ${INCDIR}libhttp.h
 
 ${OBJDIR}httplib_process_new_connection${OBJEXT}			: ${SRCDIR}httplib_process_new_connection.c			\
-									  ${SRCDIR}httplib_memory.h					\
 									  ${SRCDIR}httplib_string.h					\
 									  ${SRCDIR}httplib_main.h					\
 									  ${INCDIR}libhttp.h
@@ -1004,16 +986,10 @@ ${OBJDIR}httplib_read_request${OBJEXT}					: ${SRCDIR}httplib_read_request.c				
 									  ${INCDIR}libhttp.h
 
 ${OBJDIR}httplib_read_websocket${OBJEXT}				: ${SRCDIR}httplib_read_websocket.c				\
-									  ${SRCDIR}httplib_memory.h					\
 									  ${SRCDIR}httplib_main.h					\
 									  ${INCDIR}libhttp.h
 
 ${OBJDIR}httplib_readdir${OBJEXT}					: ${SRCDIR}httplib_readdir.c					\
-									  ${SRCDIR}httplib_main.h					\
-									  ${INCDIR}libhttp.h
-
-${OBJDIR}httplib_realloc2${OBJEXT}					: ${SRCDIR}httplib_realloc2.c					\
-									  ${SRCDIR}httplib_memory.h					\
 									  ${SRCDIR}httplib_main.h					\
 									  ${INCDIR}libhttp.h
 
@@ -1110,7 +1086,6 @@ ${OBJDIR}httplib_set_gpass_option${OBJEXT}				: ${SRCDIR}httplib_set_gpass_optio
 									  ${INCDIR}libhttp.h
 
 ${OBJDIR}httplib_set_handler_type${OBJEXT}				: ${SRCDIR}httplib_set_handler_type.c				\
-									  ${SRCDIR}httplib_memory.h					\
 									  ${SRCDIR}httplib_string.h					\
 									  ${SRCDIR}httplib_main.h					\
 									  ${INCDIR}libhttp.h
@@ -1120,7 +1095,6 @@ ${OBJDIR}httplib_set_non_blocking_mode${OBJEXT}				: ${SRCDIR}httplib_set_non_bl
 									  ${INCDIR}libhttp.h
 
 ${OBJDIR}httplib_set_ports_option${OBJEXT}				: ${SRCDIR}httplib_set_ports_option.c				\
-									  ${SRCDIR}httplib_memory.h					\
 									  ${SRCDIR}httplib_utils.h					\
 									  ${SRCDIR}httplib_main.h					\
 									  ${INCDIR}libhttp.h
@@ -1206,7 +1180,6 @@ ${OBJDIR}httplib_ssl_error${OBJEXT}					: ${SRCDIR}httplib_ssl_error.c					\
 									  ${INCDIR}libhttp.h
 
 ${OBJDIR}httplib_ssl_get_client_cert_info${OBJEXT}			: ${SRCDIR}httplib_ssl_get_client_cert_info.c			\
-									  ${SRCDIR}httplib_memory.h					\
 									  ${SRCDIR}httplib_ssl.h					\
 									  ${SRCDIR}httplib_string.h					\
 									  ${SRCDIR}httplib_main.h					\
@@ -1218,7 +1191,6 @@ ${OBJDIR}httplib_ssl_get_protocol${OBJEXT}				: ${SRCDIR}httplib_ssl_get_protoco
 									  ${INCDIR}libhttp.h
 
 ${OBJDIR}httplib_ssl_id_callback${OBJEXT}				: ${SRCDIR}httplib_ssl_id_callback.c				\
-									  ${SRCDIR}httplib_memory.h					\
 									  ${SRCDIR}httplib_pthread.h					\
 									  ${SRCDIR}httplib_ssl.h					\
 									  ${SRCDIR}httplib_utils.h					\
@@ -1242,7 +1214,6 @@ ${OBJDIR}httplib_sslize${OBJEXT}					: ${SRCDIR}httplib_sslize.c					\
 									  ${INCDIR}libhttp.h
 
 ${OBJDIR}httplib_start${OBJEXT}						: ${SRCDIR}httplib_start.c					\
-									  ${SRCDIR}httplib_memory.h					\
 									  ${SRCDIR}httplib_pthread.h					\
 									  ${SRCDIR}httplib_ssl.h					\
 									  ${SRCDIR}httplib_string.h					\
@@ -1294,7 +1265,6 @@ ${OBJDIR}httplib_strncasecmp${OBJEXT}					: ${SRCDIR}httplib_strncasecmp.c				\
 									  ${INCDIR}libhttp.h
 
 ${OBJDIR}httplib_strndup${OBJEXT}					: ${SRCDIR}httplib_strndup.c					\
-									  ${SRCDIR}httplib_memory.h					\
 									  ${SRCDIR}httplib_main.h					\
 									  ${INCDIR}libhttp.h
 
@@ -1312,14 +1282,12 @@ ${OBJDIR}httplib_timer${OBJEXT}						: ${SRCDIR}httplib_timer.c					\
 									  ${INCDIR}libhttp.h
 
 ${OBJDIR}httplib_tls_dtor${OBJEXT}					: ${SRCDIR}httplib_tls_dtor.c					\
-									  ${SRCDIR}httplib_memory.h					\
 									  ${SRCDIR}httplib_pthread.h					\
 									  ${SRCDIR}httplib_ssl.h					\
 									  ${SRCDIR}httplib_main.h					\
 									  ${INCDIR}libhttp.h
 
 ${OBJDIR}httplib_uninitialize_ssl${OBJEXT}				: ${SRCDIR}httplib_uninitialize_ssl.c				\
-									  ${SRCDIR}httplib_memory.h					\
 									  ${SRCDIR}httplib_pthread.h					\
 									  ${SRCDIR}httplib_ssl.h					\
 									  ${SRCDIR}httplib_utils.h					\
@@ -1339,7 +1307,6 @@ ${OBJDIR}httplib_version${OBJEXT}					: ${SRCDIR}httplib_version.c					\
 									  ${INCDIR}libhttp.h
 
 ${OBJDIR}httplib_vprintf${OBJEXT}					: ${SRCDIR}httplib_vprintf.c					\
-									  ${SRCDIR}httplib_memory.h					\
 									  ${SRCDIR}httplib_string.h					\
 									  ${SRCDIR}httplib_main.h					\
 									  ${INCDIR}libhttp.h
@@ -1350,12 +1317,10 @@ ${OBJDIR}httplib_vsnprintf${OBJEXT}					: ${SRCDIR}httplib_vsnprintf.c					\
 									  ${INCDIR}libhttp.h
 
 ${OBJDIR}httplib_websocket_client_thread${OBJEXT}			: ${SRCDIR}httplib_websocket_client_thread.c			\
-									  ${SRCDIR}httplib_memory.h					\
 									  ${SRCDIR}httplib_main.h					\
 									  ${INCDIR}libhttp.h
 
 ${OBJDIR}httplib_websocket_client_write${OBJEXT}			: ${SRCDIR}httplib_websocket_client_write.c			\
-									  ${SRCDIR}httplib_memory.h					\
 									  ${SRCDIR}httplib_utils.h					\
 									  ${SRCDIR}httplib_main.h					\
 									  ${INCDIR}libhttp.h
@@ -1369,7 +1334,6 @@ ${OBJDIR}httplib_websocket_write_exec${OBJEXT}				: ${SRCDIR}httplib_websocket_w
 									  ${INCDIR}libhttp.h
 
 ${OBJDIR}httplib_worker_thread${OBJEXT}					: ${SRCDIR}httplib_worker_thread.c				\
-									  ${SRCDIR}httplib_memory.h					\
 									  ${SRCDIR}httplib_pthread.h					\
 									  ${SRCDIR}httplib_ssl.h					\
 									  ${SRCDIR}httplib_utils.h					\
