@@ -59,6 +59,7 @@ void XX_httplib_handle_request( struct httplib_connection *conn ) {
 	void *callback_data;
 	httplib_authorization_handler auth_handler;
 	void *auth_callback_data;
+	const char *edl;
 	union {
 		const char *	con;
 		char *		var;
@@ -568,11 +569,10 @@ no_callback_resource:
 			 * 14.2. no substitute file
 			 */
 
-			if ( conn->ctx->cfg[ENABLE_DIRECTORY_LISTING] != NULL  &&  ! httplib_strcasecmp( conn->ctx->cfg[ENABLE_DIRECTORY_LISTING], "yes" ) ) {
-				
-				XX_httplib_handle_directory_request( conn, path );
-			}
-			else XX_httplib_send_http_error( conn, 403, "%s", "Error: Directory listing denied" );
+			edl = conn->ctx->cfg[ENABLE_DIRECTORY_LISTING];
+
+			if ( edl != NULL  &&  ! httplib_strcasecmp( edl, "yes" ) ) XX_httplib_handle_directory_request( conn, path );
+			else                                                       XX_httplib_send_http_error( conn, 403, "%s", "Error: Directory listing denied" );
 
 			return;
 		}
@@ -583,10 +583,9 @@ no_callback_resource:
 #endif /* !defined(NO_FILES) */
 
 #if 0
-	/* Perform redirect and auth checks before calling begin_request()
-	 * handler.
-	 * Otherwise, begin_request() would need to perform auth checks and
-	 * redirects.
+	/*
+	 * Perform redirect and auth checks before calling begin_request() handler.
+	 * Otherwise, begin_request() would need to perform auth checks and redirects.
 	 */
 #endif
 
