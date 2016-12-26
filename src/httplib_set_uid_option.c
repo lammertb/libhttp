@@ -42,7 +42,7 @@ bool XX_httplib_set_uid_option( struct httplib_context *ctx ) {
 
 #if defined(_WIN32)
 
-	return true;
+	return ( ctx != NULL );
 
 #else  /* _WIN32 */
 
