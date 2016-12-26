@@ -48,7 +48,7 @@ static int httplib_read_inner( struct httplib_connection *conn, void *buffie, si
 	if ( conn->consumed_content == 0  &&  conn->content_len == -1 ) {
 
 		conn->content_len = INT64_MAX;
-		conn->must_close = 1;
+		conn->must_close  = true;
 	}
 
 	nread = 0;

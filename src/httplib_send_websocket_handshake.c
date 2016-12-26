@@ -59,7 +59,7 @@ int XX_httplib_send_websocket_handshake( struct httplib_connection *conn, const 
 	XX_httplib_snprintf( conn, &truncated, buf, sizeof(buf), "%s%s", websock_key, magic );
 	if ( truncated ) {
 
-		conn->must_close = 1;
+		conn->must_close = true;
 		return 0;
 	}
 

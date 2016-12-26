@@ -112,7 +112,7 @@ void XX_httplib_handle_propfind( struct httplib_connection *conn, const char *pa
 
 	XX_httplib_gmt_time_string( date, sizeof(date), &curtime );
 
-	conn->must_close  = 1;
+	conn->must_close  = true;
 	conn->status_code = 207;
 	httplib_printf( conn, "HTTP/1.1 207 Multi-Status\r\n" "Date: %s\r\n", date );
 	XX_httplib_send_static_cache_header( conn );

@@ -51,7 +51,8 @@ void XX_httplib_handle_directory_request( struct httplib_connection *conn, const
 
 	sort_direction = ( conn->request_info.query_string != NULL  &&  conn->request_info.query_string[1] == 'd' ) ? 'a' : 'd';
 
-	conn->must_close = 1;
+	conn->must_close = true;
+
 	httplib_printf( conn, "HTTP/1.1 200 OK\r\n" );
 	XX_httplib_send_static_cache_header( conn );
 	httplib_printf( conn, "Date: %s\r\n" "Connection: close\r\n" "Content-Type: text/html; charset=utf-8\r\n\r\n", date );

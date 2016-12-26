@@ -281,7 +281,7 @@ void XX_httplib_handle_cgi_request( struct httplib_connection *conn, const char 
 	else                                                         conn->status_code = 200;
 
 	connection_state = XX_httplib_get_header( &ri, "Connection" );
-	if ( ! XX_httplib_header_has_option( connection_state, "keep-alive" ) ) conn->must_close = 1;
+	if ( ! XX_httplib_header_has_option( connection_state, "keep-alive" ) ) conn->must_close = true;
 
 	httplib_printf( conn, "HTTP/1.1 %d %s\r\n", conn->status_code, status_text );
 

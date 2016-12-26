@@ -93,7 +93,8 @@ int XX_httplib_getreq( struct httplib_connection *conn, char *ebuf, size_t ebuf_
 			 * Server did not send anything -> just close the connection
 			 */
 
-			conn->must_close = 1;
+			conn->must_close = true;
+
 			XX_httplib_snprintf( conn, NULL, ebuf, ebuf_len, "%s", "Client did not send a request" );
 			*err = 0;
 		}

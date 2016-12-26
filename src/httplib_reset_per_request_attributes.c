@@ -43,7 +43,7 @@ void XX_httplib_reset_per_request_attributes( struct httplib_connection *conn ) 
 	conn->consumed_content            = 0;
 	conn->status_code                 = -1;
 	conn->is_chunked                  = 0;
-	conn->must_close                  = 0;
+	conn->must_close                  = false;
 	conn->request_len                 = 0;
 	conn->throttle                    = 0;
 	conn->request_info.content_length = -1;
@@ -56,6 +56,5 @@ void XX_httplib_reset_per_request_attributes( struct httplib_connection *conn ) 
 	conn->request_info.num_headers    = 0;
 	conn->data_len                    = 0;
 	conn->chunk_remainder             = 0;
-	conn->internal_error              = 0;
 
 }  /* XX_httplib_reset_per_request_attributes */

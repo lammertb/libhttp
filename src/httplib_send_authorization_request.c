@@ -49,7 +49,7 @@ void XX_httplib_send_authorization_request( struct httplib_connection *conn ) {
 
 	nonce            ^= conn->ctx->auth_nonce_mask;
 	conn->status_code = 401;
-	conn->must_close  = 1;
+	conn->must_close  = true;
 
 	XX_httplib_gmt_time_string( date, sizeof(date), &curtime );
 

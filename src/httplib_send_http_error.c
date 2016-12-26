@@ -127,9 +127,9 @@ void XX_httplib_send_http_error( struct httplib_connection *conn, int status, co
 
 			if ( page_handler_found ) {
 
-				conn->in_error_handler = 1;
+				conn->in_error_handler = true;
 				XX_httplib_handle_file_based_request( conn, buf, &error_page_file );
-				conn->in_error_handler = 0;
+				conn->in_error_handler = false;
 
 				return;
 			}
@@ -147,7 +147,8 @@ void XX_httplib_send_http_error( struct httplib_connection *conn, int status, co
 
 		has_body = (status > 199 && status != 204 && status != 304);
 
-		conn->must_close = 1;
+		conn->must_close = true;
+
 		httplib_printf( conn, "HTTP/1.1 %d %s\r\n", status, status_text );
 		XX_httplib_send_no_cache_header( conn );
 

@@ -46,7 +46,7 @@ void XX_httplib_send_options( struct httplib_connection *conn ) {
 
 	curtime           = time( NULL );
 	conn->status_code = 200;
-	conn->must_close  = 1;
+	conn->must_close  = true;
 
 	XX_httplib_gmt_time_string( date, sizeof(date), &curtime );
 

@@ -310,7 +310,8 @@ void XX_httplib_handle_ssi_file_request( struct httplib_connection *conn, const 
 	}
 	
 	else {
-		conn->must_close = 1;
+		conn->must_close = true;
+
 		XX_httplib_gmt_time_string( date, sizeof(date), &curtime );
 		XX_httplib_fclose_on_exec( filep, conn );
 		httplib_printf(conn, "HTTP/1.1 200 OK\r\n");

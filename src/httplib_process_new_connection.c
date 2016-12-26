@@ -146,11 +146,11 @@ void XX_httplib_process_new_connection( struct httplib_connection *conn ) {
 				/*
 				 * TODO: handle non-local request (PROXY)
 				 */
-				conn->must_close = 1;
+				conn->must_close = true;
 			}
 		}
 		
-		else conn->must_close = 1;
+		else conn->must_close = true;
 
 		if ( ri->remote_user != NULL ) {
 

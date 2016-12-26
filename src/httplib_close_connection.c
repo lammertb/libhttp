@@ -49,7 +49,7 @@ void XX_httplib_close_connection( struct httplib_connection *conn ) {
 
 	httplib_lock_connection( conn );
 
-	conn->must_close = 1;
+	conn->must_close = true;
 
 #ifndef NO_SSL
 	if ( conn->ssl != NULL ) {

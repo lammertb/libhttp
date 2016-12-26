@@ -629,9 +629,8 @@ struct httplib_connection {					/*											*/
 	size_t		chunk_remainder;			/* Unread data from the last chunk							*/
 	char *		buf;					/* Buffer for received data								*/
 	char *		path_info;				/* PATH_INFO part of the URL								*/
-	int		must_close;				/* 1 if connection must be closed							*/
-	int		in_error_handler;			/* 1 if in handler for user defined error pages						*/
-	int		internal_error;				/* 1 if an error occured while processing the request					*/
+	bool		must_close;				/* true, if connection must be closed							*/
+	bool		in_error_handler;			/* true, if in handler for user defined error pages					*/
 	int		buf_size;				/* Buffer size										*/
 	int		request_len;				/* Size of the request + headers in a buffer						*/
 	int		data_len;				/* Total size of data in a buffer							*/
