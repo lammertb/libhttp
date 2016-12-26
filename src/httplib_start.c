@@ -215,7 +215,7 @@ struct httplib_context *httplib_start( const struct httplib_callbacks *callbacks
 	if ( ctx->callbacks.init_context != NULL ) ctx->callbacks.init_context( ctx );
 
 	ctx->callbacks.exit_context = exit_callback;
-	ctx->context_type           = 1; /* server context */
+	ctx->ctx_type               = CTX_TYPE_SERVER;
 
 	/*
 	 * Start master (listening) thread

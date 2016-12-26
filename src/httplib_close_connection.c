@@ -44,7 +44,7 @@ void XX_httplib_close_connection( struct httplib_connection *conn ) {
 	 * call the connection_close callback if assigned
 	 */
 
-	if ( conn->ctx->callbacks.connection_close != NULL  &&  conn->ctx->context_type == 1 ) conn->ctx->callbacks.connection_close( conn );
+	if ( conn->ctx->callbacks.connection_close != NULL  &&  conn->ctx->ctx_type == CTX_TYPE_SERVER ) conn->ctx->callbacks.connection_close( conn );
 
 	httplib_lock_connection( conn );
 
@@ -96,7 +96,7 @@ void httplib_close_connection( struct httplib_connection *conn ) {
 
 	if ( conn == NULL ) return;
 
-	if ( conn->ctx->context_type == 2 ) {
+	if ( conn->ctx->ctx_type == CTX_TYPE_CLIENT ) {
 
 		client_ctx        = conn->ctx;
 		conn->ctx->status = CTX_STATUS_STOPPING;

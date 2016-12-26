@@ -448,10 +448,15 @@ enum {
  * process of terminating and it can be terminated.
  */
 
-enum {
+enum ctx_status_t {
 	CTX_STATUS_RUNNING,
 	CTX_STATUS_STOPPING,
 	CTX_STATUS_TERMINATED
+};
+
+enum ctx_type_t {
+	CTX_TYPE_SERVER,
+	CTX_TYPE_CLIENT
 };
 
 #if defined(NO_SSL)
@@ -562,12 +567,12 @@ struct httplib_handler_info {
 
 struct httplib_context {
 
-	volatile int status;			/* Should we stop event loop								*/
+	volatile enum ctx_status_t status;	/* Should we stop event loop								*/
 	SSL_CTX *ssl_ctx;			/* SSL context										*/
 	char *cfg[NUM_OPTIONS];			/* LibHTTP configuration parameters							*/
 	struct httplib_callbacks callbacks;	/* User-defined callback function							*/
 	void *user_data;			/* User-defined data									*/
-	int context_type;			/* 1 = server context, 2 = client context						*/
+	enum ctx_type_t ctx_type;		/* CTX_TYPE_SERVER or CTX_TYPE_CLIENT							*/
 
 	struct socket *listening_sockets;
 	struct pollfd *listening_socket_fds;

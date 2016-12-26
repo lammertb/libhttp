@@ -106,7 +106,7 @@ struct httplib_connection *httplib_connect_websocket_client( const char *host, i
 
 	*newctx                    = *conn->ctx;
 	newctx->user_data          = user_data;
-	newctx->context_type       = 2;			/* client context type			*/
+	newctx->ctx_type           = CTX_TYPE_CLIENT;
 	newctx->cfg_worker_threads = 1;			/* one worker thread will be created	*/
 	newctx->workerthreadids    = httplib_calloc( newctx->cfg_worker_threads, sizeof(pthread_t) );
 
