@@ -49,7 +49,6 @@ struct httplib_context *httplib_start( const struct httplib_callbacks *callbacks
 	const char *value;
 	const char *default_value;
 	int idx;
-	bool ok;
 	int workerthreadcount;
 	unsigned int i;
 	void (*exit_callback)(const struct httplib_context *ctx) = NULL;
@@ -106,26 +105,12 @@ struct httplib_context *httplib_start( const struct httplib_callbacks *callbacks
 #endif
 	httplib_pthread_setspecific( XX_httplib_sTlsKey, & tls );
 
-	ok =         ( httplib_pthread_mutex_init( & ctx->thread_mutex, &XX_httplib_pthread_mutex_attr ) == 0 );
+	if ( httplib_pthread_mutex_init( & ctx->thread_mutex, &XX_httplib_pthread_mutex_attr )  ) return cleanup( ctx, "Cannot initialize thread mutex"          );
 #if !defined(ALTERNATIVE_QUEUE)
-	ok = ok  &&  ( httplib_pthread_cond_init(  & ctx->sq_empty, NULL ) == 0 );
-	ok = ok  &&  ( httplib_pthread_cond_init(  & ctx->sq_full,  NULL ) == 0 );
+	if ( httplib_pthread_cond_init(  & ctx->sq_empty, NULL )                                ) return cleanup( ctx, "Cannot initialize empty queue condition" );
+	if ( httplib_pthread_cond_init(  & ctx->sq_full,  NULL )                                ) return cleanup( ctx, "Cannot initialize full queue condition"  );
 #endif
-	ok = ok  &&  ( httplib_pthread_mutex_init( & ctx->nonce_mutex,  & XX_httplib_pthread_mutex_attr ) == 0 );
-
-	if ( ! ok ) {
-
-		/*
-		 * Fatal error - abort start. However, this situation should never
-		 * occur in practice.
-		 */
-
-		httplib_cry( XX_httplib_fc( ctx ), "Cannot initialize thread synchronization objects" );
-		httplib_free( ctx );
-		httplib_pthread_setspecific( XX_httplib_sTlsKey, NULL );
-
-		return NULL;
-	}
+	if ( httplib_pthread_mutex_init( & ctx->nonce_mutex,  & XX_httplib_pthread_mutex_attr ) ) return cleanup( ctx, "Cannot initialize nonce mutex"           );
 
 	if ( callbacks != NULL ) {
 
