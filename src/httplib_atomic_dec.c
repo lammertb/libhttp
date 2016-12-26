@@ -46,7 +46,7 @@ LIBHTTP_API int httplib_atomic_dec( volatile int *addr ) {
 	 * so whatever you use, the other SDK is likely to raise a warning.
 	 */
 
-	return InterlockedDecrement( (volatile long *)addr );
+	return InterlockedDecrement( addr );
 
 #elif defined(__GNUC__) && ((__GNUC__ > 4) || ((__GNUC__ == 4) && (__GNUC_MINOR__ > 0)))
 
