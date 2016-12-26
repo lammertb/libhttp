@@ -37,27 +37,19 @@
  * returned, otherwise NULL.
  */
 
-struct httplib_connection *httplib_connect_websocket_client(const char *host,
-                            int port,
-                            int use_ssl,
-                            char *error_buffer,
-                            size_t error_buffer_size,
-                            const char *path,
-                            const char *origin,
-                            httplib_websocket_data_handler data_func,
-                            httplib_websocket_close_handler close_func,
-                            void *user_data ) {
-
-	struct httplib_connection *conn = NULL;
+struct httplib_connection *httplib_connect_websocket_client( const char *host, int port, int use_ssl, char *error_buffer, size_t error_buffer_size, const char *path, const char *origin, httplib_websocket_data_handler data_func, httplib_websocket_close_handler close_func, void *user_data ) {
 
 #if defined(USE_WEBSOCKET)
-	struct httplib_context *newctx = NULL;
+	struct httplib_connection *conn;
+	struct httplib_context *newctx;
 	struct websocket_client_thread_data *thread_data;
 	static const char *magic = "x3JJHMbDL1EzLkh9GBhXDw==";
-	static const char *handshake_req;
+	const char *handshake_req;
 
-	if ( origin != NULL ) {
-		handshake_req = "GET %s HTTP/1.1\r\n"
+	conn   = NULL;
+	newctx = NULL;
+
+	if ( origin != NULL ) handshake_req = "GET %s HTTP/1.1\r\n"
 		                "Host: %s\r\n"
 		                "Upgrade: websocket\r\n"
 		                "Connection: Upgrade\r\n"
@@ -65,29 +57,26 @@ struct httplib_connection *httplib_connect_websocket_client(const char *host,
 		                "Sec-WebSocket-Version: 13\r\n"
 		                "Origin: %s\r\n"
 		                "\r\n";
-	}
 	
-	else {
-		handshake_req = "GET %s HTTP/1.1\r\n"
+	else handshake_req = "GET %s HTTP/1.1\r\n"
 		                "Host: %s\r\n"
 		                "Upgrade: websocket\r\n"
 		                "Connection: Upgrade\r\n"
 		                "Sec-WebSocket-Key: %s\r\n"
 		                "Sec-WebSocket-Version: 13\r\n"
 		                "\r\n";
-	}
 
 	/*
 	 * Establish the client connection and request upgrade
 	 */
 
-	conn = httplib_download(host, port, use_ssl, error_buffer, error_buffer_size, handshake_req, path, host, magic, origin);
+	conn = httplib_download( host, port, use_ssl, error_buffer, error_buffer_size, handshake_req, path, host, magic, origin );
 
 	/*
 	 * Connection object will be null if something goes wrong
 	 */
 
-	if ( conn == NULL  ||  strcmp(conn->request_info.request_uri, "101") ) {
+	if ( conn == NULL  ||  strcmp( conn->request_info.request_uri, "101" ) ) {
 
 		if ( ! *error_buffer ) {
 
@@ -98,12 +87,9 @@ struct httplib_connection *httplib_connect_websocket_client(const char *host,
 
 			XX_httplib_snprintf( conn, NULL, error_buffer, error_buffer_size, "Unexpected server reply" );
 		}
-		if ( conn != NULL ) {
 
-			httplib_free( conn );
-			conn = NULL;
-		}
-		return conn;
+		if ( conn != NULL ) httplib_free( conn );
+		return NULL;
 	}
 
 	/*
@@ -111,15 +97,41 @@ struct httplib_connection *httplib_connect_websocket_client(const char *host,
 	 * callback function, we need to create a copy and modify it.
 	 */
 
-	newctx = httplib_malloc(   sizeof(struct httplib_context) );
-	memcpy( newctx, conn->ctx, sizeof(struct httplib_context) );
+	newctx = httplib_malloc( sizeof(struct httplib_context) );
 
+	if ( newctx == NULL ) {
+	
+		httplib_free( conn );
+
+		return NULL;
+	}
+
+	*newctx                    = *conn->ctx;
 	newctx->user_data          = user_data;
 	newctx->context_type       = 2;			/* client context type			*/
 	newctx->cfg_worker_threads = 1;			/* one worker thread will be created	*/
 	newctx->workerthreadids    = httplib_calloc( newctx->cfg_worker_threads, sizeof(pthread_t) );
+
+	if ( newctx->workerthreadids == NULL ) {
+
+		httplib_free( newctx );
+		httplib_free( conn   );
+
+		return NULL;
+	}
+
 	conn->ctx                  = newctx;
 	thread_data                = httplib_calloc( sizeof(struct websocket_client_thread_data), 1 );
+
+	if ( thread_data == NULL ) {
+
+		httplib_free( newctx->workerthreadids );
+		httplib_free( newctx                  );
+		httplib_free( conn                    );
+
+		return NULL;
+	}
+
 	thread_data->conn          = conn;
 	thread_data->data_handler  = data_func;
 	thread_data->close_handler = close_func;
@@ -131,15 +143,17 @@ struct httplib_connection *httplib_connect_websocket_client(const char *host,
 	 * called on the client connection
 	 */
 
-	if ( XX_httplib_start_thread_with_id( XX_httplib_websocket_client_thread, (void *)thread_data, newctx->workerthreadids) != 0 ) {
+	if ( XX_httplib_start_thread_with_id( XX_httplib_websocket_client_thread, thread_data, newctx->workerthreadids) != 0 ) {
 
 		httplib_free( thread_data             );
 		httplib_free( newctx->workerthreadids );
 		httplib_free( newctx                  );
 		httplib_free( conn                    );
 
-		conn = NULL;
+		return NULL;
 	}
+
+	return conn;
 #else
 	UNUSED_PARAMETER(host);
 	UNUSED_PARAMETER(port);
@@ -151,8 +165,8 @@ struct httplib_connection *httplib_connect_websocket_client(const char *host,
 	UNUSED_PARAMETER(user_data);
 	UNUSED_PARAMETER(data_func);
 	UNUSED_PARAMETER(close_func);
-#endif
 
-	return conn;
+	return NULL;
+#endif
 
 }  /* httplib_connect_websocket_client */
