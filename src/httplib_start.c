@@ -127,7 +127,7 @@ struct httplib_context *httplib_start( const struct httplib_callbacks *callbacks
 		return NULL;
 	}
 
-	if ( callbacks ) {
+	if ( callbacks != NULL ) {
 
 		ctx->callbacks              = *callbacks;
 		exit_callback               = callbacks->exit_context;
@@ -188,13 +188,11 @@ struct httplib_context *httplib_start( const struct httplib_callbacks *callbacks
 
 	if ( ! XX_httplib_set_gpass_option( ctx ) ||
 #if !defined(NO_SSL)
-	    ! XX_httplib_set_ssl_option( ctx ) ||
+	    ! XX_httplib_set_ssl_option(    ctx ) ||
 #endif
-	    ! XX_httplib_set_ports_option( ctx ) ||
-#if !defined(_WIN32)
-	    ! XX_httplib_set_uid_option( ctx ) ||
-#endif
-	    ! XX_httplib_set_acl_option( ctx )     ) return cleanup( ctx );
+	    ! XX_httplib_set_ports_option(  ctx ) ||
+	    ! XX_httplib_set_uid_option(    ctx ) ||
+	    ! XX_httplib_set_acl_option(    ctx )     ) return cleanup( ctx );
 
 #if !defined(_WIN32)
 

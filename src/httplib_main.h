@@ -891,7 +891,7 @@ int			XX_httplib_set_sock_timeout( SOCKET sock, int milliseconds );
 int			XX_httplib_set_tcp_nodelay( SOCKET sock, int nodelay_on );
 void			XX_httplib_set_thread_name( const char *name );
 int			XX_httplib_set_throttle( const char *spec, uint32_t remote_ip, const char *uri );
-int			XX_httplib_set_uid_option( struct httplib_context *ctx );
+bool			XX_httplib_set_uid_option( struct httplib_context *ctx );
 bool			XX_httplib_should_decode_url( const struct httplib_connection *conn );
 bool			XX_httplib_should_keep_alive( const struct httplib_connection *conn );
 char *			XX_httplib_skip( char **buf, const char *delimiters );

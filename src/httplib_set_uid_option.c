@@ -28,33 +28,40 @@
 #include "httplib_main.h"
 
 /*
- * int XX_httplib_set_uid_option( struct httplib_contect *ctx );
+ * bool XX_httplib_set_uid_option( struct httplib_contect *ctx );
  *
  * The function XX_httplib_set_uid_option() runs on systems which support it
- * the context in the security environment of a specific user.
+ * the context in the security environment of a specific user. The function can
+ * be called for Windows, but it doesn't do anything because Windows doesn't
+ * support the run-as options as available under *nix systems. Windows returns
+ * true though, to inform that the function completed without error.
  */
 
-#if !defined(_WIN32)
+bool XX_httplib_set_uid_option( struct httplib_context *ctx ) {
 
-int XX_httplib_set_uid_option( struct httplib_context *ctx ) {
+#if defined(_WIN32)
+
+	return true;
+
+#else  /* _WIN32 */
 
 	struct passwd *pw;
 	const char *uid;
 
-	if ( ctx == NULL ) return 0;
+	if ( ctx == NULL ) return false;
 
 	uid = ctx->cfg[RUN_AS_USER];
 
-	if ( uid == NULL ) return 1;
+	if ( uid == NULL ) return true;
 
 	if      ( (pw = getpwnam(uid)) == NULL ) httplib_cry( XX_httplib_fc(ctx), "%s: unknown user [%s]", __func__, uid                  );
 	else if ( setgid(pw->pw_gid)   == -1   ) httplib_cry( XX_httplib_fc(ctx), "%s: setgid(%s): %s",    __func__, uid, strerror(errno) );
 	else if ( setgroups(0, NULL)           ) httplib_cry( XX_httplib_fc(ctx), "%s: setgroups(): %s",   __func__,      strerror(errno) );
 	else if ( setuid(pw->pw_uid)   == -1   ) httplib_cry( XX_httplib_fc(ctx), "%s: setuid(%s): %s",    __func__, uid, strerror(errno) );
-	else return 1;
+	else return true;
 
-	return 0;
-
-}  /* XX_httplib_set_uid_option */
+	return false;
 
 #endif /* !_WIN32 */
+
+}  /* XX_httplib_set_uid_option */
