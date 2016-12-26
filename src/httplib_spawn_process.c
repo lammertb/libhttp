@@ -49,7 +49,7 @@ pid_t XX_httplib_spawn_process( struct httplib_connection *conn, const char *pro
 	char full_dir[PATH_MAX];
 	char cmdline[PATH_MAX];
 	char buf[PATH_MAX];
-	int truncated;
+	bool truncated;
 	struct file file = STRUCT_FILE_INITIALIZER;
 	STARTUPINFOA si;
 	PROCESS_INFORMATION pi = {0};
@@ -80,7 +80,7 @@ pid_t XX_httplib_spawn_process( struct httplib_connection *conn, const char *pro
 	 * If CGI file is a script, try to read the interpreter line
 	 */
 
-	interp = conn->ctx->config[CGI_INTERPRETER];
+	interp = conn->ctx->cfg[CGI_INTERPRETER];
 
 	if ( interp == NULL ) {
 
