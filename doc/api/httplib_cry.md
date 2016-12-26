@@ -1,12 +1,13 @@
 # LibHTTP API Reference
 
-### `httplib_cry( conn, fmt, ... );`
+### `httplib_cry( ctx, conn, fmt, ... );`
 
 ### Parameters
 
 | Parameter | Type | Description |
 | :--- | :--- | :--- |
-|**`conn`**|`const struct httplib_connection *`|The connection on which a problem occured|
+|**`ctx`**|`const struct httplib_context *`|The context where the problem occured|
+|**`conn`**|`const struct httplib_connection *`|The connection on which a problem occured, or NULL for a connection independent error|
 |**`fmt`**|`const char *`|Format string without a line return|
 |**`...`**|*various*|Parameters depending on the format string|
 

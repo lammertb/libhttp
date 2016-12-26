@@ -24,7 +24,7 @@ LibHTTP is often used as HTTP and HTTPS library inside a larger application.  A 
 ### System Functions
 
 * [`httplib_check_feature( feature );`](api/httplib_check_feature.md)
-* [`httplib_cry( conn, fmt, ... );`](api/httplib_cry.md)
+* [`httplib_cry( ctx, conn, fmt, ... );`](api/httplib_cry.md)
 * [`httplib_get_context( conn );`](api/httplib_get_context.md)
 * [`httplib_get_builtin_mime_type( file_name );`](api/httplib_get_builtin_mime_type.md)
 * [`httplib_get_option( ctx, name );`](api/httplib_get_option.md)
