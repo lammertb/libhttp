@@ -119,7 +119,7 @@ static void master_thread_run(void *thread_func_param) {
 
 	pfd = ctx->listening_socket_fds;
 
-	while ( ctx->stop_flag == 0 ) {
+	while ( ctx->status == CTX_STATUS_RUNNING ) {
 
 		for (i=0; i<ctx->num_listening_sockets; i++) {
 
@@ -139,13 +139,13 @@ static void master_thread_run(void *thread_func_param) {
 				 * pfd[i].revents == POLLIN.
 				 */
 
-				if ( ctx->stop_flag == 0  &&  (pfd[i].revents & POLLIN)) XX_httplib_accept_new_connection( & ctx->listening_sockets[i], ctx );
+				if ( ctx->status == CTX_STATUS_RUNNING  &&  (pfd[i].revents & POLLIN)) XX_httplib_accept_new_connection( & ctx->listening_sockets[i], ctx );
 			}
 		}
 	}
 
 	/*
-	 * Here stop_flag is 1 - Initiate shutdown.
+	 * Here status is CTX_STATUS_STOPPING - Initiate shutdown.
 	 */
 
 	/*
@@ -203,6 +203,6 @@ static void master_thread_run(void *thread_func_param) {
 	 * thread does, as ctx becomes invalid after this line.
 	 */
 
-	ctx->stop_flag = 2;
+	ctx->status = CTX_STATUS_TERMINATED;
 
 }  /* master_thread_run */

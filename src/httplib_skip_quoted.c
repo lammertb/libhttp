@@ -20,18 +20,21 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
- *
- * ============
- * Release: 2.0
  */
 
 #include "httplib_main.h"
 
 /*
- * Skip the characters until one of the delimiters characters found.
- * 0-terminate resulting word. Skip the delimiter and following whitespaces.
- * Advance pointer to buffer to the next word. Return found 0-terminated word.
- * Delimiters can be quoted with quotechar.
+ * char *XX_httplib_skip_quoted( char **buf, const char *delimiters, const char *whitespace, char quotechar );
+ *
+ * The function XX_httplib_skip_quoted() skips characters in an input string
+ * until one if the delimiter characters is found. The resulting word is NUL
+ * terminated. The delimiter and following white space characters are skipped.
+ * The pointer is then advanced to the next word. The return value is a pointer
+ * to a NUL terminated word. Delimiters can be quoted with a quote character
+ * which is also provided as a parameter.
+ *
+ * If an error occurs, NULL is returned.
  */
 
 char *XX_httplib_skip_quoted( char **buf, const char *delimiters, const char *whitespace, char quotechar ) {
@@ -78,7 +81,7 @@ char *XX_httplib_skip_quoted( char **buf, const char *delimiters, const char *wh
 			}
 		}
 		
-		for (p++; p < end_word; p++) *p = '\0';
+		for (p++; p<end_word; p++) *p = '\0';
 	}
 
 	if (*end_word == '\0') *buf = end_word;

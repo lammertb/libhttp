@@ -86,7 +86,7 @@ void XX_httplib_produce_socket(struct httplib_context *ctx, const struct socket 
 	 * If the queue is full, wait
 	 */
 
-	while ( ctx->stop_flag == 0  &&  ctx->sq_head-ctx->sq_tail >= QUEUE_SIZE(ctx) ) {
+	while ( ctx->status == CTX_STATUS_RUNNING  &&  ctx->sq_head-ctx->sq_tail >= QUEUE_SIZE(ctx) ) {
 
 		httplib_pthread_cond_wait( & ctx->sq_empty, & ctx->thread_mutex );
 	}

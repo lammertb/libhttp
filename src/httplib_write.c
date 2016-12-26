@@ -71,7 +71,7 @@ int httplib_write( struct httplib_connection *conn, const void *buffie, size_t l
 			buf                        = buf + total;
 			conn->last_throttle_bytes += total;
 
-			while ( total < len  &&  conn->ctx->stop_flag == 0 ) {
+			while ( total < len  &&  conn->ctx->status == CTX_STATUS_RUNNING ) {
 
 				if ( conn->throttle > len-total ) allowed = len-total;
 				else                              allowed = conn->throttle;

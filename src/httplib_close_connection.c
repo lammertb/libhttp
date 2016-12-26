@@ -98,8 +98,8 @@ void httplib_close_connection( struct httplib_connection *conn ) {
 
 	if ( conn->ctx->context_type == 2 ) {
 
-		client_ctx           = conn->ctx;
-		conn->ctx->stop_flag = 1;
+		client_ctx        = conn->ctx;
+		conn->ctx->status = CTX_STATUS_STOPPING;
 	}
 
 	else client_ctx = NULL;

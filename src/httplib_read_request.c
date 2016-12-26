@@ -63,9 +63,9 @@ int XX_httplib_read_request( FILE *fp, struct httplib_connection *conn, char *bu
 
 	clock_gettime( CLOCK_MONOTONIC, & last_action_time );
 
-	while ( (conn->ctx->stop_flag == 0)  &&
-		(*nread < bufsiz)            &&
-		(request_len == 0)           &&
+	while ( conn->ctx->status == CTX_STATUS_RUNNING  &&
+		*nread            <  bufsiz              &&
+		request_len       == 0                   &&
 		((XX_httplib_difftimespec(&last_action_time, &(conn->req_time)) <= request_timeout) || (request_timeout < 0)) &&
 		((n = XX_httplib_pull(fp, conn, buf + *nread, bufsiz - *nread, request_timeout)) > 0)) {
 

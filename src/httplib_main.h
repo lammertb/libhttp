@@ -441,6 +441,19 @@ enum {
 	NUM_OPTIONS
 };
 
+/*
+ * enum CTX_STATUS_...
+ *
+ * A context can be in several states. It can be running, it can be in the
+ * process of terminating and it can be terminated.
+ */
+
+enum {
+	CTX_STATUS_RUNNING,
+	CTX_STATUS_STOPPING,
+	CTX_STATUS_TERMINATED
+};
+
 #if defined(NO_SSL)
 
 typedef struct SSL SSL; /* dummy for SSL argument to push/pull */
@@ -550,7 +563,7 @@ struct httplib_handler_info {
 
 struct httplib_context {
 
-	volatile int stop_flag;			/* Should we stop event loop								*/
+	volatile int status;			/* Should we stop event loop								*/
 	SSL_CTX *ssl_ctx;			/* SSL context										*/
 	char *cfg[NUM_OPTIONS];			/* LibHTTP configuration parameters							*/
 	struct httplib_callbacks callbacks;	/* User-defined callback function							*/

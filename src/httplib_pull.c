@@ -102,7 +102,7 @@ int XX_httplib_pull( FILE *fp, struct httplib_connection *conn, char *buf, int l
 			if (nread == 0) return -1; /* shutdown of the socket at client side */
 		}
 
-		if ( conn->ctx->stop_flag ) return -1;
+		if ( conn->ctx->status != CTX_STATUS_RUNNING ) return -1;
 
 		if ( nread > 0  || (nread == 0 && len == 0) ) {
 

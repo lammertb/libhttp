@@ -171,7 +171,7 @@ void XX_httplib_process_new_connection( struct httplib_connection *conn ) {
 		 * in loop exit condition.
 		 */
 
-		keep_alive = conn->ctx->stop_flag == 0  &&  keep_alive_enabled  &&  conn->content_len >= 0  &&  XX_httplib_should_keep_alive( conn );
+		keep_alive = conn->ctx->status == CTX_STATUS_RUNNING  &&  keep_alive_enabled  &&  conn->content_len >= 0  &&  XX_httplib_should_keep_alive( conn );
 
 		/*
 		 * Discard all buffered data for this request

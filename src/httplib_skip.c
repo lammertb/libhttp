@@ -20,9 +20,6 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
- *
- * ============
- * Release: 2.0
  */
 
 #include "httplib_main.h"
@@ -32,7 +29,8 @@
  *
  * The function XX_httplib_skip is a simplified version of the function
  * XX_httplib_skip_quoted() without a quote char and where delimiters are only
- * whitespace.
+ * whitespace. The function doesn't check though if the delimiters passed as
+ * parameters are really only white space characters.
  */
 
 char *XX_httplib_skip( char **buf, const char *delimiters ) {

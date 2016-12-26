@@ -89,7 +89,7 @@ void XX_httplib_read_websocket( struct httplib_connection *conn, httplib_websock
 	 * callback, and waiting repeatedly until an error occurs.
 	 */
 
-	while ( ! conn->ctx->stop_flag ) {
+	while ( conn->ctx->status == CTX_STATUS_RUNNING ) {
 
 		header_len = 0;
 

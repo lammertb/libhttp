@@ -115,7 +115,7 @@ static int64_t push( struct httplib_context *ctx, FILE *fp, SOCKET sock, SSL *ss
 			}
 		}
 
-		if ( ctx->stop_flag ) return -1;
+		if ( ctx->status != CTX_STATUS_RUNNING ) return -1;
 
 		if ( n > 0  ||  (n == 0 && len == 0) ) return n;
 
@@ -166,7 +166,7 @@ int64_t XX_httplib_push_all( struct httplib_context *ctx, FILE *fp, SOCKET sock,
 	if ( ctx->cfg[REQUEST_TIMEOUT] != NULL ) timeout = atoi( ctx->cfg[REQUEST_TIMEOUT] ) / 1000.0;
 	else                                     timeout = -1.0;
 
-	while ( len > 0  &&  ctx->stop_flag == 0 ) {
+	while ( len > 0  &&  ctx->status == CTX_STATUS_RUNNING ) {
 
 		n = push( ctx, fp, sock, ssl, buf + nwritten, len, timeout );
 

@@ -51,16 +51,20 @@ void httplib_stop( struct httplib_context *ctx ) {
 	ctx->masterthreadid = 0;
 
 	/*
-	 * Set stop flag, so all threads know they have to exit.
+	 * Set stop flag, so all threads know they have to exit. If for some
+	 * reason the context was already stopping or terminated, we do not set
+	 * the stopping request here again, just to be sure that we don't
+	 * accidentally reset a terminated state back to a stopping state. In
+	 * that case the context would never be flagged as terminated again.
 	 */
 
-	ctx->stop_flag = 1;
+	if ( ctx->status == CTX_STATUS_RUNNING ) ctx->status = CTX_STATUS_STOPPING;
 
 	/*
 	 * Wait until everything has stopped.
 	 */
 
-	while ( ctx->stop_flag != 2 ) httplib_sleep( 10 );
+	while ( ctx->status != CTX_STATUS_TERMINATED ) httplib_sleep( 10 );
 
 	httplib_pthread_join( mt, NULL );
 	XX_httplib_free_context( ctx );
