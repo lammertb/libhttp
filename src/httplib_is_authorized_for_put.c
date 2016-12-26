@@ -37,7 +37,7 @@ int XX_httplib_is_authorized_for_put( struct httplib_connection *conn ) {
 
 	if ( conn == NULL  ||  conn->ctx == NULL ) return 0;
 
-	passfile = conn->ctx->config[PUT_DELETE_PASSWORDS_FILE];
+	passfile = conn->ctx->cfg[PUT_DELETE_PASSWORDS_FILE];
 	ret      = 0;
 
 	if ( passfile != NULL  &&  XX_httplib_fopen( conn, passfile, "r", &file ) ) {

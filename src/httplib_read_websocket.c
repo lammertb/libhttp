@@ -79,11 +79,11 @@ void XX_httplib_read_websocket( struct httplib_connection *conn, httplib_websock
 	unsigned char mop; /* mask flag and opcode */
 	double timeout;
 
-	timeout = -1.0;
 	data    = mem;
+	timeout = -1.0;
 
-	if (                     conn->ctx->config[WEBSOCKET_TIMEOUT] ) timeout = atoi( conn->ctx->config[WEBSOCKET_TIMEOUT] ) / 1000.0;
-	if ( timeout <= 0.0  &&  conn->ctx->config[REQUEST_TIMEOUT]   ) timeout = atoi( conn->ctx->config[REQUEST_TIMEOUT]   ) / 1000.0;
+	if (                     conn->ctx->cfg[WEBSOCKET_TIMEOUT] != NULL ) timeout = atof( conn->ctx->cfg[WEBSOCKET_TIMEOUT] ) / 1000.0;
+	if ( timeout <= 0.0  &&  conn->ctx->cfg[REQUEST_TIMEOUT]   != NULL ) timeout = atof( conn->ctx->cfg[REQUEST_TIMEOUT]   ) / 1000.0;
 
 	XX_httplib_set_thread_name( "wsock" );
 

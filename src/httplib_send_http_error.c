@@ -63,8 +63,8 @@ void XX_httplib_send_http_error( struct httplib_connection *conn, int status, co
 			 * Send user defined error pages, if defined
 			 */
 
-			error_handler       = conn->ctx->config[ERROR_PAGES];
-			error_page_file_ext = conn->ctx->config[INDEX_FILES];
+			error_handler       = conn->ctx->cfg[ERROR_PAGES];
+			error_page_file_ext = conn->ctx->cfg[INDEX_FILES];
 			page_handler_found  = 0;
 
 			if ( error_handler != NULL ) {
@@ -106,7 +106,9 @@ void XX_httplib_send_http_error( struct httplib_connection *conn, int status, co
 					 */
 
 					len  = (int)strlen( buf );
-					tstr = strchr( error_page_file_ext, '.' );
+
+					if ( error_page_file_ext != NULL ) tstr = strchr( error_page_file_ext, '.' );
+					else                               tstr = NULL;
 
 					while ( tstr ) {
 

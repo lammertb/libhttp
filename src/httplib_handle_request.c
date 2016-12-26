@@ -150,7 +150,7 @@ void XX_httplib_handle_request( struct httplib_connection *conn ) {
 	 * 3. if this ip has limited speed, set it for this connection
 	 */
 
-	conn->throttle = XX_httplib_set_throttle( conn->ctx->config[THROTTLE], XX_httplib_get_remote_ip( conn ), ri->local_uri );
+	conn->throttle = XX_httplib_set_throttle( conn->ctx->cfg[THROTTLE], XX_httplib_get_remote_ip( conn ), ri->local_uri );
 
 	/*
 	 * 4. call a "handle everything" callback, if registered
@@ -274,7 +274,7 @@ no_callback_resource:
 #if defined(NO_FILES)
 		if (1) {
 #else
-		if ( conn->ctx->config[DOCUMENT_ROOT] == NULL ) {
+		if ( conn->ctx->cfg[DOCUMENT_ROOT] == NULL ) {
 #endif
 			/*
 			 * This server does not have any real files, thus the
@@ -416,7 +416,7 @@ no_callback_resource:
 	 * by a script file. Thus, a DOCUMENT_ROOT must exist.
 	 */
 
-	if ( conn->ctx->config[DOCUMENT_ROOT] == NULL ) {
+	if ( conn->ctx->cfg[DOCUMENT_ROOT] == NULL ) {
 
 		XX_httplib_send_http_error( conn, 404, "%s", "Not Found" );
 		return;
@@ -568,7 +568,10 @@ no_callback_resource:
 			 * 14.2. no substitute file
 			 */
 
-			if ( ! httplib_strcasecmp( conn->ctx->config[ENABLE_DIRECTORY_LISTING], "yes" ) ) XX_httplib_handle_directory_request( conn, path );
+			if ( conn->ctx->cfg[ENABLE_DIRECTORY_LISTING] != NULL  &&  ! httplib_strcasecmp( conn->ctx->cfg[ENABLE_DIRECTORY_LISTING], "yes" ) ) {
+				
+				XX_httplib_handle_directory_request( conn, path );
+			}
 			else XX_httplib_send_http_error( conn, 403, "%s", "Error: Directory listing denied" );
 
 			return;

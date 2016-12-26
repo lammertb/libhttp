@@ -52,16 +52,8 @@ int XX_httplib_read_request( FILE *fp, struct httplib_connection *conn, char *bu
 
 	memset( & last_action_time, 0, sizeof(last_action_time) );
 
-	if ( conn->ctx->config[REQUEST_TIMEOUT] != NULL ) {
-
-		/*
-		 * value of request_timeout is in seconds, config in milliseconds
-		 */
-
-		request_timeout = atof( conn->ctx->config[REQUEST_TIMEOUT] ) / 1000.0;
-	}
-	
-	else request_timeout = -1.0;
+	if ( conn->ctx->cfg[REQUEST_TIMEOUT] != NULL ) request_timeout = atof( conn->ctx->cfg[REQUEST_TIMEOUT] ) / 1000.0;
+	else                                           request_timeout = -1.0;
 
 	request_len = XX_httplib_get_request_len( buf, *nread );
 

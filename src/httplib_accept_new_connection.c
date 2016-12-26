@@ -97,7 +97,7 @@ void XX_httplib_accept_new_connection( const struct socket *listener, struct htt
 		 * are relatively small (eg. less than 1400 bytes).
 		 */
 
-		if ( ctx != NULL  &&  ctx->config[CONFIG_TCP_NODELAY] != NULL  &&  ! strcmp(ctx->config[CONFIG_TCP_NODELAY], "1" ) ) {
+		if ( ctx != NULL  &&  ctx->cfg[CONFIG_TCP_NODELAY] != NULL  &&  ! strcmp(ctx->cfg[CONFIG_TCP_NODELAY], "1" ) ) {
 
 			if ( XX_httplib_set_tcp_nodelay( so.sock, 1 ) != 0 ) {
 
@@ -105,8 +105,8 @@ void XX_httplib_accept_new_connection( const struct socket *listener, struct htt
 			}
 		}
 
-		if ( ctx != NULL  &&  ctx->config[REQUEST_TIMEOUT] ) timeout = atoi( ctx->config[REQUEST_TIMEOUT] );
-		else                                                 timeout = -1;
+		if ( ctx != NULL  &&  ctx->cfg[REQUEST_TIMEOUT] != NULL ) timeout = atoi( ctx->cfg[REQUEST_TIMEOUT] );
+		else                                                      timeout = -1;
 
 		if ( timeout > 0 ) XX_httplib_set_sock_timeout( so.sock, timeout );
 

@@ -166,8 +166,8 @@ int64_t XX_httplib_push_all( struct httplib_context *ctx, FILE *fp, SOCKET sock,
 
 	nwritten = 0;
 
-	if ( ctx->config[REQUEST_TIMEOUT] != NULL ) timeout = atoi( ctx->config[REQUEST_TIMEOUT] ) / 1000.0;
-	else                                        timeout = -1.0;
+	if ( ctx->cfg[REQUEST_TIMEOUT] != NULL ) timeout = atoi( ctx->cfg[REQUEST_TIMEOUT] ) / 1000.0;
+	else                                     timeout = -1.0;
 
 	while ( len > 0  &&  ctx->stop_flag == 0 ) {
 

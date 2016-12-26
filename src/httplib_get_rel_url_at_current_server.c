@@ -55,7 +55,7 @@ const char * XX_httplib_get_rel_url_at_current_server( const char *uri, const st
 	 * DNS is case insensitive, so use case insensitive string compare here
 	 */
 
-	server_domain = conn->ctx->config[AUTHENTICATION_DOMAIN];
+	server_domain = conn->ctx->cfg[AUTHENTICATION_DOMAIN];
 	if ( server_domain == NULL ) return 0;
 
 	server_domain_len = strlen( server_domain );

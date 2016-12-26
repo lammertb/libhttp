@@ -60,6 +60,7 @@ void XX_httplib_interpret_uri( struct httplib_connection *conn, char *filename, 
 	bool truncated;
 #if !defined(NO_CGI)
 	char *p;
+	const char *cgi_ext;
 #endif  /* !NO_CGI */
 #else  /* NO_FILES */
 	UNUSED_PARAMETER( filename_buf_len );
@@ -68,7 +69,7 @@ void XX_httplib_interpret_uri( struct httplib_connection *conn, char *filename, 
 	if ( conn == NULL  ||  conn->ctx == NULL  ||  filep == NULL ) return;
 
 	uri  = conn->request_info.local_uri;
-	root = conn->ctx->config[DOCUMENT_ROOT];
+	root = conn->ctx->cfg[DOCUMENT_ROOT];
 
 	memset( filep, 0, sizeof(*filep) );
 
@@ -80,7 +81,7 @@ void XX_httplib_interpret_uri( struct httplib_connection *conn, char *filename, 
 #if defined(USE_WEBSOCKET)
 	*is_websocket_request     = XX_httplib_is_websocket_protocol( conn );
 #if !defined(NO_FILES)
-	if ( *is_websocket_request  &&  conn->ctx->config[WEBSOCKET_ROOT] ) root = conn->ctx->config[WEBSOCKET_ROOT];
+	if ( *is_websocket_request  &&  conn->ctx->cfg[WEBSOCKET_ROOT] != NULL ) root = conn->ctx->cfg[WEBSOCKET_ROOT];
 #endif /* !NO_FILES */
 #else  /* USE_WEBSOCKET */
 	*is_websocket_request = false;
@@ -112,7 +113,7 @@ void XX_httplib_interpret_uri( struct httplib_connection *conn, char *filename, 
 
 	if ( truncated ) goto interpret_cleanup;
 
-	rewrite = conn->ctx->config[REWRITE];
+	rewrite = conn->ctx->cfg[REWRITE];
 
 	while ( (rewrite = XX_httplib_next_option( rewrite, &a, &b )) != NULL ) {
 
@@ -139,11 +140,9 @@ void XX_httplib_interpret_uri( struct httplib_connection *conn, char *filename, 
 		 * File exists. Check if it is a script type.
 		 */
 
-		if (0
-#if !defined(NO_CGI)
-		    || XX_httplib_match_prefix(conn->ctx->config[CGI_EXTENSIONS], strlen(conn->ctx->config[CGI_EXTENSIONS]), filename) > 0
-#endif
-		    ) {
+		if ( conn->ctx->cfg[CGI_EXTENSIONS] != NULL  &&
+		     XX_httplib_match_prefix(conn->ctx->cfg[CGI_EXTENSIONS], strlen(conn->ctx->cfg[CGI_EXTENSIONS]), filename) > 0 ) {
+
 			/*
 			 * The request addresses a CGI script or a Lua script. The URI
 			 * corresponds to the script itself (like /path/script.cgi),
@@ -210,13 +209,10 @@ void XX_httplib_interpret_uri( struct httplib_connection *conn, char *filename, 
 
 		if ( *p == '/' ) {
 
-			*p = '\0';
+			*p      = '\0';
+			cgi_ext = conn->ctx->cfg[CGI_EXTENSIONS];
 
-			if ((0
-#if !defined(NO_CGI)
-			     || XX_httplib_match_prefix(conn->ctx->config[CGI_EXTENSIONS], strlen(conn->ctx->config[CGI_EXTENSIONS]), filename) > 0
-#endif
-			     ) && XX_httplib_stat(conn, filename, filep)) {
+			if ( cgi_ext != NULL  &&  XX_httplib_match_prefix( cgi_ext, strlen( cgi_ext ), filename ) > 0  &&  XX_httplib_stat( conn, filename, filep ) ) {
 
 				/*
 				 * Shift PATH_INFO block one character right, e.g.

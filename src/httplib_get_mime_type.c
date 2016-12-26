@@ -47,7 +47,7 @@ void XX_httplib_get_mime_type( struct httplib_context *ctx, const char *path, st
 	 * override default mime types.
 	 */
 
-	list = ctx->config[EXTRA_MIME_TYPES];
+	list = ctx->cfg[EXTRA_MIME_TYPES];
 
 	while ( (list = XX_httplib_next_option( list, &ext_vec, &mime_vec )) != NULL ) {
 

@@ -37,13 +37,23 @@
 
 void XX_httplib_handle_file_based_request( struct httplib_connection *conn, const char *path, struct file *file ) {
 
+#if !defined(NO_CGI)
+	const char *cgi_ext;
+#endif  /* ! NO_CGI */
+	const char *ssi_ext;
+
 	if ( conn == NULL  ||  conn->ctx == NULL ) return;
+
+#if !defined(NO_CGI)
+	cgi_ext = conn->ctx->cfg[CGI_EXTENSIONS];
+#endif  /* ! NO_CGI */
+	ssi_ext = conn->ctx->cfg[SSI_EXTENSIONS];
 
 	if (0) {
 #if !defined(NO_CGI)
 	}
 	
-	else if ( XX_httplib_match_prefix( conn->ctx->config[CGI_EXTENSIONS], strlen(conn->ctx->config[CGI_EXTENSIONS]), path) > 0 ) {
+	else if ( cgi_ext != NULL  &&  XX_httplib_match_prefix( cgi_ext, strlen( cgi_ext ), path ) > 0 ) {
 		
 		/*
 		 * CGI scripts may support all HTTP methods
@@ -53,7 +63,7 @@ void XX_httplib_handle_file_based_request( struct httplib_connection *conn, cons
 #endif /* !NO_CGI */
 	}
 	
-	else if ( XX_httplib_match_prefix( conn->ctx->config[SSI_EXTENSIONS], strlen( conn->ctx->config[SSI_EXTENSIONS] ), path ) > 0 ) {
+	else if ( ssi_ext != NULL  &&  XX_httplib_match_prefix( ssi_ext, strlen( ssi_ext ), path ) > 0 ) {
 
 		XX_httplib_handle_ssi_file_request( conn, path, file );
 #if !defined(NO_CACHING)

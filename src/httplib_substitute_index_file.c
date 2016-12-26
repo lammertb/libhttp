@@ -49,7 +49,7 @@ int XX_httplib_substitute_index_file( struct httplib_connection *conn, char *pat
 
 	if ( conn == NULL  ||  conn->ctx == NULL  ||  path == NULL ) return 0;
 
-	list  = conn->ctx->config[INDEX_FILES];
+	list  = conn->ctx->cfg[INDEX_FILES];
 	n     = strlen( path );
 	found = false;
 

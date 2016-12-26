@@ -36,6 +36,8 @@ static void do_ssi_include(struct httplib_connection *conn, const char *ssi, cha
 
 	char file_name[MG_BUF_LEN];
 	char path[512];
+	const char *doc_root;
+	const char *ssi_ext;
 	char *p;
 	struct file file = STRUCT_FILE_INITIALIZER;
 	size_t len;
@@ -58,7 +60,10 @@ static void do_ssi_include(struct httplib_connection *conn, const char *ssi, cha
 		 */
 
 		file_name[511] = 0;
-		XX_httplib_snprintf( conn, &truncated, path, sizeof(path), "%s/%s", conn->ctx->config[DOCUMENT_ROOT], file_name );
+		if ( conn->ctx->cfg[DOCUMENT_ROOT] != NULL ) doc_root = conn->ctx->cfg[DOCUMENT_ROOT];
+		else                                         doc_root = "";
+
+		XX_httplib_snprintf( conn, &truncated, path, sizeof(path), "%s/%s", doc_root, file_name );
 
 	}
 	
@@ -111,10 +116,9 @@ static void do_ssi_include(struct httplib_connection *conn, const char *ssi, cha
 	else {
 		XX_httplib_fclose_on_exec( & file, conn );
 
-		if ( XX_httplib_match_prefix( conn->ctx->config[SSI_EXTENSIONS], strlen( conn->ctx->config[SSI_EXTENSIONS] ), path) > 0 ) {
+		ssi_ext = conn->ctx->cfg[SSI_EXTENSIONS];
 
-			send_ssi_file(conn, path, &file, include_level + 1);
-		}
+		if ( ssi_ext != NULL  &&  XX_httplib_match_prefix( ssi_ext, strlen( ssi_ext ), path ) > 0 ) send_ssi_file( conn, path, &file, include_level+1 );
 		
 		else XX_httplib_send_file_data(conn, &file, 0, INT64_MAX);
 
@@ -285,7 +289,7 @@ void XX_httplib_handle_ssi_file_request( struct httplib_connection *conn, const 
 		 */
 
 		cors1 = "Access-Control-Allow-Origin: ";
-		cors2 = conn->ctx->config[ACCESS_CONTROL_ALLOW_ORIGIN];
+		cors2 = ( conn->ctx->cfg[ACCESS_CONTROL_ALLOW_ORIGIN] != NULL ) ? conn->ctx->cfg[ACCESS_CONTROL_ALLOW_ORIGIN] : "";
 		cors3 = "\r\n";
 	}
 	

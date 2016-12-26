@@ -45,7 +45,7 @@ bool XX_httplib_authorize( struct httplib_connection *conn, struct file *filep )
 	workdata.conn = conn;
 
 	if ( ! XX_httplib_parse_auth_header( conn, buf, sizeof(buf), &workdata.ah ) ) return false;
-	workdata.domain = conn->ctx->config[AUTHENTICATION_DOMAIN];
+	workdata.domain = conn->ctx->cfg[AUTHENTICATION_DOMAIN];
 
 	return XX_httplib_read_auth_file( filep, &workdata );
 

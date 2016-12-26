@@ -54,7 +54,7 @@ void XX_httplib_process_new_connection( struct httplib_connection *conn ) {
 	if ( conn == NULL  ||  conn->ctx == NULL ) return;
 
 	ri                 = & conn->request_info;
-	keep_alive_enabled = ! strcmp( conn->ctx->config[ENABLE_KEEP_ALIVE], "yes" );
+	keep_alive_enabled = ( conn->ctx->cfg[ENABLE_KEEP_ALIVE] != NULL  &&  ! strcmp( conn->ctx->cfg[ENABLE_KEEP_ALIVE], "yes" ) );
 
 	/*
 	 * Important: on new connection, reset the receiving buffer. Credit

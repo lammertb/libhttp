@@ -51,7 +51,7 @@ int XX_httplib_refresh_trust( struct httplib_connection *conn ) {
 
 	p_reload_lock = & reload_lock;
 
-	pem = conn->ctx->config[SSL_CERTIFICATE];
+	pem = conn->ctx->cfg[SSL_CERTIFICATE];
 	if ( pem == NULL  &&  conn->ctx->callbacks.init_ssl == NULL ) return 0;
 
 	if ( stat( pem, &cert_buf ) != -1 ) t = (long int)cert_buf.st_mtime;
@@ -61,14 +61,11 @@ int XX_httplib_refresh_trust( struct httplib_connection *conn ) {
 
 		data_check = t;
 
-		should_verify_peer = conn->ctx->config[SSL_DO_VERIFY_PEER] != NULL  &&  ! httplib_strcasecmp( conn->ctx->config[SSL_DO_VERIFY_PEER], "yes" );
+		should_verify_peer = conn->ctx->cfg[SSL_DO_VERIFY_PEER] != NULL  &&  ! httplib_strcasecmp( conn->ctx->cfg[SSL_DO_VERIFY_PEER], "yes" );
 
 		if ( should_verify_peer ) {
 
-			char *ca_path = conn->ctx->config[SSL_CA_PATH];
-			char *ca_file = conn->ctx->config[SSL_CA_FILE];
-
-			if ( SSL_CTX_load_verify_locations( conn->ctx->ssl_ctx, ca_file, ca_path ) != 1 ) {
+			if ( SSL_CTX_load_verify_locations( conn->ctx->ssl_ctx, conn->ctx->cfg[SSL_CA_FILE], conn->ctx->cfg[SSL_CA_PATH] ) != 1 ) {
 
 				httplib_cry( XX_httplib_fc(conn->ctx),
 				       "SSL_CTX_load_verify_locations error: %s "

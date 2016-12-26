@@ -103,6 +103,7 @@ void XX_httplib_handle_propfind( struct httplib_connection *conn, const char *pa
 	const char *depth;
 	char date[64];
 	time_t curtime;
+	const char *edl;
 
 	if ( conn == NULL  ||  conn->ctx == NULL  ||  path == NULL  ||  filep == NULL ) return;
 
@@ -129,7 +130,8 @@ void XX_httplib_handle_propfind( struct httplib_connection *conn, const char *pa
 	 * If it is a directory, print directory entries too if Depth is not 0
 	 */
 
-	if ( filep  &&  filep->is_directory && !httplib_strcasecmp(conn->ctx->config[ENABLE_DIRECTORY_LISTING], "yes") && (depth == NULL || strcmp(depth, "0") != 0)) {
+	edl = conn->ctx->cfg[ENABLE_DIRECTORY_LISTING];
+	if ( filep  &&  filep->is_directory  &&  edl != NULL  &&  ! httplib_strcasecmp( edl, "yes" )  &&  ( depth == NULL  ||  strcmp( depth, "0" ) != 0 ) ) {
 
 		XX_httplib_scan_directory( conn, path, conn, &print_dav_dir_entry );
 	}

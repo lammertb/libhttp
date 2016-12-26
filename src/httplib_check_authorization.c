@@ -43,7 +43,7 @@ bool XX_httplib_check_authorization( struct httplib_connection *conn, const char
 
 	authorized = true;
 
-	list = conn->ctx->config[PROTECT_URI];
+	list = conn->ctx->cfg[PROTECT_URI];
 
 	while ( (list = XX_httplib_next_option( list, &uri_vec, &filename_vec )) != NULL ) {
 

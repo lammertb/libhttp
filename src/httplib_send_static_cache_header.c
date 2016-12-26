@@ -44,7 +44,8 @@ int XX_httplib_send_static_cache_header( struct httplib_connection *conn ) {
 
 	int max_age;
 	
-	max_age = atoi( conn->ctx->config[STATIC_FILE_MAX_AGE] );
+	if ( conn->ctx->cfg[STATIC_FILE_MAX_AGE] != NULL ) max_age = atoi( conn->ctx->cfg[STATIC_FILE_MAX_AGE] );
+	else                                               max_age = -1;
 
 	if ( max_age <= 0 ) {
 

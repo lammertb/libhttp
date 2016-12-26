@@ -29,9 +29,9 @@
 
 bool XX_httplib_should_decode_url( const struct httplib_connection *conn ) {
 
-	if ( conn == NULL  ||  conn->ctx   == NULL ) return false;
-	if ( conn->ctx->config[DECODE_URL] == NULL ) return false;
+	if ( conn == NULL  ||  conn->ctx  == NULL ) return false;
+	if ( conn->ctx->cfg[DECODE_URL]   == NULL ) return false;
 
-	return ( ! httplib_strcasecmp( conn->ctx->config[DECODE_URL], "yes" ) );
+	return ( ! httplib_strcasecmp( conn->ctx->cfg[DECODE_URL], "yes" ) );
 
 }  /* XX_httplib_should_decode_url */

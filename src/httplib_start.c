@@ -157,13 +157,13 @@ struct httplib_context *httplib_start( const struct httplib_callbacks *callbacks
 			return NULL;
 		}
 
-		if ( ctx->config[idx] != NULL ) {
+		if ( ctx->cfg[idx] != NULL ) {
 
 			httplib_cry( XX_httplib_fc(ctx), "warning: %s: duplicate option", name );
-			httplib_free( ctx->config[idx] );
+			httplib_free( ctx->cfg[idx] );
 		}
 
-		ctx->config[idx] = httplib_strdup( value );
+		ctx->cfg[idx] = httplib_strdup( value );
 	}
 
 	/*
@@ -173,11 +173,11 @@ struct httplib_context *httplib_start( const struct httplib_callbacks *callbacks
 	for (i=0; XX_httplib_config_options[i].name != NULL; i++) {
 
 		default_value = XX_httplib_config_options[i].default_value;
-		if ( ctx->config[i] == NULL  &&  default_value != NULL ) ctx->config[i] = httplib_strdup( default_value );
+		if ( ctx->cfg[i] == NULL  &&  default_value != NULL ) ctx->cfg[i] = httplib_strdup( default_value );
 	}
 
 #if defined(NO_FILES)
-	if ( ctx->config[DOCUMENT_ROOT] != NULL ) {
+	if ( ctx->cfg[DOCUMENT_ROOT] != NULL ) {
 
 		httplib_cry( XX_httplib_fc( ctx ), "%s", "Document root must not be set" );
 		XX_httplib_free_context( ctx );
@@ -221,7 +221,16 @@ struct httplib_context *httplib_start( const struct httplib_callbacks *callbacks
 
 #endif /* !_WIN32 */
 
-	workerthreadcount = atoi( ctx->config[NUM_THREADS] );
+	if ( ctx->cfg[NUM_THREADS] == NULL ) {
+
+		httplib_cry( XX_httplib_fc(ctx), "No worker thread number specified" );
+		XX_httplib_free_context( ctx );
+		httplib_pthread_setspecific( XX_httplib_sTlsKey, NULL );
+
+		return NULL;
+	}
+
+	workerthreadcount = atoi( ctx->cfg[NUM_THREADS] );
 
 	if ( workerthreadcount > MAX_WORKER_THREADS ) {
 
@@ -232,7 +241,7 @@ struct httplib_context *httplib_start( const struct httplib_callbacks *callbacks
 		return NULL;
 	}
 
-	if (workerthreadcount > 0) {
+	if ( workerthreadcount > 0 ) {
 
 		ctx->cfg_worker_threads = ((unsigned int)(workerthreadcount));
 		ctx->workerthreadids    = httplib_calloc( ctx->cfg_worker_threads, sizeof(pthread_t) );

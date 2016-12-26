@@ -45,8 +45,8 @@ const char *httplib_get_option( const struct httplib_context *ctx, const char *n
 	i = XX_httplib_get_option_index( name );
 	if ( i == -1 ) return NULL;
 
-	if ( ctx == NULL  ||  ctx->config[i] == NULL ) return "";
+	if ( ctx == NULL  ||  ctx->cfg[i] == NULL ) return "";
 
-	return ctx->config[i];
+	return ctx->cfg[i];
 
 }  /* httplib_get_option */

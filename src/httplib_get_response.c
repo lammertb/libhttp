@@ -32,7 +32,12 @@
  * int httplib_get_response( struct httplib_connection *conn, char *ebuf, size_t ebuf_len, int timeout );
  *
  * The function httplib_get_response() tries to get a response from a remote
- * peer.
+ * peer. This function does some dirty action by temporarily replacing the
+ * contect of the connection with a copy. The only thing which is changed in
+ * the copy is the timeout value which is set according to the timeout as it
+ * was passed as a parameter to the function call. After the call to the
+ * function XX_httplib_getreq() has finished, the old context is put back in
+ * place.
  */
 
 int httplib_get_response( struct httplib_connection *conn, char *ebuf, size_t ebuf_len, int timeout ) {
@@ -45,21 +50,30 @@ int httplib_get_response( struct httplib_connection *conn, char *ebuf, size_t eb
 
 	if ( conn == NULL ) return -1;
 
+	/*
+	 * Replace the connection context with a copy of it where the timeout
+	 * value is changed to a parameter passed value.
+	 */
+
 	octx =   conn->ctx;
 	rctx = *(conn->ctx);
 
 	if ( timeout >= 0 ) {
 
 		XX_httplib_snprintf( conn, NULL, txt, sizeof(txt), "%i", timeout );
-		rctx.config[REQUEST_TIMEOUT] = txt;
+		rctx.cfg[REQUEST_TIMEOUT] = txt;
 		XX_httplib_set_sock_timeout( conn->client.sock, timeout );
 	}
 	
-	else rctx.config[REQUEST_TIMEOUT] = NULL;
+	else rctx.cfg[REQUEST_TIMEOUT] = NULL;
 
 	conn->ctx = &rctx;
 	ret       = XX_httplib_getreq( conn, ebuf, ebuf_len, &err );
 	conn->ctx = octx;
+
+	/*
+	 * End of dirty context swap code.
+	 */
 
 	/*
 	 * TODO: 1) uri is deprecated;

@@ -567,8 +567,8 @@ struct httplib_context {
 
 	volatile int stop_flag;			/* Should we stop event loop								*/
 	SSL_CTX *ssl_ctx;			/* SSL context										*/
-	char *config[NUM_OPTIONS];		/* LibHTTP configuration parameters							*/
-	struct httplib_callbacks callbacks;		/* User-defined callback function							*/
+	char *cfg[NUM_OPTIONS];			/* LibHTTP configuration parameters							*/
+	struct httplib_callbacks callbacks;	/* User-defined callback function							*/
 	void *user_data;			/* User-defined data									*/
 	int context_type;			/* 1 = server context, 2 = client context						*/
 
@@ -845,7 +845,7 @@ void			XX_httplib_log_access( const struct httplib_connection *conn );
 LIBHTTP_THREAD		XX_httplib_master_thread( void *thread_func_param );
 int			XX_httplib_match_prefix(const char *pattern, size_t pattern_len, const char *str);
 void			XX_httplib_mkcol( struct httplib_connection *conn, const char *path );
-int			XX_httplib_must_hide_file( struct httplib_connection *conn, const char *path );
+bool			XX_httplib_must_hide_file( struct httplib_connection *conn, const char *path );
 const char *		XX_httplib_next_option( const char *list, struct vec *val, struct vec *eq_val );
 void			XX_httplib_open_auth_file( struct httplib_connection *conn, const char *path, struct file *filep );
 int			XX_httplib_parse_auth_header( struct httplib_connection *conn, char *buf, size_t buf_size, struct ah *ah );

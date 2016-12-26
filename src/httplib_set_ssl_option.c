@@ -43,8 +43,6 @@ bool XX_httplib_set_ssl_option( struct httplib_context *ctx ) {
 	const char *pem;
 	int callback_ret;
 	int should_verify_peer;
-	const char *ca_path;
-	const char *ca_file;
 	int use_default_verify_paths;
 	int verify_depth;
 	time_t now_rt;
@@ -58,7 +56,7 @@ bool XX_httplib_set_ssl_option( struct httplib_context *ctx ) {
 	if ( ctx == NULL ) return false;
 
 	now_rt = time( NULL );
-	pem    = ctx->config[ SSL_CERTIFICATE ];
+	pem    = ctx->cfg[ SSL_CERTIFICATE ];
 
 	if ( pem == NULL  &&  ctx->callbacks.init_ssl == NULL ) return true;
 
@@ -86,7 +84,8 @@ bool XX_httplib_set_ssl_option( struct httplib_context *ctx ) {
 
 	SSL_CTX_clear_options( ctx->ssl_ctx, SSL_OP_NO_SSLv2 | SSL_OP_NO_SSLv3 | SSL_OP_NO_TLSv1 | SSL_OP_NO_TLSv1_1 );
 
-	protocol_ver = atoi( ctx->config[ SSL_PROTOCOL_VERSION ] );
+	if ( ctx->cfg[SSL_PROTOCOL_VERSION] != NULL ) protocol_ver = atoi( ctx->cfg[SSL_PROTOCOL_VERSION] );
+	else                                          protocol_ver = 0;
 
 	SSL_CTX_set_options(   ctx->ssl_ctx, XX_httplib_ssl_get_protocol( protocol_ver ) );
 	SSL_CTX_set_options(   ctx->ssl_ctx, SSL_OP_SINGLE_DH_USE                        );
@@ -121,7 +120,9 @@ bool XX_httplib_set_ssl_option( struct httplib_context *ctx ) {
 	md5_append( & md5state, (const md5_byte_t *)&now_rt, sizeof(now_rt) );
 	clock_gettime( CLOCK_MONOTONIC, &now_mt );
 	md5_append( & md5state, (const md5_byte_t *)&now_mt, sizeof(now_mt) );
-	md5_append( & md5state, (const md5_byte_t *)ctx->config[ LISTENING_PORTS ], strlen( ctx->config[LISTENING_PORTS ] ) );
+
+	if ( ctx->cfg[LISTENING_PORTS] != NULL ) md5_append( & md5state, (const md5_byte_t *)ctx->cfg[LISTENING_PORTS], strlen( ctx->cfg[LISTENING_PORTS] ) );
+
 	md5_append( & md5state, (const md5_byte_t *)ctx, sizeof(*ctx) );
 	md5_finish( & md5state, ssl_context_id );
 
@@ -129,15 +130,12 @@ bool XX_httplib_set_ssl_option( struct httplib_context *ctx ) {
 
 	if ( pem != NULL  &&  ! XX_httplib_ssl_use_pem_file( ctx, pem ) ) return false;
 
-	should_verify_peer       = ctx->config[SSL_DO_VERIFY_PEER]       != NULL  &&  ! httplib_strcasecmp( ctx->config[SSL_DO_VERIFY_PEER],       "yes" );
-	use_default_verify_paths = ctx->config[SSL_DEFAULT_VERIFY_PATHS] != NULL  &&  ! httplib_strcasecmp( ctx->config[SSL_DEFAULT_VERIFY_PATHS], "yes" );
+	should_verify_peer       = ctx->cfg[SSL_DO_VERIFY_PEER]       != NULL  &&  ! httplib_strcasecmp( ctx->cfg[SSL_DO_VERIFY_PEER],       "yes" );
+	use_default_verify_paths = ctx->cfg[SSL_DEFAULT_VERIFY_PATHS] != NULL  &&  ! httplib_strcasecmp( ctx->cfg[SSL_DEFAULT_VERIFY_PATHS], "yes" );
 
 	if ( should_verify_peer ) {
 
-		ca_path = ctx->config[SSL_CA_PATH];
-		ca_file = ctx->config[SSL_CA_FILE];
-
-		if ( SSL_CTX_load_verify_locations( ctx->ssl_ctx, ca_file, ca_path ) != 1 ) {
+		if ( SSL_CTX_load_verify_locations( ctx->ssl_ctx, ctx->cfg[SSL_CA_FILE], ctx->cfg[SSL_CA_PATH] ) != 1 ) {
 
 			httplib_cry( XX_httplib_fc(ctx),
 			       "SSL_CTX_load_verify_locations error: %s "
@@ -158,16 +156,16 @@ bool XX_httplib_set_ssl_option( struct httplib_context *ctx ) {
 			return false;
 		}
 
-		if ( ctx->config[SSL_VERIFY_DEPTH] != NULL ) {
+		if ( ctx->cfg[SSL_VERIFY_DEPTH] != NULL ) {
 
-			verify_depth = atoi( ctx->config[SSL_VERIFY_DEPTH] );
+			verify_depth = atoi( ctx->cfg[SSL_VERIFY_DEPTH] );
 			SSL_CTX_set_verify_depth( ctx->ssl_ctx, verify_depth );
 		}
 	}
 
-	if ( ctx->config[SSL_CIPHER_LIST] != NULL ) {
+	if ( ctx->cfg[SSL_CIPHER_LIST] != NULL ) {
 
-		if ( SSL_CTX_set_cipher_list( ctx->ssl_ctx, ctx->config[SSL_CIPHER_LIST] ) != 1 ) {
+		if ( SSL_CTX_set_cipher_list( ctx->ssl_ctx, ctx->cfg[SSL_CIPHER_LIST] ) != 1 ) {
 
 			httplib_cry( XX_httplib_fc(ctx), "SSL_CTX_set_cipher_list error: %s", XX_httplib_ssl_error());
 		}

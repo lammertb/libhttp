@@ -45,7 +45,7 @@ int XX_httplib_sslize( struct httplib_connection *conn, SSL_CTX *s, int (*func)(
 
 	if ( conn == NULL ) return 0;
 
-	short_trust = ( conn->ctx->config[SSL_SHORT_TRUST] != NULL  &&  ! httplib_strcasecmp( conn->ctx->config[SSL_SHORT_TRUST], "yes" ) );
+	short_trust = ( conn->ctx->cfg[SSL_SHORT_TRUST] != NULL  &&  ! httplib_strcasecmp( conn->ctx->cfg[SSL_SHORT_TRUST], "yes" ) );
 
 	if ( short_trust ) {
 

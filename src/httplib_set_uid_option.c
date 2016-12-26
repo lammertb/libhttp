@@ -43,7 +43,7 @@ int XX_httplib_set_uid_option( struct httplib_context *ctx ) {
 
 	if ( ctx == NULL ) return 0;
 
-	uid = ctx->config[RUN_AS_USER];
+	uid = ctx->cfg[RUN_AS_USER];
 
 	if ( uid == NULL ) return 1;
 

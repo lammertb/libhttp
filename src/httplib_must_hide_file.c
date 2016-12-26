@@ -27,16 +27,26 @@
 
 #include "httplib_main.h"
 
-int XX_httplib_must_hide_file( struct httplib_connection *conn, const char *path ) {
+/*
+ * bool XX_httplib_must_hide_file( struct httplib_connection *conn, const char *path );
+ *
+ * The function XX_httplib_must_hide_file() returns true, if a file must be
+ * hidden from browsing by the remote client. A used provided list of file
+ * patterns to hide is used. Password files are always hidden, independent of
+ * the patterns defined by the user.
+ */
+
+bool XX_httplib_must_hide_file( struct httplib_connection *conn, const char *path ) {
 
 	const char *pw_pattern;
 	const char *pattern;
 
-	if ( conn == NULL  ||  conn->ctx == NULL ) return 0;
+	if ( conn == NULL  ||  conn->ctx == NULL ) return false;
 
 	pw_pattern = "**" PASSWORDS_FILE_NAME "$";
-	pattern    = conn->ctx->config[HIDE_FILES];
+	pattern    = conn->ctx->cfg[HIDE_FILES];
 
-	return XX_httplib_match_prefix( pw_pattern, strlen(pw_pattern), path) > 0 || (pattern != NULL && XX_httplib_match_prefix(pattern, strlen(pattern), path) > 0);
+	return ( pw_pattern != NULL  &&  XX_httplib_match_prefix( pw_pattern, strlen( pw_pattern ), path ) > 0 )  ||
+	       ( pattern    != NULL  &&  XX_httplib_match_prefix( pattern,    strlen( pattern ),    path ) > 0 );
 
 }  /* XX_httplib_must_hide_file */

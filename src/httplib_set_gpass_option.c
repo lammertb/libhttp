@@ -41,7 +41,7 @@ int XX_httplib_set_gpass_option( struct httplib_context *ctx ) {
 
 	if ( ctx == NULL ) return 0;
 
-	path = ctx->config[GLOBAL_PASSWORDS_FILE];
+	path = ctx->cfg[GLOBAL_PASSWORDS_FILE];
 
 	if ( path != NULL  &&  ! XX_httplib_stat( XX_httplib_fc(ctx), path, &file ) ) {
 

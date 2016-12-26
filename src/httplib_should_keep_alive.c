@@ -48,12 +48,12 @@ bool XX_httplib_should_keep_alive( const struct httplib_connection *conn ) {
 	http_version = conn->request_info.http_version;
 	header       = httplib_get_header( conn, "Connection" );
 
-	if ( conn->must_close                                                                                                    ) return false;
-	if ( conn->internal_error                                                                                                ) return false;
-	if ( conn->status_code == 401                                                                                            ) return false;
-	if ( conn->ctx->config[ENABLE_KEEP_ALIVE] != NULL  &&  httplib_strcasecmp( conn->ctx->config[ENABLE_KEEP_ALIVE], "yes" ) ) return false;
-	if ( header != NULL                                &&  ! XX_httplib_header_has_option( header, "keep-alive" )            ) return false;
-	if ( header == NULL  &&  http_version != NULL      &&  strcmp( http_version, "1.1" )                                     ) return false;
+	if ( conn->must_close                                                                                              ) return false;
+	if ( conn->internal_error                                                                                          ) return false;
+	if ( conn->status_code == 401                                                                                      ) return false;
+	if ( conn->ctx->cfg[ENABLE_KEEP_ALIVE] != NULL  &&  httplib_strcasecmp( conn->ctx->cfg[ENABLE_KEEP_ALIVE], "yes" ) ) return false;
+	if ( header != NULL                             &&  ! XX_httplib_header_has_option( header, "keep-alive" )         ) return false;
+	if ( header == NULL  &&  http_version != NULL   &&  strcmp( http_version, "1.1" )                                  ) return false;
 
 	return true;
 

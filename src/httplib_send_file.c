@@ -37,6 +37,7 @@
 void httplib_send_file( struct httplib_connection *conn, const char *path, const char *mime_type, const char *additional_headers ) {
 
 	struct file file = STRUCT_FILE_INITIALIZER;
+	const char *edl;
 
 	if ( XX_httplib_stat( conn, path, &file ) ) {
 
@@ -44,8 +45,9 @@ void httplib_send_file( struct httplib_connection *conn, const char *path, const
 
 			if ( conn == NULL ) return;
 
-			if ( ! httplib_strcasecmp( conn->ctx->config[ENABLE_DIRECTORY_LISTING], "yes" ) ) XX_httplib_handle_directory_request( conn, path );
-			
+			edl = conn->ctx->cfg[ENABLE_DIRECTORY_LISTING];
+
+			if ( edl != NULL  &&  ! httplib_strcasecmp( edl, "yes" ) ) XX_httplib_handle_directory_request( conn, path );
 			else XX_httplib_send_http_error( conn, 403, "%s", "Error: Directory listing denied" );
 		}
 		

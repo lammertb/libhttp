@@ -34,6 +34,7 @@ void XX_httplib_send_authorization_request( struct httplib_connection *conn ) {
 	char date[64];
 	time_t curtime;
 	uint64_t nonce;
+	const char *auth_domain;
 
 	if ( conn == NULL  ||  conn->ctx == NULL ) return;
 
@@ -46,11 +47,14 @@ void XX_httplib_send_authorization_request( struct httplib_connection *conn ) {
 	++conn->ctx->nonce_count;
 	httplib_pthread_mutex_unlock( & conn->ctx->nonce_mutex );
 
-	nonce ^= conn->ctx->auth_nonce_mask;
+	nonce            ^= conn->ctx->auth_nonce_mask;
 	conn->status_code = 401;
 	conn->must_close  = 1;
 
 	XX_httplib_gmt_time_string( date, sizeof(date), &curtime );
+
+	if ( conn->ctx->cfg[AUTHENTICATION_DOMAIN] != NULL ) auth_domain = conn->ctx->cfg[AUTHENTICATION_DOMAIN];
+	else                                                 auth_domain = "example.com";
 
 	httplib_printf( conn, "HTTP/1.1 401 Unauthorized\r\n" );
 	XX_httplib_send_no_cache_header( conn );
@@ -62,7 +66,7 @@ void XX_httplib_send_authorization_request( struct httplib_connection *conn ) {
 	          "nonce=\"%" UINT64_FMT "\"\r\n\r\n",
 	          date,
 	          XX_httplib_suggest_connection_header(conn),
-	          conn->ctx->config[AUTHENTICATION_DOMAIN],
+	          auth_domain,
 	          nonce );
 
 }  /* XX_httplib_send_authorization_request */

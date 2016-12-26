@@ -60,10 +60,10 @@ void XX_httplib_prepare_cgi_environment( struct httplib_connection *conn, const 
 	env->varused = 0;
 	env->var     = httplib_malloc( env->buflen * sizeof(char *) );
 
-	XX_httplib_addenv( env, "SERVER_NAME=%s",                   conn->ctx->config[AUTHENTICATION_DOMAIN] );
-	XX_httplib_addenv( env, "SERVER_ROOT=%s",                   conn->ctx->config[DOCUMENT_ROOT]         );
-	XX_httplib_addenv( env, "DOCUMENT_ROOT=%s",                 conn->ctx->config[DOCUMENT_ROOT]         );
-	XX_httplib_addenv( env, "SERVER_SOFTWARE=%s/%s", "LibHTTP", httplib_version()                             );
+	if ( conn->ctx->cfg[AUTHENTICATION_DOMAIN] != NULL ) XX_httplib_addenv( env, "SERVER_NAME=%s",   conn->ctx->cfg[AUTHENTICATION_DOMAIN] );
+	if ( conn->ctx->cfg[DOCUMENT_ROOT]         != NULL ) XX_httplib_addenv( env, "SERVER_ROOT=%s",   conn->ctx->cfg[DOCUMENT_ROOT]         );
+	if ( conn->ctx->cfg[DOCUMENT_ROOT]         != NULL ) XX_httplib_addenv( env, "DOCUMENT_ROOT=%s", conn->ctx->cfg[DOCUMENT_ROOT]         );
+	XX_httplib_addenv( env, "SERVER_SOFTWARE=%s/%s", "LibHTTP", httplib_version() );
 
 	/*
 	 * Prepare the environment block
@@ -92,10 +92,11 @@ void XX_httplib_prepare_cgi_environment( struct httplib_connection *conn, const 
 
 	XX_httplib_addenv( env, "SCRIPT_FILENAME=%s", prog );
 
-	if ( conn->path_info == NULL ) XX_httplib_addenv( env, "PATH_TRANSLATED=%s",   conn->ctx->config[DOCUMENT_ROOT]                  );
-	else                           XX_httplib_addenv( env, "PATH_TRANSLATED=%s%s", conn->ctx->config[DOCUMENT_ROOT], conn->path_info );
+	if      ( conn->ctx->cfg[DOCUMENT_ROOT] == NULL ) XX_httplib_addenv( env, "PATH_TRANSLATED="                                                     );
+	else if ( conn->path_info               == NULL ) XX_httplib_addenv( env, "PATH_TRANSLATED=%s",   conn->ctx->cfg[DOCUMENT_ROOT]                  );
+	else                                              XX_httplib_addenv( env, "PATH_TRANSLATED=%s%s", conn->ctx->cfg[DOCUMENT_ROOT], conn->path_info );
 
-	XX_httplib_addenv(env, "HTTPS=%s", (conn->ssl == NULL) ? "off" : "on");
+	XX_httplib_addenv( env, "HTTPS=%s", (conn->ssl == NULL) ? "off" : "on" );
 
 	if ( (s = httplib_get_header( conn, "Content-Type" ) )   != NULL ) XX_httplib_addenv( env, "CONTENT_TYPE=%s",   s                               );
 	if ( conn->request_info.query_string                     != NULL ) XX_httplib_addenv( env, "QUERY_STRING=%s",   conn->request_info.query_string );
@@ -160,7 +161,7 @@ void XX_httplib_prepare_cgi_environment( struct httplib_connection *conn, const 
 	 * Add user-specified variables
 	 */
 
-	s = conn->ctx->config[CGI_ENVIRONMENT];
+	s = conn->ctx->cfg[CGI_ENVIRONMENT];
 
 	while ( (s = XX_httplib_next_option( s, &var_vec, NULL )) != NULL ) {
 
