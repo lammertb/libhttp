@@ -28,23 +28,29 @@
 #include "httplib_main.h"
 
 /*
- * A helper function for checking if a comma separated list of values contains
- * the given option (case insensitvely).
+ * bool XX_httplib_header_has_option( const char *header, const char *option );
+ *
+ * XX_httplib_header_has_option() is a helper function for checking if a comma
+ * separated list of values contains the given option (case insensitvely).
  * 'header' can be NULL, in which case false is returned.
+ *
+ * Please note that not all characters of the option may be checked against the
+ * options found in the header because comparison is only for the length of the
+ * retrieved header option. TODO: This may or may not be correct.
  */
 
-int XX_httplib_header_has_option( const char *header, const char *option ) {
+bool XX_httplib_header_has_option( const char *header, const char *option ) {
 
 	struct vec opt_vec;
 	struct vec eq_vec;
 
-	if ( option == NULL  ||  option[0] == '\0' ) return false;
+	if ( header == NULL  ||  option == NULL  ||  option[0] == '\0' ) return false;
 
 	while ( (header = XX_httplib_next_option( header, &opt_vec, &eq_vec )) != NULL ) {
 
-		if ( httplib_strncasecmp( option, opt_vec.ptr, opt_vec.len ) == 0 ) return 1;
+		if ( httplib_strncasecmp( option, opt_vec.ptr, opt_vec.len ) == 0 ) return true;
 	}
 
-	return 0;
+	return false;
 
 }  /* XX_httplib_header_has_option */
