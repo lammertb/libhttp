@@ -809,7 +809,7 @@ void			XX_httplib_fclose( struct file *filep );
 void			XX_httplib_fclose_on_exec( struct file *filep, struct httplib_connection *conn );
 const char *		XX_httplib_fgets( char *buf, size_t size, struct file *filep, char **p );
 bool			XX_httplib_fopen( const struct httplib_connection *conn, const char *path, const char *mode, struct file *filep );
-int			XX_httplib_forward_body_data( struct httplib_connection *conn, FILE *fp, SOCKET sock, SSL *ssl );
+bool			XX_httplib_forward_body_data( struct httplib_connection *conn, FILE *fp, SOCKET sock, SSL *ssl );
 void			XX_httplib_free_context( struct httplib_context *ctx );
 const char *		XX_httplib_get_header( const struct httplib_request_info *ri, const char *name );
 void			XX_httplib_get_mime_type( struct httplib_context *ctx, const char *path, struct vec *vec );

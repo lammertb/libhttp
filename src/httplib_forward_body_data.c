@@ -28,27 +28,27 @@
 #include "httplib_main.h"
 
 /*
- * int XX_httplib_forward_body_data( struct httplib_connection *conn, FILE *fp, SOCKET sock, SSL *ssl );
+ * bool XX_httplib_forward_body_data( struct httplib_connection *conn, FILE *fp, SOCKET sock, SSL *ssl );
  *
  * The function XX_httplib_forward_body_data() forwards body data to the
- * client.
+ * client. The function returns true if successful, and false otherwise.
  */
 
 #if !defined(NO_CGI) || !defined(NO_FILES)
-int XX_httplib_forward_body_data( struct httplib_connection *conn, FILE *fp, SOCKET sock, SSL *ssl ) {
+bool XX_httplib_forward_body_data( struct httplib_connection *conn, FILE *fp, SOCKET sock, SSL *ssl ) {
 
 	const char *expect;
 	const char *body;
 	char buf[MG_BUF_LEN];
 	int to_read;
 	int nread;
-	int success;
+	bool success;
 	int64_t buffered_len;
 	double timeout;
 
-	if ( conn == NULL  ||  conn->ctx == NULL ) return 0;
+	if ( conn == NULL  ||  conn->ctx == NULL ) return false;
 
-	success = 0;
+	success = false;
 	if ( conn->ctx->cfg[REQUEST_TIMEOUT] != NULL ) timeout = atof( conn->ctx->cfg[REQUEST_TIMEOUT] ) / 1000.0;
 	else                                           timeout = -1.0;
 
@@ -57,7 +57,7 @@ int XX_httplib_forward_body_data( struct httplib_connection *conn, FILE *fp, SOC
 	if ( fp == NULL ) {
 
 		XX_httplib_send_http_error( conn, 500, "%s", "Error: NULL File" );
-		return 0;
+		return false;
 	}
 
 	if ( conn->content_len == -1  &&  ! conn->is_chunked ) {
@@ -94,7 +94,7 @@ int XX_httplib_forward_body_data( struct httplib_connection *conn, FILE *fp, SOC
 		if ( buffered_len < 0  ||  conn->consumed_content != 0 ) {
 
 			XX_httplib_send_http_error( conn, 500, "%s", "Error: Size mismatch" );
-			return 0;
+			return false;
 		}
 
 		if ( buffered_len > 0 ) {
