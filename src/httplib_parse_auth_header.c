@@ -89,8 +89,6 @@ int XX_httplib_parse_auth_header(struct httplib_connection *conn, char *buf, siz
 		else if ( ! strcmp( name, "nonce"    ) ) ah->nonce    = value;
 	}
 
-#ifndef NO_NONCE_CHECK
-
 	/*
 	 * Read the nonce from the response.
 	 */
@@ -133,9 +131,6 @@ int XX_httplib_parse_auth_header(struct httplib_connection *conn, char *buf, siz
 	 */
 
 	if ( nonce >= ( (uint64_t)conn->ctx->start_time + conn->ctx->nonce_count ) ) return 0;
-#else
-	UNUSED_PARAMETER(nonce);
-#endif
 
 	/*
 	 * CGI needs it as REMOTE_USER

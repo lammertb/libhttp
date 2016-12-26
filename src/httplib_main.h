@@ -121,10 +121,6 @@ char static_assert_replacement[1];
 #include "libhttp.h"
 
 
-#ifndef IGNORE_UNUSED_RESULT
-#define IGNORE_UNUSED_RESULT(a) ((void)((a) && 1))
-#endif  /* IGNORE_UNUSED_RESULT */
-
 #ifndef _WIN32_WCE /* Some ANSI #includes are not available on Windows CE */
 #include <sys/types.h>
 #include <sys/stat.h>
