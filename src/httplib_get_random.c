@@ -29,14 +29,14 @@
 #include "httplib_utils.h"
 
 /*
- * uint64_t XX_httplib_get_random( void );
+ * uint64_t httplib_get_random( void );
  *
- * The function XX_httplib_get_random() is a pseudo random generator which
+ * The function httplib_get_random() is a pseudo random generator which
  * combines two high resolution random generators and the nano second part
  * of the time to generate 64 bit random numbers.
  */
 
-uint64_t XX_httplib_get_random( void ) {
+LIBHTTP_API uint64_t httplib_get_random( void ) {
 
 	static uint64_t lfsr = 0;	/* Linear feedback shift register	*/
 	static uint64_t lcg  = 0;	/* Linear congruential generator	*/
@@ -73,4 +73,4 @@ uint64_t XX_httplib_get_random( void ) {
 
 	return (lfsr ^ lcg ^ (uint64_t)now.tv_nsec);
 
-}  /* XX_httplib_get_random */
+}  /* httplib_get_random */

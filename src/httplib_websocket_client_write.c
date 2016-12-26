@@ -49,7 +49,7 @@ int httplib_websocket_client_write( struct httplib_connection *conn, int opcode,
 
 	retval      = -1;
 	masked_data = httplib_malloc( ((dataLen + 7) / 4) * 4 );
-	masking_key = (uint32_t) XX_httplib_get_random();
+	masking_key = (uint32_t) httplib_get_random();
 
 	if ( masked_data == NULL ) {
 

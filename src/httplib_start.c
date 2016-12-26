@@ -65,7 +65,7 @@ struct httplib_context *httplib_start( const struct httplib_callbacks *callbacks
 	 * Random number generator will initialize at the first call
 	 */
 
-	ctx->auth_nonce_mask = (uint64_t)XX_httplib_get_random() ^ (uint64_t)(ptrdiff_t)(options);
+	ctx->auth_nonce_mask = httplib_get_random() ^ (uint64_t)(ptrdiff_t)(options);
 
 	if ( httplib_atomic_inc( & XX_httplib_sTlsInit ) == 1 ) {
 

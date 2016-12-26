@@ -24,7 +24,6 @@
 
 void			XX_httplib_addenv( struct cgi_environment *env, PRINTF_FORMAT_STRING(const char *fmt), ... ) PRINTF_ARGS(2, 3);
 double			XX_httplib_difftimespec( const struct timespec *ts_now, const struct timespec *ts_before );
-uint64_t		XX_httplib_get_random( void );
 void			XX_httplib_gmt_time_string( char *buf, size_t buf_len, time_t *t );
 int			XX_httplib_inet_pton( int af, const char *src, void *dst, size_t dstlen );
 int			XX_httplib_lowercase( const char *s );
