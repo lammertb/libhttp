@@ -70,9 +70,7 @@ struct httplib_option XX_httplib_config_options[] = {
 	{ "access_control_allow_origin", CONFIG_TYPE_STRING,      "*"                                                                },
 	{ "error_pages",                 CONFIG_TYPE_DIRECTORY,   NULL                                                               },
 	{ "tcp_nodelay",                 CONFIG_TYPE_NUMBER,      "0"                                                                },
-#if !defined(NO_CACHING)
-	{ "static_file_max_age",         CONFIG_TYPE_NUMBER,      "3600"                                                             },
-#endif
+	{ "static_file_max_age",         CONFIG_TYPE_NUMBER,      NULL                                                               },
 #if defined(__linux__)
 	{ "allow_sendfile_call",         CONFIG_TYPE_BOOLEAN,     "yes"                                                              },
 #endif

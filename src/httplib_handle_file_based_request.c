@@ -41,6 +41,7 @@ void XX_httplib_handle_file_based_request( struct httplib_connection *conn, cons
 	const char *cgi_ext;
 #endif  /* ! NO_CGI */
 	const char *ssi_ext;
+	const char *max_age;
 
 	if ( conn == NULL  ||  conn->ctx == NULL ) return;
 
@@ -48,6 +49,7 @@ void XX_httplib_handle_file_based_request( struct httplib_connection *conn, cons
 	cgi_ext = conn->ctx->cfg[CGI_EXTENSIONS];
 #endif  /* ! NO_CGI */
 	ssi_ext = conn->ctx->cfg[SSI_EXTENSIONS];
+	max_age = conn->ctx->cfg[STATIC_FILE_MAX_AGE];
 
 	if (0) {
 #if !defined(NO_CGI)
@@ -66,17 +68,11 @@ void XX_httplib_handle_file_based_request( struct httplib_connection *conn, cons
 	else if ( ssi_ext != NULL  &&  XX_httplib_match_prefix( ssi_ext, strlen( ssi_ext ), path ) > 0 ) {
 
 		XX_httplib_handle_ssi_file_request( conn, path, file );
-#if !defined(NO_CACHING)
 	}
 	
-	else if ( ! conn->in_error_handler  &&  XX_httplib_is_not_modified( conn, file ) ) {
-
-		/*
-		 * Send 304 "Not Modified" - this must not send any body data
-		 */
+	else if ( max_age != NULL  &&  ! conn->in_error_handler  &&  XX_httplib_is_not_modified( conn, file ) ) {
 
 		XX_httplib_handle_not_modified_static_file_request( conn, file );
-#endif /* !NO_CACHING */
 	}
 	
 	else XX_httplib_handle_static_file_request( conn, path, file, NULL, NULL );

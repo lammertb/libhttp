@@ -27,13 +27,8 @@
 
 #include "httplib_main.h"
 
-#if !defined(NO_CACHING)
 static const char *month_names[] = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
-#endif /* !NO_CACHING */
 
-
-
-#if !defined(NO_CACHING)
 /* Convert month to the month number. Return -1 on error, or month number */
 static int get_month_index( const char *s ) {
 
@@ -47,8 +42,10 @@ static int get_month_index( const char *s ) {
 	return -1;
 }
 
-
-/* Parse UTC date-time string, and return the corresponding time_t value. */
+/*
+ * Parse UTC date-time string, and return the corresponding time_t value.
+ * This function is used in the if-modified-since calculations
+ */
 time_t XX_httplib_parse_date_string( const char *datetime ) {
 
 	char month_str[32] = {0};
@@ -85,5 +82,3 @@ time_t XX_httplib_parse_date_string( const char *datetime ) {
 	return result;
 
 }  /* XX_httplib_parse_date_string */
-
-#endif /* !NO_CACHING */

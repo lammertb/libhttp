@@ -35,20 +35,16 @@
  * be sufficient.
  */
 
-#if !defined(NO_CACHING)
-
 bool XX_httplib_is_not_modified( const struct httplib_connection *conn, const struct file *filep ) {
 
 	char etag[64];
 	const char *ims = httplib_get_header( conn, "If-Modified-Since" );
 	const char *inm = httplib_get_header( conn, "If-None-Match"     );
 
+	if ( conn == NULL  ||  filep == NULL ) return false;
 	XX_httplib_construct_etag( etag, sizeof(etag), filep );
-	if ( filep == NULL ) return false;
 
 	return  (inm != NULL  &&  ! httplib_strcasecmp( etag, inm ) )                                 ||
 		(ims != NULL  &&  ( filep->last_modified <= XX_httplib_parse_date_string( ims ) ) ) ;
 
 }  /* XX_httplib_is_not_modified */
-
-#endif /* !NO_CACHING */

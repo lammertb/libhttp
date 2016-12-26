@@ -25,8 +25,6 @@ The following parameter values can be used:
 | **1** | NO_FILES | *Able to serve files*.  If this feature is available, the webserver is able to serve files directly from a directory tree. |
 | **2** | NO_SSL | *Support for HTTPS*. If this feature is available, the webserver van use encryption in the client-server connection. SSLv2, SSLv3, TLSv1.0, TLSv1.1 and TLSv1.2 are supported depending on the SSL library LibHTTP has been compiled with, but which protocols are used effectively when the server is running is dependent on the options used when the server is started. |
 | **4** | NO_CGI | *Support for CGI*. If this feature is available, external CGI scripts can be called by the webserver. |
-| **16** | USE_WEBSOCKET | Support for web sockets. WebSockets support is available in the LibHTTP library if the proper options has been used during cimpile time. |
-| **128** | NO_CACHING | *Support for caching*. The webserver will support caching, if it has not been disabled while compiling the library. |
 
 Parameter values other than the values mentioned above will give undefined results. Therefore&mdash;although the parameter values for the `httplib_check_feature()` function are effectively bitmasks, you should't assume that combining two of those values with an OR to a new value will give any meaningful results when the function returns.
 

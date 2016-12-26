@@ -36,7 +36,6 @@
 
 int XX_httplib_send_static_cache_header( struct httplib_connection *conn ) {
 
-#if !defined(NO_CACHING)
 	/*
 	 * Read the server config to check how long a file may be cached.
 	 * The configuration is in seconds.
@@ -71,11 +70,5 @@ int XX_httplib_send_static_cache_header( struct httplib_connection *conn ) {
 	 */
 
 	return httplib_printf( conn, "Cache-Control: max-age=%u\r\n", (unsigned)max_age );
-
-#else  /* NO_CACHING */
-
-	return XX_httplib_send_no_cache_header( conn );
-
-#endif /* !NO_CACHING */
 
 }  /* XX_httplib_send_static_cache_header */

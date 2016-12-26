@@ -36,7 +36,6 @@
  * not been changed.
  */
 
-#if !defined(NO_CACHING)
 void XX_httplib_handle_not_modified_static_file_request( struct httplib_connection *conn, struct file *filep ) {
 
 	char date[64];
@@ -58,5 +57,3 @@ void XX_httplib_handle_not_modified_static_file_request( struct httplib_connecti
 	httplib_printf( conn, "Last-Modified: %s\r\n" "Etag: %s\r\n" "Connection: %s\r\n" "\r\n", lm, etag, XX_httplib_suggest_connection_header( conn ) );
 
 }  /* XX_httplib_handle_not_modified_static_file_request */
-
-#endif
