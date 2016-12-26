@@ -82,7 +82,7 @@ int XX_httplib_set_ports_option( struct httplib_context *ctx ) {
 		}
 
 #if !defined(NO_SSL)
-		if ( so.is_ssl  &&  ctx->ssl_ctx == NULL ) {
+		if ( so.has_ssl  &&  ctx->ssl_ctx == NULL ) {
 
 			httplib_cry( XX_httplib_fc(ctx), "Cannot add SSL socket (entry %i). Is -ssl_certificate option set?", ports_total );
 			continue;
@@ -355,8 +355,8 @@ static bool parse_port_string( const struct vec *vec, struct socket *so, int *ip
 	}
 
 	ch            = vec->ptr[len]; /* Next character after the port number */
-	so->is_ssl    = ( ch == 's' );
-	so->ssl_redir = ( ch == 'r' );
+	so->has_ssl   = ( ch == 's' );
+	so->has_redir = ( ch == 'r' );
 
 	/*
 	 * Make sure the port is valid and vector ends with 's', 'r' or ','

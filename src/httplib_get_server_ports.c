@@ -46,8 +46,8 @@ int httplib_get_server_ports( const struct httplib_context *ctx, int size, struc
 		        ? ntohs( ctx->listening_sockets[i].lsa.sin6.sin6_port )
 		        : ntohs( ctx->listening_sockets[i].lsa.sin.sin_port   );
 
-		ports[cnt].is_ssl      = ctx->listening_sockets[i].is_ssl;
-		ports[cnt].is_redirect = ctx->listening_sockets[i].ssl_redir;
+		ports[cnt].has_ssl      = ctx->listening_sockets[i].has_ssl;
+		ports[cnt].has_redirect = ctx->listening_sockets[i].has_redir;
 
 		if      ( ctx->listening_sockets[i].lsa.sa.sa_family == AF_INET  ) ports[cnt++].protocol = 1;
 		else if ( ctx->listening_sockets[i].lsa.sa.sa_family == AF_INET6 ) ports[cnt++].protocol = 3;

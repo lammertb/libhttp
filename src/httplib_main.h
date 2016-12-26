@@ -516,13 +516,12 @@ extern CRITICAL_SECTION			global_log_file_lock;
 /* Describes listening socket, or socket which was accept()-ed by the master
  * thread and queued for future handling by the worker thread. */
 struct socket {
-	SOCKET sock;             /* Listening socket */
-	union usa lsa;           /* Local socket address */
-	union usa rsa;           /* Remote socket address */
-	unsigned char is_ssl;    /* Is port SSL-ed */
-	unsigned char ssl_redir; /* Is port supposed to redirect everything to SSL
-	                          * port */
-	unsigned char in_use;    /* Is valid */
+	SOCKET sock;			/* Listening socket					*/
+	union usa lsa;			/* Local socket address					*/
+	union usa rsa;			/* Remote socket address				*/
+	bool has_ssl;			/* Is port SSL-ed					*/
+	bool has_redir;			/* Is port supposed to redirect everything to SSL port	*/
+	unsigned char in_use;		/* Is valid						*/
 };
 
 

@@ -105,7 +105,7 @@ void XX_httplib_handle_request( struct httplib_connection *conn ) {
 	 * 1.2. do a https redirect, if required. Do not decode URIs yet.
 	 */
 
-	if ( ! conn->client.is_ssl  &&  conn->client.ssl_redir ) {
+	if ( ! conn->client.has_ssl  &&  conn->client.has_redir ) {
 
 		ssl_index = XX_httplib_get_first_ssl_listener_index( conn->ctx );
 

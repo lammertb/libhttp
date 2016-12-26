@@ -66,8 +66,8 @@ void XX_httplib_accept_new_connection( const struct socket *listener, struct htt
 
 		XX_httplib_set_close_on_exec( so.sock, XX_httplib_fc(ctx) );
 
-		so.is_ssl    = listener->is_ssl;
-		so.ssl_redir = listener->ssl_redir;
+		so.has_ssl   = listener->has_ssl;
+		so.has_redir = listener->has_redir;
 
 		if ( getsockname( so.sock, &so.lsa.sa, &len ) != 0 ) {
 

@@ -20,9 +20,6 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
- *
- * ============
- * Release: 2.0
  */
 
 #include "httplib_main.h"
@@ -35,7 +32,7 @@
  * the data, the link between the connection and data is removed.
  */
 
-void httplib_set_user_connection_data( struct httplib_connection *conn, void *data ) {
+LIBHTTP_API void httplib_set_user_connection_data( struct httplib_connection *conn, void *data ) {
 
 	if ( conn != NULL ) conn->request_info.conn_data = data;
 

@@ -30,7 +30,7 @@
 /*
  * struct httplib_connection *XX_httplib_fc( struct httplib_context *ctx );
  *
- * TThe function XX_httplib_fc() returns a fake connection structure specific
+ * The function XX_httplib_fc() returns a fake connection structure specific
  * for logging if a connection is not applicable at the moment of logging.
  */
 

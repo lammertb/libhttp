@@ -42,7 +42,7 @@ int XX_httplib_get_first_ssl_listener_index( const struct httplib_context *ctx )
 
 	idx = -1;
 
-	if ( ctx != NULL ) for (i=0; idx == -1 && i < ctx->num_listening_sockets; i++) idx = ctx->listening_sockets[i].is_ssl ? ((int)(i)) : -1;
+	if ( ctx != NULL ) for (i=0; idx == -1 && i < ctx->num_listening_sockets; i++) idx = (ctx->listening_sockets[i].has_ssl) ? ((int)(i)) : -1;
 
 	return idx;
 

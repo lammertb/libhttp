@@ -111,19 +111,17 @@ static void do_ssi_include(struct httplib_connection *conn, const char *ssi, cha
 	if ( ! XX_httplib_fopen( conn, path, "rb", &file ) ) {
 
 		httplib_cry( conn, "Cannot open SSI #include: [%s]: fopen(%s): %s", tag, path, strerror(ERRNO) );
+		return;
 	}
 	
-	else {
-		XX_httplib_fclose_on_exec( & file, conn );
+	XX_httplib_fclose_on_exec( & file, conn );
 
-		ssi_ext = conn->ctx->cfg[SSI_EXTENSIONS];
+	ssi_ext = conn->ctx->cfg[SSI_EXTENSIONS];
 
-		if ( ssi_ext != NULL  &&  XX_httplib_match_prefix( ssi_ext, strlen( ssi_ext ), path ) > 0 ) send_ssi_file( conn, path, &file, include_level+1 );
-		
-		else XX_httplib_send_file_data(conn, &file, 0, INT64_MAX);
+	if ( ssi_ext != NULL  &&  XX_httplib_match_prefix( ssi_ext, strlen( ssi_ext ), path ) > 0 ) send_ssi_file( conn, path, &file, include_level+1 );
+	else XX_httplib_send_file_data( conn, &file, 0, INT64_MAX );
 
-		XX_httplib_fclose( & file );
-	}
+	XX_httplib_fclose( & file );
 
 }  /* do_ssi_include */
 

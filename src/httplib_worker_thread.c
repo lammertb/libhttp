@@ -129,9 +129,9 @@ static void *worker_thread_run( struct worker_thread_args *thread_args ) {
 
 			XX_httplib_sockaddr_to_string( conn->request_info.remote_addr, sizeof(conn->request_info.remote_addr), &conn->client.rsa );
 
-			conn->request_info.is_ssl = conn->client.is_ssl;
+			conn->request_info.has_ssl = conn->client.has_ssl;
 
-			if ( conn->client.is_ssl ) {
+			if ( conn->client.has_ssl ) {
 #ifndef NO_SSL
 				/*
 				 * HTTPS connection

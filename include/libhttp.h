@@ -164,7 +164,7 @@ struct httplib_request_info {
 	int64_t content_length; /* Length (in bytes) of the request body,
 	                             can be -1 if no length was given. */
 	int remote_port;          /* Client's port */
-	int is_ssl;               /* 1 if SSL-ed, 0 if not */
+	bool has_ssl;               /* 1 if SSL-ed, 0 if not */
 	void *user_data;          /* User data pointer passed to httplib_start() */
 	void *conn_data;          /* Connection-specific user data */
 
@@ -444,14 +444,8 @@ httplib_get_context(const struct httplib_connection *conn);
 LIBHTTP_API void *httplib_get_user_data(const struct httplib_context *ctx);
 
 
-/* Set user data for the current connection. */
-LIBHTTP_API void httplib_set_user_connection_data(struct httplib_connection *conn,
-                                              void *data);
 
 
-/* Get user data set for the current connection. */
-LIBHTTP_API void *
-httplib_get_user_connection_data(const struct httplib_connection *conn);
 
 
 struct httplib_option {
@@ -462,12 +456,12 @@ struct httplib_option {
 
 
 enum {
-	CONFIG_TYPE_UNKNOWN = 0x0,
-	CONFIG_TYPE_NUMBER = 0x1,
-	CONFIG_TYPE_STRING = 0x2,
-	CONFIG_TYPE_FILE = 0x3,
-	CONFIG_TYPE_DIRECTORY = 0x4,
-	CONFIG_TYPE_BOOLEAN = 0x5,
+	CONFIG_TYPE_UNKNOWN     = 0x0,
+	CONFIG_TYPE_NUMBER      = 0x1,
+	CONFIG_TYPE_STRING      = 0x2,
+	CONFIG_TYPE_FILE        = 0x3,
+	CONFIG_TYPE_DIRECTORY   = 0x4,
+	CONFIG_TYPE_BOOLEAN     = 0x5,
 	CONFIG_TYPE_EXT_PATTERN = 0x6
 };
 
@@ -479,14 +473,14 @@ LIBHTTP_API const struct httplib_option *httplib_get_valid_options(void);
 
 
 struct httplib_server_ports {
-	int protocol;    /* 1 = IPv4, 2 = IPv6, 3 = both */
-	int port;        /* port number */
-	int is_ssl;      /* https port: 0 = no, 1 = yes */
-	int is_redirect; /* redirect all requests: 0 = no, 1 = yes */
-	int _reserved1;
-	int _reserved2;
-	int _reserved3;
-	int _reserved4;
+	int	protocol;		/* 1 = IPv4, 2 = IPv6, 3 = both			*/
+	int	port;			/* port number					*/
+	bool	has_ssl;		/* https port: 0 = no, 1 = yes			*/
+	bool	has_redirect;		/* redirect all requests: 0 = no, 1 = yes	*/
+	int	_reserved1;
+	int	_reserved2;
+	int	_reserved3;
+	int	_reserved4;
 };
 
 
@@ -983,6 +977,7 @@ LIBHTTP_API int			httplib_atomic_inc( volatile int *addr );
 LIBHTTP_API int			httplib_base64_encode( const unsigned char *src, int src_len, char *dst, int dst_len );
 LIBHTTP_API int			httplib_closedir( DIR *dir );
 LIBHTTP_API uint64_t		httplib_get_random( void );
+LIBHTTP_API void *		httplib_get_user_connection_data( const struct httplib_connection *conn );
 LIBHTTP_API int			httplib_kill( pid_t pid, int sig_num );
 LIBHTTP_API int			httplib_mkdir( const char *path, int mode );
 LIBHTTP_API DIR *		httplib_opendir( const char *name );
@@ -1008,6 +1003,7 @@ LIBHTTP_API struct dirent *	httplib_readdir( DIR *dir );
 LIBHTTP_API int			httplib_remove( const char *path );
 LIBHTTP_API void		httplib_send_file( struct httplib_connection *conn, const char *path, const char *mime_type, const char *additional_headers );
 LIBHTTP_API void		httplib_set_alloc_callback_func( httplib_alloc_callback_func log_func );
+LIBHTTP_API void		httplib_set_user_connection_data( struct httplib_connection *conn, void *data );
 LIBHTTP_API int			httplib_strcasecmp( const char *s1, const char *s2 );
 LIBHTTP_API const char *	httplib_strcasestr( const char *big_str, const char *small_str );
 LIBHTTP_API char *		httplib_strdup( const char *str );
