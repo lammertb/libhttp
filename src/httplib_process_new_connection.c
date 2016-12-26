@@ -44,7 +44,7 @@ void XX_httplib_process_new_connection( struct httplib_connection *conn ) {
 	char ebuf[100];
 	const char *hostend;
 	int reqerr;
-	int uri_type;
+	enum uri_type_t uri_type;
 	union {
 		const void *	con;
 		void *		var;
@@ -88,31 +88,23 @@ void XX_httplib_process_new_connection( struct httplib_connection *conn ) {
 
 			switch ( uri_type ) {
 
-				case 1 :
-					/*
-					 * Asterisk
-					 */
+				case URI_TYPE_ASTERISK :
 
 					conn->request_info.local_uri = NULL;
 					break;
 
-				case 2 :
-					/*
-					 * relative uri
-					 */
+				case URI_TYPE_RELATIVE :
 
 					conn->request_info.local_uri = conn->request_info.request_uri;
 					break;
-				case 3 :
-				case 4 :
-					/*
-					 * absolute uri (with/without port)
-					 */
+
+				case URI_TYPE_ABS_NOPORT :
+				case URI_TYPE_ABS_PORT   :
 
 					hostend = XX_httplib_get_rel_url_at_current_server( conn->request_info.request_uri, conn );
 
-					if (hostend) conn->request_info.local_uri = hostend;
-					else         conn->request_info.local_uri = NULL;
+					if ( hostend != NULL ) conn->request_info.local_uri = hostend;
+					else                   conn->request_info.local_uri = NULL;
 					break;
 
 				default :

@@ -28,19 +28,13 @@
 #include "httplib_main.h"
 
 /*
- * int XX_httplib_get_uri_type( const char *uri );
+ * enum uri_type_t XX_httplib_get_uri_type( const char *uri );
  *
  * The function XX_httplib_get_uri_type() returns the URI type of an URI. This
  * can be any of the following values:
- *
- * return 0 for invalid uri,
- * return 1 for *,
- * return 2 for relative uri,
- * return 3 for absolute uri without port,
- * return 4 for absolute uri with port
  */
 
-int XX_httplib_get_uri_type( const char *uri ) {
+enum uri_type_t XX_httplib_get_uri_type( const char *uri ) {
 
 	int i;
 	char *hostend;
@@ -55,7 +49,7 @@ int XX_httplib_get_uri_type( const char *uri ) {
 	 * or it should start with the protocol (absolute uri).
 	 */
 
-	if (uri[0] == '*' && uri[1] == '\0') return 1;
+	if (uri[0] == '*' && uri[1] == '\0') return URI_TYPE_ASTERISK;
 
 	/*
 	 * Valid URIs according to RFC 3986
@@ -66,8 +60,8 @@ int XX_httplib_get_uri_type( const char *uri ) {
 	 */
 
 	for (i = 0; uri[i] != 0; i++) {
-		if ( uri[i] < 33  ) return 0;	/* control characters and spaces are invalid	*/
-		if ( uri[i] > 126 ) return 0;	/* non-ascii characters must be % encoded	*/
+		if ( uri[i] < 33  ) return URI_TYPE_UNKNOWN;	/* control characters and spaces are invalid	*/
+		if ( uri[i] > 126 ) return URI_TYPE_UNKNOWN;	/* non-ascii characters must be % encoded	*/
 
 		switch ( uri[i] ) {
 			case '"':  /*  34 */
@@ -79,7 +73,7 @@ int XX_httplib_get_uri_type( const char *uri ) {
 			case '{':  /* 123 */
 			case '|':  /* 124 */
 			case '}':  /* 125 */
-				return 0;
+				return URI_TYPE_UNKNOWN;
 
 			default:
 				/*
@@ -94,7 +88,7 @@ int XX_httplib_get_uri_type( const char *uri ) {
 	 * A relative uri starts with a / character
 	 */
 
-	if ( uri[0] == '/' ) return 2;		/* relative uri		*/
+	if ( uri[0] == '/' ) return URI_TYPE_RELATIVE;		/* relative uri		*/
 
 	/*
 	 * It could be an absolute uri:
@@ -108,19 +102,19 @@ int XX_httplib_get_uri_type( const char *uri ) {
 		if ( httplib_strncasecmp( uri, XX_httplib_abs_uri_protocols[i].proto, XX_httplib_abs_uri_protocols[i].proto_len ) == 0 ) { 
 
 			hostend = strchr( uri + XX_httplib_abs_uri_protocols[i].proto_len, '/' );
-			if ( hostend == NULL ) return 0;
+			if ( hostend == NULL ) return URI_TYPE_UNKNOWN;
 
 			portbegin = strchr( uri + XX_httplib_abs_uri_protocols[i].proto_len, ':' );
-			if ( portbegin == NULL ) return 3;
+			if ( portbegin == NULL ) return URI_TYPE_ABS_NOPORT;
 
 			port = strtoul( portbegin+1, &portend, 10 );
 
-			if ( portend != hostend  ||  ! port  ||  ! XX_httplib_is_valid_port( port ) ) return 0;
+			if ( portend != hostend  ||  ! port  ||  ! XX_httplib_is_valid_port( port ) ) return URI_TYPE_UNKNOWN;
 
-			return 4;
+			return URI_TYPE_ABS_PORT;
 		}
 	}
 
-	return 0;
+	return URI_TYPE_UNKNOWN;
 
 }  /* XX_httplib_get_uri_type */

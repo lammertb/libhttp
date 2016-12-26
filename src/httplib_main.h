@@ -459,6 +459,14 @@ enum ctx_type_t {
 	CTX_TYPE_CLIENT
 };
 
+enum uri_type_t {
+	URI_TYPE_UNKNOWN,
+	URI_TYPE_ASTERISK,
+	URI_TYPE_RELATIVE,
+	URI_TYPE_ABS_NOPORT,
+	URI_TYPE_ABS_PORT
+};
+
 #if defined(NO_SSL)
 
 typedef struct SSL SSL; /* dummy for SSL argument to push/pull */
@@ -818,7 +826,7 @@ uint32_t		XX_httplib_get_remote_ip( const struct httplib_connection *conn );
 int			XX_httplib_get_request_handler( struct httplib_connection *conn, int handler_type, httplib_request_handler *handler, httplib_websocket_connect_handler *connect_handler, httplib_websocket_ready_handler *ready_handler, httplib_websocket_data_handler *data_handler, httplib_websocket_close_handler *close_handler, httplib_authorization_handler *auth_handler, void **cbdata );
 int			XX_httplib_get_request_len( const char *buf, int buflen );
 void			XX_httplib_get_system_name( char **sysName );
-int			XX_httplib_get_uri_type( const char *uri );
+enum uri_type_t		XX_httplib_get_uri_type( const char *uri );
 int			XX_httplib_getreq( struct httplib_connection *conn, char *ebuf, size_t ebuf_len, int *err );
 void			XX_httplib_handle_cgi_request( struct httplib_connection *conn, const char *prog );
 void			XX_httplib_handle_directory_request( struct httplib_connection *conn, const char *dir );
