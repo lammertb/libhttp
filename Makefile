@@ -83,7 +83,7 @@ ifneq ($(OS),Windows_NT)
 OS:=$(shell uname -s)
 endif
 
-DFLAGS = -DUSE_STACK_SIZE=102400 -DUSE_WEBSOCKET
+DFLAGS = -DUSE_STACK_SIZE=102400
 
 INCDIR = include/
 LIBDIR = lib/

@@ -37,7 +37,6 @@
 
 bool XX_httplib_is_websocket_protocol( const struct httplib_connection *conn ) {
 
-#if defined(USE_WEBSOCKET)
 	const char *upgrade;
 	const char *connection;
 
@@ -67,13 +66,5 @@ bool XX_httplib_is_websocket_protocol( const struct httplib_connection *conn ) {
 	 */
 
 	return true;
-
-#else  /* defined(USE_WEBSOCKET) */
-
-	UNUSED_PARAMETER(conn);
-
-	return false;
-
-#endif  /* defined(USE_WEBSOCKET) */
 
 }  /* XX_httplib_is_websocket_protocol */

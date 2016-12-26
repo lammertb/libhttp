@@ -33,8 +33,6 @@
  * The function XX_httplib_read_websocket() reads from a websocket connection.
  */
 
-#if defined(USE_WEBSOCKET)
-
 void XX_httplib_read_websocket( struct httplib_connection *conn, httplib_websocket_data_handler ws_data_handler, void *callback_data ) {
 
 	/* Pointer to the beginning of the portion of the incoming websocket
@@ -277,5 +275,3 @@ void XX_httplib_read_websocket( struct httplib_connection *conn, httplib_websock
 	XX_httplib_set_thread_name( "worker" );
 
 }  /* XX_httplib_read_websocket */
-
-#endif /* !USE_WEBSOCKET */

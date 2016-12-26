@@ -361,7 +361,6 @@ no_callback_resource:
 		}
 		
 		else {
-#if defined(USE_WEBSOCKET)
 			XX_httplib_handle_websocket_request( conn,
 			                         path,
 			                         is_callback_resource,
@@ -370,7 +369,6 @@ no_callback_resource:
 			                         ws_data_handler,
 			                         ws_close_handler,
 			                         callback_data );
-#endif
 		}
 
 		return;
@@ -379,8 +377,6 @@ no_callback_resource:
 /*
  * 8. handle websocket requests
  */
-
-#if defined(USE_WEBSOCKET)
 
 	if ( is_websocket_request ) {
 
@@ -399,7 +395,6 @@ no_callback_resource:
 	}
 	
 	else
-#endif
 
 #if defined(NO_FILES)
 

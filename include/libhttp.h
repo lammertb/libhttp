@@ -531,7 +531,6 @@ LIBHTTP_API int httplib_write(struct httplib_connection *, const void *buf, size
    a request simultaneously.
 
    Send data to a websocket client wrapped in a websocket frame.
-   This function is available when LibHTTP is compiled with -DUSE_WEBSOCKET
 
    Return:
     0   when the connection has been closed
@@ -546,7 +545,6 @@ LIBHTTP_API int httplib_websocket_write(struct httplib_connection *conn, int opc
    a request simultaneously.
 
    Send data to a websocket server wrapped in a masked websocket frame.
-   This function is available when LibHTTP is compiled with -DUSE_WEBSOCKET
 
    Return:
     0   when the connection has been closed
@@ -572,12 +570,12 @@ LIBHTTP_API void httplib_unlock_context(struct httplib_context *ctx);
 
 /* Opcodes, from http://tools.ietf.org/html/rfc6455 */
 enum {
-	WEBSOCKET_OPCODE_CONTINUATION = 0x0,
-	WEBSOCKET_OPCODE_TEXT = 0x1,
-	WEBSOCKET_OPCODE_BINARY = 0x2,
+	WEBSOCKET_OPCODE_CONTINUATION     = 0x0,
+	WEBSOCKET_OPCODE_TEXT             = 0x1,
+	WEBSOCKET_OPCODE_BINARY           = 0x2,
 	WEBSOCKET_OPCODE_CONNECTION_CLOSE = 0x8,
-	WEBSOCKET_OPCODE_PING = 0x9,
-	WEBSOCKET_OPCODE_PONG = 0xa
+	WEBSOCKET_OPCODE_PING             = 0x9,
+	WEBSOCKET_OPCODE_PONG             = 0xA
 };
 
 
@@ -959,7 +957,6 @@ LIBHTTP_API int httplib_get_response(struct httplib_connection *conn, char *ebuf
          1  serve files (NO_FILES not set)
          2  support HTTPS (NO_SSL not set)
          4  support CGI (NO_CGI not set)
-        16  support WebSocket (USE_WEBSOCKET set)
        128  support caching (NO_CACHING not set)
        The result is undefined for all other feature values.
 

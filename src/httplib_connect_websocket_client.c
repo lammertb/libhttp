@@ -38,7 +38,6 @@
 
 struct httplib_connection *httplib_connect_websocket_client( const char *host, int port, int use_ssl, char *error_buffer, size_t error_buffer_size, const char *path, const char *origin, httplib_websocket_data_handler data_func, httplib_websocket_close_handler close_func, void *user_data ) {
 
-#if defined(USE_WEBSOCKET)
 	struct httplib_connection *conn;
 	struct httplib_context *newctx;
 	struct websocket_client_thread_data *thread_data;
@@ -153,19 +152,5 @@ struct httplib_connection *httplib_connect_websocket_client( const char *host, i
 	}
 
 	return conn;
-#else
-	UNUSED_PARAMETER(host);
-	UNUSED_PARAMETER(port);
-	UNUSED_PARAMETER(use_ssl);
-	UNUSED_PARAMETER(error_buffer);
-	UNUSED_PARAMETER(error_buffer_size);
-	UNUSED_PARAMETER(path);
-	UNUSED_PARAMETER(origin);
-	UNUSED_PARAMETER(user_data);
-	UNUSED_PARAMETER(data_func);
-	UNUSED_PARAMETER(close_func);
-
-	return NULL;
-#endif
 
 }  /* httplib_connect_websocket_client */

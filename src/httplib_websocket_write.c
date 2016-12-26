@@ -34,12 +34,8 @@
  * connection.
  */
 
-#if defined(USE_WEBSOCKET)
-
 int httplib_websocket_write( struct httplib_connection *conn, int opcode, const char *data, size_t dataLen ) {
 
 	return XX_httplib_websocket_write_exec( conn, opcode, data, dataLen, 0 );
 
 }  /* httplib_websocket_write */
-
-#endif /* USE_WEBSOCKET */

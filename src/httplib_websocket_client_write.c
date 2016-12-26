@@ -28,8 +28,6 @@
 #include "httplib_main.h"
 #include "httplib_utils.h"
 
-#if defined(USE_WEBSOCKET)
-
 static void mask_data( const char *in, size_t in_len, uint32_t masking_key, char *out );
 
 /*
@@ -104,5 +102,3 @@ static void mask_data( const char *in, size_t in_len, uint32_t masking_key, char
 	}
 
 }  /* mask_data */
-
-#endif /* !USE_WEBSOCKET */

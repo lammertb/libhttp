@@ -34,8 +34,6 @@
  * connects as a client to a remote websocket server.
  */
 
-#if defined(USE_WEBSOCKET)
-
 LIBHTTP_THREAD XX_httplib_websocket_client_thread( void *data ) {
 
 	struct websocket_client_thread_data *cdata;
@@ -63,5 +61,3 @@ LIBHTTP_THREAD XX_httplib_websocket_client_thread( void *data ) {
 	return LIBHTTP_THREAD_RETNULL;
 
 }  /* XX_httplib_websocket_client_thread */
-
-#endif  /* USE_WEBSOCKET */

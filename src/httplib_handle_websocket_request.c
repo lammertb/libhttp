@@ -34,8 +34,6 @@
  * request on a connection.
  */
 
-#if defined(USE_WEBSOCKET)
-
 void XX_httplib_handle_websocket_request( struct httplib_connection *conn, const char *path, int is_callback_resource, httplib_websocket_connect_handler ws_connect_handler, httplib_websocket_ready_handler ws_ready_handler, httplib_websocket_data_handler ws_data_handler, httplib_websocket_close_handler ws_close_handler, void *cbData ) {
 
 	const char *websock_key;
@@ -187,5 +185,3 @@ void XX_httplib_handle_websocket_request( struct httplib_connection *conn, const
 	if ( ws_close_handler ) ws_close_handler( conn, cbData );
 
 }  /* XX_httplib_handle_websocket_request */
-
-#endif /* USE_WEBSOCKET */

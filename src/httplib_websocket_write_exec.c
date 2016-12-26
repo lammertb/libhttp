@@ -34,8 +34,6 @@
  * writing data over a websocket connectin to a remote peer.
  */
 
-#if defined(USE_WEBSOCKET)
-
 int XX_httplib_websocket_write_exec( struct httplib_connection *conn, int opcode, const char *data, size_t data_len, uint32_t masking_key ) {
 
 	unsigned char header[14];
@@ -118,5 +116,3 @@ int XX_httplib_websocket_write_exec( struct httplib_connection *conn, int opcode
 	return retval;
 
 }  /* XX_httplib_websocket_write_exec */
-
-#endif /* !USE_WEBSOCKET */

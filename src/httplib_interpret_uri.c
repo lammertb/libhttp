@@ -78,16 +78,10 @@ void XX_httplib_interpret_uri( struct httplib_connection *conn, char *filename, 
 	*is_script_resource       = false;
 	*is_put_or_delete_request = XX_httplib_is_put_or_delete_method( conn );
 
-#if defined(USE_WEBSOCKET)
 	*is_websocket_request     = XX_httplib_is_websocket_protocol( conn );
 #if !defined(NO_FILES)
 	if ( *is_websocket_request  &&  conn->ctx->cfg[WEBSOCKET_ROOT] != NULL ) root = conn->ctx->cfg[WEBSOCKET_ROOT];
-#endif /* !NO_FILES */
-#else  /* USE_WEBSOCKET */
-	*is_websocket_request = false;
-#endif /* USE_WEBSOCKET */
 
-#if !defined(NO_FILES)
 	/*
 	 * Note that root == NULL is a regular use case here. This occurs,
 	 * if all requests are handled by callbacks, so the WEBSOCKET_ROOT

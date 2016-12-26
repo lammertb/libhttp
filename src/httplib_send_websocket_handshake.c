@@ -38,8 +38,6 @@
  * a websocket connection.
  */
 
-#if defined(USE_WEBSOCKET)
-
 int XX_httplib_send_websocket_handshake( struct httplib_connection *conn, const char *websock_key ) {
 
 	static const char *magic = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
@@ -117,5 +115,3 @@ int XX_httplib_send_websocket_handshake( struct httplib_connection *conn, const 
 	return 1;
 
 }  /* XX_httplib_send_websocket_handshake */
-
-#endif /* !USE_WEBSOCKET */

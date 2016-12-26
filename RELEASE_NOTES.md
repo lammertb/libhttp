@@ -5,6 +5,7 @@ Release Notes v2.0 (work in progress)
 Changes
 -------
 
+- Websocket support is always compiled in and switched on/off at runtime
 - Added NULL checking to all uses of context configuration settings
 - IPv6 support is now always available
 - Combined three send file functions into `httplib_send_file()`.

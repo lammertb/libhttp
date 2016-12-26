@@ -47,9 +47,6 @@ unsigned httplib_check_feature( unsigned feature ) {
 #if !defined(NO_CGI)
 	                                    | 0x0004u
 #endif
-#if defined(USE_WEBSOCKET)
-	                                    | 0x0010u
-#endif
 #if !defined(NO_CACHING)
 	                                    | 0x0080u
 #endif
