@@ -29,9 +29,6 @@ The format string is a format string from the `printf()` series of functions to 
 `conn = httplib_download( "google.com", 80, 0, ebuf, sizeof(ebuf),
                      "%s", "GET / HTTP/1.0\r\nHost: google.com\r\n\r\n" );`
 
-Please note that although LibHTTP supports both IPv4 and IPv6 communication that IPv6 addressing is only available if it was enabled at compile time. When running an application it is possible to check if IPv6 support has been compiled in by using the [`httplib_check_feature()`](httplib_check_feature.md) function with the parameter `USE_IPV6`.
-
 ### See Also
 
-* [`httplib_check_feature();`](httplib_check_feature.md)
 * [`httplib_close_connection();`](httplib_close_connection.md)

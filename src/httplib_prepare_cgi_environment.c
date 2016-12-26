@@ -73,13 +73,8 @@ void XX_httplib_prepare_cgi_environment( struct httplib_connection *conn, const 
 	XX_httplib_addenv( env, "%s", "SERVER_PROTOCOL=HTTP/1.1"  );
 	XX_httplib_addenv( env, "%s", "REDIRECT_STATUS=200"       ); /* For PHP */
 
-#if defined(USE_IPV6)
-	if ( conn->client.lsa.sa.sa_family == AF_INET6 ) XX_httplib_addenv( env, "SERVER_PORT=%d", ntohs(conn->client.lsa.sin6.sin6_port) );
-	else
-#endif
-	{
-		XX_httplib_addenv( env, "SERVER_PORT=%d", ntohs( conn->client.lsa.sin.sin_port ) );
-	}
+	if ( conn->client.lsa.sa.sa_family == AF_INET6 ) XX_httplib_addenv( env, "SERVER_PORT=%d", ntohs( conn->client.lsa.sin6.sin6_port ) );
+	else                                             XX_httplib_addenv( env, "SERVER_PORT=%d", ntohs( conn->client.lsa.sin.sin_port   ) );
 
 	XX_httplib_sockaddr_to_string( src_addr, sizeof(src_addr), &conn->client.rsa );
 

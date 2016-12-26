@@ -42,13 +42,9 @@ int httplib_get_server_ports( const struct httplib_context *ctx, int size, struc
 
 	for (i = 0; (i < size) && (i < (int)ctx->num_listening_sockets); i++) {
 
-		ports[cnt].port =
-#if defined(USE_IPV6)
-		    (ctx->listening_sockets[i].lsa.sa.sa_family == AF_INET6)
-		        ? ntohs(ctx->listening_sockets[i].lsa.sin6.sin6_port)
-		        :
-#endif
-		        ntohs(ctx->listening_sockets[i].lsa.sin.sin_port);
+		ports[cnt].port = (ctx->listening_sockets[i].lsa.sa.sa_family == AF_INET6)
+		        ? ntohs( ctx->listening_sockets[i].lsa.sin6.sin6_port )
+		        : ntohs( ctx->listening_sockets[i].lsa.sin.sin_port   );
 
 		ports[cnt].is_ssl      = ctx->listening_sockets[i].is_ssl;
 		ports[cnt].is_redirect = ctx->listening_sockets[i].ssl_redir;

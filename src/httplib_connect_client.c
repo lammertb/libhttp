@@ -104,13 +104,8 @@ static struct httplib_connection *httplib_connect_client_impl( const struct http
 
 	else {
 
-#ifdef USE_IPV6
 		len = (sa.sa.sa_family == AF_INET) ? sizeof(conn->client.rsa.sin)               : sizeof(conn->client.rsa.sin6);
 		psa = (sa.sa.sa_family == AF_INET) ? (struct sockaddr *)&(conn->client.rsa.sin) : (struct sockaddr *)&(conn->client.rsa.sin6);
-#else
-		len = sizeof(conn->client.rsa.sin);
-		psa = (struct sockaddr *)&(conn->client.rsa.sin);
-#endif
 
 		conn->buf_size    = MAX_REQUEST_SIZE;
 		conn->buf         = (char *)(conn + 1);

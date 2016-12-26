@@ -100,17 +100,8 @@ const char * XX_httplib_get_rel_url_at_current_server( const char *uri, const st
 		return 0;
 	}
 
-#if defined(USE_IPV6)
-	if ( conn->client.lsa.sa.sa_family == AF_INET6 ) {
-
-		if ( ntohs( conn->client.lsa.sin6.sin6_port ) != port ) return 0;
-	}
-	
-	else
-#endif
-	{
-		if ( ntohs( conn->client.lsa.sin.sin_port ) != port ) return 0;
-	}
+	if ( conn->client.lsa.sa.sa_family == AF_INET6 ) { if ( ntohs( conn->client.lsa.sin6.sin6_port ) != port ) return 0; }
+	else                                             { if ( ntohs( conn->client.lsa.sin.sin_port   ) != port ) return 0; }
 
 	if ( request_domain_len != server_domain_len  ||  ( memcmp( server_domain, hostbegin, server_domain_len ) != 0 ) ) {
 

@@ -68,16 +68,15 @@ int XX_httplib_connect_socket( struct httplib_context *ctx, const char *host, in
 		XX_httplib_snprintf( NULL, NULL, ebuf, ebuf_len, "%s", "SSL is not initialized" );
 		return 0;
 	}
-#else
+#else  /* NO_SSL */
 	UNUSED_PARAMETER(use_ssl);
-#endif
+#endif  /*NO_SSL */
 
 	if (XX_httplib_inet_pton(AF_INET, host, &sa->sin, sizeof(sa->sin))) {
 
 		sa->sin.sin_port = htons((uint16_t)port);
 		ip_ver = 4;
 	}
-#ifdef USE_IPV6
 	
 	else if ( XX_httplib_inet_pton( AF_INET6, host, &sa->sin6, sizeof(sa->sin6) ) ) {
 
@@ -107,7 +106,7 @@ int XX_httplib_connect_socket( struct httplib_context *ctx, const char *host, in
 			httplib_free( h );
 		}
 	}
-#endif
+
 	if ( ip_ver == 0 ) {
 
 		XX_httplib_snprintf( NULL, NULL, ebuf, ebuf_len, "%s", "host not found" );
@@ -115,9 +114,7 @@ int XX_httplib_connect_socket( struct httplib_context *ctx, const char *host, in
 	}
 
 	if      ( ip_ver == 4 ) *sock = socket( PF_INET,  SOCK_STREAM, 0 );
-#ifdef USE_IPV6
 	else if ( ip_ver == 6 ) *sock = socket( PF_INET6, SOCK_STREAM, 0 );
-#endif
 
 	if ( *sock == INVALID_SOCKET ) {
 
@@ -128,10 +125,7 @@ int XX_httplib_connect_socket( struct httplib_context *ctx, const char *host, in
 	XX_httplib_set_close_on_exec( *sock, XX_httplib_fc(ctx) );
 
 	if ( ip_ver == 4  &&  connect( *sock, (struct sockaddr *)&sa->sin,  sizeof(sa->sin)  ) == 0 ) return 1;
-
-#ifdef USE_IPV6
 	if ( ip_ver == 6  &&  connect( *sock, (struct sockaddr *)&sa->sin6, sizeof(sa->sin6) ) == 0 ) return 1;
-#endif
 
 	/*
 	 * Not connected

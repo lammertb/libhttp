@@ -70,13 +70,9 @@ void XX_httplib_redirect_to_https_port( struct httplib_connection *conn, int ssl
 
 	httplib_printf( conn, "HTTP/1.1 302 Found\r\nLocation: https://%s:%d%s%s%s\r\n\r\n",
 	          host,
-#if defined(USE_IPV6)
-	          (conn->ctx->listening_sockets[ssl_index].lsa.sa.sa_family
-	           == AF_INET6)
-	              ? (int)ntohs(conn->ctx->listening_sockets[ssl_index].lsa.sin6.sin6_port)
-	              :
-#endif
-	              (int)ntohs(conn->ctx->listening_sockets[ssl_index].lsa.sin.sin_port),
+	          (conn->ctx->listening_sockets[ssl_index].lsa.sa.sa_family == AF_INET6)
+	              ? (int)ntohs( conn->ctx->listening_sockets[ssl_index].lsa.sin6.sin6_port )
+	              : (int)ntohs( conn->ctx->listening_sockets[ssl_index].lsa.sin.sin_port   ),
 	          conn->request_info.local_uri,
 	          (conn->request_info.query_string == NULL) ? "" : "?",
 	          (conn->request_info.query_string == NULL) ? "" : conn->request_info.query_string);

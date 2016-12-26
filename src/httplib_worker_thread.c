@@ -124,14 +124,9 @@ static void *worker_thread_run( struct worker_thread_args *thread_args ) {
 			 * error handler would have the corresponding info.
 			 * Thanks to Johannes Winkelmann for the patch.
 			 */
-#if defined(USE_IPV6)
+
 			if ( conn->client.rsa.sa.sa_family == AF_INET6 ) conn->request_info.remote_port = ntohs( conn->client.rsa.sin6.sin6_port );
-			
-			else
-#endif
-			{
-				conn->request_info.remote_port = ntohs(conn->client.rsa.sin.sin_port);
-			}
+			else                                             conn->request_info.remote_port = ntohs( conn->client.rsa.sin.sin_port   );
 
 			XX_httplib_sockaddr_to_string( conn->request_info.remote_addr, sizeof(conn->request_info.remote_addr), &conn->client.rsa );
 

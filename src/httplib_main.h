@@ -394,9 +394,7 @@ typedef int SOCKET;
 union usa {
 	struct sockaddr sa;
 	struct sockaddr_in sin;
-#if defined(USE_IPV6)
 	struct sockaddr_in6 sin6;
-#endif
 };
 
 /* NOTE(lsm): this enum shoulds be in sync with the config_options below. */

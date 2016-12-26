@@ -42,10 +42,8 @@ static bool parse_port_string( const struct vec *vec, struct socket *so, int *ip
 int XX_httplib_set_ports_option( struct httplib_context *ctx ) {
 
 	const char *list;
-	int on = 1;
-#if defined(USE_IPV6)
-	int off = 0;
-#endif  /* USE_IPV6 */
+	int on;
+	int off;
 	struct vec vec;
 	struct socket so;
 	struct socket *ptr;
@@ -58,6 +56,8 @@ int XX_httplib_set_ports_option( struct httplib_context *ctx ) {
 
 	if ( ctx == NULL ) return 0;
 
+	on          = 1;
+	off         = 0;
 	ports_total = 0;
 	ports_ok    = 0;
 
@@ -130,7 +130,7 @@ int XX_httplib_set_ports_option( struct httplib_context *ctx ) {
 #endif  /* _WIN32 */
 
 		if ( ip_version > 4 ) {
-#if defined(USE_IPV6)
+
 			if ( ip_version == 6 ) {
 
 				if ( so.lsa.sa.sa_family == AF_INET6  &&  setsockopt( so.sock, IPPROTO_IPV6, IPV6_V6ONLY, (void *)&off, sizeof(off) ) != 0 ) {
@@ -142,12 +142,6 @@ int XX_httplib_set_ports_option( struct httplib_context *ctx ) {
 					httplib_cry( XX_httplib_fc(ctx), "cannot set socket option IPV6_V6ONLY (entry %i)", ports_total );
 				}
 			}
-#else  /* USE_IPV6 */
-			httplib_cry( XX_httplib_fc(ctx), "IPv6 not available" );
-			closesocket( so.sock );
-			so.sock = INVALID_SOCKET;
-			continue;
-#endif  /* USE_IPV6 */
 		}
 
 		if ( so.lsa.sa.sa_family == AF_INET ) {
@@ -162,7 +156,7 @@ int XX_httplib_set_ports_option( struct httplib_context *ctx ) {
 				continue;
 			}
 		}
-#if defined(USE_IPV6)
+
 		else if ( so.lsa.sa.sa_family == AF_INET6 ) {
 
 			len = sizeof(so.lsa.sin6);
@@ -175,7 +169,7 @@ int XX_httplib_set_ports_option( struct httplib_context *ctx ) {
 				continue;
 			}
 		}
-#endif  /* USE_IPV6 */
+
 		else {
 			httplib_cry( XX_httplib_fc(ctx), "cannot bind: address family not supported (entry %i)", ports_total );
 			continue;
@@ -202,14 +196,8 @@ int XX_httplib_set_ports_option( struct httplib_context *ctx ) {
  * Update lsa port in case of random free ports
  */
 
-#if defined(USE_IPV6)
 		if ( so.lsa.sa.sa_family == AF_INET6 ) so.lsa.sin6.sin6_port = usa.sin6.sin6_port;
-
-		else
-#endif  /* USE_IPV6 */
-		{
-			so.lsa.sin.sin_port = usa.sin.sin_port;
-		}
+		else                                   so.lsa.sin.sin_port   = usa.sin.sin_port;
 
 		ptr = httplib_realloc( ctx->listening_sockets, (ctx->num_listening_sockets+1) * sizeof(ctx->listening_sockets[0]) );
 
@@ -282,9 +270,7 @@ static bool parse_port_string( const struct vec *vec, struct socket *so, int *ip
 	unsigned int port;
 	int ch;
 	int len;
-#if defined(USE_IPV6)
 	char buf[100] = {0};
-#endif  /* USE_IPV6 */
 
 	/*
 	 * MacOS needs that. If we do not zero it, subsequent bind() will fail.
@@ -309,7 +295,6 @@ static bool parse_port_string( const struct vec *vec, struct socket *so, int *ip
 		*ip_version = 4;
 	}
 
-#if defined(USE_IPV6)
 	else if ( sscanf( vec->ptr, "[%49[^]]]:%u%n", buf, &port, &len ) == 2  &&  XX_httplib_inet_pton( AF_INET6, buf, &so->lsa.sin6, sizeof(so->lsa.sin6) ) ) {
 
 		/*
@@ -320,7 +305,6 @@ static bool parse_port_string( const struct vec *vec, struct socket *so, int *ip
 		so->lsa.sin6.sin6_port = htons( (uint16_t)port );
 		*ip_version = 6;
 	}
-#endif  /* USE_IPV6 */
 
 	else if ( vec->ptr[0] == '+'  &&  sscanf( vec->ptr + 1, "%u%n", &port, &len ) == 1 ) {
 
@@ -331,8 +315,6 @@ static bool parse_port_string( const struct vec *vec, struct socket *so, int *ip
 
 		len++;
 
-#if defined(USE_IPV6)
-
 		/*
 		 * Set socket family to IPv6, do not use IPV6_V6ONLY
 		 */
@@ -341,18 +323,6 @@ static bool parse_port_string( const struct vec *vec, struct socket *so, int *ip
 		so->lsa.sin6.sin6_port   = htons(( uint16_t)port );
 
 		*ip_version = 4 + 6;
-
-#else  /* USE_IPV6 */
-
-		/*
-		 * Bind to IPv4 only, since IPv6 is not built in.
-		 */
-
-		so->lsa.sin.sin_port = htons( (uint16_t)port );
-		*ip_version = 4;
-
-#endif  /* USE_IPV6 */
-
 	}
 	
 	else if ( sscanf( vec->ptr, "%u%n", &port, &len ) == 1 ) {

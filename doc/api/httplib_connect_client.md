@@ -20,10 +20,9 @@
 
 ### Description
 
-The function `httplib_connect_client()` connects to a TCP server as a client. This server can be a HTTP server but this is not necessary. The function returns a pointer to a connection structure when the connection is established and NULL otherwise. The host may be on IPv4 or IPv6, but IPv6 is not enabled in every LibHTTP installation. Specifically the use of IPv6 communications has to be enabled when the library is compiled. At runtime you can use the [`httplib_check_feature()`](httplib_check_feature.md) function with the parameter `USE_IPV6` to check if IPv6 communication is supported.
+The function `httplib_connect_client()` connects to a TCP server as a client. This server can be a HTTP server but this is not necessary. The function returns a pointer to a connection structure when the connection is established and NULL otherwise.
  
 ### See Also
 
-* [`httplib_check_feature();`](httplib_check_feature.md)
 * [`httplib_connect_client_secure();`](httplib_connect_client_secure.md)
 * [`httplib_connect_websocket_client();`](httplib_connect_websocket_client.md)

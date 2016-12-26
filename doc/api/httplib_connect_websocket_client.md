@@ -27,10 +27,7 @@
 
 The function `httplib_connect_websocket_client()` connects to a websocket on a server as a client. Data and close events are processed with callback functions which must be provided in the call.
 
-LibHTTP supports both IPv4 and IPv6 communication, but only if the use if IPv6 has been enabled at compile time. When running an application it is possible to check if IPv6 addressing is available by calling the [`httplib_check_feature()`](httplib_check_feature.md) function with the `USE_IPV6` parameter.
-
 ### See Also
 
-* [`httplib_check_feature();`](httplib_check_feature.md)
 * [`httplib_connect_client();`](httplib_connect_client.md)
 * [`httplib_connect_client_secure();`](httplib_connect_client_secure.md)
