@@ -48,7 +48,6 @@ void XX_httplib_interpret_uri( struct httplib_connection *conn, char *filename, 
 
 /* TODO (high): Restructure this function */
 
-#if !defined(NO_FILES)
 	const char *uri;
 	const char *root;
 	const char *rewrite;
@@ -62,9 +61,6 @@ void XX_httplib_interpret_uri( struct httplib_connection *conn, char *filename, 
 	char *p;
 	const char *cgi_ext;
 #endif  /* !NO_CGI */
-#else  /* NO_FILES */
-	UNUSED_PARAMETER( filename_buf_len );
-#endif  /* NO_FILES */
 
 	if ( conn == NULL  ||  conn->ctx == NULL  ||  filep == NULL ) return;
 
@@ -79,7 +75,7 @@ void XX_httplib_interpret_uri( struct httplib_connection *conn, char *filename, 
 	*is_put_or_delete_request = XX_httplib_is_put_or_delete_method( conn );
 
 	*is_websocket_request     = XX_httplib_is_websocket_protocol( conn );
-#if !defined(NO_FILES)
+
 	if ( *is_websocket_request  &&  conn->ctx->cfg[WEBSOCKET_ROOT] != NULL ) root = conn->ctx->cfg[WEBSOCKET_ROOT];
 
 	/*
@@ -230,10 +226,7 @@ void XX_httplib_interpret_uri( struct httplib_connection *conn, char *filename, 
 		}
 	}
 #endif /* !defined(NO_CGI) */
-#endif /* !defined(NO_FILES) */
 	return;
-
-#if !defined(NO_FILES)
 
 /*
  * Reset all outputs
@@ -248,7 +241,5 @@ interpret_cleanup:
 	*is_script_resource       = false;
 	*is_websocket_request     = false;
 	*is_put_or_delete_request = false;
-
-#endif /* !defined(NO_FILES) */
 
 }  /* XX_httplib_interpret_uri */

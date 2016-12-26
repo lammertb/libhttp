@@ -22,7 +22,6 @@ The following parameter values can be used:
 
 | Value | Compilation option | Description |
 | :---: | :---: | :--- |
-| **1** | NO_FILES | *Able to serve files*.  If this feature is available, the webserver is able to serve files directly from a directory tree. |
 | **2** | NO_SSL | *Support for HTTPS*. If this feature is available, the webserver van use encryption in the client-server connection. SSLv2, SSLv3, TLSv1.0, TLSv1.1 and TLSv1.2 are supported depending on the SSL library LibHTTP has been compiled with, but which protocols are used effectively when the server is running is dependent on the options used when the server is started. |
 | **4** | NO_CGI | *Support for CGI*. If this feature is available, external CGI scripts can be called by the webserver. |
 

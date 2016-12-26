@@ -36,7 +36,6 @@
  * location specificied by the request URI.
  */
 
-#if !defined(NO_FILES)
 void XX_httplib_mkcol( struct httplib_connection *conn, const char *path ) {
 
 	int rc;
@@ -45,7 +44,8 @@ void XX_httplib_mkcol( struct httplib_connection *conn, const char *path ) {
 	char date[64];
 	time_t curtime;
 
-	if ( conn == NULL  ||  conn->ctx == NULL ) return;
+	if ( conn == NULL   ||   conn->ctx == NULL ) return;
+	if ( conn->ctx->cfg[DOCUMENT_ROOT] == NULL ) return;
 
 	curtime = time( NULL );
 
@@ -98,5 +98,3 @@ void XX_httplib_mkcol( struct httplib_connection *conn, const char *path ) {
 	}
 
 }  /* XX_httplib_mkcol */
-
-#endif /* !NO_FILES */

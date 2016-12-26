@@ -49,7 +49,7 @@ void XX_httplib_prepare_cgi_environment( struct httplib_connection *conn, const 
 	int i;
 	bool truncated;
 
-	if ( conn == NULL  ||  conn->ctx == NULL  ||  prog == NULL  ||  env == NULL ) return;
+	if ( conn == NULL  ||  conn->ctx == NULL  ||  prog == NULL  ||  env == NULL  ||  conn->ctx->cfg[DOCUMENT_ROOT] == NULL ) return;
 
 	env->conn    = conn;
 	env->buflen  = CGI_ENVIRONMENT_SIZE;
@@ -60,9 +60,9 @@ void XX_httplib_prepare_cgi_environment( struct httplib_connection *conn, const 
 	env->var     = httplib_malloc( env->buflen * sizeof(char *) );
 
 	if ( conn->ctx->cfg[AUTHENTICATION_DOMAIN] != NULL ) XX_httplib_addenv( env, "SERVER_NAME=%s",   conn->ctx->cfg[AUTHENTICATION_DOMAIN] );
-	if ( conn->ctx->cfg[DOCUMENT_ROOT]         != NULL ) XX_httplib_addenv( env, "SERVER_ROOT=%s",   conn->ctx->cfg[DOCUMENT_ROOT]         );
-	if ( conn->ctx->cfg[DOCUMENT_ROOT]         != NULL ) XX_httplib_addenv( env, "DOCUMENT_ROOT=%s", conn->ctx->cfg[DOCUMENT_ROOT]         );
-	XX_httplib_addenv( env, "SERVER_SOFTWARE=%s/%s", "LibHTTP", httplib_version() );
+	XX_httplib_addenv( env, "SERVER_ROOT=%s",                   conn->ctx->cfg[DOCUMENT_ROOT] );
+	XX_httplib_addenv( env, "DOCUMENT_ROOT=%s",                 conn->ctx->cfg[DOCUMENT_ROOT] );
+	XX_httplib_addenv( env, "SERVER_SOFTWARE=%s/%s", "LibHTTP", httplib_version()             );
 
 	/*
 	 * Prepare the environment block
@@ -91,9 +91,8 @@ void XX_httplib_prepare_cgi_environment( struct httplib_connection *conn, const 
 
 	XX_httplib_addenv( env, "SCRIPT_FILENAME=%s", prog );
 
-	if      ( conn->ctx->cfg[DOCUMENT_ROOT] == NULL ) XX_httplib_addenv( env, "PATH_TRANSLATED="                                                     );
-	else if ( conn->path_info               == NULL ) XX_httplib_addenv( env, "PATH_TRANSLATED=%s",   conn->ctx->cfg[DOCUMENT_ROOT]                  );
-	else                                              XX_httplib_addenv( env, "PATH_TRANSLATED=%s%s", conn->ctx->cfg[DOCUMENT_ROOT], conn->path_info );
+	if ( conn->path_info == NULL ) XX_httplib_addenv( env, "PATH_TRANSLATED=%s",   conn->ctx->cfg[DOCUMENT_ROOT]                  );
+	else                           XX_httplib_addenv( env, "PATH_TRANSLATED=%s%s", conn->ctx->cfg[DOCUMENT_ROOT], conn->path_info );
 
 	XX_httplib_addenv( env, "HTTPS=%s", (conn->ssl == NULL) ? "off" : "on" );
 

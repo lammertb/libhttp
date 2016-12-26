@@ -24,8 +24,6 @@
 
 #include "httplib_main.h"
 
-#if !defined(NO_FILES)
-
 /*
  * bool XX_httplib_is_authorized_for_put( struct httplib_connection *conn );
  *
@@ -40,7 +38,8 @@ bool XX_httplib_is_authorized_for_put( struct httplib_connection *conn ) {
 	const char *passfile;
 	bool ret;
 
-	if ( conn == NULL  ||  conn->ctx == NULL ) return 0;
+	if ( conn == NULL   ||   conn->ctx == NULL ) return false;
+	if ( conn->ctx->cfg[DOCUMENT_ROOT] == NULL ) return false;
 
 	passfile = conn->ctx->cfg[PUT_DELETE_PASSWORDS_FILE];
 
@@ -55,5 +54,3 @@ bool XX_httplib_is_authorized_for_put( struct httplib_connection *conn ) {
 	return false;
 
 }  /* XX_httplib_is_authorized_for_put */
-
-#endif

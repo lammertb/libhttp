@@ -146,10 +146,6 @@ struct httplib_context *httplib_start( const struct httplib_callbacks *callbacks
 		if ( ctx->cfg[i] == NULL  &&  default_value != NULL ) ctx->cfg[i] = httplib_strdup( default_value );
 	}
 
-#if defined(NO_FILES)
-	if ( ctx->cfg[DOCUMENT_ROOT] != NULL ) return cleanup( ctx, "Document root must not be set" );
-#endif
-
 	XX_httplib_get_system_name( & ctx->systemName );
 
 	/*

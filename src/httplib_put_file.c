@@ -35,8 +35,6 @@
  * a remote client.
  */
 
-#if !defined(NO_FILES)
-
 void XX_httplib_put_file( struct httplib_connection *conn, const char *path ) {
 
 	struct file file = STRUCT_FILE_INITIALIZER;
@@ -47,7 +45,8 @@ void XX_httplib_put_file( struct httplib_connection *conn, const char *path ) {
 	char date[64];
 	time_t curtime;
 
-	if ( conn == NULL ) return;
+	if ( conn == NULL   ||   conn->ctx == NULL ) return;
+	if ( conn->ctx->cfg[DOCUMENT_ROOT] == NULL ) return;
 
 	curtime = time( NULL );
 
@@ -198,5 +197,3 @@ void XX_httplib_put_file( struct httplib_connection *conn, const char *path ) {
 	XX_httplib_fclose( & file );
 
 }  /* XX_httplib_put_file */
-
-#endif /* !NO_FILES */

@@ -60,14 +60,12 @@ void XX_httplib_handle_request( struct httplib_connection *conn ) {
 	httplib_authorization_handler auth_handler;
 	void *auth_callback_data;
 	const char *edl;
+	time_t curtime;
+	char date[64];
 	union {
 		const char *	con;
 		char *		var;
 	} ptr;
-#if !defined(NO_FILES)
-	time_t curtime = time( NULL );
-	char date[64];
-#endif
 
 	if ( conn == NULL ) return;
 
@@ -86,6 +84,7 @@ void XX_httplib_handle_request( struct httplib_connection *conn ) {
 	auth_handler             = NULL;
 	auth_callback_data       = NULL;
 	path[0]                  = 0;
+	curtime                  = time( NULL );
 
 	if ( ri == NULL ) return;
 
@@ -272,11 +271,8 @@ no_callback_resource:
  * 6.2.1. thus, the server must have real files
  */
 
-#if defined(NO_FILES)
-		if (1) {
-#else
 		if ( conn->ctx->cfg[DOCUMENT_ROOT] == NULL ) {
-#endif
+
 			/*
 			 * This server does not have any real files, thus the
 			 * PUT/DELETE methods are not valid.
@@ -286,7 +282,6 @@ no_callback_resource:
 			return;
 		}
 
-#if !defined(NO_FILES)
 		/*
 		 * 6.2.2. Check if put authorization for static files is
 		 * available.
@@ -296,8 +291,6 @@ no_callback_resource:
 			XX_httplib_send_authorization_request( conn );
 			return;
 		}
-#endif
-
 	}
 
 	else {
@@ -394,25 +387,12 @@ no_callback_resource:
 		return;
 	}
 	
-	else
-
-#if defined(NO_FILES)
-
-		/*
-		 * 9a. In case the server uses only callbacks, this uri is
-		 * unknown.
-		 * Then, all request handling ends here.
-		 */
-
-		XX_httplib_send_http_error( conn, 404, "%s", "Not Found" );
-
-#else
 	/*
-	 * 9b. This request is either for a static file or resource handled
+	 * 9. This request is either for a static file or resource handled
 	 * by a script file. Thus, a DOCUMENT_ROOT must exist.
 	 */
 
-	if ( conn->ctx->cfg[DOCUMENT_ROOT] == NULL ) {
+	else if ( conn->ctx->cfg[DOCUMENT_ROOT] == NULL ) {
 
 		XX_httplib_send_http_error( conn, 404, "%s", "Not Found" );
 		return;
@@ -434,35 +414,9 @@ no_callback_resource:
 
 	if ( is_put_or_delete_request ) {
 
-		/*
-		 * 11.1. PUT method
-		 */
-
-		if ( ! strcmp( ri->request_method, "PUT" ) ) {
-
-			XX_httplib_put_file( conn, path );
-			return;
-		}
-
-		/*
-		 * 11.2. DELETE method
-		 */
-
-		if ( ! strcmp( ri->request_method, "DELETE" ) ) {
-
-			XX_httplib_delete_file( conn, path );
-			return;
-		}
-
-		/*
-		 * 11.3. MKCOL method
-		 */
-
-		if ( ! strcmp( ri->request_method, "MKCOL" ) ) {
-
-			XX_httplib_mkcol( conn, path );
-			return;
-		}
+		if ( ! strcmp( ri->request_method, "PUT"    ) ) { XX_httplib_put_file(    conn, path ); return; }
+		if ( ! strcmp( ri->request_method, "DELETE" ) ) { XX_httplib_delete_file( conn, path ); return; }
+		if ( ! strcmp( ri->request_method, "MKCOL"  ) ) { XX_httplib_mkcol(       conn, path ); return; }
 
 		/*
 		 * 11.4. PATCH method
@@ -574,8 +528,6 @@ no_callback_resource:
 	}
 
 	XX_httplib_handle_file_based_request( conn, path, &file );
-
-#endif /* !defined(NO_FILES) */
 
 #if 0
 	/*

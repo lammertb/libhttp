@@ -34,11 +34,16 @@
  * connection.
  */
 
-#if !defined(NO_FILES)
-
 void XX_httplib_delete_file( struct httplib_connection *conn, const char *path ) {
 
 	struct de de;
+
+	if ( conn == NULL  ||  conn->ctx == NULL   ) return;
+	if ( conn->ctx->cfg[DOCUMENT_ROOT] == NULL ) {
+
+		XX_httplib_send_http_error( conn, 405, "Error: File delete operations are not supported" );
+		return;
+	}
 
 	memset( &de.file, 0, sizeof(de.file) );
 
@@ -106,5 +111,3 @@ void XX_httplib_delete_file( struct httplib_connection *conn, const char *path )
 	else                               XX_httplib_send_http_error( conn, 423, "Error: Cannot delete file\nremove(%s): %s", path, strerror(ERRNO) );
 
 }  /* XX_httplib_delete_file */
-
-#endif /* !NO_FILES */

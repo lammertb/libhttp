@@ -29,8 +29,6 @@
 #include "httplib_string.h"
 #include "httplib_utils.h"
 
-#if !defined(NO_FILES)
-
 /*
  * static void print_props( struct httplib_connection *conn, const char *uri, struct file *filep );
  *
@@ -106,6 +104,7 @@ void XX_httplib_handle_propfind( struct httplib_connection *conn, const char *pa
 	const char *edl;
 
 	if ( conn == NULL  ||  conn->ctx == NULL  ||  path == NULL  ||  filep == NULL ) return;
+	if ( conn->ctx->cfg[DOCUMENT_ROOT] == NULL ) return;
 
 	depth   = httplib_get_header( conn, "Depth" );
 	curtime = time( NULL );
@@ -139,5 +138,3 @@ void XX_httplib_handle_propfind( struct httplib_connection *conn, const char *pa
 	conn->num_bytes_sent += httplib_printf( conn, "%s\n", "</d:multistatus>" );
 
 }  /* XX_httplib_handle_propfind */
-
-#endif

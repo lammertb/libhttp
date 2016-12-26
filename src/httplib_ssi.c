@@ -32,7 +32,7 @@
 static void send_ssi_file(struct httplib_connection *, const char *, struct file *, int);
 
 
-static void do_ssi_include(struct httplib_connection *conn, const char *ssi, char *tag, int include_level) {
+static void do_ssi_include( struct httplib_connection *conn, const char *ssi, char *tag, int include_level ) {
 
 	char file_name[MG_BUF_LEN];
 	char path[512];
@@ -43,7 +43,7 @@ static void do_ssi_include(struct httplib_connection *conn, const char *ssi, cha
 	size_t len;
 	bool truncated;
 
-	if ( conn == NULL  ||  conn->ctx == NULL ) return;
+	if ( conn == NULL  ||  conn->ctx == NULL  ||  conn->ctx->cfg[DOCUMENT_ROOT] == NULL ) return;
 
 	truncated = false;
 
@@ -60,8 +60,7 @@ static void do_ssi_include(struct httplib_connection *conn, const char *ssi, cha
 		 */
 
 		file_name[511] = 0;
-		if ( conn->ctx->cfg[DOCUMENT_ROOT] != NULL ) doc_root = conn->ctx->cfg[DOCUMENT_ROOT];
-		else                                         doc_root = "";
+		doc_root       = conn->ctx->cfg[DOCUMENT_ROOT];
 
 		XX_httplib_snprintf( conn, &truncated, path, sizeof(path), "%s/%s", doc_root, file_name );
 

@@ -514,10 +514,10 @@ struct httplib_workerTLS {
 extern CRITICAL_SECTION			global_log_file_lock;
 #endif
 
-#define PASSWORDS_FILE_NAME ".htpasswd"
-#define CGI_ENVIRONMENT_SIZE (4096)
-#define MAX_CGI_ENVIR_VARS (256)
-#define MG_BUF_LEN (8192)
+#define PASSWORDS_FILE_NAME		".htpasswd"
+#define CGI_ENVIRONMENT_SIZE		(4096)
+#define MAX_CGI_ENVIR_VARS		(256)
+#define MG_BUF_LEN			(8192)
 
 /*
  * TODO: LJB: Move to test functions

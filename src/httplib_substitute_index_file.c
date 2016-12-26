@@ -37,8 +37,6 @@
  * located, it's stats are returnd in stp.
  */
 
-#if !defined(NO_FILES)
-
 int XX_httplib_substitute_index_file( struct httplib_connection *conn, char *path, size_t path_len, struct file *filep ) {
 
 	const char *list;
@@ -48,6 +46,7 @@ int XX_httplib_substitute_index_file( struct httplib_connection *conn, char *pat
 	bool found;
 
 	if ( conn == NULL  ||  conn->ctx == NULL  ||  path == NULL ) return 0;
+	if ( conn->ctx->cfg[DOCUMENT_ROOT] == NULL                 ) return 0;
 
 	list  = conn->ctx->cfg[INDEX_FILES];
 	n     = strlen( path );
@@ -106,4 +105,3 @@ int XX_httplib_substitute_index_file( struct httplib_connection *conn, char *pat
 	return found;
 
 }  /* XX_httplib_substitute_index_file */
-#endif

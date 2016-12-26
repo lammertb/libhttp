@@ -35,14 +35,13 @@
  * client can use to connect to the server.
  */
 
-#if !defined(NO_FILES)
-
 void XX_httplib_send_options( struct httplib_connection *conn ) {
 
 	char date[64];
 	time_t curtime;
 
-	if ( conn == NULL ) return;
+	if ( conn == NULL   ||   conn->ctx == NULL ) return;
+	if ( conn->ctx->cfg[DOCUMENT_ROOT] == NULL ) return;
 
 	curtime           = time( NULL );
 	conn->status_code = 200;
@@ -62,5 +61,3 @@ void XX_httplib_send_options( struct httplib_connection *conn ) {
 	          XX_httplib_suggest_connection_header( conn ) );
 
 }  /* XX_httplib_send_options */
-
-#endif

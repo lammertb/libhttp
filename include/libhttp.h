@@ -930,10 +930,8 @@ LIBHTTP_API int httplib_get_response(struct httplib_connection *conn, char *ebuf
 /* Check which features where set when LibHTTP has been compiled.
    Parameters:
      feature: specifies which feature should be checked
-         1  serve files (NO_FILES not set)
          2  support HTTPS (NO_SSL not set)
          4  support CGI (NO_CGI not set)
-       128  support caching (NO_CACHING not set)
        The result is undefined for all other feature values.
 
    Return:
