@@ -76,6 +76,8 @@ void XX_httplib_read_websocket( struct httplib_connection *conn, httplib_websock
 	unsigned char mop; /* mask flag and opcode */
 	double timeout;
 
+	if ( conn == NULL  ||  conn->ctx == NULL ) return;
+
 	data    = mem;
 	timeout = -1.0;
 
@@ -93,7 +95,11 @@ void XX_httplib_read_websocket( struct httplib_connection *conn, httplib_websock
 
 		header_len = 0;
 
-		assert( conn->data_len >= conn->request_len );
+		if ( conn->data_len < conn->request_len ) {
+
+			httplib_cry( conn->ctx, conn, "websocket error: data len less than request len, closing connection" );
+			break;
+		}
 
 		body_len = (size_t)(conn->data_len - conn->request_len);
 
@@ -154,7 +160,12 @@ void XX_httplib_read_websocket( struct httplib_connection *conn, httplib_websock
 			 * data and advance the queue by moving the memory in place.
 			 */
 
-			assert(body_len >= header_len);
+			if ( body_len < header_len ) {
+
+				httplib_cry( conn->ctx, conn, "websocket error: body len less than header len, closing connection" );
+				break;
+			}
+
 			if (data_len + header_len > body_len) {
 
 				 /*
