@@ -5,6 +5,7 @@ Release Notes v2.0 (work in progress)
 Changes
 -------
 
+- Added NULL checking to all uses of context configuration settings
 - IPv6 support is now always available
 - Combined three send file functions into `httplib_send_file()`.
 - Memory allocation debugging can be switched on and off dynamically
