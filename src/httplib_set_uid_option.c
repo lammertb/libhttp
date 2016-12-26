@@ -33,8 +33,9 @@
  * The function XX_httplib_set_uid_option() runs on systems which support it
  * the context in the security environment of a specific user. The function can
  * be called for Windows, but it doesn't do anything because Windows doesn't
- * support the run-as options as available under *nix systems. Windows returns
- * true though, to inform that the function completed without error.
+ * support the run-as options as available under *nix systems.
+ *
+ * False is returned in case a problem is detected, true otherwise.
  */
 
 bool XX_httplib_set_uid_option( struct httplib_context *ctx ) {
