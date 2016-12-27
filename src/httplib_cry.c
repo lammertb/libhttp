@@ -20,9 +20,6 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
- *
- * ============
- * Release: 2.0
  */
 
 #include "httplib_main.h"
@@ -32,7 +29,8 @@
  * void httplib_cry( const struct httplib_context *ctx, const struct httplib_connection *conn, const char *fmt, ... );
  *
  * The function httplib_cry() prints a formatted error message to the opened
- * error log stream.
+ * error log stream. It first tries to use a user supplied error handler. If
+ * that doesn't work, the alternative is to write to an error log file.
  */
 
 void httplib_cry( const struct httplib_context *ctx, const struct httplib_connection *conn, const char *fmt, ... ) {
@@ -43,47 +41,70 @@ void httplib_cry( const struct httplib_context *ctx, const struct httplib_connec
 	struct file fi;
 	time_t timestamp;
 
+	/*
+	 * Check if we have a context. Without a context there is no callback
+	 * and also other important information like the path to the error file
+	 * is missing. No need to continue if that information cannot be
+	 * retrieved.
+	 */
+
+	if ( ctx == NULL ) return;
+
+	/*
+	 * Gather all the information from the parameters of this function and
+	 * create a NULL terminated string buffer with the error message.
+	 */
+
 	va_start( ap, fmt );
 	vsnprintf_impl( buf, sizeof(buf), fmt, ap );
 	va_end( ap );
 	buf[sizeof(buf)-1] = 0;
 
-	if ( ctx == NULL ) return;
-
 	/*
-	 * Do not lock when getting the callback value, here and below.
-	 * I suppose this is fine, since function cannot disappear in the
-	 * same way string option can.
+	 * Let's first try to use the user's custom error handler callback. If
+	 * that succeeds, there is no need for us to do our own error
+	 * processing.
 	 */
 
-	if ( conn == NULL  ||  ctx->callbacks.log_message == NULL  ||  ctx->callbacks.log_message( conn, buf ) == 0 ) {
+	if ( ctx->callbacks.log_message != NULL  &&  ctx->callbacks.log_message( ctx, conn, buf ) != 0 ) return;
 
-		if ( ctx->cfg[ERROR_LOG_FILE] != NULL ) {
+	/*
+	 * We now try to open the error log file. If this succeeds the error is
+	 * appended to the file. On failure there is no way to log the message
+	 * without disrupting the user's flow of control so we just return and
+	 * logging anything. This is IMHO better than printing to stderr which
+	 * may not even be available on all platforms (Windows etc).
+	 */
 
-			if ( XX_httplib_fopen( conn, ctx->cfg[ERROR_LOG_FILE], "a+", &fi ) == 0 ) fi.fp = NULL;
-		}
-		
-		else fi.fp = NULL;
+	if ( ctx->cfg[ERROR_LOG_FILE] == NULL                                ) return;
+	if ( ! XX_httplib_fopen( conn, ctx->cfg[ERROR_LOG_FILE], "a+", &fi ) ) return;
 
-		if ( fi.fp != NULL ) {
+	/*
+	 * We now have an open FILE stream pointer in fi.fp and can dump the
+	 * message in that file. Note though, that some information might not
+	 * be available for logging if the message has no connection, so some
+	 * information is skipped if the 'conn' parameter is NULL.
+	 *
+	 * Just to be sure that no other process is writing to the same file,
+	 * we use locking around this operation.
+	 */
 
-			flockfile( fi.fp );
-			timestamp = time( NULL );
+	flockfile( fi.fp );
+	timestamp = time( NULL );
 
-			if ( conn != NULL ) XX_httplib_sockaddr_to_string( src_addr, sizeof(src_addr), &conn->client.rsa );
-			fprintf( fi.fp, "[%010lu] [error] [client %s] ", (unsigned long)timestamp, src_addr );
+	if ( conn != NULL ) XX_httplib_sockaddr_to_string( src_addr, sizeof(src_addr), &conn->client.rsa );
+	fprintf( fi.fp, "[%010lu] [error] [client %s] ", (unsigned long)timestamp, src_addr );
 
-			if ( conn != NULL  &&  conn->request_info.request_method != NULL ) {
+	if ( conn != NULL  &&  conn->request_info.request_method != NULL ) {
 
-				fprintf( fi.fp, "%s %s: ", conn->request_info.request_method, conn->request_info.request_uri );
-			}
-
-			fprintf( fi.fp, "%s", buf );
-			fputc( '\n', fi.fp );
-			fflush( fi.fp );
-			funlockfile( fi.fp );
-			XX_httplib_fclose( &fi );
-		}
+		fprintf( fi.fp, "%s %s: ", conn->request_info.request_method, conn->request_info.request_uri );
 	}
+
+	fprintf( fi.fp, "%s", buf );
+	fputc( '\n', fi.fp );
+	fflush( fi.fp );
+
+	funlockfile( fi.fp );
+	XX_httplib_fclose( &fi );
 
 }  /* httplib_cry */

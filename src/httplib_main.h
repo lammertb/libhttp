@@ -24,10 +24,6 @@
 
 
 
-#ifndef UNUSED_PARAMETER
-#define UNUSED_PARAMETER(x)	(void)(x)
-#endif  /* UNUSED_PARAMETER */
-
 #if defined(_WIN32)
 
 #if !defined(_CRT_SECURE_NO_WARNINGS)

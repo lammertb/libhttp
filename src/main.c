@@ -606,19 +606,20 @@ static void init_server_name(int argc, const char *argv[]) {
 }
 
 
-static int log_message(const struct httplib_connection *conn, const char *message) {
+static int log_message( const struct httplib_context *ctx, const struct httplib_connection *conn, const char *message ) {
 
-	const struct httplib_context *ctx = httplib_get_context(conn);
-	struct tuser_data *ud = (struct tuser_data *)httplib_get_user_data(ctx);
+	struct tuser_data *ud;
 
-	fprintf(stderr, "%s\n", message);
+	UNUSED_PARAMETER(conn);
 
-	if (ud->first_message == NULL) {
-		ud->first_message = sdup(message);
-	}
+	fprintf( stderr, "%s\n", message );
+       
+	ud = httplib_get_user_data( ctx );
+	if ( ud != NULL  &&  ud->first_message == NULL ) ud->first_message = sdup( message );
 
 	return 0;
-}
+
+}  /* log_message */
 
 
 static int is_path_absolute(const char *path) {
@@ -869,7 +870,7 @@ static void start_libhttp(int argc, char *argv[]) {
 	/* Start LibHTTP */
 	memset(&callbacks, 0, sizeof(callbacks));
 	callbacks.log_message = &log_message;
-	g_ctx = httplib_start(&callbacks, &g_user_data, (const char **)options, NULL, 0 );
+	g_ctx = httplib_start(&callbacks, &g_user_data, (const char **)options );
 
 	/* httplib_start copies all options to an internal buffer.
 	 * The options data field here is not required anymore. */
