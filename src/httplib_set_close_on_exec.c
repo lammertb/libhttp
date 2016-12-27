@@ -37,7 +37,7 @@ void XX_httplib_set_close_on_exec( SOCKET fd, const struct httplib_context *ctx 
 
 	UNUSED_PARAMETER(ctx);
 
-	SetHandleInformation( (HANDLE)(intptr_t)sock, HANDLE_FLAG_INHERIT, 0 );
+	SetHandleInformation( (HANDLE)(intptr_t)fd, HANDLE_FLAG_INHERIT, 0 );
 
 #else  /* _WIN32 */
 

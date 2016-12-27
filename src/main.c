@@ -752,13 +752,13 @@ static void start_libhttp(int argc, char *argv[]) {
 		fprintf(stdout, "\n%s\n", g_server_name);
 		fprintf(stdout, "%s - Symbian\n", g_server_base_name);
 #endif  /* _WIN32 */
-
+/*
 		struct utsname name;
 		memset( &name, 0, sizeof(name) );
 		uname( &name );
 		fprintf( stdout, "\n%s\n", g_server_name );
 		fprintf( stdout, "%s - %s %s (%s) - %s\n", g_server_base_name, name.sysname, name.version, name.release, name.machine );
-
+*/
 
 		fprintf( stdout, "Features:" );
 		if ( httplib_check_feature(  1 ) ) fprintf( stdout, " Files"      );
@@ -1452,9 +1452,7 @@ add_control(unsigned char **mem,
 }
 
 
-static void
-show_settings_dialog()
-{
+static void show_settings_dialog( void ) {
 #define HEIGHT (15)
 #define WIDTH (460)
 #define LABEL_WIDTH (90)
@@ -1546,9 +1544,8 @@ show_settings_dialog()
 }
 
 
-static void
-change_password_file()
-{
+static void change_password_file( void ) {
+
 #define HEIGHT (15)
 #define WIDTH (320)
 #define LABEL_WIDTH (90)

@@ -71,7 +71,7 @@ static int64_t push( struct httplib_context *ctx, FILE *fp, SOCKET sock, SSL *ss
 #ifndef NO_SSL
 		if ( ssl != NULL ) {
 
-			n = SSL_write( ssl, buf, len );
+			n = SSL_write( ssl, buf, (int)len );
 
 			if ( n <= 0 ) {
 

@@ -1,7 +1,6 @@
 #
-# Library: libhttp
+# Project: LibHTTP
 # File:    Makefile
-# Author:  Lammert Bies
 #
 # This file is licensed under the MIT License as stated below
 #
@@ -61,7 +60,6 @@ PORTS = 8080
 
 # only set main compile options if none were chosen
 
-LIBS = -lpthread -lm
 
 ifdef CONFIG_FILE
   CFLAGS += -DCONFIG_FILE=\"$(CONFIG_FILE)\"
@@ -103,6 +101,7 @@ AR     = ar
 ARQC   = qc 
 ARQ    = q
 RANLIB = ranlib
+LIBS   = -lpthread -lm
 
 CFLAGS=	-Wall \
 	-Wextra \
@@ -140,6 +139,7 @@ AR     = lib
 ARQC   = /NOLOGO /OUT:
 ARQ    = /NOLOGO
 RANLIB = dir
+LIBS   = user32.lib advapi32.lib comdlg32.lib shell32.lib
 
 CFLAGS = -Ox -Ot -MT -GT -volatile:iso -I${INCDIR} -nologo -J -sdl -Wall -WX -wd4464 -wd4710 -wd4711 -wd4201 -wd4820
 endif
@@ -164,7 +164,8 @@ testmime${EXEEXT} :					\
 		Makefile
 	${LINK} ${XFLAG}testmime${EXEEXT}		\
 		${TSTDIR}${OBJDIR}testmime${OBJEXT}	\
-		${LIBDIR}libhttp${LIBEXT}
+		${LIBDIR}libhttp${LIBEXT}		\
+		${LIBS}
 	${STRIP} testmime${EXEEXT}
 
 
