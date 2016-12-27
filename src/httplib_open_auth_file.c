@@ -33,6 +33,9 @@
 void XX_httplib_open_auth_file( struct httplib_connection *conn, const char *path, struct file *filep ) {
 
 	char name[PATH_MAX];
+#ifdef DEBUG
+	char error_string[ERROR_STRING_LEN];
+#endif
 	const char *p;
 	const char *e;
 	const char *gpass;
@@ -51,7 +54,7 @@ void XX_httplib_open_auth_file( struct httplib_connection *conn, const char *pat
 
 		if ( ! XX_httplib_fopen( conn, gpass, "r", filep ) ) {
 #ifdef DEBUG
-			httplib_cry( conn, "fopen(%s): %s", gpass, strerror(ERRNO) );
+			httplib_cry( conn, "fopen(%s): %s", gpass, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 #endif
 		}
 		/*
@@ -68,7 +71,7 @@ void XX_httplib_open_auth_file( struct httplib_connection *conn, const char *pat
 
 		if ( truncated  ||  ! XX_httplib_fopen( conn, name, "r", filep ) ) {
 #ifdef DEBUG
-			httplib_cry( conn, "fopen(%s): %s", name, strerror(ERRNO) );
+			httplib_cry( conn, "fopen(%s): %s", name, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 #endif
 		}
 	}
@@ -86,7 +89,7 @@ void XX_httplib_open_auth_file( struct httplib_connection *conn, const char *pat
 
 		if ( truncated  ||  ! XX_httplib_fopen( conn, name, "r", filep ) ) {
 #ifdef DEBUG
-			httplib_cry( conn, "fopen(%s): %s", name, strerror(ERRNO) );
+			httplib_cry( conn, "fopen(%s): %s", name, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 #endif
 		}
 	}

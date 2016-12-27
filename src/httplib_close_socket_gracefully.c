@@ -40,6 +40,7 @@ void XX_httplib_close_socket_gracefully( struct httplib_connection *conn ) {
 	char buf[MG_BUF_LEN];
 	int n;
 #endif
+	char error_string[ERROR_STRING_LEN];
 	struct linger linger;
 	int error_code;
 	socklen_t opt_len;
@@ -66,7 +67,7 @@ void XX_httplib_close_socket_gracefully( struct httplib_connection *conn ) {
 	else {
 		if ( setsockopt( conn->client.sock, SOL_SOCKET, SO_LINGER, (char *)&linger, sizeof(linger) ) != 0 ) {
 
-			httplib_cry( conn->ctx, conn, "%s: setsockopt(SOL_SOCKET SO_LINGER) failed: %s", __func__, strerror(ERRNO) );
+			httplib_cry( conn->ctx, conn, "%s: setsockopt(SOL_SOCKET SO_LINGER) failed: %s", __func__, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 		}
 	}
 

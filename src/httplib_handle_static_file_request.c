@@ -52,6 +52,7 @@ void XX_httplib_handle_static_file_request( struct httplib_connection *conn, con
 	int n;
 	bool truncated;
 	char gz_path[PATH_MAX];
+	char error_string[ERROR_STRING_LEN];
 	const char *encoding;
 	const char *cors1;
 	const char *cors2;
@@ -98,7 +99,7 @@ void XX_httplib_handle_static_file_request( struct httplib_connection *conn, con
 
 	if ( ! XX_httplib_fopen( conn, path, "rb", filep ) ) {
 
-		XX_httplib_send_http_error( conn, 500, "Error: Cannot open file\nfopen(%s): %s", path, strerror(ERRNO) );
+		XX_httplib_send_http_error( conn, 500, "Error: Cannot open file\nfopen(%s): %s", path, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 		return;
 	}
 

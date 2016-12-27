@@ -41,6 +41,7 @@ static bool parse_port_string( const struct vec *vec, struct socket *so, int *ip
 int XX_httplib_set_ports_option( struct httplib_context *ctx ) {
 
 	const char *list;
+	char error_string[ERROR_STRING_LEN];
 	int on;
 	int off;
 	struct vec vec;
@@ -149,7 +150,7 @@ int XX_httplib_set_ports_option( struct httplib_context *ctx ) {
 
 			if ( bind( so.sock, &so.lsa.sa, len ) != 0 ) {
 
-				httplib_cry( ctx, NULL, "cannot bind to %.*s: %d (%s)", (int)vec.len, vec.ptr, (int)ERRNO, strerror(errno) );
+				httplib_cry( ctx, NULL, "cannot bind to %.*s: %d (%s)", (int)vec.len, vec.ptr, (int)ERRNO, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 				closesocket( so.sock );
 				so.sock = INVALID_SOCKET;
 				continue;
@@ -162,7 +163,7 @@ int XX_httplib_set_ports_option( struct httplib_context *ctx ) {
 
 			if ( bind( so.sock, &so.lsa.sa, len ) != 0 ) {
 
-				httplib_cry( ctx, NULL, "cannot bind to IPv6 %.*s: %d (%s)", (int)vec.len, vec.ptr, (int)ERRNO, strerror(errno) );
+				httplib_cry( ctx, NULL, "cannot bind to IPv6 %.*s: %d (%s)", (int)vec.len, vec.ptr, (int)ERRNO, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 				closesocket( so.sock );
 				so.sock = INVALID_SOCKET;
 				continue;
@@ -176,7 +177,7 @@ int XX_httplib_set_ports_option( struct httplib_context *ctx ) {
 
 		if ( listen( so.sock, SOMAXCONN ) != 0 ) {
 
-			httplib_cry( ctx, NULL, "cannot listen to %.*s: %d (%s)", (int)vec.len, vec.ptr, (int)ERRNO, strerror(errno) );
+			httplib_cry( ctx, NULL, "cannot listen to %.*s: %d (%s)", (int)vec.len, vec.ptr, (int)ERRNO, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 			closesocket( so.sock );
 			so.sock = INVALID_SOCKET;
 			continue;
@@ -185,7 +186,7 @@ int XX_httplib_set_ports_option( struct httplib_context *ctx ) {
 		if ( getsockname( so.sock, &(usa.sa), &len ) != 0  ||  usa.sa.sa_family  !=  so.lsa.sa.sa_family ) {
 
 			int err = (int)ERRNO;
-			httplib_cry( ctx, NULL, "call to getsockname failed %.*s: %d (%s)", (int)vec.len, vec.ptr, err, strerror(errno) );
+			httplib_cry( ctx, NULL, "call to getsockname failed %.*s: %d (%s)", (int)vec.len, vec.ptr, err, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 			closesocket( so.sock );
 			so.sock = INVALID_SOCKET;
 			continue;

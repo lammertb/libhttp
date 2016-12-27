@@ -37,6 +37,7 @@
 void XX_httplib_delete_file( struct httplib_connection *conn, const char *path ) {
 
 	struct de de;
+	char error_string[ERROR_STRING_LEN];
 
 	if ( conn == NULL  ||  conn->ctx == NULL   ) return;
 	if ( conn->ctx->cfg[DOCUMENT_ROOT] == NULL ) {
@@ -108,6 +109,6 @@ void XX_httplib_delete_file( struct httplib_connection *conn, const char *path )
 	 */
 
 	if ( httplib_remove( path ) == 0 ) XX_httplib_send_http_error( conn, 204, "%s", "" );
-	else                               XX_httplib_send_http_error( conn, 423, "Error: Cannot delete file\nremove(%s): %s", path, strerror(ERRNO) );
+	else                               XX_httplib_send_http_error( conn, 423, "Error: Cannot delete file\nremove(%s): %s", path, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 
 }  /* XX_httplib_delete_file */

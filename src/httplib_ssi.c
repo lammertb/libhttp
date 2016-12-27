@@ -36,6 +36,7 @@ static void do_ssi_include( struct httplib_connection *conn, const char *ssi, ch
 
 	char file_name[MG_BUF_LEN];
 	char path[512];
+	char error_string[ERROR_STRING_LEN];
 	const char *doc_root;
 	const char *ssi_ext;
 	char *p;
@@ -109,7 +110,7 @@ static void do_ssi_include( struct httplib_connection *conn, const char *ssi, ch
 
 	if ( ! XX_httplib_fopen( conn, path, "rb", &file ) ) {
 
-		httplib_cry( conn->ctx, conn, "Cannot open SSI #include: [%s]: fopen(%s): %s", tag, path, strerror(ERRNO) );
+		httplib_cry( conn->ctx, conn, "Cannot open SSI #include: [%s]: fopen(%s): %s", tag, path, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 		return;
 	}
 	
@@ -129,6 +130,7 @@ static void do_ssi_include( struct httplib_connection *conn, const char *ssi, ch
 static void do_ssi_exec( struct httplib_connection *conn, char *tag ) {
 
 	char cmd[1024] = "";
+	char error_string[ERROR_STRING_LEN];
 	struct file file = STRUCT_FILE_INITIALIZER;
 
 	if ( sscanf(tag, " \"%1023[^\"]\"", cmd) != 1 ) {
@@ -140,7 +142,7 @@ static void do_ssi_exec( struct httplib_connection *conn, char *tag ) {
 		cmd[1023] = 0;
 		if ( (file.fp = popen( cmd, "r" ) ) == NULL ) {
 
-			httplib_cry( conn->ctx, conn, "Cannot SSI #exec: [%s]: %s", cmd, strerror(ERRNO) );
+			httplib_cry( conn->ctx, conn, "Cannot SSI #exec: [%s]: %s", cmd, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 		}
 		
 		else {
@@ -270,6 +272,7 @@ static void send_ssi_file( struct httplib_connection *conn, const char *path, st
 void XX_httplib_handle_ssi_file_request( struct httplib_connection *conn, const char *path, struct file *filep ) {
 
 	char date[64];
+	char error_string[ERROR_STRING_LEN];
 	time_t curtime;
 	const char *cors1;
 	const char *cors2;
@@ -303,7 +306,7 @@ void XX_httplib_handle_ssi_file_request( struct httplib_connection *conn, const 
 		 * but can not be opened by the server.
 		 */
 
-		XX_httplib_send_http_error(conn, 500, "Error: Cannot read file\nfopen(%s): %s", path, strerror(ERRNO));
+		XX_httplib_send_http_error(conn, 500, "Error: Cannot read file\nfopen(%s): %s", path, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 	}
 	
 	else {

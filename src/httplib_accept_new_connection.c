@@ -39,6 +39,7 @@ void XX_httplib_accept_new_connection( const struct socket *listener, struct htt
 
 	struct socket so;
 	char src_addr[IP_ADDR_STR_LEN];
+	char error_string[ERROR_STRING_LEN];
 	socklen_t len;
 	int on;
 	int timeout;
@@ -72,7 +73,7 @@ void XX_httplib_accept_new_connection( const struct socket *listener, struct htt
 
 		if ( getsockname( so.sock, &so.lsa.sa, &len ) != 0 ) {
 
-			httplib_cry( ctx, NULL, "%s: getsockname() failed: %s", __func__, strerror(ERRNO) );
+			httplib_cry( ctx, NULL, "%s: getsockname() failed: %s", __func__, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 		}
 
 		/*
@@ -86,7 +87,7 @@ void XX_httplib_accept_new_connection( const struct socket *listener, struct htt
 
 		if ( setsockopt( so.sock, SOL_SOCKET, SO_KEEPALIVE, (SOCK_OPT_TYPE)&on, sizeof(on) ) != 0 ) {
 
-			httplib_cry( ctx, NULL, "%s: setsockopt(SOL_SOCKET SO_KEEPALIVE) failed: %s", __func__, strerror(ERRNO) );
+			httplib_cry( ctx, NULL, "%s: setsockopt(SOL_SOCKET SO_KEEPALIVE) failed: %s", __func__, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 		}
 
 		/*
@@ -102,7 +103,7 @@ void XX_httplib_accept_new_connection( const struct socket *listener, struct htt
 
 			if ( XX_httplib_set_tcp_nodelay( so.sock, 1 ) != 0 ) {
 
-				httplib_cry( ctx, NULL, "%s: setsockopt(IPPROTO_TCP TCP_NODELAY) failed: %s", __func__, strerror(ERRNO) );
+				httplib_cry( ctx, NULL, "%s: setsockopt(IPPROTO_TCP TCP_NODELAY) failed: %s", __func__, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 			}
 		}
 

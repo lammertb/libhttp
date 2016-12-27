@@ -159,6 +159,7 @@ pid_t XX_httplib_spawn_process( struct httplib_connection *conn, const char *pro
 
 	pid_t pid;
 	const char *interp;
+	char error_string[ERROR_STRING_LEN];
 
 	UNUSED_PARAMETER(envblk);
 
@@ -170,7 +171,7 @@ pid_t XX_httplib_spawn_process( struct httplib_connection *conn, const char *pro
 		 * Parent
 		 */
 
-		XX_httplib_send_http_error( conn, 500, "Error: Creating CGI process\nfork(): %s", strerror(ERRNO) );
+		XX_httplib_send_http_error( conn, 500, "Error: Creating CGI process\nfork(): %s", httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 	}
 	
 	else if ( pid == 0 ) {
@@ -179,10 +180,10 @@ pid_t XX_httplib_spawn_process( struct httplib_connection *conn, const char *pro
 		 * Child
 		 */
 
-		if      ( chdir( dir        ) !=  0 ) httplib_cry( conn->ctx, conn, "%s: chdir(%s): %s", __func__,   dir,      strerror(ERRNO) );
-		else if ( dup2( fdin[0], 0  ) == -1 ) httplib_cry( conn->ctx, conn, "%s: dup2(%d, 0): %s", __func__, fdin[0],  strerror(ERRNO) );
-		else if ( dup2( fdout[1], 1 ) == -1 ) httplib_cry( conn->ctx, conn, "%s: dup2(%d, 1): %s", __func__, fdout[1], strerror(ERRNO) );
-		else if ( dup2( fderr[1], 2 ) == -1 ) httplib_cry( conn->ctx, conn, "%s: dup2(%d, 2): %s", __func__, fderr[1], strerror(ERRNO) );
+		if      ( chdir( dir        ) !=  0 ) httplib_cry( conn->ctx, conn, "%s: chdir(%s): %s", __func__,   dir,      httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
+		else if ( dup2( fdin[0], 0  ) == -1 ) httplib_cry( conn->ctx, conn, "%s: dup2(%d, 0): %s", __func__, fdin[0],  httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
+		else if ( dup2( fdout[1], 1 ) == -1 ) httplib_cry( conn->ctx, conn, "%s: dup2(%d, 1): %s", __func__, fdout[1], httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
+		else if ( dup2( fderr[1], 2 ) == -1 ) httplib_cry( conn->ctx, conn, "%s: dup2(%d, 2): %s", __func__, fderr[1], httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 		else {
 			/*
 			 * Keep stderr and stdout in two different pipes.
@@ -217,12 +218,12 @@ pid_t XX_httplib_spawn_process( struct httplib_connection *conn, const char *pro
 			if ( interp == NULL ) {
 
 				execle( prog, prog, NULL, envp );
-				httplib_cry( conn->ctx, conn, "%s: execle(%s): %s", __func__, prog, strerror(ERRNO) );
+				httplib_cry( conn->ctx, conn, "%s: execle(%s): %s", __func__, prog, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 			}
 			
 			else {
 				execle( interp, interp, prog, NULL, envp );
-				httplib_cry( conn->ctx, conn, "%s: execle(%s %s): %s", __func__, interp, prog, strerror(ERRNO) );
+				httplib_cry( conn->ctx, conn, "%s: execle(%s %s): %s", __func__, interp, prog, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 			}
 		}
 

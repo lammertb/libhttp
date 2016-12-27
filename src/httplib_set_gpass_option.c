@@ -38,6 +38,7 @@ int XX_httplib_set_gpass_option( struct httplib_context *ctx ) {
 
 	struct file file = STRUCT_FILE_INITIALIZER;
 	const char *path;
+	char error_string[ERROR_STRING_LEN];
 
 	if ( ctx == NULL ) return 0;
 
@@ -45,7 +46,7 @@ int XX_httplib_set_gpass_option( struct httplib_context *ctx ) {
 
 	if ( path != NULL  &&  ! XX_httplib_stat( NULL, path, &file ) ) {
 
-		httplib_cry( ctx, NULL, "Cannot open %s: %s", path, strerror(ERRNO) );
+		httplib_cry( ctx, NULL, "Cannot open %s: %s", path, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 		return 0;
 	}
 	return 1;

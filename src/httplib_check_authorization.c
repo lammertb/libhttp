@@ -32,6 +32,7 @@
 bool XX_httplib_check_authorization( struct httplib_connection *conn, const char *path ) {
 
 	char fname[PATH_MAX];
+	char error_string[ERROR_STRING_LEN];
 	struct vec uri_vec;
 	struct vec filename_vec;
 	const char *list;
@@ -53,7 +54,7 @@ bool XX_httplib_check_authorization( struct httplib_connection *conn, const char
 
 			if ( truncated  ||  ! XX_httplib_fopen( conn, fname, "r", &file ) ) {
 
-				httplib_cry( conn->ctx, conn, "%s: cannot open %s: %s", __func__, fname, strerror(errno) );
+				httplib_cry( conn->ctx, conn, "%s: cannot open %s: %s", __func__, fname, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 			}
 			break;
 		}

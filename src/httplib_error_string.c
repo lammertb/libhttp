@@ -30,7 +30,7 @@
 #endif
 
 /*
- * char *XX_httplib_error_string( int error_code, char *buf, size_t buf_len );
+ * char *httplib_error_string( int error_code, char *buf, size_t buf_len );
  *
  * The function XX_httplib_error_string() returns a string associated with an
  * error code by storing it in a caller provided buffer. The function returns a
@@ -42,7 +42,7 @@
  * The implementation of the function is thread safe.
  */
 
-char *XX_httplib_error_string( int error_code, char *buf, size_t buf_len ) {
+LIBHTTP_API char *httplib_error_string( int error_code, char *buf, size_t buf_len ) {
 
 	if ( buf == NULL  ||  buf_len < 1 ) return NULL;
 
@@ -172,4 +172,4 @@ char *XX_httplib_error_string( int error_code, char *buf, size_t buf_len ) {
 
 #endif  /* _WIN32 */
 
-}  /* XX_httplib_error_string */
+}  /* httplib_error_string */

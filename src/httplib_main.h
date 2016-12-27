@@ -511,6 +511,7 @@ extern CRITICAL_SECTION			global_log_file_lock;
 #define CGI_ENVIRONMENT_SIZE		(4096)
 #define MAX_CGI_ENVIR_VARS		(256)
 #define MG_BUF_LEN			(8192)
+#define ERROR_STRING_LEN		(256)
 
 /*
  * TODO: LJB: Move to test functions
@@ -805,7 +806,6 @@ int			XX_httplib_consume_socket( struct httplib_context *ctx, struct socket *sp,
 void			XX_httplib_delete_file( struct httplib_connection *conn, const char *path );
 void			XX_httplib_dir_scan_callback( struct de *de, void *data );
 void			XX_httplib_discard_unread_request_data( struct httplib_connection *conn );
-char *			XX_httplib_error_string( int error_code, char *buf, size_t buf_len );
 int			XX_httplib_fclose( struct file *filep );
 void			XX_httplib_fclose_on_exec( struct file *filep, struct httplib_connection *conn );
 const char *		XX_httplib_fgets( char *buf, size_t size, struct file *filep, char **p );

@@ -48,6 +48,7 @@ bool XX_httplib_set_uid_option( struct httplib_context *ctx ) {
 
 	struct passwd *pw;
 	const char *uid;
+	char error_string[ERROR_STRING_LEN];
 
 	if ( ctx == NULL ) return false;
 
@@ -56,9 +57,9 @@ bool XX_httplib_set_uid_option( struct httplib_context *ctx ) {
 	if ( uid == NULL ) return true;
 
 	if      ( (pw = getpwnam(uid)) == NULL ) httplib_cry( ctx, NULL, "%s: unknown user [%s]", __func__, uid                  );
-	else if ( setgid(pw->pw_gid)   == -1   ) httplib_cry( ctx, NULL, "%s: setgid(%s): %s",    __func__, uid, strerror(errno) );
-	else if ( setgroups(0, NULL)           ) httplib_cry( ctx, NULL, "%s: setgroups(): %s",   __func__,      strerror(errno) );
-	else if ( setuid(pw->pw_uid)   == -1   ) httplib_cry( ctx, NULL, "%s: setuid(%s): %s",    __func__, uid, strerror(errno) );
+	else if ( setgid(pw->pw_gid)   == -1   ) httplib_cry( ctx, NULL, "%s: setgid(%s): %s",    __func__, uid, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
+	else if ( setgroups(0, NULL)           ) httplib_cry( ctx, NULL, "%s: setgroups(): %s",   __func__,      httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
+	else if ( setuid(pw->pw_uid)   == -1   ) httplib_cry( ctx, NULL, "%s: setuid(%s): %s",    __func__, uid, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 	else return true;
 
 	return false;

@@ -125,6 +125,10 @@ static int guard = 0; /* test if any dialog is already open */
 #define PATH_MAX (1024)
 #endif
 
+#ifndef ERROR_STRING_LEN
+#define ERROR_STRING_LEN (256)
+#endif
+
 #define MAX_OPTIONS (50)
 #define MAX_CONF_FILE_LINE_SIZE (8 * 1024)
 
@@ -503,6 +507,7 @@ static int read_config_file(const char *config_file, char **options) {
 static void process_command_line_arguments(int argc, char *argv[], char **options) {
 
 	char *p;
+	char error_string[ERROR_STRING_LEN];
 	size_t i, cmd_line_opts_start = 1;
 #ifdef CONFIG_FILE2
 	FILE *fp = NULL;
@@ -547,9 +552,7 @@ static void process_command_line_arguments(int argc, char *argv[], char **option
 		if (cmd_line_opts_start == 2) {
 			/* If config file was set in command line and open failed, die. */
 			/* Errno will still hold the error from fopen. */
-			die("Cannot open config file %s: %s",
-			    g_config_file_name,
-			    strerror(errno));
+			die( "Cannot open config file %s: %s", g_config_file_name, httplib_error_string( errno, error_string, ERROR_STRING_LEN ) );
 		}
 		/* Otherwise: LibHTTP can work without a config file */
 	}
@@ -639,6 +642,7 @@ static int is_path_absolute(const char *path) {
 static void verify_existence(char **options, const char *option_name, int must_be_dir) {
 
 	struct stat st;
+	char error_string[ERROR_STRING_LEN];
 	const char *path = get_option(options, option_name);
 
 #ifdef _WIN32
@@ -662,7 +666,7 @@ static void verify_existence(char **options, const char *option_name, int must_b
 		    "absolute, or it is relative to libhttp executable.",
 		    option_name,
 		    path,
-		    strerror(errno));
+		    httplib_error_string( errno, error_string, ERROR_STRING_LEN ) );
 	}
 }
 

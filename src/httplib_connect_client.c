@@ -82,12 +82,13 @@ static struct httplib_connection *httplib_connect_client_impl( const struct http
 	union usa sa;
 	socklen_t len;
 	struct sockaddr *psa;
+	char error_string[ERROR_STRING_LEN];
 
 	if ( ! XX_httplib_connect_socket( &fake_ctx, client_options->host, client_options->port, use_ssl, ebuf, ebuf_len, &sock, &sa ) ) return NULL;
 	
 	if ( (conn = httplib_calloc( 1, sizeof(*conn) + MAX_REQUEST_SIZE )) == NULL ) {
 
-		XX_httplib_snprintf( NULL, NULL, ebuf, ebuf_len, "calloc(): %s", strerror(ERRNO) );
+		XX_httplib_snprintf( NULL, NULL, ebuf, ebuf_len, "calloc(): %s", httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 		closesocket( sock );
 	}
 #ifndef NO_SSL
@@ -112,7 +113,7 @@ static struct httplib_connection *httplib_connect_client_impl( const struct http
 		conn->client.sock = sock;
 		conn->client.lsa  = sa;
 
-		if ( getsockname( sock, psa, &len ) != 0 ) httplib_cry( &fake_ctx, conn, "%s: getsockname() failed: %s", __func__, strerror(ERRNO) );
+		if ( getsockname( sock, psa, &len ) != 0 ) httplib_cry( &fake_ctx, conn, "%s: getsockname() failed: %s", __func__, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 
 		conn->client.has_ssl = (use_ssl) ? true : false;
 		httplib_pthread_mutex_init( &conn->mutex, &XX_httplib_pthread_mutex_attr );

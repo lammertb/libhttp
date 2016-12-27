@@ -53,6 +53,7 @@ void XX_httplib_handle_cgi_request( struct httplib_connection *conn, const char 
 	const char *connection_state;
 	char *pbuf;
 	char dir[PATH_MAX];
+	char error_string[ERROR_STRING_LEN];
 	char *ptr;
 	const char *cptr;
 	struct httplib_request_info ri;
@@ -104,7 +105,7 @@ void XX_httplib_handle_cgi_request( struct httplib_connection *conn, const char 
 
 	if ( pipe(fdin) != 0  ||  pipe(fdout) != 0  ||  pipe(fderr) != 0 ) {
 
-		status = strerror( ERRNO );
+		status = httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN );
 		httplib_cry( conn->ctx, conn, "Error: CGI program \"%s\": Can not create CGI pipes: %s", prog, status );
 		XX_httplib_send_http_error( conn, 500, "Error: Cannot create CGI pipe: %s", status );
 
@@ -115,7 +116,7 @@ void XX_httplib_handle_cgi_request( struct httplib_connection *conn, const char 
 
 	if ( pid == (pid_t)-1 ) {
 
-		status = strerror(ERRNO);
+		status = httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN );
 		httplib_cry( conn->ctx, conn, "Error: CGI program \"%s\": Can not spawn CGI process: %s", prog, status );
 		XX_httplib_send_http_error( conn, 500, "Error: Cannot spawn CGI process [%s]: %s", prog, status );
 
@@ -150,7 +151,7 @@ void XX_httplib_handle_cgi_request( struct httplib_connection *conn, const char 
 
 	if ( (in = fdopen( fdin[1], "wb" )) == NULL ) {
 
-		status = strerror(ERRNO);
+		status = httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN );
 		httplib_cry( conn->ctx, conn, "Error: CGI program \"%s\": Can not open stdin: %s", prog, status );
 		XX_httplib_send_http_error( conn, 500, "Error: CGI can not open fdin\nfopen: %s", status );
 
@@ -159,7 +160,7 @@ void XX_httplib_handle_cgi_request( struct httplib_connection *conn, const char 
 
 	if ( (out = fdopen( fdout[0], "rb" )) == NULL ) {
 
-		status = strerror(ERRNO);
+		status = httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN );
 		httplib_cry( conn->ctx, conn, "Error: CGI program \"%s\": Can not open stdout: %s", prog, status );
 		XX_httplib_send_http_error( conn, 500, "Error: CGI can not open fdout\nfopen: %s", status );
 
@@ -168,7 +169,7 @@ void XX_httplib_handle_cgi_request( struct httplib_connection *conn, const char 
 
 	if ( (err = fdopen( fderr[0], "rb" )) == NULL ) {
 
-		status = strerror(ERRNO);
+		status = httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN );
 		httplib_cry( conn->ctx, conn, "Error: CGI program \"%s\": Can not open stderr: %s", prog, status );
 		XX_httplib_send_http_error( conn, 500, "Error: CGI can not open fdout\nfopen: %s", status );
 

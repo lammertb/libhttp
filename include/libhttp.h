@@ -940,6 +940,7 @@ LIBHTTP_API int				httplib_base64_encode( const unsigned char *src, int src_len,
 LIBHTTP_API unsigned			httplib_check_feature( unsigned feature );
 LIBHTTP_API int				httplib_closedir( DIR *dir );
 LIBHTTP_API void			httplib_cry( const struct httplib_context *ctx, const struct httplib_connection *conn, PRINTF_FORMAT_STRING(const char *fmt), ...) PRINTF_ARGS(3, 4);
+LIBHTTP_API char *			httplib_error_string( int error_code, char *buf, size_t buf_len );
 LIBHTTP_API const char *		httplib_get_builtin_mime_type( const char *file_name );
 LIBHTTP_API uint64_t			httplib_get_random( void );
 LIBHTTP_API void *			httplib_get_user_connection_data( const struct httplib_connection *conn );

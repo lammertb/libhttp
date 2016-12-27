@@ -41,6 +41,7 @@
 int XX_httplib_connect_socket( struct httplib_context *ctx, const char *host, int port, int use_ssl, char *ebuf, size_t ebuf_len, SOCKET *sock, union usa *sa ) {
 
 	int ip_ver;
+	char error_string[ERROR_STRING_LEN];
 
 	ip_ver = 0;
 	*sock  = INVALID_SOCKET;
@@ -117,7 +118,7 @@ int XX_httplib_connect_socket( struct httplib_context *ctx, const char *host, in
 
 	if ( *sock == INVALID_SOCKET ) {
 
-		XX_httplib_snprintf( NULL, NULL, ebuf, ebuf_len, "socket(): %s", strerror(ERRNO) );
+		XX_httplib_snprintf( NULL, NULL, ebuf, ebuf_len, "socket(): %s", httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 		return 0;
 	}
 
@@ -130,7 +131,7 @@ int XX_httplib_connect_socket( struct httplib_context *ctx, const char *host, in
 	 * Not connected
 	 */
 
-	XX_httplib_snprintf( NULL, NULL, ebuf, ebuf_len, "connect(%s:%d): %s", host, port, strerror(ERRNO) );
+	XX_httplib_snprintf( NULL, NULL, ebuf, ebuf_len, "connect(%s:%d): %s", host, port, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 	closesocket( *sock );
 	*sock = INVALID_SOCKET;
 

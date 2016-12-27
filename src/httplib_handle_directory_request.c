@@ -34,6 +34,7 @@ void XX_httplib_handle_directory_request( struct httplib_connection *conn, const
 	int sort_direction;
 	struct dir_scan_data data = { NULL, 0, 128 };
 	char date[64];
+	char error_string[ERROR_STRING_LEN];
 	time_t curtime;
 
 	if ( conn == NULL  ||  conn->ctx == NULL )                                                                      return;
@@ -41,7 +42,7 @@ void XX_httplib_handle_directory_request( struct httplib_connection *conn, const
 
 	if ( ! XX_httplib_scan_directory( conn, dir, & data, XX_httplib_dir_scan_callback ) ) {
 
-		XX_httplib_send_http_error( conn, 500, "Error: Cannot open directory\nopendir(%s): %s", dir, strerror(ERRNO) );
+		XX_httplib_send_http_error( conn, 500, "Error: Cannot open directory\nopendir(%s): %s", dir, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 		return;
 	}
 

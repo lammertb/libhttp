@@ -31,6 +31,7 @@
 int XX_httplib_scan_directory( struct httplib_connection *conn, const char *dir, void *data, void (*cb)(struct de *, void *) ) {
 
 	char path[PATH_MAX];
+	char error_string[ERROR_STRING_LEN];
 	struct dirent *dp;
 	DIR *dirp;
 	struct de de;
@@ -65,7 +66,7 @@ int XX_httplib_scan_directory( struct httplib_connection *conn, const char *dir,
 
 		if ( ! XX_httplib_stat( conn, path, &de.file ) ) {
 
-			httplib_cry( conn->ctx, conn, "%s: XX_httplib_stat(%s) failed: %s", __func__, path, strerror(ERRNO) );
+			httplib_cry( conn->ctx, conn, "%s: XX_httplib_stat(%s) failed: %s", __func__, path, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 		}
 
 		de.file_name = dp->d_name;

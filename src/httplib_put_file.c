@@ -43,6 +43,7 @@ void XX_httplib_put_file( struct httplib_connection *conn, const char *path ) {
 	int64_t r2;
 	int rc;
 	char date[64];
+	char error_string[ERROR_STRING_LEN];
 	time_t curtime;
 
 	if ( conn == NULL   ||   conn->ctx == NULL ) return;
@@ -140,7 +141,7 @@ void XX_httplib_put_file( struct httplib_connection *conn, const char *path ) {
 		 * XX_httplib_put_dir returns -1 if the path is too long
 		 */
 
-		XX_httplib_send_http_error( conn, 414, "Error: Path too long\nput_dir(%s): %s", path, strerror(ERRNO) );
+		XX_httplib_send_http_error( conn, 414, "Error: Path too long\nput_dir(%s): %s", path, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 		return;
 	}
 
@@ -150,7 +151,7 @@ void XX_httplib_put_file( struct httplib_connection *conn, const char *path ) {
 		 * XX_httplib_put_dir returns -2 if the directory can not be created
 		 */
 
-		XX_httplib_send_http_error( conn, 500, "Error: Can not create directory\nput_dir(%s): %s", path, strerror(ERRNO) );
+		XX_httplib_send_http_error( conn, 500, "Error: Can not create directory\nput_dir(%s): %s", path, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 		return;
 	}
 
@@ -161,7 +162,7 @@ void XX_httplib_put_file( struct httplib_connection *conn, const char *path ) {
 	if ( ! XX_httplib_fopen( conn, path, "wb+", &file)  ||  file.fp == NULL ) {
 
 		XX_httplib_fclose( & file );
-		XX_httplib_send_http_error( conn, 500, "Error: Can not create file\nfopen(%s): %s", path, strerror(ERRNO) );
+		XX_httplib_send_http_error( conn, 500, "Error: Can not create file\nfopen(%s): %s", path, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 		return;
 	}
 
