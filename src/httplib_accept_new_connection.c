@@ -50,7 +50,7 @@ void XX_httplib_accept_new_connection( const struct socket *listener, struct htt
 
 	so.sock = accept( listener->sock, &so.rsa.sa, &len );
 	if ( so.sock == INVALID_SOCKET ) return;
-	
+
 	if ( ! XX_httplib_check_acl( ctx, ntohl(*(uint32_t *)&so.rsa.sin.sin_addr )) ) {
 
 		XX_httplib_sockaddr_to_string( src_addr, sizeof(src_addr), &so.rsa );
@@ -60,6 +60,7 @@ void XX_httplib_accept_new_connection( const struct socket *listener, struct htt
 	}
 	
 	else {
+
 		/*
 		 * Put so socket structure into the queue
 		 */

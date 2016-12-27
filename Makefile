@@ -150,12 +150,13 @@ ${OBJDIR}%${OBJEXT} : ${SRCDIR}%.c
 ${TSTDIR}${OBJDIR}%${OBJEXT} : ${TSTDIR}%.c
 	${CC} -c ${CPPFLAGS} ${CFLAGS} ${DFLAGS} ${OFLAG}$@ $<
 
-all: ${LIBDIR}libhttp${LIBEXT} testmime${EXEEXT}
+all: ${LIBDIR}libhttp${LIBEXT} testmime${EXEEXT} libhttpserver${EXEEXT}
 
 clean:
 	${RM} ${OBJDIR}*${OBJEXT}
 	${RM} ${LIBDIR}libhttp${LIBEXT}
 	${RM} testmime${EXEEXT}
+	${RM} libhttpserver${EXEEXT}
 
 testmime${EXEEXT} :					\
 		${TSTDIR}${OBJDIR}testmime${OBJEXT}	\
@@ -165,6 +166,17 @@ testmime${EXEEXT} :					\
 		${TSTDIR}${OBJDIR}testmime${OBJEXT}	\
 		${LIBDIR}libhttp${LIBEXT}
 	${STRIP} testmime${EXEEXT}
+
+
+libhttpserver${EXEEXT} :				\
+		${OBJDIR}main${OBJEXT}			\
+		${LIBDIR}libhttp${LIBEXT}		\
+		Makefile
+	${LINK} ${XFLAG}libhttpserver${EXEEXT}		\
+		${OBJDIR}main${OBJEXT}			\
+		${LIBDIR}libhttp${LIBEXT}		\
+		${LIBS}
+	${STRIP} libhttpserver${EXEEXT}
 
 
 OBJLIST =									\
@@ -411,6 +423,9 @@ ${LIBDIR}libhttp${LIBEXT} :	\
 #
 
 ${TSTDIR}${OBJDIR}testmime${OBJEXT}					: ${TSTDIR}testmime.c						\
+									  ${INCDIR}libhttp.h
+
+${OBJDIR}main${OBJEXT}							: ${SRCDIR}main.c						\
 									  ${INCDIR}libhttp.h
 
 ${OBJDIR}extern_md5${OBJEXT}						: ${SRCDIR}extern_md5.c						\

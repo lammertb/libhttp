@@ -67,7 +67,7 @@ void XX_httplib_handle_request( struct httplib_connection *conn ) {
 		char *		var;
 	} ptr;
 
-	if ( conn == NULL ) return;
+	if ( conn == NULL  ||  conn->ctx == NULL ) return;
 
 	ri                       = & conn->request_info;
 	is_found                 = false;
@@ -98,7 +98,7 @@ void XX_httplib_handle_request( struct httplib_connection *conn ) {
 
 	ptr.var = strchr( ri->request_uri, '?' );
 	if ( ptr.var != NULL ) *(ptr.var++) = '\0';
-	conn->request_info.query_string = ptr.var;
+	ri->query_string = ptr.var;
 
 	/*
 	 * 1.2. do a https redirect, if required. Do not decode URIs yet.
@@ -386,13 +386,13 @@ no_callback_resource:
 
 		return;
 	}
-	
+
 	/*
 	 * 9. This request is either for a static file or resource handled
 	 * by a script file. Thus, a DOCUMENT_ROOT must exist.
 	 */
 
-	else if ( conn->ctx->cfg[DOCUMENT_ROOT] == NULL ) {
+	if ( conn->ctx->cfg[DOCUMENT_ROOT] == NULL ) {
 
 		XX_httplib_send_http_error( conn, 404, "%s", "Not Found" );
 		return;

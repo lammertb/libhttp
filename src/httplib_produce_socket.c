@@ -53,7 +53,7 @@ void XX_httplib_produce_socket( struct httplib_context *ctx, const struct socket
 				ctx->client_socks[i]        = *sp;
 				ctx->client_socks[i].in_use = 1;
 
-				event_signal(ctx->client_wait_events[i]);
+				event_signal( ctx->client_wait_events[i] );
 
 				return;
 			}
@@ -74,7 +74,7 @@ void XX_httplib_produce_socket( struct httplib_context *ctx, const struct socket
  * Master thread adds accepted socket to a queue
  */
 
-void XX_httplib_produce_socket(struct httplib_context *ctx, const struct socket *sp) {
+void XX_httplib_produce_socket( struct httplib_context *ctx, const struct socket *sp ) {
 
 #define QUEUE_SIZE(ctx) ((int)(ARRAY_SIZE(ctx->queue)))
 

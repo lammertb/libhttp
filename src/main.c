@@ -683,7 +683,7 @@ static void set_absolute_path(char *options[], const char *option_name, const ch
 		   be the relative directory for everything.
 		   Extract libhttp executable directory into path. */
 		if ((p = strrchr(path_to_libhttp_exe, DIRSEP)) == NULL) {
-			IGNORE_UNUSED_RESULT(getcwd(path, sizeof(path)));
+			getcwd(path, sizeof(path));
 		} else {
 			snprintf(path, sizeof(path) - 1, "%.*s", (int)(p - path_to_libhttp_exe), path_to_libhttp_exe);
 			path[sizeof(path) - 1] = 0;
@@ -693,7 +693,7 @@ static void set_absolute_path(char *options[], const char *option_name, const ch
 		strncat(path, option_value, sizeof(path) - strlen(path) - 1);
 
 		/* Absolutize the path, and set the option */
-		IGNORE_UNUSED_RESULT(abs_path(path, absolute, sizeof(absolute)));
+		abs_path(path, absolute, sizeof(absolute));
 		set_option(options, option_name, absolute);
 	}
 }

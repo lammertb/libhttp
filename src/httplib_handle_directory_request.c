@@ -36,7 +36,7 @@ void XX_httplib_handle_directory_request( struct httplib_connection *conn, const
 	char date[64];
 	time_t curtime;
 
-	if ( conn == NULL )                                                                                             return;
+	if ( conn == NULL  ||  conn->ctx == NULL )                                                                      return;
 	if ( dir  == NULL ) { XX_httplib_send_http_error( conn, 500, "Internal server error\nOpening NULL directory" ); return; }
 
 	if ( ! XX_httplib_scan_directory( conn, dir, & data, XX_httplib_dir_scan_callback ) ) {

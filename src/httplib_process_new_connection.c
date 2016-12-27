@@ -61,6 +61,7 @@ void XX_httplib_process_new_connection( struct httplib_connection *conn ) {
 	 */
 
 	conn->data_len = 0;
+
 	do {
 		if ( ! XX_httplib_getreq( conn, ebuf, sizeof(ebuf), &reqerr ) ) {
 
@@ -122,14 +123,14 @@ void XX_httplib_process_new_connection( struct httplib_connection *conn ) {
 
 		if ( ebuf[0] == '\0' ) {
 
-			if ( conn->request_info.local_uri ) {
+			if ( conn->request_info.local_uri != NULL ) {
 
 				/*
 				 * handle request to local server
 				 */
 
 				XX_httplib_handle_request( conn );
-				if (conn->ctx->callbacks.end_request != NULL) conn->ctx->callbacks.end_request(conn, conn->status_code);
+				if ( conn->ctx->callbacks.end_request != NULL ) conn->ctx->callbacks.end_request( conn, conn->status_code );
 				XX_httplib_log_access(conn);
 			}
 			

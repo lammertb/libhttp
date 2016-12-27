@@ -432,12 +432,9 @@ enum {
 	WEBSOCKET_ROOT,
 	ACCESS_CONTROL_ALLOW_ORIGIN,
 	ERROR_PAGES,
-	CONFIG_TCP_NODELAY, /* Prepended CONFIG_ to avoid conflict with the socket option typedef TCP_NODELAY. */
+	CONFIG_TCP_NODELAY,
 	STATIC_FILE_MAX_AGE,
-#if defined(__linux__)
 	ALLOW_SENDFILE_CALL,
-#endif
-
 	NUM_OPTIONS
 };
 

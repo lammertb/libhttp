@@ -62,8 +62,7 @@ static int64_t push( struct httplib_context *ctx, FILE *fp, SOCKET sock, SSL *ss
 	if ( ssl != NULL ) return -1;
 #endif  /* NO_SSL */
 
-	if ( len > (int64_t)SIZE_T_MAX ) len = SIZE_T_MAX;
-	if ( len > (int64_t)INT_MAX    ) len = INT_MAX;
+	if ( len > INT_MAX ) len = INT_MAX;
 
 	if ( timeout > 0.0 ) clock_gettime( CLOCK_MONOTONIC, &start );
 

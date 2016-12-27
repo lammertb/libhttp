@@ -132,6 +132,7 @@ static void *worker_thread_run( struct worker_thread_args *thread_args ) {
 			conn->request_info.has_ssl = conn->client.has_ssl;
 
 			if ( conn->client.has_ssl ) {
+
 #ifndef NO_SSL
 				/*
 				 * HTTPS connection
@@ -167,7 +168,9 @@ static void *worker_thread_run( struct worker_thread_args *thread_args ) {
 					}
 				}
 #endif
-			} else XX_httplib_process_new_connection( conn );
+			}
+			
+			else XX_httplib_process_new_connection( conn );
 
 			XX_httplib_close_connection( conn );
 		}
