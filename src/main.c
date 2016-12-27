@@ -869,7 +869,7 @@ static void start_libhttp(int argc, char *argv[]) {
 	/* Start LibHTTP */
 	memset(&callbacks, 0, sizeof(callbacks));
 	callbacks.log_message = &log_message;
-	g_ctx = httplib_start(&callbacks, &g_user_data, (const char **)options);
+	g_ctx = httplib_start(&callbacks, &g_user_data, (const char **)options, NULL, 0 );
 
 	/* httplib_start copies all options to an internal buffer.
 	 * The options data field here is not required anymore. */

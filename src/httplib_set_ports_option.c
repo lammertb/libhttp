@@ -70,7 +70,7 @@ int XX_httplib_set_ports_option( struct httplib_context *ctx ) {
 
 		ports_total++;
 
-		if ( ! parse_port_string( & vec, & so, & ip_version ) ) {
+		if ( ! parse_port_string( &vec, &so, &ip_version ) ) {
 
 			httplib_cry( ctx, NULL,
 			       "%.*s: invalid port spec (entry %i). Expecting list of: %s",

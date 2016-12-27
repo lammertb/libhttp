@@ -310,7 +310,6 @@ struct httplib_callbacks {
 
    Return:
      web server context, or NULL on error. */
-LIBHTTP_API struct httplib_context *httplib_start(const struct httplib_callbacks *callbacks, void *user_data, const char **configuration_options);
 
 
 /* httplib_request_handler
@@ -985,6 +984,7 @@ LIBHTTP_API int			httplib_remove( const char *path );
 LIBHTTP_API void		httplib_send_file( struct httplib_connection *conn, const char *path, const char *mime_type, const char *additional_headers );
 LIBHTTP_API void		httplib_set_alloc_callback_func( httplib_alloc_callback_func log_func );
 LIBHTTP_API void		httplib_set_user_connection_data( struct httplib_connection *conn, void *data );
+LIBHTTP_API struct httplib_context *	httplib_start(const struct httplib_callbacks *callbacks, void *user_data, const char **configuration_options, char *ebuf, size_t ebuf_len );
 LIBHTTP_API void		httplib_stop( struct httplib_context *ctx );
 LIBHTTP_API int			httplib_strcasecmp( const char *s1, const char *s2 );
 LIBHTTP_API const char *	httplib_strcasestr( const char *big_str, const char *small_str );

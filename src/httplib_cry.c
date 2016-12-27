@@ -48,7 +48,7 @@ void httplib_cry( const struct httplib_context *ctx, const struct httplib_connec
 	va_end( ap );
 	buf[sizeof(buf)-1] = 0;
 
-	if ( conn == NULL  ||  ctx == NULL ) return;
+	if ( ctx == NULL ) return;
 
 	/*
 	 * Do not lock when getting the callback value, here and below.
@@ -56,7 +56,7 @@ void httplib_cry( const struct httplib_context *ctx, const struct httplib_connec
 	 * same way string option can.
 	 */
 
-	if ( ctx->callbacks.log_message == NULL  ||  ctx->callbacks.log_message( conn, buf ) == 0 ) {
+	if ( conn == NULL  ||  ctx->callbacks.log_message == NULL  ||  ctx->callbacks.log_message( conn, buf ) == 0 ) {
 
 		if ( ctx->cfg[ERROR_LOG_FILE] != NULL ) {
 
@@ -70,10 +70,10 @@ void httplib_cry( const struct httplib_context *ctx, const struct httplib_connec
 			flockfile( fi.fp );
 			timestamp = time( NULL );
 
-			XX_httplib_sockaddr_to_string( src_addr, sizeof(src_addr), &conn->client.rsa );
+			if ( conn != NULL ) XX_httplib_sockaddr_to_string( src_addr, sizeof(src_addr), &conn->client.rsa );
 			fprintf( fi.fp, "[%010lu] [error] [client %s] ", (unsigned long)timestamp, src_addr );
 
-			if ( conn->request_info.request_method != NULL ) {
+			if ( conn != NULL  &&  conn->request_info.request_method != NULL ) {
 
 				fprintf( fi.fp, "%s %s: ", conn->request_info.request_method, conn->request_info.request_uri );
 			}
