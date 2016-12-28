@@ -389,11 +389,6 @@ union usa {
 	struct sockaddr_in6 sin6;
 };
 
-/* NOTE(lsm): this enum shoulds be in sync with the config_options below. */
-enum {
-	NUM_OPTIONS
-};
-
 /*
  * enum CTX_STATUS_...
  *
@@ -531,7 +526,6 @@ struct httplib_context {
 
 	volatile enum ctx_status_t status;	/* Should we stop event loop								*/
 	SSL_CTX *ssl_ctx;			/* SSL context										*/
-	char *cfg[NUM_OPTIONS];			/* LibHTTP configuration parameters							*/
 	struct httplib_callbacks callbacks;	/* User-defined callback function							*/
 	void *user_data;			/* User-defined data									*/
 	enum ctx_type_t ctx_type;		/* CTX_TYPE_SERVER or CTX_TYPE_CLIENT							*/
@@ -815,7 +809,6 @@ bool			XX_httplib_forward_body_data( struct httplib_connection *conn, FILE *fp, 
 void			XX_httplib_free_context( struct httplib_context *ctx );
 const char *		XX_httplib_get_header( const struct httplib_request_info *ri, const char *name );
 void			XX_httplib_get_mime_type( struct httplib_context *ctx, const char *path, struct vec *vec );
-int			XX_httplib_get_option_index( const char *name );
 const char *		XX_httplib_get_rel_url_at_current_server( const char *uri, const struct httplib_connection *conn );
 uint32_t		XX_httplib_get_remote_ip( const struct httplib_connection *conn );
 int			XX_httplib_get_request_handler( struct httplib_connection *conn, int handler_type, httplib_request_handler *handler, httplib_websocket_connect_handler *connect_handler, httplib_websocket_ready_handler *ready_handler, httplib_websocket_data_handler *data_handler, httplib_websocket_close_handler *close_handler, httplib_authorization_handler *auth_handler, void **cbdata );
@@ -934,4 +927,3 @@ extern pthread_mutexattr_t			XX_httplib_pthread_mutex_attr;
 #endif /* _WIN32 */
 
 extern const struct uriprot_tp		XX_httplib_abs_uri_protocols[];
-extern struct httplib_option		XX_httplib_config_options[];

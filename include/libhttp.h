@@ -429,7 +429,6 @@ LIBHTTP_API void httplib_set_auth_handler(struct httplib_context *ctx, const cha
    If given parameter name is not valid, NULL is returned. For valid
    names, return value is guaranteed to be non-NULL. If parameter is not
    set, zero-length string is returned. */
-LIBHTTP_API const char *httplib_get_option(const struct httplib_context *ctx, const char *name);
 
 
 /* Get context from connection. */
@@ -439,28 +438,6 @@ httplib_get_context(const struct httplib_connection *conn);
 
 /* Get user data passed to httplib_start from context. */
 LIBHTTP_API void *httplib_get_user_data(const struct httplib_context *ctx);
-
-
-
-
-
-
-struct httplib_option {
-	const char *name;
-	int type;
-	const char *default_value;
-};
-
-
-enum {
-	CONFIG_TYPE_UNKNOWN     = 0x0,
-};
-
-
-/* Return array of struct httplib_option, representing all valid configuration
-   options of libhttp.c.
-   The array is terminated by a NULL name option. */
-LIBHTTP_API const struct httplib_option *httplib_get_valid_options(void);
 
 
 struct httplib_server_ports {
@@ -941,6 +918,7 @@ LIBHTTP_API int				httplib_closedir( DIR *dir );
 LIBHTTP_API void			httplib_cry( const struct httplib_context *ctx, const struct httplib_connection *conn, PRINTF_FORMAT_STRING(const char *fmt), ...) PRINTF_ARGS(3, 4);
 LIBHTTP_API char *			httplib_error_string( int error_code, char *buf, size_t buf_len );
 LIBHTTP_API const char *		httplib_get_builtin_mime_type( const char *file_name );
+LIBHTTP_API const char *		httplib_get_option( const struct httplib_context *ctx, const char *name, char *buffer, size_t buflen );
 LIBHTTP_API uint64_t			httplib_get_random( void );
 LIBHTTP_API void *			httplib_get_user_connection_data( const struct httplib_connection *conn );
 LIBHTTP_API int				httplib_kill( pid_t pid, int sig_num );

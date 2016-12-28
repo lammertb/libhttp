@@ -27,14 +27,6 @@
 
 #include "httplib_main.h"
 
-/*
- * Config option name, config types, default value
- */
-
-struct httplib_option XX_httplib_config_options[] = {
-	{ NULL,                          CONFIG_TYPE_UNKNOWN,     NULL                                                               }
-};
-
 /* 
  * Check if the XX_httplib_config_options and the corresponding enum have
  * compatible sizes

@@ -280,10 +280,6 @@ struct httplib_context *httplib_start( const struct httplib_callbacks *callbacks
 
 static bool process_options( struct httplib_context *ctx, const struct httplib_option_t *options ) {
 
-	int i;
-	int idx;
-	const char *default_value;
-
 	if ( ctx == NULL ) return false;
 
 	ctx->access_control_allow_origin = NULL;
@@ -406,33 +402,11 @@ static bool process_options( struct httplib_context *ctx, const struct httplib_o
 		if ( check_dir(  ctx, options, "websocket_root",              & ctx->websocket_root                          ) ) return true;
 		if ( check_int(  ctx, options, "websocket_timeout",           & ctx->websocket_timeout,           0, INT_MAX ) ) return true;
 
-		else {
-
-			idx = XX_httplib_get_option_index( options->name );
-
-			if ( idx             == -1   ) { cleanup( ctx, "Invalid option: %s",              options->name ); return true; }
-			if ( options->value  == NULL ) { cleanup( ctx, "%s: option value cannot be NULL", options->name ); return true; }
-
-			if ( ctx->cfg[idx] != NULL ) {
-
-				httplib_cry( ctx, NULL, "warning: %s: duplicate option", options->name );
-				ctx->cfg[idx] = httplib_free( ctx->cfg[idx] );
-			}
-
-			ctx->cfg[idx] = httplib_strdup( options->value );
-		}
+		/*
+		 * TODO: Currently silently ignoring unrecognized options
+		 */
 
 		options++;
-	}
-
-	/*
-	 * Set default value if needed
-	 */
-
-	for (i=0; XX_httplib_config_options[i].name != NULL; i++) {
-
-		default_value = XX_httplib_config_options[i].default_value;
-		if ( ctx->cfg[i] == NULL  &&  default_value != NULL ) ctx->cfg[i] = httplib_strdup( default_value );
 	}
 
 	return false;

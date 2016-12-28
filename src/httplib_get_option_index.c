@@ -26,18 +26,3 @@
  */
 
 #include "httplib_main.h"
-
-int XX_httplib_get_option_index( const char *name ) {
-
-	int i;
-
-	if ( name == NULL ) return -1;
-
-	for (i=0; XX_httplib_config_options[i].name != NULL; i++) {
-
-		if ( strcmp( XX_httplib_config_options[i].name, name ) == 0 ) return i;
-	}
-
-	return -1;
-
-}  /* XX_httplib_get_option_index */

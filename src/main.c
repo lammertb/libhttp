@@ -136,6 +136,11 @@ struct tuser_data {
 	char *first_message;
 };
 
+struct httplib_option {
+	const char *	name;
+	const char *	value;
+};
+
 static int g_exit_flag = 0;         /* Main loop should exit */
 static char g_server_base_name[40]; /* Set by init_server_name() */
 static const char *g_server_name;   /* Set by init_server_name() */
@@ -162,11 +167,10 @@ static struct tuser_data
 enum { OPTION_TITLE, OPTION_ICON, NUM_MAIN_OPTIONS };
 
 static struct httplib_option main_config_options[] = {
-	{ "title",  0x02,  NULL },
-	{ "icon",   0x02,  NULL },
-	{ NULL,     CONFIG_TYPE_UNKNOWN, NULL }
+	{ "title", NULL },
+	{ "icon",  NULL },
+	{ NULL,    NULL }
 };
-
 
 static void WINCDECL signal_handler(int sig_num) {
 
@@ -212,9 +216,6 @@ show_server_name(void)
 
 static NO_RETURN void show_usage_and_exit( const char *exeName ) {
 
-	const struct httplib_option *options;
-	int i;
-
 	if ( exeName == NULL  ||  *exeName == '\0' ) exeName = "libhttp";
 
 	show_server_name();
@@ -232,16 +233,6 @@ static NO_RETURN void show_usage_and_exit( const char *exeName ) {
 	fprintf(stderr, "  Remove user:\n");
 	fprintf(stderr, "    %s -R <htpasswd_file> <realm> <user>\n", exeName);
 	fprintf(stderr, "\nOPTIONS:\n");
-
-	options = httplib_get_valid_options();
-	for (i = 0; options[i].name != NULL; i++) {
-		fprintf(stderr, "  -%s %s\n", options[i].name, ((options[i].default_value == NULL) ? "<empty>" : options[i].default_value));
-	}
-
-	options = main_config_options;
-	for (i = 0; options[i].name != NULL; i++) {
-		fprintf(stderr, "  -%s %s\n", options[i].name, ((options[i].default_value == NULL) ? "<empty>" : options[i].default_value));
-	}
 
 	exit(EXIT_FAILURE);
 }
@@ -335,8 +326,6 @@ static const char * get_option( struct httplib_option_t *options, const char *op
 static int set_option( struct httplib_option_t *options, const char *name, const char *value ) {
 
 	int i;
-	int type;
-	const struct httplib_option *default_options = httplib_get_valid_options();
 
 	for (i = 0; main_config_options[i].name != NULL; i++) {
 		if (0 == strcmp(name, main_config_options[i].name)) {
@@ -344,44 +333,6 @@ static int set_option( struct httplib_option_t *options, const char *name, const
 			 * and return OK */
 			return 1;
 		}
-	}
-
-	type = CONFIG_TYPE_UNKNOWN;
-	for (i = 0; default_options[i].name != NULL; i++) {
-		if (!strcmp( default_options[i].name, name ) ) type = default_options[i].type;
-	}
-
-	switch (type) {
-	case CONFIG_TYPE_UNKNOWN:
-		/* unknown option */
-		return 0;
-	case 0x1 :  /* CONFIG_TYPE_NUMBER: */
-		/* integer number > 0, e.g. number of threads */
-		if (atol(value) < 0) {
-			/* invalid number */
-			return 0;
-		}
-		break;
-	case 0x02 : /* CONFIG_TYPE_STRING: */
-		/* any text */
-		break;
-	case 0x5 : /* CONFIG_TYPE_BOOLEAN: */
-		/* boolean value, yes or no */
-		if ((0 != strcmp(value, "yes")) && (0 != strcmp(value, "no"))) {
-			/* invalid boolean */
-			return 0;
-		}
-		break;
-	case 0x03 : /* CONFIG_TYPE_FILE: */
-	case 0x04 : /* CONFIG_TYPE_DIRECTORY: */
-		/* TODO (low): check this option when it is set, instead of calling
-		 * verify_existence later */
-		break;
-	case 0x06 : /* CONFIG_TYPE_EXT_PATTERN: */
-		/* list of file extentions */
-		break;
-	default:
-		die("Unknown option type - option %s", name);
 	}
 
 	for (i = 0; i < MAX_OPTIONS; i++) {
@@ -2072,16 +2023,18 @@ main(int argc, char *argv[])
 
 #else  /* GUI */
 
-int
-main(int argc, char *argv[])
-{
-	init_server_name(argc, (const char **)argv);
+int main( int argc, char *argv[] ) {
+
+	char buf1[1024];
+	char buf2[1024];
+
+	init_server_name( argc, (const char **)argv );
 	start_libhttp(argc, argv);
 	fprintf(stdout,
 	        "%s started on port(s) %s with web root [%s]\n",
 	        g_server_name,
-	        httplib_get_option(g_ctx, "listening_ports"),
-	        httplib_get_option(g_ctx, "document_root"));
+	        httplib_get_option( g_ctx, "listening_ports", buf1, sizeof(buf1) ),
+	        httplib_get_option( g_ctx, "document_root",   buf2, sizeof(buf2) ) );
 	while (g_exit_flag == 0) {
 		sleep(1);
 	}

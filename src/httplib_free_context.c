@@ -39,7 +39,6 @@
 
 void XX_httplib_free_context( struct httplib_context *ctx ) {
 
-	int i;
 	struct httplib_handler_info *tmp_rh;
 
 	if ( ctx == NULL ) return;
@@ -104,8 +103,6 @@ void XX_httplib_free_context( struct httplib_context *ctx ) {
 	ctx->throttle                    = httplib_free( ctx->throttle                    );
 	ctx->url_rewrite_patterns        = httplib_free( ctx->url_rewrite_patterns        );
 	ctx->websocket_root              = httplib_free( ctx->websocket_root              );
-
-	for (i = 0; i < NUM_OPTIONS; i++) ctx->cfg[i] = httplib_free( ctx->cfg[i] );
 
 	/*
 	 * Deallocate request handlers
