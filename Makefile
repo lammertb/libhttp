@@ -211,6 +211,7 @@ OBJLIST =									\
 	${OBJDIR}httplib_dir_scan_callback${OBJEXT}				\
 	${OBJDIR}httplib_discard_unread_request_data${OBJEXT}			\
 	${OBJDIR}httplib_download${OBJEXT}					\
+	${OBJDIR}httplib_error_string${OBJEXT}					\
 	${OBJDIR}httplib_event_queue${OBJEXT}					\
 	${OBJDIR}httplib_fclose${OBJEXT}					\
 	${OBJDIR}httplib_fclose_on_exec${OBJEXT}				\
@@ -568,6 +569,10 @@ ${OBJDIR}httplib_discard_unread_request_data${OBJEXT}			: ${SRCDIR}httplib_disca
 
 ${OBJDIR}httplib_download${OBJEXT}					: ${SRCDIR}httplib_download.c					\
 									  ${SRCDIR}httplib_string.h					\
+									  ${SRCDIR}httplib_main.h					\
+									  ${INCDIR}libhttp.h
+
+${OBJDIR}httplib_error_string${OBJEXT}					: ${SRCDIR}httplib_error_string.c				\
 									  ${SRCDIR}httplib_main.h					\
 									  ${INCDIR}libhttp.h
 
