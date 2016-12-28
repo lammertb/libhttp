@@ -98,12 +98,9 @@ void XX_httplib_accept_new_connection( const struct socket *listener, struct htt
 		 * are relatively small (eg. less than 1400 bytes).
 		 */
 
-		if ( ctx != NULL  &&  ctx->cfg[CONFIG_TCP_NODELAY] != NULL  &&  ! strcmp(ctx->cfg[CONFIG_TCP_NODELAY], "1" ) ) {
+		if ( ctx->tcp_nodelay  &&  XX_httplib_set_tcp_nodelay( so.sock, 1 ) != 0 ) {
 
-			if ( XX_httplib_set_tcp_nodelay( so.sock, 1 ) != 0 ) {
-
-				httplib_cry( ctx, NULL, "%s: setsockopt(IPPROTO_TCP TCP_NODELAY) failed: %s", __func__, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
-			}
+			httplib_cry( ctx, NULL, "%s: setsockopt(IPPROTO_TCP TCP_NODELAY) failed: %s", __func__, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 		}
 
 		if ( ctx->request_timeout > 0 ) XX_httplib_set_sock_timeout( so.sock, ctx->request_timeout );

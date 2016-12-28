@@ -418,7 +418,6 @@ enum {
 	WEBSOCKET_ROOT,
 	ACCESS_CONTROL_ALLOW_ORIGIN,
 	ERROR_PAGES,
-	CONFIG_TCP_NODELAY,
 	NUM_OPTIONS
 };
 
@@ -610,6 +609,7 @@ struct httplib_context {
 	bool	ssl_short_trust;
 	bool	ssl_verify_paths;
 	bool	ssl_verify_peer;
+	bool	tcp_nodelay;
 };
 
 /*
@@ -890,7 +890,7 @@ void			XX_httplib_set_handler_type( struct httplib_context *ctx, const char *uri
 int			XX_httplib_set_non_blocking_mode( SOCKET sock );
 int			XX_httplib_set_ports_option( struct httplib_context *ctx );
 int			XX_httplib_set_sock_timeout( SOCKET sock, int milliseconds );
-int			XX_httplib_set_tcp_nodelay( SOCKET sock, int nodelay_on );
+int			XX_httplib_set_tcp_nodelay( SOCKET sock, bool nodelay_on );
 void			XX_httplib_set_thread_name( const char *name );
 int			XX_httplib_set_throttle( const char *spec, uint32_t remote_ip, const char *uri );
 bool			XX_httplib_set_uid_option( struct httplib_context *ctx );

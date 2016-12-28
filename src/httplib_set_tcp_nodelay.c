@@ -32,9 +32,13 @@
  * socket passed as a parameter.
  */
 
-int XX_httplib_set_tcp_nodelay( SOCKET sock, int nodelay_on ) {
+int XX_httplib_set_tcp_nodelay( SOCKET sock, bool nodelay_on ) {
 
-	if ( setsockopt( sock, IPPROTO_TCP, TCP_NODELAY, (SOCK_OPT_TYPE)&nodelay_on, sizeof(nodelay_on) ) != 0 ) return 1;
+	int opt_val;
+
+	opt_val = (nodelay_on) ? 1 : 0;
+
+	if ( setsockopt( sock, IPPROTO_TCP, TCP_NODELAY, (SOCK_OPT_TYPE)&opt_val, sizeof(opt_val) ) != 0 ) return 1;
 
 	return 0;
 
