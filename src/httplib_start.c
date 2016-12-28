@@ -293,6 +293,7 @@ static bool process_options( struct httplib_context *ctx, const struct httplib_o
 	ctx->authentication_domain       = NULL;
 	ctx->cgi_environment             = NULL;
 	ctx->cgi_interpreter             = NULL;
+	ctx->cgi_pattern                 = NULL;
 	ctx->decode_url                  = true;
 	ctx->document_root               = NULL;
 	ctx->enable_directory_listing    = true;
@@ -338,6 +339,12 @@ static bool process_options( struct httplib_context *ctx, const struct httplib_o
 		return true;
 	}
 
+	if ( (ctx->cgi_pattern = strdup( "**.cgi$|**.pl$|**.php$" )) == NULL ) {
+
+		cleanup( ctx, "Out of memory creating context allocating \"cgi_pattern\"" );
+		return true;
+	}
+
 	if ( (ctx->index_files = strdup( "index.xhtml,index.html,index.htm,index.cgi,index.shtml,index.php" )) == NULL ) {
 
 		cleanup( ctx, "Out of memory creating context allocating \"index_files\"" );
@@ -365,6 +372,7 @@ static bool process_options( struct httplib_context *ctx, const struct httplib_o
 		if ( check_str(  ctx, options, "authentication_domain",       & ctx->authentication_domain                   ) ) return true;
 		if ( check_str(  ctx, options, "cgi_environment",             & ctx->cgi_environment                         ) ) return true;
 		if ( check_file( ctx, options, "cgi_interpreter",             & ctx->cgi_interpreter                         ) ) return true;
+		if ( check_patt( ctx, options, "cgi_pattern",                 & ctx->cgi_pattern                             ) ) return true;
 		if ( check_bool( ctx, options, "decode_url",                  & ctx->decode_url                              ) ) return true;
 		if ( check_dir(  ctx, options, "document_root",               & ctx->document_root                           ) ) return true;
 		if ( check_bool( ctx, options, "enable_directory_listing",    & ctx->enable_directory_listing                ) ) return true;

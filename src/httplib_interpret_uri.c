@@ -130,8 +130,7 @@ void XX_httplib_interpret_uri( struct httplib_connection *conn, char *filename, 
 		 * File exists. Check if it is a script type.
 		 */
 
-		if ( conn->ctx->cfg[CGI_EXTENSIONS] != NULL  &&
-		     XX_httplib_match_prefix(conn->ctx->cfg[CGI_EXTENSIONS], strlen(conn->ctx->cfg[CGI_EXTENSIONS]), filename) > 0 ) {
+		if ( conn->ctx->cgi_pattern != NULL  &&  XX_httplib_match_prefix( conn->ctx->cgi_pattern, strlen( conn->ctx->cgi_pattern ), filename ) > 0 ) {
 
 			/*
 			 * The request addresses a CGI script or a Lua script. The URI
@@ -200,7 +199,7 @@ void XX_httplib_interpret_uri( struct httplib_connection *conn, char *filename, 
 		if ( *p == '/' ) {
 
 			*p      = '\0';
-			cgi_ext = conn->ctx->cfg[CGI_EXTENSIONS];
+			cgi_ext = conn->ctx->cgi_pattern;
 
 			if ( cgi_ext != NULL  &&  XX_httplib_match_prefix( cgi_ext, strlen( cgi_ext ), filename ) > 0  &&  XX_httplib_stat( conn, filename, filep ) ) {
 

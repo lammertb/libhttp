@@ -32,7 +32,6 @@
  */
 
 struct httplib_option XX_httplib_config_options[] = {
-	{ "cgi_pattern",                 CONFIG_TYPE_EXT_PATTERN, "**.cgi$|**.pl$|**.php$"                                           },
 	{ NULL,                          CONFIG_TYPE_UNKNOWN,     NULL                                                               }
 };
 

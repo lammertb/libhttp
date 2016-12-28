@@ -391,7 +391,6 @@ union usa {
 
 /* NOTE(lsm): this enum shoulds be in sync with the config_options below. */
 enum {
-	CGI_EXTENSIONS,
 	NUM_OPTIONS
 };
 
@@ -577,6 +576,7 @@ struct httplib_context {
 	char *	authentication_domain;
 	char *	cgi_environment;
 	char *	cgi_interpreter;
+	char *	cgi_pattern;
 	char *	document_root;
 	char *	error_log_file;
 	char *	error_pages;
