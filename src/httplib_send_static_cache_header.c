@@ -36,17 +36,14 @@
 
 int XX_httplib_send_static_cache_header( struct httplib_connection *conn ) {
 
+	if ( conn == NULL  ||  conn->ctx == NULL ) return 0;
+
 	/*
 	 * Read the server config to check how long a file may be cached.
 	 * The configuration is in seconds.
 	 */
 
-	int max_age;
-	
-	if ( conn->ctx->cfg[STATIC_FILE_MAX_AGE] != NULL ) max_age = atoi( conn->ctx->cfg[STATIC_FILE_MAX_AGE] );
-	else                                               max_age = -1;
-
-	if ( max_age <= 0 ) {
+	if ( conn->ctx->static_file_max_age <= 0 ) {
 
 		/*
 		 * 0 means "do not cache". All values <0 are reserved
@@ -69,6 +66,6 @@ int XX_httplib_send_static_cache_header( struct httplib_connection *conn ) {
 	 * as undefined.
 	 */
 
-	return httplib_printf( conn, "Cache-Control: max-age=%u\r\n", (unsigned)max_age );
+	return httplib_printf( conn, "Cache-Control: max-age=%d\r\n", conn->ctx->static_file_max_age );
 
 }  /* XX_httplib_send_static_cache_header */

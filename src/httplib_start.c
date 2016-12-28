@@ -290,6 +290,7 @@ static bool process_options ( struct httplib_context *ctx, const struct httplib_
 	ctx->ssl_short_trust          = false;
 	ctx->ssl_verify_paths         = true;
 	ctx->ssl_verify_peer          = false;
+	ctx->static_file_max_age      = 0;
 
 	while ( options != NULL  &&  options->name != NULL ) {
 
@@ -301,6 +302,7 @@ static bool process_options ( struct httplib_context *ctx, const struct httplib_
 		if ( check_bool( ctx, options, "ssl_short_trust",          & ctx->ssl_short_trust                      ) ) return true;
 		if ( check_bool( ctx, options, "ssl_verify_paths",         & ctx->ssl_verify_paths                     ) ) return true;
 		if ( check_bool( ctx, options, "ssl_verify_peer",          & ctx->ssl_verify_peer                      ) ) return true;
+		if ( check_int(  ctx, options, "static_file_max_age",      & ctx->static_file_max_age,      0, INT_MAX ) ) return true;
 
 		else {
 

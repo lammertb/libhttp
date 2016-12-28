@@ -422,7 +422,6 @@ enum {
 	ACCESS_CONTROL_ALLOW_ORIGIN,
 	ERROR_PAGES,
 	CONFIG_TCP_NODELAY,
-	STATIC_FILE_MAX_AGE,
 	NUM_OPTIONS
 };
 
@@ -602,6 +601,7 @@ struct httplib_context {
 	struct ttimers *timers;
 #endif
 	int	num_threads;
+	int	static_file_max_age;
 
 	bool	allow_sendfile_call;
 	bool	decode_url;
