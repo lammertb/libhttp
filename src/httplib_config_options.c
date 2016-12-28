@@ -42,7 +42,6 @@ struct httplib_option XX_httplib_config_options[] = {
 	{ "global_auth_file",            CONFIG_TYPE_FILE,        NULL                                                               },
 	{ "index_files",                 CONFIG_TYPE_STRING,      "index.xhtml,index.html,index.htm,index.cgi,index.shtml,index.php" },
 	{ "access_control_list",         CONFIG_TYPE_STRING,      NULL                                                               },
-	{ "extra_mime_types",            CONFIG_TYPE_STRING,      NULL                                                               },
 	{ "listening_ports",             CONFIG_TYPE_STRING,      "8080"                                                             },
 	{ "document_root",               CONFIG_TYPE_DIRECTORY,   NULL                                                               },
 	{ "ssl_certificate",             CONFIG_TYPE_FILE,        NULL                                                               },

@@ -401,7 +401,6 @@ enum {
 	GLOBAL_PASSWORDS_FILE,
 	INDEX_FILES,
 	ACCESS_CONTROL_LIST,
-	EXTRA_MIME_TYPES,
 	LISTENING_PORTS,
 	DOCUMENT_ROOT,
 	SSL_CERTIFICATE,
@@ -593,6 +592,7 @@ struct httplib_context {
 	char *	access_log_file;
 	char *	cgi_environment;
 	char *	error_log_file;
+	char *	extra_mime_types;
 	char *	run_as_user;
 	char *	ssl_cipher_list;
 

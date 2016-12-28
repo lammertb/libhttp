@@ -85,11 +85,12 @@ void XX_httplib_free_context( struct httplib_context *ctx ) {
 	 * Deallocate config parameters
 	 */
 
-	if ( ctx->access_log_file != NULL ) { httplib_free( ctx->access_log_file ); ctx->access_log_file = NULL; }
-	if ( ctx->cgi_environment != NULL ) { httplib_free( ctx->cgi_environment ); ctx->cgi_environment = NULL; }
-	if ( ctx->error_log_file  != NULL ) { httplib_free( ctx->error_log_file  ); ctx->error_log_file  = NULL; }
-	if ( ctx->run_as_user     != NULL ) { httplib_free( ctx->run_as_user     ); ctx->run_as_user     = NULL; }
-	if ( ctx->ssl_cipher_list != NULL ) { httplib_free( ctx->ssl_cipher_list ); ctx->ssl_cipher_list = NULL; }
+	if ( ctx->access_log_file  != NULL ) { httplib_free( ctx->access_log_file  ); ctx->access_log_file  = NULL; }
+	if ( ctx->cgi_environment  != NULL ) { httplib_free( ctx->cgi_environment  ); ctx->cgi_environment  = NULL; }
+	if ( ctx->error_log_file   != NULL ) { httplib_free( ctx->error_log_file   ); ctx->error_log_file   = NULL; }
+	if ( ctx->extra_mime_types != NULL ) { httplib_free( ctx->extra_mime_types ); ctx->extra_mime_types = NULL; }
+	if ( ctx->run_as_user      != NULL ) { httplib_free( ctx->run_as_user      ); ctx->run_as_user      = NULL; }
+	if ( ctx->ssl_cipher_list  != NULL ) { httplib_free( ctx->ssl_cipher_list  ); ctx->ssl_cipher_list  = NULL; }
 
 	for (i = 0; i < NUM_OPTIONS; i++) {
 
