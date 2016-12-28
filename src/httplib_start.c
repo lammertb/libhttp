@@ -284,11 +284,13 @@ static bool process_options ( struct httplib_context *ctx, const struct httplib_
 
 	if ( ctx == NULL ) return false;
 
-	ctx->allow_sendfile_call = true;
+	ctx->allow_sendfile_call      = true;
+	ctx->enable_directory_listing = true;
 
 	while ( options != NULL  &&  options->name != NULL ) {
 
-		if ( ! strcmp( options->name, "allow_sendfile_call" ) ) ctx->allow_sendfile_call = XX_httplib_option_value_to_bool( options->value );
+		if (      ! httplib_strcasecmp( options->name, "allow_sendfile_call"      ) ) ctx->allow_sendfile_call      = XX_httplib_option_value_to_bool( options->value );
+		else if ( ! httplib_strcasecmp( options->name, "enable_directory_listing" ) ) ctx->enable_directory_listing = XX_httplib_option_value_to_bool( options->value );
 
 		else {
 

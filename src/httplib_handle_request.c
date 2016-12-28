@@ -59,7 +59,6 @@ void XX_httplib_handle_request( struct httplib_connection *conn ) {
 	void *callback_data;
 	httplib_authorization_handler auth_handler;
 	void *auth_callback_data;
-	const char *edl;
 	time_t curtime;
 	char date[64];
 	union {
@@ -518,10 +517,8 @@ no_callback_resource:
 			 * 14.2. no substitute file
 			 */
 
-			edl = conn->ctx->cfg[ENABLE_DIRECTORY_LISTING];
-
-			if ( edl != NULL  &&  ! httplib_strcasecmp( edl, "yes" ) ) XX_httplib_handle_directory_request( conn, path );
-			else                                                       XX_httplib_send_http_error( conn, 403, "%s", "Error: Directory listing denied" );
+			if ( conn->ctx->enable_directory_listing ) XX_httplib_handle_directory_request( conn, path );
+			else                                       XX_httplib_send_http_error( conn, 403, "%s", "Error: Directory listing denied" );
 
 			return;
 		}

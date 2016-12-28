@@ -400,7 +400,6 @@ enum {
 	SSI_EXTENSIONS,
 	THROTTLE,
 	ACCESS_LOG_FILE,
-	ENABLE_DIRECTORY_LISTING,
 	ERROR_LOG_FILE,
 	GLOBAL_PASSWORDS_FILE,
 	INDEX_FILES,
@@ -610,6 +609,7 @@ struct httplib_context {
 #ifdef USE_TIMERS
 	struct ttimers *timers;
 #endif
+	bool	enable_directory_listing;
 	bool	allow_sendfile_call;
 };
 
