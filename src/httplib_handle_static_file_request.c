@@ -152,7 +152,7 @@ void XX_httplib_handle_static_file_request( struct httplib_connection *conn, con
 		 */
 
 		cors1 = "Access-Control-Allow-Origin: ";
-		cors2 = ( conn->ctx->cfg[ACCESS_CONTROL_ALLOW_ORIGIN] != NULL ) ? conn->ctx->cfg[ACCESS_CONTROL_ALLOW_ORIGIN] : "";
+		cors2 = ( conn->ctx->access_control_allow_origin != NULL ) ? conn->ctx->access_control_allow_origin : "";
 		cors3 = "\r\n";
 	}
 	else {

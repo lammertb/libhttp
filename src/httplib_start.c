@@ -309,15 +309,21 @@ static bool process_options( struct httplib_context *ctx, const struct httplib_o
 	ctx->url_rewrite_patterns     = NULL;
 	ctx->websocket_timeout        = 30000;
 
+	if ( (ctx->access_control_allow_origin = strdup( "*" )) == NULL ) {
+
+		cleanup( ctx, "Out of memory creating context allocating \"access_control_allow_origin\"" );
+		return true;
+	}
+
 	if ( (ctx->authentication_domain = strdup( "example.com" )) == NULL ) {
 
-		cleanup( ctx, "Out of memory creating context allocating authentication domain" );
+		cleanup( ctx, "Out of memory creating context allocating \"authentication_domain\"" );
 		return true;
 	}
 
 	if ( (ctx->listening_ports = strdup( "8080" )) == NULL ) {
 
-		cleanup( ctx, "Out of memory creating context allocating listening ports" );
+		cleanup( ctx, "Out of memory creating context allocating \"listening_ports\"" );
 		return true;
 	}
 

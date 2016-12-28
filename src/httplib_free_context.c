@@ -79,18 +79,19 @@ void XX_httplib_free_context( struct httplib_context *ctx ) {
 	 * Deallocate config parameters
 	 */
 
-	ctx->access_control_list   = httplib_free( ctx->access_control_list   );
-	ctx->access_log_file       = httplib_free( ctx->access_log_file       );
-	ctx->authentication_domain = httplib_free( ctx->authentication_domain );
-	ctx->cgi_environment       = httplib_free( ctx->cgi_environment       );
-	ctx->error_log_file        = httplib_free( ctx->error_log_file        );
-	ctx->extra_mime_types      = httplib_free( ctx->extra_mime_types      );
-	ctx->listening_ports       = httplib_free( ctx->listening_ports       );
-	ctx->protect_uri           = httplib_free( ctx->protect_uri           );
-	ctx->run_as_user           = httplib_free( ctx->run_as_user           );
-	ctx->ssl_cipher_list       = httplib_free( ctx->ssl_cipher_list       );
-	ctx->throttle              = httplib_free( ctx->throttle              );
-	ctx->url_rewrite_patterns  = httplib_free( ctx->url_rewrite_patterns  );
+	ctx->access_control_allow_origin = httplib_free( ctx->access_control_allow_origin );
+	ctx->access_control_list         = httplib_free( ctx->access_control_list         );
+	ctx->access_log_file             = httplib_free( ctx->access_log_file             );
+	ctx->authentication_domain       = httplib_free( ctx->authentication_domain       );
+	ctx->cgi_environment             = httplib_free( ctx->cgi_environment             );
+	ctx->error_log_file              = httplib_free( ctx->error_log_file              );
+	ctx->extra_mime_types            = httplib_free( ctx->extra_mime_types            );
+	ctx->listening_ports             = httplib_free( ctx->listening_ports             );
+	ctx->protect_uri                 = httplib_free( ctx->protect_uri                 );
+	ctx->run_as_user                 = httplib_free( ctx->run_as_user                 );
+	ctx->ssl_cipher_list             = httplib_free( ctx->ssl_cipher_list             );
+	ctx->throttle                    = httplib_free( ctx->throttle                    );
+	ctx->url_rewrite_patterns        = httplib_free( ctx->url_rewrite_patterns        );
 
 	for (i = 0; i < NUM_OPTIONS; i++) ctx->cfg[i] = httplib_free( ctx->cfg[i] );
 

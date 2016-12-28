@@ -44,7 +44,6 @@ struct httplib_option XX_httplib_config_options[] = {
 	{ "ssl_ca_path",                 CONFIG_TYPE_DIRECTORY,   NULL                                                               },
 	{ "ssl_ca_file",                 CONFIG_TYPE_FILE,        NULL                                                               },
 	{ "websocket_root",              CONFIG_TYPE_DIRECTORY,   NULL                                                               },
-	{ "access_control_allow_origin", CONFIG_TYPE_STRING,      "*"                                                                },
 	{ "error_pages",                 CONFIG_TYPE_DIRECTORY,   NULL                                                               },
 	{ NULL,                          CONFIG_TYPE_UNKNOWN,     NULL                                                               }
 };

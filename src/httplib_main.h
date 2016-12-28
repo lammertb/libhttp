@@ -403,7 +403,6 @@ enum {
 	SSL_CA_PATH,
 	SSL_CA_FILE,
 	WEBSOCKET_ROOT,
-	ACCESS_CONTROL_ALLOW_ORIGIN,
 	ERROR_PAGES,
 	NUM_OPTIONS
 };
@@ -583,6 +582,8 @@ struct httplib_context {
 #ifdef USE_TIMERS
 	struct ttimers *timers;
 #endif
+
+	char *	access_control_allow_origin;
 	char *	access_control_list;
 	char *	access_log_file;
 	char *	authentication_domain;
