@@ -394,7 +394,6 @@ enum {
 	CGI_EXTENSIONS,
 	SSI_EXTENSIONS,
 	HIDE_FILES,
-	ERROR_PAGES,
 	NUM_OPTIONS
 };
 
@@ -582,6 +581,7 @@ struct httplib_context {
 	char *	cgi_interpreter;
 	char *	document_root;
 	char *	error_log_file;
+	char *	error_pages;
 	char *	extra_mime_types;
 	char *	global_auth_file;
 	char *	index_files;

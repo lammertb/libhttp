@@ -297,6 +297,7 @@ static bool process_options( struct httplib_context *ctx, const struct httplib_o
 	ctx->enable_directory_listing    = true;
 	ctx->enable_keep_alive           = false;
 	ctx->error_log_file              = NULL;
+	ctx->error_pages                 = NULL;
 	ctx->extra_mime_types            = NULL;
 	ctx->global_auth_file            = NULL;
 	ctx->index_files                 = NULL;
@@ -360,6 +361,7 @@ static bool process_options( struct httplib_context *ctx, const struct httplib_o
 		if ( check_bool( ctx, options, "enable_directory_listing",    & ctx->enable_directory_listing                ) ) return true;
 		if ( check_bool( ctx, options, "enable_keep_alive",           & ctx->enable_keep_alive                       ) ) return true;
 		if ( check_file( ctx, options, "error_log_file",              & ctx->error_log_file                          ) ) return true;
+		if ( check_dir(  ctx, options, "error_pages",                 & ctx->error_pages                             ) ) return true;
 		if ( check_str(  ctx, options, "extra_mime_types",            & ctx->extra_mime_types                        ) ) return true;
 		if ( check_file( ctx, options, "global_auth_file",            & ctx->global_auth_file                        ) ) return true;
 		if ( check_str(  ctx, options, "index_files",                 & ctx->index_files                             ) ) return true;
