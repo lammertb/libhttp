@@ -128,7 +128,7 @@ bool XX_httplib_set_ssl_option( struct httplib_context *ctx ) {
 
 	if ( ctx->ssl_verify_peer ) {
 
-		if ( SSL_CTX_load_verify_locations( ctx->ssl_ctx, ctx->ssl_ca_file, ctx->cfg[SSL_CA_PATH] ) != 1 ) {
+		if ( SSL_CTX_load_verify_locations( ctx->ssl_ctx, ctx->ssl_ca_file, ctx->ssl_ca_path ) != 1 ) {
 
 			httplib_cry( ctx, NULL,
 			       "SSL_CTX_load_verify_locations error: %s "

@@ -95,6 +95,7 @@ void XX_httplib_free_context( struct httplib_context *ctx ) {
 	ctx->put_delete_auth_file        = httplib_free( ctx->put_delete_auth_file        );
 	ctx->run_as_user                 = httplib_free( ctx->run_as_user                 );
 	ctx->ssl_ca_file                 = httplib_free( ctx->ssl_ca_file                 );
+	ctx->ssl_ca_path                 = httplib_free( ctx->ssl_ca_path                 );
 	ctx->ssl_certificate             = httplib_free( ctx->ssl_certificate             );
 	ctx->ssl_cipher_list             = httplib_free( ctx->ssl_cipher_list             );
 	ctx->throttle                    = httplib_free( ctx->throttle                    );

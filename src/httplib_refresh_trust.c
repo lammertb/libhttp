@@ -64,7 +64,7 @@ int XX_httplib_refresh_trust( struct httplib_connection *conn ) {
 
 		if ( conn->ctx->ssl_verify_peer ) {
 
-			if ( SSL_CTX_load_verify_locations( conn->ctx->ssl_ctx, conn->ctx->ssl_ca_file, conn->ctx->cfg[SSL_CA_PATH] ) != 1 ) {
+			if ( SSL_CTX_load_verify_locations( conn->ctx->ssl_ctx, conn->ctx->ssl_ca_file, conn->ctx->ssl_ca_path ) != 1 ) {
 
 				httplib_cry( conn->ctx, conn,
 				       "SSL_CTX_load_verify_locations error: %s "

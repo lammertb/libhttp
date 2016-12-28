@@ -394,7 +394,6 @@ enum {
 	CGI_EXTENSIONS,
 	SSI_EXTENSIONS,
 	HIDE_FILES,
-	SSL_CA_PATH,
 	WEBSOCKET_ROOT,
 	ERROR_PAGES,
 	NUM_OPTIONS
@@ -592,6 +591,7 @@ struct httplib_context {
 	char *	put_delete_auth_file;
 	char *	run_as_user;
 	char *	ssl_ca_file;
+	char *	ssl_ca_path;
 	char *	ssl_certificate;
 	char *	ssl_cipher_list;
 	char *	throttle;
