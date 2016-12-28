@@ -29,13 +29,14 @@
 
 void XX_httplib_fclose_on_exec( struct file *filep, struct httplib_connection *conn ) {
 
-	char error_string[ERROR_STRING_LEN];
-
 	if ( filep == NULL  ||  filep->fp == NULL ) return;
 
 #ifdef _WIN32
 	UNUSED_PARAMETER(conn);
 #else
+
+	char error_string[ERROR_STRING_LEN];
+
 	if ( fcntl( fileno( filep->fp ), F_SETFD, FD_CLOEXEC) != 0 ) {
 
 		if ( conn != NULL  &&  conn->ctx != NULL ) httplib_cry( conn->ctx, conn, "%s: fcntl(F_SETFD FD_CLOEXEC) failed: %s", __func__, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
