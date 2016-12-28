@@ -32,6 +32,7 @@
 #include "httplib_utils.h"
 
 static bool			check_bool( struct httplib_context *ctx, const struct httplib_option_t *option, const char *name, bool *config );
+static bool			check_file( struct httplib_context *ctx, const struct httplib_option_t *option, const char *name, char **config );
 static bool			check_int( struct httplib_context *ctx, const struct httplib_option_t *option, const char *name, int *config, int minval, int maxval );
 static bool			check_str( struct httplib_context *ctx, const struct httplib_option_t *option, const char *name, char **config );
 static struct httplib_context *	cleanup( struct httplib_context *ctx, PRINTF_FORMAT_STRING(const char *fmt), ...) PRINTF_ARGS(2, 3);
@@ -303,12 +304,12 @@ static bool process_options( struct httplib_context *ctx, const struct httplib_o
 
 	while ( options != NULL  &&  options->name != NULL ) {
 
-		if ( check_str(  ctx, options, "access_log_file",          & ctx->access_log_file                      ) ) return true;
+		if ( check_file( ctx, options, "access_log_file",          & ctx->access_log_file                      ) ) return true;
 		if ( check_bool( ctx, options, "allow_sendfile_call",      & ctx->allow_sendfile_call                  ) ) return true;
 		if ( check_bool( ctx, options, "decode_url",               & ctx->decode_url                           ) ) return true;
 		if ( check_bool( ctx, options, "enable_directory_listing", & ctx->enable_directory_listing             ) ) return true;
 		if ( check_bool( ctx, options, "enable_keep_alive",        & ctx->enable_keep_alive                    ) ) return true;
-		if ( check_str(  ctx, options, "error_log_file",           & ctx->error_log_file                       ) ) return true;
+		if ( check_file( ctx, options, "error_log_file",           & ctx->error_log_file                       ) ) return true;
 		if ( check_int(  ctx, options, "num_threads",              & ctx->num_threads,              1, INT_MAX ) ) return true;
 		if ( check_int(  ctx, options, "request_timeout",          & ctx->request_timeout,          0, INT_MAX ) ) return true;
 		if ( check_str(  ctx, options, "run_as_user",              & ctx->run_as_user                          ) ) return true;
@@ -386,7 +387,43 @@ static bool check_bool( struct httplib_context *ctx, const struct httplib_option
 
 
 /*
- * static bool chec_str( struct httplib_context *ctx, const struct httplib_option_t *option, const char *name, char **config );
+ * static bool check_file( struct httplib_context *ctx, const struct httplib_option_t *option, const char *name, char **config );
+ *
+ * The function check_file() checks if an option is equal to a filename config
+ * parameter and stores the value if that is the case. If the value cannot be
+ * recognized, true is returned and the function performs a complete cleanup.
+ * If the option name could not be found, the function returns false to
+ * indicate that the search should go on. IF the value could be found, also
+ * false is returned.
+ */
+
+static bool check_file( struct httplib_context *ctx, const struct httplib_option_t *option, const char *name, char **config ) {
+
+	if ( ctx == NULL  ||  option == NULL  ||  option->name == NULL  ||  name == NULL  ||  config == NULL ) {
+
+		cleanup( ctx, "Internal error parsing string option" );
+		return true;
+	}
+
+	if ( httplib_strcasecmp( option->name, name ) ) return false;
+
+	if ( *config != NULL ) httplib_free( *config );
+	*config = NULL;
+
+	if ( option->value == NULL ) return false;
+
+	*config = httplib_strdup( option->value );
+	if ( *config != NULL ) return false;
+
+	cleanup( ctx, "Out of memory assigning value \"%s\" to option \"%s\"", option->value, option->name );
+	return true;
+
+}  /* check_file */
+
+
+
+/*
+ * static bool check_str( struct httplib_context *ctx, const struct httplib_option_t *option, const char *name, char **config );
  *
  * The function check_str() checks if an option is equal to a string config
  * parameter and stores the value if that is the case. If the value cannot be
