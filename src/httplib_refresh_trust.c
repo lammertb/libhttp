@@ -51,7 +51,7 @@ int XX_httplib_refresh_trust( struct httplib_connection *conn ) {
 	if ( conn == NULL  ||  conn->ctx == NULL ) return 0;
 
 	p_reload_lock = & reload_lock;
-	pem           = conn->ctx->cfg[SSL_CERTIFICATE];
+	pem           = conn->ctx->ssl_certificate;
 
 	if ( pem == NULL  &&  conn->ctx->callbacks.init_ssl == NULL ) return 0;
 

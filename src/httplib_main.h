@@ -397,7 +397,6 @@ enum {
 	SSI_EXTENSIONS,
 	GLOBAL_PASSWORDS_FILE,
 	DOCUMENT_ROOT,
-	SSL_CERTIFICATE,
 	HIDE_FILES,
 	SSL_CA_PATH,
 	WEBSOCKET_ROOT,
@@ -593,6 +592,7 @@ struct httplib_context {
 	char *	protect_uri;
 	char *	run_as_user;
 	char *	ssl_ca_file;
+	char *	ssl_certificate;
 	char *	ssl_cipher_list;
 	char *	throttle;
 	char *	url_rewrite_patterns;

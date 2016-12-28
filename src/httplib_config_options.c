@@ -38,7 +38,6 @@ struct httplib_option XX_httplib_config_options[] = {
 	{ "ssi_pattern",                 CONFIG_TYPE_EXT_PATTERN, "**.shtml$|**.shtm$"                                               },
 	{ "global_auth_file",            CONFIG_TYPE_FILE,        NULL                                                               },
 	{ "document_root",               CONFIG_TYPE_DIRECTORY,   NULL                                                               },
-	{ "ssl_certificate",             CONFIG_TYPE_FILE,        NULL                                                               },
 	{ "hide_files_patterns",         CONFIG_TYPE_EXT_PATTERN, NULL                                                               },
 	{ "ssl_ca_path",                 CONFIG_TYPE_DIRECTORY,   NULL                                                               },
 	{ "websocket_root",              CONFIG_TYPE_DIRECTORY,   NULL                                                               },

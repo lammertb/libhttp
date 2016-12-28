@@ -55,7 +55,7 @@ bool XX_httplib_set_ssl_option( struct httplib_context *ctx ) {
 	if ( ctx == NULL ) return false;
 
 	now_rt = time( NULL );
-	pem    = ctx->cfg[ SSL_CERTIFICATE ];
+	pem    = ctx->ssl_certificate;
 
 	if ( pem == NULL  &&  ctx->callbacks.init_ssl == NULL ) return true;
 
