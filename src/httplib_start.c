@@ -32,9 +32,10 @@
 #include "httplib_utils.h"
 
 static struct httplib_context *		cleanup( struct httplib_context *ctx, PRINTF_FORMAT_STRING(const char *fmt), ...) PRINTF_ARGS(2, 3);
+static bool				process_options( struct httplib_context *ctx, const struct httplib_option_t *options );
 
 /*
- * struct httplib_context *httplib_start( const struct httplib_callbacks *callbacks, void *user_data, const char **options );
+ * struct httplib_context *httplib_start( const struct httplib_callbacks *callbacks, void *user_data, const struct httplib_t *options );
  *
  * The function httplib_start() functions as the main entry point for the LibHTTP
  * server. The function starts all threads and when finished returns the
@@ -44,8 +45,6 @@ static struct httplib_context *		cleanup( struct httplib_context *ctx, PRINTF_FO
 struct httplib_context *httplib_start( const struct httplib_callbacks *callbacks, void *user_data, const struct httplib_option_t *options ) {
 
 	struct httplib_context *ctx;
-	const char *default_value;
-	int idx;
 	int workerthreadcount;
 	unsigned int i;
 	void (*exit_callback)(const struct httplib_context *ctx);
@@ -150,32 +149,7 @@ struct httplib_context *httplib_start( const struct httplib_callbacks *callbacks
 	ctx->user_data = user_data;
 	ctx->handlers  = NULL;
 
-	while ( options  &&  options->name != NULL ) {
-
-		idx = XX_httplib_get_option_index( options->name );
-		if ( idx             == -1   ) return cleanup( ctx, "Invalid option: %s",              options->name );
-		if ( options->value  == NULL ) return cleanup( ctx, "%s: option value cannot be NULL", options->name );
-
-		if ( ctx->cfg[idx] != NULL ) {
-
-			httplib_cry( ctx, NULL, "warning: %s: duplicate option", options->name );
-			httplib_free( ctx->cfg[idx] );
-		}
-
-		ctx->cfg[idx] = httplib_strdup( options->value );
-
-		options++;
-	}
-
-	/*
-	 * Set default value if needed
-	 */
-
-	for (i=0; XX_httplib_config_options[i].name != NULL; i++) {
-
-		default_value = XX_httplib_config_options[i].default_value;
-		if ( ctx->cfg[i] == NULL  &&  default_value != NULL ) ctx->cfg[i] = httplib_strdup( default_value );
-	}
+	if ( process_options( ctx, options ) ) return NULL;
 
 	XX_httplib_get_system_name( & ctx->systemName );
 
@@ -289,6 +263,65 @@ struct httplib_context *httplib_start( const struct httplib_callbacks *callbacks
 	return ctx;
 
 }  /* httplib_start */
+
+
+
+/*
+ * static bool process_options( struct httplib_context *ctx, const struct httplib_option_t *options );
+ *
+ * The function process_options() processes the user supplied options and adds
+ * them to the central option list of the context. If en error occurs, the
+ * function returns true, otherwise FALSE is returned. In case of an error all
+ * cleanup is already done before returning and an error message has been
+ * generated.
+ */
+
+static bool process_options ( struct httplib_context *ctx, const struct httplib_option_t *options ) {
+
+	int i;
+	int idx;
+	const char *default_value;
+
+	if ( ctx == NULL ) return false;
+
+	ctx->allow_sendfile_call = true;
+
+	while ( options != NULL  &&  options->name != NULL ) {
+
+		if ( ! strcmp( options->name, "allow_sendfile_call" ) ) ctx->allow_sendfile_call = XX_httplib_option_value_to_bool( options->value );
+
+		else {
+
+			idx = XX_httplib_get_option_index( options->name );
+
+			if ( idx             == -1   ) { cleanup( ctx, "Invalid option: %s",              options->name ); return true; }
+			if ( options->value  == NULL ) { cleanup( ctx, "%s: option value cannot be NULL", options->name ); return true; }
+
+			if ( ctx->cfg[idx] != NULL ) {
+
+				httplib_cry( ctx, NULL, "warning: %s: duplicate option", options->name );
+				httplib_free( ctx->cfg[idx] );
+			}
+
+			ctx->cfg[idx] = httplib_strdup( options->value );
+		}
+
+		options++;
+	}
+
+	/*
+	 * Set default value if needed
+	 */
+
+	for (i=0; XX_httplib_config_options[i].name != NULL; i++) {
+
+		default_value = XX_httplib_config_options[i].default_value;
+		if ( ctx->cfg[i] == NULL  &&  default_value != NULL ) ctx->cfg[i] = httplib_strdup( default_value );
+	}
+
+	return false;
+
+}  /* process_options */
 
 
 

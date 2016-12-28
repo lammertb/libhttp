@@ -71,7 +71,6 @@ struct httplib_option XX_httplib_config_options[] = {
 	{ "error_pages",                 CONFIG_TYPE_DIRECTORY,   NULL                                                               },
 	{ "tcp_nodelay",                 CONFIG_TYPE_NUMBER,      "0"                                                                },
 	{ "static_file_max_age",         CONFIG_TYPE_NUMBER,      NULL                                                               },
-	{ "allow_sendfile_call",         CONFIG_TYPE_BOOLEAN,     "yes"                                                              },
 	{ NULL,                          CONFIG_TYPE_UNKNOWN,     NULL                                                               }
 };
 

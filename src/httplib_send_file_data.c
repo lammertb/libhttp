@@ -47,7 +47,6 @@ void XX_httplib_send_file_data( struct httplib_connection *conn, struct file *fi
 	ssize_t sf_sent;
 	int sf_file;
 	int loop_cnt;
-	const char *asc;
 #endif  /* __linux__ */
 
 	if ( filep == NULL  ||  conn == NULL  ||  conn->ctx == NULL ) return;
@@ -82,9 +81,7 @@ void XX_httplib_send_file_data( struct httplib_connection *conn, struct file *fi
 		 * sendfile is only available for Linux
 		 */
 
-		asc = conn->ctx->cfg[ALLOW_SENDFILE_CALL];
-
-		if ( conn->ssl == 0  &&  conn->throttle == 0  &&  asc != NULL  &&  ! httplib_strcasecmp( asc, "yes" ) ) {
+		if ( conn->ctx->allow_sendfile_call  &&  conn->ssl == 0  &&  conn->throttle == 0 ) {
 
 			sf_offs  = (off_t)offset;
 			sf_file  = fileno( filep->fp );

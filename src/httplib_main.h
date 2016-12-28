@@ -430,7 +430,6 @@ enum {
 	ERROR_PAGES,
 	CONFIG_TCP_NODELAY,
 	STATIC_FILE_MAX_AGE,
-	ALLOW_SENDFILE_CALL,
 	NUM_OPTIONS
 };
 
@@ -611,6 +610,7 @@ struct httplib_context {
 #ifdef USE_TIMERS
 	struct ttimers *timers;
 #endif
+	bool	allow_sendfile_call;
 };
 
 /*
@@ -849,6 +849,7 @@ void			XX_httplib_mkcol( struct httplib_connection *conn, const char *path );
 bool			XX_httplib_must_hide_file( struct httplib_connection *conn, const char *path );
 const char *		XX_httplib_next_option( const char *list, struct vec *val, struct vec *eq_val );
 void			XX_httplib_open_auth_file( struct httplib_connection *conn, const char *path, struct file *filep );
+bool			XX_httplib_option_value_to_bool( const char *value );
 int			XX_httplib_parse_auth_header( struct httplib_connection *conn, char *buf, size_t buf_size, struct ah *ah );
 time_t			XX_httplib_parse_date_string( const char *datetime );
 int			XX_httplib_parse_http_headers( char **buf, struct httplib_request_info *ri );
