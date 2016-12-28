@@ -353,6 +353,7 @@ static bool process_options( struct httplib_context *ctx, const struct httplib_o
 		if ( check_str(  ctx, options, "listening_ports",             & ctx->listening_ports                         ) ) return true;
 		if ( check_int(  ctx, options, "num_threads",                 & ctx->num_threads,                 1, INT_MAX ) ) return true;
 		if ( check_str(  ctx, options, "protect_uri",                 & ctx->protect_uri                             ) ) return true;
+		if ( check_file( ctx, options, "put_delete_auth_file",        & ctx->put_delete_auth_file                    ) ) return true;
 		if ( check_int(  ctx, options, "request_timeout",             & ctx->request_timeout,             0, INT_MAX ) ) return true;
 		if ( check_str(  ctx, options, "run_as_user",                 & ctx->run_as_user                             ) ) return true;
 		if ( check_file( ctx, options, "ssl_ca_file",                 & ctx->ssl_ca_file                             ) ) return true;

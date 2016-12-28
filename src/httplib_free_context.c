@@ -91,6 +91,7 @@ void XX_httplib_free_context( struct httplib_context *ctx ) {
 	ctx->index_files                 = httplib_free( ctx->index_files                 );
 	ctx->listening_ports             = httplib_free( ctx->listening_ports             );
 	ctx->protect_uri                 = httplib_free( ctx->protect_uri                 );
+	ctx->put_delete_auth_file        = httplib_free( ctx->put_delete_auth_file        );
 	ctx->run_as_user                 = httplib_free( ctx->run_as_user                 );
 	ctx->ssl_ca_file                 = httplib_free( ctx->ssl_ca_file                 );
 	ctx->ssl_certificate             = httplib_free( ctx->ssl_certificate             );
