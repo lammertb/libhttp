@@ -42,7 +42,6 @@ bool XX_httplib_set_ssl_option( struct httplib_context *ctx ) {
 
 	const char *pem;
 	int callback_ret;
-	int verify_depth;
 	time_t now_rt;
 	struct timespec now_mt;
 	md5_byte_t ssl_context_id[16];
@@ -154,11 +153,7 @@ bool XX_httplib_set_ssl_option( struct httplib_context *ctx ) {
 			return false;
 		}
 
-		if ( ctx->cfg[SSL_VERIFY_DEPTH] != NULL ) {
-
-			verify_depth = atoi( ctx->cfg[SSL_VERIFY_DEPTH] );
-			SSL_CTX_set_verify_depth( ctx->ssl_ctx, verify_depth );
-		}
+		SSL_CTX_set_verify_depth( ctx->ssl_ctx, ctx->ssl_verify_depth );
 	}
 
 	if ( ctx->cfg[SSL_CIPHER_LIST] != NULL ) {

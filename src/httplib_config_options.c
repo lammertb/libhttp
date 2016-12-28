@@ -54,7 +54,6 @@ struct httplib_option XX_httplib_config_options[] = {
 	{ "hide_files_patterns",         CONFIG_TYPE_EXT_PATTERN, NULL                                                               },
 	{ "ssl_ca_path",                 CONFIG_TYPE_DIRECTORY,   NULL                                                               },
 	{ "ssl_ca_file",                 CONFIG_TYPE_FILE,        NULL                                                               },
-	{ "ssl_verify_depth",            CONFIG_TYPE_NUMBER,      "9"                                                                },
 	{ "ssl_cipher_list",             CONFIG_TYPE_STRING,      NULL                                                               },
 	{ "ssl_protocol_version",        CONFIG_TYPE_NUMBER,      "0"                                                                },
 	{ "websocket_root",              CONFIG_TYPE_DIRECTORY,   NULL                                                               },
