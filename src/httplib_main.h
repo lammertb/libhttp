@@ -394,7 +394,6 @@ enum {
 	CGI_EXTENSIONS,
 	SSI_EXTENSIONS,
 	HIDE_FILES,
-	WEBSOCKET_ROOT,
 	ERROR_PAGES,
 	NUM_OPTIONS
 };
@@ -596,6 +595,7 @@ struct httplib_context {
 	char *	ssl_cipher_list;
 	char *	throttle;
 	char *	url_rewrite_patterns;
+	char *	websocket_root;
 
 	int	num_threads;
 	int	request_timeout;

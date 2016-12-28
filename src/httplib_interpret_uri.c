@@ -69,14 +69,14 @@ void XX_httplib_interpret_uri( struct httplib_connection *conn, char *filename, 
 
 	memset( filep, 0, sizeof(*filep) );
 
-	*filename                 = 0;
+	*filename                 = '\0';
 	*is_found                 = false;
 	*is_script_resource       = false;
 	*is_put_or_delete_request = XX_httplib_is_put_or_delete_method( conn );
 
 	*is_websocket_request     = XX_httplib_is_websocket_protocol( conn );
 
-	if ( *is_websocket_request  &&  conn->ctx->cfg[WEBSOCKET_ROOT] != NULL ) root = conn->ctx->cfg[WEBSOCKET_ROOT];
+	if ( *is_websocket_request  &&  conn->ctx->websocket_root != NULL ) root = conn->ctx->websocket_root;
 
 	/*
 	 * Note that root == NULL is a regular use case here. This occurs,
