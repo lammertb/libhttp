@@ -61,8 +61,7 @@ static void master_thread_run(void *thread_func_param) {
 	struct httplib_context *ctx = (struct httplib_context *)thread_func_param;
 	struct httplib_workerTLS tls;
 	struct pollfd *pfd;
-	unsigned int i;
-	unsigned int workerthreadcount;
+	int i;
 
 	if ( ctx == NULL ) return;
 
@@ -121,7 +120,7 @@ static void master_thread_run(void *thread_func_param) {
 
 	while ( ctx->status == CTX_STATUS_RUNNING ) {
 
-		for (i=0; i<ctx->num_listening_sockets; i++) {
+		for (i=0; i<(int)ctx->num_listening_sockets; i++) {
 
 			pfd[i].fd     = ctx->listening_sockets[i].sock;
 			pfd[i].events = POLLIN;
@@ -129,7 +128,7 @@ static void master_thread_run(void *thread_func_param) {
 
 		if ( httplib_poll( pfd, ctx->num_listening_sockets, 200 ) > 0 ) {
 
-			for (i=0; i<ctx->num_listening_sockets; i++) {
+			for (i=0; i<(int)ctx->num_listening_sockets; i++) {
 
 				/*
 				 * NOTE(lsm): on QNX, poll() returns POLLRDNORM after the
@@ -181,9 +180,7 @@ static void master_thread_run(void *thread_func_param) {
 	 * Join all worker threads to avoid leaking threads.
 	 */
 
-	workerthreadcount = ctx->cfg_worker_threads;
-
-	for (i=0; i<workerthreadcount; i++) {
+	for (i=0; i<ctx->num_threads; i++) {
 
 		if ( ctx->workerthreadids[i] != 0 ) httplib_pthread_join( ctx->workerthreadids[i], NULL );
 	}

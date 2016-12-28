@@ -92,7 +92,7 @@ void XX_httplib_close_connection( struct httplib_connection *conn ) {
 void httplib_close_connection( struct httplib_connection *conn ) {
 
 	struct httplib_context *client_ctx;
-	unsigned int i;
+	int i;
 
 	if ( conn == NULL ) return;
 
@@ -119,7 +119,7 @@ void httplib_close_connection( struct httplib_connection *conn ) {
 		 * join worker thread and free context
 		 */
 
-		for (i=0; i<client_ctx->cfg_worker_threads; i++) {
+		for (i=0; i<client_ctx->num_threads; i++) {
 
 			if ( client_ctx->workerthreadids[i] != 0 ) httplib_pthread_join( client_ctx->workerthreadids[i], NULL );
 		}

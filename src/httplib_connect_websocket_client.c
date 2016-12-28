@@ -96,19 +96,13 @@ struct httplib_connection *httplib_connect_websocket_client( const char *host, i
 	 */
 
 	newctx = httplib_malloc( sizeof(struct httplib_context) );
+	if ( newctx == NULL ) { httplib_free( conn ); return NULL; }
 
-	if ( newctx == NULL ) {
-	
-		httplib_free( conn );
-
-		return NULL;
-	}
-
-	*newctx                    = *conn->ctx;
-	newctx->user_data          = user_data;
-	newctx->ctx_type           = CTX_TYPE_CLIENT;
-	newctx->cfg_worker_threads = 1;			/* one worker thread will be created	*/
-	newctx->workerthreadids    = httplib_calloc( newctx->cfg_worker_threads, sizeof(pthread_t) );
+	*newctx                 = *conn->ctx;
+	newctx->user_data       = user_data;
+	newctx->ctx_type        = CTX_TYPE_CLIENT;
+	newctx->num_threads     = 1;			/* one worker thread will be created	*/
+	newctx->workerthreadids = httplib_calloc( newctx->num_threads, sizeof(pthread_t) );
 
 	if ( newctx->workerthreadids == NULL ) {
 

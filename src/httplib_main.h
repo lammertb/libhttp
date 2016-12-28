@@ -408,7 +408,6 @@ enum {
 	LISTENING_PORTS,
 	DOCUMENT_ROOT,
 	SSL_CERTIFICATE,
-	NUM_THREADS,
 	RUN_AS_USER,
 	REWRITE,
 	HIDE_FILES,
@@ -587,8 +586,6 @@ struct httplib_context {
 #endif
 
 	pthread_t masterthreadid;		/* The master thread ID									*/
-	unsigned int
-	    cfg_worker_threads;			/* The number of configured worker threads.						*/
 	pthread_t *workerthreadids;		/* The worker thread IDs								*/
 
 	time_t start_time;			/* Server start time, used for authentication						*/
@@ -604,6 +601,8 @@ struct httplib_context {
 #ifdef USE_TIMERS
 	struct ttimers *timers;
 #endif
+	int	num_threads;
+
 	bool	allow_sendfile_call;
 	bool	decode_url;
 	bool	enable_directory_listing;
@@ -850,6 +849,7 @@ bool			XX_httplib_must_hide_file( struct httplib_connection *conn, const char *p
 const char *		XX_httplib_next_option( const char *list, struct vec *val, struct vec *eq_val );
 void			XX_httplib_open_auth_file( struct httplib_connection *conn, const char *path, struct file *filep );
 bool			XX_httplib_option_value_to_bool( const char *value );
+int			XX_httplib_option_value_to_int( const char *value );
 int			XX_httplib_parse_auth_header( struct httplib_connection *conn, char *buf, size_t buf_size, struct ah *ah );
 time_t			XX_httplib_parse_date_string( const char *datetime );
 int			XX_httplib_parse_http_headers( char **buf, struct httplib_request_info *ri );

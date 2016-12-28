@@ -285,6 +285,7 @@ OBJLIST =									\
 	${OBJDIR}httplib_open_auth_file${OBJEXT}				\
 	${OBJDIR}httplib_opendir${OBJEXT}					\
 	${OBJDIR}httplib_option_value_to_bool${OBJEXT}				\
+	${OBJDIR}httplib_option_value_to_int${OBJEXT}				\
 	${OBJDIR}httplib_parse_auth_header${OBJEXT}				\
 	${OBJDIR}httplib_parse_date_string${OBJEXT}				\
 	${OBJDIR}httplib_parse_http_headers${OBJEXT}				\
@@ -903,7 +904,11 @@ ${OBJDIR}httplib_opendir${OBJEXT}					: ${SRCDIR}httplib_opendir.c					\
 									  ${SRCDIR}httplib_main.h					\
 									  ${INCDIR}libhttp.h
 
-${OBJDIR}httplib_object_value_to_bool${OBJEXT}				: ${SRCDIR}httplib_object_value_to_bool${OBJEXT}		\
+${OBJDIR}httplib_option_value_to_bool${OBJEXT}				: ${SRCDIR}httplib_option_value_to_bool.c			\
+									  ${SRCDIR}httplib_main.h					\
+									  ${INCDIR}libhttp.h
+
+${OBJDIR}httplib_option_value_to_int${OBJEXT}				: ${SRCDIR}httplib_option_value_to_int.c			\
 									  ${SRCDIR}httplib_main.h					\
 									  ${INCDIR}libhttp.h
 

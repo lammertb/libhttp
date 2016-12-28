@@ -45,8 +45,7 @@ static bool				process_options( struct httplib_context *ctx, const struct httpli
 struct httplib_context *httplib_start( const struct httplib_callbacks *callbacks, void *user_data, const struct httplib_option_t *options ) {
 
 	struct httplib_context *ctx;
-	int workerthreadcount;
-	unsigned int i;
+	int i;
 	void (*exit_callback)(const struct httplib_context *ctx);
 	struct httplib_workerTLS tls;
 
@@ -177,27 +176,24 @@ struct httplib_context *httplib_start( const struct httplib_callbacks *callbacks
 
 #endif /* !_WIN32 */
 
-	if ( ctx->cfg[NUM_THREADS] == NULL ) return cleanup( ctx, "No worker thread number specified" );
+	if ( ctx->num_threads < 1 ) return cleanup( ctx, "No worker thread number specified" );
 
-	workerthreadcount = atoi( ctx->cfg[NUM_THREADS] );
+	if ( ctx->num_threads > MAX_WORKER_THREADS ) return cleanup( ctx, "Too many worker threads" );
 
-	if ( workerthreadcount > MAX_WORKER_THREADS ) return cleanup( ctx, "Too many worker threads" );
+	if ( ctx->num_threads > 0 ) {
 
-	if ( workerthreadcount > 0 ) {
-
-		ctx->cfg_worker_threads = (unsigned int)(workerthreadcount);
-		ctx->workerthreadids    = httplib_calloc( ctx->cfg_worker_threads, sizeof(pthread_t) );
+		ctx->workerthreadids = httplib_calloc( ctx->num_threads, sizeof(pthread_t) );
 		if ( ctx->workerthreadids == NULL ) return cleanup( ctx, "Not enough memory for worker thread ID array" );
 
 #if defined(ALTERNATIVE_QUEUE)
 
-		ctx->client_wait_events = httplib_calloc( sizeof(ctx->client_wait_events[0]), ctx->cfg_worker_threads );
+		ctx->client_wait_events = httplib_calloc( sizeof(ctx->client_wait_events[0]), ctx->num_threads );
 		if ( ctx->client_wait_events == NULL ) return cleanup( ctx, "Not enough memory for worker event array" );
 
-		ctx->client_socks = httplib_calloc( sizeof(ctx->client_socks[0]), ctx->cfg_worker_threads );
+		ctx->client_socks = httplib_calloc( sizeof(ctx->client_socks[0]), ctx->num_threads );
 		if ( ctx->client_socks == NULL ) return cleanup( ctx, "Not enough memory for worker socket array" );
 
-		for (i=0; i<ctx->cfg_worker_threads; i++) {
+		for (i=0; i<ctx->num_threads; i++) {
 
 			ctx->client_wait_events[i] = event_create();
 			if ( ctx->client_wait_events[i] == 0 ) return cleanup( ctx, "Error creating worker event %u", i );
@@ -230,7 +226,7 @@ struct httplib_context *httplib_start( const struct httplib_callbacks *callbacks
 	/*
 	 * Start worker threads
 	 */
-	for (i=0; i < ctx->cfg_worker_threads; i++) {
+	for (i=0; i<ctx->num_threads; i++) {
 
 		struct worker_thread_args *wta;
 	       
@@ -288,6 +284,7 @@ static bool process_options ( struct httplib_context *ctx, const struct httplib_
 	ctx->decode_url               = true;
 	ctx->enable_directory_listing = true;
 	ctx->enable_keep_alive        = false;
+	ctx->num_threads              = 50;
 	ctx->ssl_short_trust          = false;
 	ctx->ssl_verify_paths         = true;
 	ctx->ssl_verify_peer          = false;
@@ -298,6 +295,7 @@ static bool process_options ( struct httplib_context *ctx, const struct httplib_
 		else if ( ! httplib_strcasecmp( options->name, "decode_url"               ) ) ctx->decode_url               = XX_httplib_option_value_to_bool( options->value );
 		else if ( ! httplib_strcasecmp( options->name, "enable_directory_listing" ) ) ctx->enable_directory_listing = XX_httplib_option_value_to_bool( options->value );
 		else if ( ! httplib_strcasecmp( options->name, "enable_keep_alive"        ) ) ctx->enable_keep_alive        = XX_httplib_option_value_to_bool( options->value );
+		else if ( ! httplib_strcasecmp( options->name, "num_threads"              ) ) ctx->num_threads              = XX_httplib_option_value_to_int(  options->value );
 		else if ( ! httplib_strcasecmp( options->name, "ssl_short_trust"          ) ) ctx->ssl_short_trust          = XX_httplib_option_value_to_bool( options->value );
 		else if ( ! httplib_strcasecmp( options->name, "ssl_verify_paths"         ) ) ctx->ssl_verify_paths         = XX_httplib_option_value_to_bool( options->value );
 		else if ( ! httplib_strcasecmp( options->name, "ssl_verify_peer"          ) ) ctx->ssl_verify_peer          = XX_httplib_option_value_to_bool( options->value );
