@@ -85,6 +85,8 @@ void XX_httplib_free_context( struct httplib_context *ctx ) {
 	 * Deallocate config parameters
 	 */
 
+	if ( ctx->error_log_file != NULL ) { httplib_free( ctx->error_log_file ); ctx->error_log_file = NULL; }
+
 	for (i = 0; i < NUM_OPTIONS; i++) {
 
 		if (ctx->cfg[i] != NULL) {

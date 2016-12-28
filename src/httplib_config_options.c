@@ -41,7 +41,6 @@ struct httplib_option XX_httplib_config_options[] = {
 	{ "ssi_pattern",                 CONFIG_TYPE_EXT_PATTERN, "**.shtml$|**.shtm$"                                               },
 	{ "throttle",                    CONFIG_TYPE_STRING,      NULL                                                               },
 	{ "access_log_file",             CONFIG_TYPE_FILE,        NULL                                                               },
-	{ "error_log_file",              CONFIG_TYPE_FILE,        NULL                                                               },
 	{ "global_auth_file",            CONFIG_TYPE_FILE,        NULL                                                               },
 	{ "index_files",                 CONFIG_TYPE_STRING,      "index.xhtml,index.html,index.htm,index.cgi,index.shtml,index.php" },
 	{ "access_control_list",         CONFIG_TYPE_STRING,      NULL                                                               },

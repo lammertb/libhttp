@@ -76,8 +76,8 @@ void httplib_cry( const struct httplib_context *ctx, const struct httplib_connec
 	 * may not even be available on all platforms (Windows etc).
 	 */
 
-	if ( ctx->cfg[ERROR_LOG_FILE] == NULL                                ) return;
-	if ( ! XX_httplib_fopen( conn, ctx->cfg[ERROR_LOG_FILE], "a+", &fi ) ) return;
+	if ( ctx->error_log_file == NULL                                ) return;
+	if ( ! XX_httplib_fopen( conn, ctx->error_log_file, "a+", &fi ) ) return;
 
 	/*
 	 * We now have an open FILE stream pointer in fi.fp and can dump the

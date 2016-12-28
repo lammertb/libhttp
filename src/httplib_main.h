@@ -400,7 +400,6 @@ enum {
 	SSI_EXTENSIONS,
 	THROTTLE,
 	ACCESS_LOG_FILE,
-	ERROR_LOG_FILE,
 	GLOBAL_PASSWORDS_FILE,
 	INDEX_FILES,
 	ACCESS_CONTROL_LIST,
@@ -595,6 +594,8 @@ struct httplib_context {
 #ifdef USE_TIMERS
 	struct ttimers *timers;
 #endif
+	char *	error_log_file;
+
 	int	num_threads;
 	int	request_timeout;
 	int	ssl_protocol_version;
