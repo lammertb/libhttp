@@ -159,7 +159,7 @@ void XX_httplib_prepare_cgi_environment( struct httplib_connection *conn, const 
 	 * Add user-specified variables
 	 */
 
-	s = conn->ctx->cfg[CGI_ENVIRONMENT];
+	s = conn->ctx->cgi_environment;
 
 	while ( (s = XX_httplib_next_option( s, &var_vec, NULL )) != NULL ) {
 

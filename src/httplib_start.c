@@ -286,6 +286,7 @@ static bool process_options( struct httplib_context *ctx, const struct httplib_o
 
 	ctx->access_log_file          = NULL;
 	ctx->allow_sendfile_call      = true;
+	ctx->cgi_environment          = NULL;
 	ctx->decode_url               = true;
 	ctx->enable_directory_listing = true;
 	ctx->enable_keep_alive        = false;
@@ -306,6 +307,7 @@ static bool process_options( struct httplib_context *ctx, const struct httplib_o
 
 		if ( check_file( ctx, options, "access_log_file",          & ctx->access_log_file                      ) ) return true;
 		if ( check_bool( ctx, options, "allow_sendfile_call",      & ctx->allow_sendfile_call                  ) ) return true;
+		if ( check_str(  ctx, options, "cgi_environment",          & ctx->cgi_environment                      ) ) return true;
 		if ( check_bool( ctx, options, "decode_url",               & ctx->decode_url                           ) ) return true;
 		if ( check_bool( ctx, options, "enable_directory_listing", & ctx->enable_directory_listing             ) ) return true;
 		if ( check_bool( ctx, options, "enable_keep_alive",        & ctx->enable_keep_alive                    ) ) return true;

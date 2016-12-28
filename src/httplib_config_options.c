@@ -33,7 +33,6 @@
 
 struct httplib_option XX_httplib_config_options[] = {
 	{ "cgi_pattern",                 CONFIG_TYPE_EXT_PATTERN, "**.cgi$|**.pl$|**.php$"                                           },
-	{ "cgi_environment",             CONFIG_TYPE_STRING,      NULL                                                               },
 	{ "put_delete_auth_file",        CONFIG_TYPE_FILE,        NULL                                                               },
 	{ "cgi_interpreter",             CONFIG_TYPE_FILE,        NULL                                                               },
 	{ "protect_uri",                 CONFIG_TYPE_STRING,      NULL                                                               },

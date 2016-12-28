@@ -392,7 +392,6 @@ union usa {
 /* NOTE(lsm): this enum shoulds be in sync with the config_options below. */
 enum {
 	CGI_EXTENSIONS,
-	CGI_ENVIRONMENT,
 	PUT_DELETE_PASSWORDS_FILE,
 	CGI_INTERPRETER,
 	PROTECT_URI,
@@ -593,6 +592,7 @@ struct httplib_context {
 	struct ttimers *timers;
 #endif
 	char *	access_log_file;
+	char *	cgi_environment;
 	char *	error_log_file;
 	char *	run_as_user;
 
