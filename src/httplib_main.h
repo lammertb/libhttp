@@ -406,7 +406,6 @@ enum {
 	LISTENING_PORTS,
 	DOCUMENT_ROOT,
 	SSL_CERTIFICATE,
-	RUN_AS_USER,
 	REWRITE,
 	HIDE_FILES,
 	SSL_CA_PATH,
@@ -595,6 +594,7 @@ struct httplib_context {
 #endif
 	char *	access_log_file;
 	char *	error_log_file;
+	char *	run_as_user;
 
 	int	num_threads;
 	int	request_timeout;

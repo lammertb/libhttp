@@ -87,6 +87,7 @@ void XX_httplib_free_context( struct httplib_context *ctx ) {
 
 	if ( ctx->access_log_file != NULL ) { httplib_free( ctx->access_log_file ); ctx->access_log_file = NULL; }
 	if ( ctx->error_log_file  != NULL ) { httplib_free( ctx->error_log_file  ); ctx->error_log_file  = NULL; }
+	if ( ctx->run_as_user     != NULL ) { httplib_free( ctx->run_as_user     ); ctx->run_as_user     = NULL; }
 
 	for (i = 0; i < NUM_OPTIONS; i++) {
 
