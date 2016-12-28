@@ -84,6 +84,7 @@ void XX_httplib_free_context( struct httplib_context *ctx ) {
 	ctx->access_log_file             = httplib_free( ctx->access_log_file             );
 	ctx->authentication_domain       = httplib_free( ctx->authentication_domain       );
 	ctx->cgi_environment             = httplib_free( ctx->cgi_environment             );
+	ctx->cgi_interpreter             = httplib_free( ctx->cgi_interpreter             );
 	ctx->error_log_file              = httplib_free( ctx->error_log_file              );
 	ctx->extra_mime_types            = httplib_free( ctx->extra_mime_types            );
 	ctx->global_auth_file            = httplib_free( ctx->global_auth_file            );

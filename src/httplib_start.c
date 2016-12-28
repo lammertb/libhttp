@@ -342,6 +342,7 @@ static bool process_options( struct httplib_context *ctx, const struct httplib_o
 		if ( check_bool( ctx, options, "allow_sendfile_call",         & ctx->allow_sendfile_call                     ) ) return true;
 		if ( check_str(  ctx, options, "authentication_domain",       & ctx->authentication_domain                   ) ) return true;
 		if ( check_str(  ctx, options, "cgi_environment",             & ctx->cgi_environment                         ) ) return true;
+		if ( check_file( ctx, options, "cgi_interpreter",             & ctx->cgi_interpreter                         ) ) return true;
 		if ( check_bool( ctx, options, "decode_url",                  & ctx->decode_url                              ) ) return true;
 		if ( check_bool( ctx, options, "enable_directory_listing",    & ctx->enable_directory_listing                ) ) return true;
 		if ( check_bool( ctx, options, "enable_keep_alive",           & ctx->enable_keep_alive                       ) ) return true;

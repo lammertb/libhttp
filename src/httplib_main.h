@@ -393,7 +393,6 @@ union usa {
 enum {
 	CGI_EXTENSIONS,
 	PUT_DELETE_PASSWORDS_FILE,
-	CGI_INTERPRETER,
 	SSI_EXTENSIONS,
 	DOCUMENT_ROOT,
 	HIDE_FILES,
@@ -584,6 +583,7 @@ struct httplib_context {
 	char *	access_log_file;
 	char *	authentication_domain;
 	char *	cgi_environment;
+	char *	cgi_interpreter;
 	char *	error_log_file;
 	char *	extra_mime_types;
 	char *	global_auth_file;

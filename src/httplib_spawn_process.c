@@ -213,7 +213,7 @@ pid_t XX_httplib_spawn_process( struct httplib_connection *conn, const char *pro
 
 			signal( SIGCHLD, SIG_DFL );
 
-			interp = conn->ctx->cfg[CGI_INTERPRETER];
+			interp = conn->ctx->cgi_interpreter;
 
 			if ( interp == NULL ) {
 
