@@ -44,7 +44,6 @@ struct httplib_option XX_httplib_config_options[] = {
 	{ "error_log_file",              CONFIG_TYPE_FILE,        NULL                                                               },
 	{ "global_auth_file",            CONFIG_TYPE_FILE,        NULL                                                               },
 	{ "index_files",                 CONFIG_TYPE_STRING,      "index.xhtml,index.html,index.htm,index.cgi,index.shtml,index.php" },
-	{ "enable_keep_alive",           CONFIG_TYPE_BOOLEAN,     "no"                                                               },
 	{ "access_control_list",         CONFIG_TYPE_STRING,      NULL                                                               },
 	{ "extra_mime_types",            CONFIG_TYPE_STRING,      NULL                                                               },
 	{ "listening_ports",             CONFIG_TYPE_STRING,      "8080"                                                             },

@@ -403,7 +403,6 @@ enum {
 	ERROR_LOG_FILE,
 	GLOBAL_PASSWORDS_FILE,
 	INDEX_FILES,
-	ENABLE_KEEP_ALIVE,
 	ACCESS_CONTROL_LIST,
 	EXTRA_MIME_TYPES,
 	LISTENING_PORTS,
@@ -609,8 +608,9 @@ struct httplib_context {
 #ifdef USE_TIMERS
 	struct ttimers *timers;
 #endif
-	bool	enable_directory_listing;
 	bool	allow_sendfile_call;
+	bool	enable_directory_listing;
+	bool	enable_keep_alive;
 };
 
 /*

@@ -38,7 +38,6 @@
 void XX_httplib_process_new_connection( struct httplib_connection *conn ) {
 
 	struct httplib_request_info *ri;
-	int keep_alive_enabled;
 	int keep_alive;
 	int discard_len;
 	char ebuf[100];
@@ -52,8 +51,7 @@ void XX_httplib_process_new_connection( struct httplib_connection *conn ) {
 
 	if ( conn == NULL  ||  conn->ctx == NULL ) return;
 
-	ri                 = & conn->request_info;
-	keep_alive_enabled = ( conn->ctx->cfg[ENABLE_KEEP_ALIVE] != NULL  &&  ! strcmp( conn->ctx->cfg[ENABLE_KEEP_ALIVE], "yes" ) );
+	ri = & conn->request_info;
 
 	/*
 	 * Important: on new connection, reset the receiving buffer. Credit
@@ -164,7 +162,7 @@ void XX_httplib_process_new_connection( struct httplib_connection *conn ) {
 		 * in loop exit condition.
 		 */
 
-		keep_alive = conn->ctx->status == CTX_STATUS_RUNNING  &&  keep_alive_enabled  &&  conn->content_len >= 0  &&  XX_httplib_should_keep_alive( conn );
+		keep_alive = conn->ctx->status == CTX_STATUS_RUNNING  &&  conn->ctx->enable_keep_alive  &&  conn->content_len >= 0  &&  XX_httplib_should_keep_alive( conn );
 
 		/*
 		 * Discard all buffered data for this request
