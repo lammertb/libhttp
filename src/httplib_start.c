@@ -309,6 +309,7 @@ static bool process_options( struct httplib_context *ctx, const struct httplib_o
 	ctx->put_delete_auth_file        = NULL;
 	ctx->request_timeout             = 30000;
 	ctx->run_as_user                 = NULL;
+	ctx->ssi_pattern                 = NULL;
 	ctx->ssl_ca_file                 = NULL;
 	ctx->ssl_ca_path                 = NULL;
 	ctx->ssl_certificate             = NULL;
@@ -349,6 +350,12 @@ static bool process_options( struct httplib_context *ctx, const struct httplib_o
 		return true;
 	}
 
+	if ( (ctx->ssi_pattern = strdup( "**.shtml$|**.shtm$" )) == NULL ) {
+
+		cleanup( ctx, "Out of memory creating context allocating \"ssi_pattern\"" );
+		return true;
+	}
+
 	while ( options != NULL  &&  options->name != NULL ) {
 
 		if ( check_str(  ctx, options, "access_control_allow_origin", & ctx->access_control_allow_origin             ) ) return true;
@@ -374,6 +381,7 @@ static bool process_options( struct httplib_context *ctx, const struct httplib_o
 		if ( check_file( ctx, options, "put_delete_auth_file",        & ctx->put_delete_auth_file                    ) ) return true;
 		if ( check_int(  ctx, options, "request_timeout",             & ctx->request_timeout,             0, INT_MAX ) ) return true;
 		if ( check_str(  ctx, options, "run_as_user",                 & ctx->run_as_user                             ) ) return true;
+		if ( check_patt( ctx, options, "ssi_pattern",                 & ctx->ssi_pattern                             ) ) return true;
 		if ( check_file( ctx, options, "ssl_ca_file",                 & ctx->ssl_ca_file                             ) ) return true;
 		if ( check_dir(  ctx, options, "ssl_ca_path",                 & ctx->ssl_ca_path                             ) ) return true;
 		if ( check_file( ctx, options, "ssl_certificate",             & ctx->ssl_certificate                         ) ) return true;

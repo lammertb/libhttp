@@ -47,7 +47,7 @@ void XX_httplib_handle_file_based_request( struct httplib_connection *conn, cons
 #if !defined(NO_CGI)
 	cgi_ext = conn->ctx->cfg[CGI_EXTENSIONS];
 #endif  /* ! NO_CGI */
-	ssi_ext = conn->ctx->cfg[SSI_EXTENSIONS];
+	ssi_ext = conn->ctx->ssi_pattern;
 
 	if (0) {
 #if !defined(NO_CGI)

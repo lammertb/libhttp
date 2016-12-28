@@ -116,7 +116,7 @@ static void do_ssi_include( struct httplib_connection *conn, const char *ssi, ch
 	
 	XX_httplib_fclose_on_exec( & file, conn );
 
-	ssi_ext = conn->ctx->cfg[SSI_EXTENSIONS];
+	ssi_ext = conn->ctx->ssi_pattern;
 
 	if ( ssi_ext != NULL  &&  XX_httplib_match_prefix( ssi_ext, strlen( ssi_ext ), path ) > 0 ) send_ssi_file( conn, path, &file, include_level+1 );
 	else XX_httplib_send_file_data( conn, &file, 0, INT64_MAX );

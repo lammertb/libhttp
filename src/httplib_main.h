@@ -392,7 +392,6 @@ union usa {
 /* NOTE(lsm): this enum shoulds be in sync with the config_options below. */
 enum {
 	CGI_EXTENSIONS,
-	SSI_EXTENSIONS,
 	NUM_OPTIONS
 };
 
@@ -589,6 +588,7 @@ struct httplib_context {
 	char *	protect_uri;
 	char *	put_delete_auth_file;
 	char *	run_as_user;
+	char *	ssi_pattern;
 	char *	ssl_ca_file;
 	char *	ssl_ca_path;
 	char *	ssl_certificate;
