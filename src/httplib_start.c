@@ -321,6 +321,12 @@ static bool process_options( struct httplib_context *ctx, const struct httplib_o
 		return true;
 	}
 
+	if ( (ctx->index_files = strdup( "index.xhtml,index.html,index.htm,index.cgi,index.shtml,index.php" )) == NULL ) {
+
+		cleanup( ctx, "Out of memory creating context allocating \"index_files\"" );
+		return true;
+	}
+
 	if ( (ctx->listening_ports = strdup( "8080" )) == NULL ) {
 
 		cleanup( ctx, "Out of memory creating context allocating \"listening_ports\"" );

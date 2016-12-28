@@ -47,7 +47,7 @@ void XX_httplib_send_http_error( struct httplib_connection *conn, int status, co
 	const char *tstr;
 	const char *status_text;
 
-	if ( conn == NULL ) return;
+	if ( conn == NULL  ||  conn->ctx == NULL ) return;
 
 	curtime       = time( NULL );
 	error_handler = NULL;
@@ -64,7 +64,7 @@ void XX_httplib_send_http_error( struct httplib_connection *conn, int status, co
 			 */
 
 			error_handler       = conn->ctx->cfg[ERROR_PAGES];
-			error_page_file_ext = conn->ctx->cfg[INDEX_FILES];
+			error_page_file_ext = conn->ctx->index_files;
 			page_handler_found  = 0;
 
 			if ( error_handler != NULL ) {

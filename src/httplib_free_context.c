@@ -86,6 +86,7 @@ void XX_httplib_free_context( struct httplib_context *ctx ) {
 	ctx->cgi_environment             = httplib_free( ctx->cgi_environment             );
 	ctx->error_log_file              = httplib_free( ctx->error_log_file              );
 	ctx->extra_mime_types            = httplib_free( ctx->extra_mime_types            );
+	ctx->index_files                 = httplib_free( ctx->index_files                 );
 	ctx->listening_ports             = httplib_free( ctx->listening_ports             );
 	ctx->protect_uri                 = httplib_free( ctx->protect_uri                 );
 	ctx->run_as_user                 = httplib_free( ctx->run_as_user                 );
