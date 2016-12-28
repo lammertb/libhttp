@@ -454,7 +454,6 @@ struct httplib_option {
 
 enum {
 	CONFIG_TYPE_UNKNOWN     = 0x0,
-	CONFIG_TYPE_FILE        = 0x3,
 	CONFIG_TYPE_DIRECTORY   = 0x4,
 	CONFIG_TYPE_EXT_PATTERN = 0x6
 };
