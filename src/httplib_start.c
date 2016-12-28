@@ -310,7 +310,13 @@ static bool process_options( struct httplib_context *ctx, const struct httplib_o
 
 	if ( (ctx->authentication_domain = strdup( "example.com" )) == NULL ) {
 
-		cleanup( ctx, "Out of memory creating context" );
+		cleanup( ctx, "Out of memory creating context allocating authentication domain" );
+		return true;
+	}
+
+	if ( (ctx->listening_ports = strdup( "8080" )) == NULL ) {
+
+		cleanup( ctx, "Out of memory creating context allocating listening ports" );
 		return true;
 	}
 
@@ -326,6 +332,7 @@ static bool process_options( struct httplib_context *ctx, const struct httplib_o
 		if ( check_bool( ctx, options, "enable_keep_alive",        & ctx->enable_keep_alive                    ) ) return true;
 		if ( check_file( ctx, options, "error_log_file",           & ctx->error_log_file                       ) ) return true;
 		if ( check_str(  ctx, options, "extra_mime_types",         & ctx->extra_mime_types                     ) ) return true;
+		if ( check_str(  ctx, options, "listening_ports",          & ctx->listening_ports                      ) ) return true;
 		if ( check_int(  ctx, options, "num_threads",              & ctx->num_threads,              1, INT_MAX ) ) return true;
 		if ( check_str(  ctx, options, "protect_uri",              & ctx->protect_uri                          ) ) return true;
 		if ( check_int(  ctx, options, "request_timeout",          & ctx->request_timeout,          0, INT_MAX ) ) return true;

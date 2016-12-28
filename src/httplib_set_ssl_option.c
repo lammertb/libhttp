@@ -117,7 +117,7 @@ bool XX_httplib_set_ssl_option( struct httplib_context *ctx ) {
 	clock_gettime( CLOCK_MONOTONIC, &now_mt );
 	md5_append( & md5state, (const md5_byte_t *)&now_mt, sizeof(now_mt) );
 
-	if ( ctx->cfg[LISTENING_PORTS] != NULL ) md5_append( & md5state, (const md5_byte_t *)ctx->cfg[LISTENING_PORTS], strlen( ctx->cfg[LISTENING_PORTS] ) );
+	if ( ctx->listening_ports != NULL ) md5_append( & md5state, (const md5_byte_t *)ctx->listening_ports, strlen( ctx->listening_ports ) );
 
 	md5_append( & md5state, (const md5_byte_t *)ctx, sizeof(*ctx) );
 	md5_finish( & md5state, ssl_context_id );

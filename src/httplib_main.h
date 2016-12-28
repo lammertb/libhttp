@@ -397,7 +397,6 @@ enum {
 	SSI_EXTENSIONS,
 	GLOBAL_PASSWORDS_FILE,
 	INDEX_FILES,
-	LISTENING_PORTS,
 	DOCUMENT_ROOT,
 	SSL_CERTIFICATE,
 	REWRITE,
@@ -591,6 +590,7 @@ struct httplib_context {
 	char *	cgi_environment;
 	char *	error_log_file;
 	char *	extra_mime_types;
+	char *	listening_ports;
 	char *	protect_uri;
 	char *	run_as_user;
 	char *	ssl_cipher_list;

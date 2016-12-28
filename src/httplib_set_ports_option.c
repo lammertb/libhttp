@@ -65,7 +65,7 @@ int XX_httplib_set_ports_option( struct httplib_context *ctx ) {
 	memset( & usa, 0, sizeof(usa) );
 
 	len  = sizeof(usa);
-	list = ctx->cfg[LISTENING_PORTS];
+	list = ctx->listening_ports;
 
 	while ( (list = XX_httplib_next_option( list, &vec, NULL )) != NULL ) {
 
