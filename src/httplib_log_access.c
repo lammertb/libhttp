@@ -50,9 +50,9 @@ void XX_httplib_log_access( const struct httplib_connection *conn ) {
 
 	if ( conn == NULL  ||  conn->ctx == NULL ) return;
 
-	if ( conn->ctx->cfg[ACCESS_LOG_FILE] != NULL ) {
+	if ( conn->ctx->access_log_file != NULL ) {
 
-		if ( XX_httplib_fopen( conn, conn->ctx->cfg[ACCESS_LOG_FILE], "a+", &fi ) == 0 ) fi.fp = NULL;
+		if ( XX_httplib_fopen( conn, conn->ctx->access_log_file, "a+", &fi ) == 0 ) fi.fp = NULL;
 	}
 	else fi.fp = NULL;
 
