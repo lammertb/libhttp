@@ -377,7 +377,7 @@ static int set_option( struct httplib_option_t *options, const char *name, const
 		/* TODO (low): check this option when it is set, instead of calling
 		 * verify_existence later */
 		break;
-	case CONFIG_TYPE_EXT_PATTERN:
+	case 0x06 : /* CONFIG_TYPE_EXT_PATTERN: */
 		/* list of file extentions */
 		break;
 	default:
