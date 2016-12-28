@@ -393,7 +393,6 @@ union usa {
 enum {
 	CGI_EXTENSIONS,
 	SSI_EXTENSIONS,
-	HIDE_FILES,
 	NUM_OPTIONS
 };
 
@@ -584,6 +583,7 @@ struct httplib_context {
 	char *	error_pages;
 	char *	extra_mime_types;
 	char *	global_auth_file;
+	char *	hide_file_pattern;
 	char *	index_files;
 	char *	listening_ports;
 	char *	protect_uri;

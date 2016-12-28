@@ -35,6 +35,7 @@ static bool			check_bool( struct httplib_context *ctx, const struct httplib_opti
 static bool			check_dir(  struct httplib_context *ctx, const struct httplib_option_t *option, const char *name, char **config );
 static bool			check_file( struct httplib_context *ctx, const struct httplib_option_t *option, const char *name, char **config );
 static bool			check_int(  struct httplib_context *ctx, const struct httplib_option_t *option, const char *name, int *config, int minval, int maxval );
+static bool			check_patt( struct httplib_context *ctx, const struct httplib_option_t *option, const char *name, char **config );
 static bool			check_str(  struct httplib_context *ctx, const struct httplib_option_t *option, const char *name, char **config );
 static struct httplib_context *	cleanup( struct httplib_context *ctx, PRINTF_FORMAT_STRING(const char *fmt), ...) PRINTF_ARGS(2, 3);
 static bool			process_options( struct httplib_context *ctx, const struct httplib_option_t *options );
@@ -300,6 +301,7 @@ static bool process_options( struct httplib_context *ctx, const struct httplib_o
 	ctx->error_pages                 = NULL;
 	ctx->extra_mime_types            = NULL;
 	ctx->global_auth_file            = NULL;
+	ctx->hide_file_pattern           = NULL;
 	ctx->index_files                 = NULL;
 	ctx->listening_ports             = NULL;
 	ctx->num_threads                 = 50;
@@ -364,6 +366,7 @@ static bool process_options( struct httplib_context *ctx, const struct httplib_o
 		if ( check_dir(  ctx, options, "error_pages",                 & ctx->error_pages                             ) ) return true;
 		if ( check_str(  ctx, options, "extra_mime_types",            & ctx->extra_mime_types                        ) ) return true;
 		if ( check_file( ctx, options, "global_auth_file",            & ctx->global_auth_file                        ) ) return true;
+		if ( check_patt( ctx, options, "hide_file_pattern",           & ctx->hide_file_pattern                       ) ) return true;
 		if ( check_str(  ctx, options, "index_files",                 & ctx->index_files                             ) ) return true;
 		if ( check_str(  ctx, options, "listening_ports",             & ctx->listening_ports                         ) ) return true;
 		if ( check_int(  ctx, options, "num_threads",                 & ctx->num_threads,                 1, INT_MAX ) ) return true;
@@ -484,6 +487,40 @@ static bool check_dir( struct httplib_context *ctx, const struct httplib_option_
 
 }  /* check_dir */
 
+
+
+/*
+ * static bool check_patt( struct httplib_context *ctx, const struct httplib_option_t *option, const char *name, char **config );
+ *
+ * The function check_patt() checks if an option is equal to a pattern config
+ * parameter and stores the value if that is the case. If the value cannot be
+ * recognized, true is returned and the function performs a complete cleanup.
+ * If the option name could not be found, the function returns false to
+ * indicate that the search should go on. IF the value could be found, also
+ * false is returned.
+ */
+
+static bool check_patt( struct httplib_context *ctx, const struct httplib_option_t *option, const char *name, char **config ) {
+
+	if ( ctx == NULL  ||  option == NULL  ||  option->name == NULL  ||  name == NULL  ||  config == NULL ) {
+
+		cleanup( ctx, "Internal error parsing pattern option" );
+		return true;
+	}
+
+	if ( httplib_strcasecmp( option->name, name ) ) return false;
+
+	*config = httplib_free( *config );
+
+	if ( option->value == NULL ) return false;
+
+	*config = httplib_strdup( option->value );
+	if ( *config != NULL ) return false;
+
+	cleanup( ctx, "Out of memory assigning value \"%s\" to option \"%s\"", option->value, option->name );
+	return true;
+
+}  /* check_patt */
 
 
 

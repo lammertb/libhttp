@@ -90,6 +90,7 @@ void XX_httplib_free_context( struct httplib_context *ctx ) {
 	ctx->error_pages                 = httplib_free( ctx->error_pages                 );
 	ctx->extra_mime_types            = httplib_free( ctx->extra_mime_types            );
 	ctx->global_auth_file            = httplib_free( ctx->global_auth_file            );
+	ctx->hide_file_pattern           = httplib_free( ctx->hide_file_pattern           );
 	ctx->index_files                 = httplib_free( ctx->index_files                 );
 	ctx->listening_ports             = httplib_free( ctx->listening_ports             );
 	ctx->protect_uri                 = httplib_free( ctx->protect_uri                 );
