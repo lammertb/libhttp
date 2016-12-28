@@ -162,8 +162,8 @@ static struct tuser_data
 enum { OPTION_TITLE, OPTION_ICON, NUM_MAIN_OPTIONS };
 
 static struct httplib_option main_config_options[] = {
-	{ "title",  CONFIG_TYPE_STRING,  NULL },
-	{ "icon",   CONFIG_TYPE_STRING,  NULL },
+	{ "title",  0x02,  NULL },
+	{ "icon",   0x02,  NULL },
 	{ NULL,     CONFIG_TYPE_UNKNOWN, NULL }
 };
 
@@ -362,7 +362,7 @@ static int set_option( struct httplib_option_t *options, const char *name, const
 			return 0;
 		}
 		break;
-	case CONFIG_TYPE_STRING:
+	case 0x02 : /* CONFIG_TYPE_STRING: */
 		/* any text */
 		break;
 	case 0x5 : /* CONFIG_TYPE_BOOLEAN: */
