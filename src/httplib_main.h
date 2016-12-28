@@ -396,7 +396,6 @@ enum {
 	CGI_INTERPRETER,
 	AUTHENTICATION_DOMAIN,
 	SSI_EXTENSIONS,
-	THROTTLE,
 	GLOBAL_PASSWORDS_FILE,
 	INDEX_FILES,
 	ACCESS_CONTROL_LIST,
@@ -595,6 +594,7 @@ struct httplib_context {
 	char *	protect_uri;
 	char *	run_as_user;
 	char *	ssl_cipher_list;
+	char *	throttle;
 
 	int	num_threads;
 	int	request_timeout;

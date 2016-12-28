@@ -303,6 +303,7 @@ static bool process_options( struct httplib_context *ctx, const struct httplib_o
 	ctx->ssl_verify_paths         = true;
 	ctx->ssl_verify_peer          = false;
 	ctx->static_file_max_age      = 0;
+	ctx->throttle                 = NULL;
 	ctx->tcp_nodelay              = false;
 	ctx->websocket_timeout        = 30000;
 
@@ -327,6 +328,7 @@ static bool process_options( struct httplib_context *ctx, const struct httplib_o
 		if ( check_bool( ctx, options, "ssl_verify_paths",         & ctx->ssl_verify_paths                     ) ) return true;
 		if ( check_bool( ctx, options, "ssl_verify_peer",          & ctx->ssl_verify_peer                      ) ) return true;
 		if ( check_int(  ctx, options, "static_file_max_age",      & ctx->static_file_max_age,      0, INT_MAX ) ) return true;
+		if ( check_str(  ctx, options, "throttle",                 & ctx->throttle                             ) ) return true;
 		if ( check_bool( ctx, options, "tcp_nodelay",              & ctx->tcp_nodelay                          ) ) return true;
 		if ( check_int(  ctx, options, "websocket_timeout",        & ctx->websocket_timeout,        0, INT_MAX ) ) return true;
 

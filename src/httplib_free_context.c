@@ -92,6 +92,7 @@ void XX_httplib_free_context( struct httplib_context *ctx ) {
 	if ( ctx->protect_uri      != NULL ) { httplib_free( ctx->protect_uri      ); ctx->protect_uri      = NULL; }
 	if ( ctx->run_as_user      != NULL ) { httplib_free( ctx->run_as_user      ); ctx->run_as_user      = NULL; }
 	if ( ctx->ssl_cipher_list  != NULL ) { httplib_free( ctx->ssl_cipher_list  ); ctx->ssl_cipher_list  = NULL; }
+	if ( ctx->throttle         != NULL ) { httplib_free( ctx->throttle         ); ctx->throttle         = NULL; }
 
 	for (i = 0; i < NUM_OPTIONS; i++) {
 

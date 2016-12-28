@@ -149,7 +149,7 @@ void XX_httplib_handle_request( struct httplib_connection *conn ) {
 	 * 3. if this ip has limited speed, set it for this connection
 	 */
 
-	conn->throttle = XX_httplib_set_throttle( conn->ctx->cfg[THROTTLE], XX_httplib_get_remote_ip( conn ), ri->local_uri );
+	conn->throttle = XX_httplib_set_throttle( conn->ctx->throttle, XX_httplib_get_remote_ip( conn ), ri->local_uri );
 
 	/*
 	 * 4. call a "handle everything" callback, if registered
