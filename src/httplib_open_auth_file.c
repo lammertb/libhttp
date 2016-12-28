@@ -44,7 +44,7 @@ void XX_httplib_open_auth_file( struct httplib_connection *conn, const char *pat
 
 	if ( conn == NULL  ||  conn->ctx == NULL ) return;
 
-	gpass = conn->ctx->cfg[GLOBAL_PASSWORDS_FILE];
+	gpass = conn->ctx->global_auth_file;
 
 	if ( gpass != NULL ) {
 

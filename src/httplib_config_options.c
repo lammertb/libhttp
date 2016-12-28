@@ -36,7 +36,6 @@ struct httplib_option XX_httplib_config_options[] = {
 	{ "put_delete_auth_file",        CONFIG_TYPE_FILE,        NULL                                                               },
 	{ "cgi_interpreter",             CONFIG_TYPE_FILE,        NULL                                                               },
 	{ "ssi_pattern",                 CONFIG_TYPE_EXT_PATTERN, "**.shtml$|**.shtm$"                                               },
-	{ "global_auth_file",            CONFIG_TYPE_FILE,        NULL                                                               },
 	{ "document_root",               CONFIG_TYPE_DIRECTORY,   NULL                                                               },
 	{ "hide_files_patterns",         CONFIG_TYPE_EXT_PATTERN, NULL                                                               },
 	{ "ssl_ca_path",                 CONFIG_TYPE_DIRECTORY,   NULL                                                               },

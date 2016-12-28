@@ -347,6 +347,7 @@ static bool process_options( struct httplib_context *ctx, const struct httplib_o
 		if ( check_bool( ctx, options, "enable_keep_alive",           & ctx->enable_keep_alive                       ) ) return true;
 		if ( check_file( ctx, options, "error_log_file",              & ctx->error_log_file                          ) ) return true;
 		if ( check_str(  ctx, options, "extra_mime_types",            & ctx->extra_mime_types                        ) ) return true;
+		if ( check_file( ctx, options, "global_auth_file",            & ctx->global_auth_file                        ) ) return true;
 		if ( check_str(  ctx, options, "index_files",                 & ctx->index_files                             ) ) return true;
 		if ( check_str(  ctx, options, "listening_ports",             & ctx->listening_ports                         ) ) return true;
 		if ( check_int(  ctx, options, "num_threads",                 & ctx->num_threads,                 1, INT_MAX ) ) return true;

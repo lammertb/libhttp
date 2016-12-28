@@ -395,7 +395,6 @@ enum {
 	PUT_DELETE_PASSWORDS_FILE,
 	CGI_INTERPRETER,
 	SSI_EXTENSIONS,
-	GLOBAL_PASSWORDS_FILE,
 	DOCUMENT_ROOT,
 	HIDE_FILES,
 	SSL_CA_PATH,
@@ -587,6 +586,7 @@ struct httplib_context {
 	char *	cgi_environment;
 	char *	error_log_file;
 	char *	extra_mime_types;
+	char *	global_auth_file;
 	char *	index_files;
 	char *	listening_ports;
 	char *	protect_uri;
