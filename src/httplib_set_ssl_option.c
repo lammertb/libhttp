@@ -46,7 +46,6 @@ bool XX_httplib_set_ssl_option( struct httplib_context *ctx ) {
 	struct timespec now_mt;
 	md5_byte_t ssl_context_id[16];
 	md5_state_t md5state;
-	int protocol_ver;
 
 	/*
 	 * If PEM file is not specified and the init_ssl callback
@@ -84,13 +83,10 @@ bool XX_httplib_set_ssl_option( struct httplib_context *ctx ) {
 
 	SSL_CTX_clear_options( ctx->ssl_ctx, SSL_OP_NO_SSLv2 | SSL_OP_NO_SSLv3 | SSL_OP_NO_TLSv1 | SSL_OP_NO_TLSv1_1 );
 
-	if ( ctx->cfg[SSL_PROTOCOL_VERSION] != NULL ) protocol_ver = atoi( ctx->cfg[SSL_PROTOCOL_VERSION] );
-	else                                          protocol_ver = 0;
-
-	SSL_CTX_set_options(   ctx->ssl_ctx, XX_httplib_ssl_get_protocol( protocol_ver ) );
-	SSL_CTX_set_options(   ctx->ssl_ctx, SSL_OP_SINGLE_DH_USE                        );
-	SSL_CTX_set_options(   ctx->ssl_ctx, SSL_OP_CIPHER_SERVER_PREFERENCE             );
-	SSL_CTX_set_ecdh_auto( ctx->ssl_ctx, 1                                           );
+	SSL_CTX_set_options(   ctx->ssl_ctx, XX_httplib_ssl_get_protocol( ctx->ssl_protocol_version ) );
+	SSL_CTX_set_options(   ctx->ssl_ctx, SSL_OP_SINGLE_DH_USE                                     );
+	SSL_CTX_set_options(   ctx->ssl_ctx, SSL_OP_CIPHER_SERVER_PREFERENCE                          );
+	SSL_CTX_set_ecdh_auto( ctx->ssl_ctx, 1                                                        );
 
 	/* If a callback has been specified, call it. */
 

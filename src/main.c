@@ -355,7 +355,7 @@ static int set_option( struct httplib_option_t *options, const char *name, const
 	case CONFIG_TYPE_UNKNOWN:
 		/* unknown option */
 		return 0;
-	case CONFIG_TYPE_NUMBER:
+	case 0x1 :  /* CONFIG_TYPE_NUMBER: */
 		/* integer number > 0, e.g. number of threads */
 		if (atol(value) < 0) {
 			/* invalid number */

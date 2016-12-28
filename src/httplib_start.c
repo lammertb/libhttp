@@ -288,6 +288,7 @@ static bool process_options( struct httplib_context *ctx, const struct httplib_o
 	ctx->enable_keep_alive        = false;
 	ctx->num_threads              = 50;
 	ctx->request_timeout          = 30000;
+	ctx->ssl_protocol_version     = 0;
 	ctx->ssl_short_trust          = false;
 	ctx->ssl_verify_depth         = 9;
 	ctx->ssl_verify_paths         = true;
@@ -304,6 +305,7 @@ static bool process_options( struct httplib_context *ctx, const struct httplib_o
 		if ( check_bool( ctx, options, "enable_keep_alive",        & ctx->enable_keep_alive                    ) ) return true;
 		if ( check_int(  ctx, options, "num_threads",              & ctx->num_threads,              1, INT_MAX ) ) return true;
 		if ( check_int(  ctx, options, "request_timeout",          & ctx->request_timeout,          0, INT_MAX ) ) return true;
+		if ( check_int(  ctx, options, "ssl_protocol_version",     & ctx->ssl_protocol_version,     0, 4       ) ) return true;
 		if ( check_bool( ctx, options, "ssl_short_trust",          & ctx->ssl_short_trust                      ) ) return true;
 		if ( check_int(  ctx, options, "ssl_verify_depth",         & ctx->ssl_verify_depth,         0, 9       ) ) return true;
 		if ( check_bool( ctx, options, "ssl_verify_paths",         & ctx->ssl_verify_paths                     ) ) return true;

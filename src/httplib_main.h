@@ -414,7 +414,6 @@ enum {
 	SSL_CA_PATH,
 	SSL_CA_FILE,
 	SSL_CIPHER_LIST,
-	SSL_PROTOCOL_VERSION,
 	WEBSOCKET_ROOT,
 	ACCESS_CONTROL_ALLOW_ORIGIN,
 	ERROR_PAGES,
@@ -598,6 +597,7 @@ struct httplib_context {
 #endif
 	int	num_threads;
 	int	request_timeout;
+	int	ssl_protocol_version;
 	int	ssl_verify_depth;
 	int	static_file_max_age;
 	int	websocket_timeout;
