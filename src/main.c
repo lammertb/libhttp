@@ -373,7 +373,7 @@ static int set_option( struct httplib_option_t *options, const char *name, const
 		}
 		break;
 	case 0x03 : /* CONFIG_TYPE_FILE: */
-	case CONFIG_TYPE_DIRECTORY:
+	case 0x04 : /* CONFIG_TYPE_DIRECTORY: */
 		/* TODO (low): check this option when it is set, instead of calling
 		 * verify_existence later */
 		break;
