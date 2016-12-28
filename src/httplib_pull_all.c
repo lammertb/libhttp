@@ -36,9 +36,7 @@ int XX_httplib_pull_all( FILE *fp, struct httplib_connection *conn, char *buf, i
 	if ( conn == NULL  ||  conn->ctx == NULL ) return 0;
 
 	nread   = 0;
-
-	if ( conn->ctx->cfg[REQUEST_TIMEOUT] != NULL ) timeout = atof( conn->ctx->cfg[REQUEST_TIMEOUT] ) / 1000.0;
-	else                                           timeout = -1.0;
+	timeout = ((double)conn->ctx->request_timeout) / 1000.0;
 
 	while ( len > 0  &&  conn->ctx->status == CTX_STATUS_RUNNING ) {
 

@@ -287,6 +287,7 @@ static bool process_options ( struct httplib_context *ctx, const struct httplib_
 	ctx->enable_directory_listing = true;
 	ctx->enable_keep_alive        = false;
 	ctx->num_threads              = 50;
+	ctx->request_timeout          = 30000;
 	ctx->ssl_short_trust          = false;
 	ctx->ssl_verify_paths         = true;
 	ctx->ssl_verify_peer          = false;
@@ -299,6 +300,7 @@ static bool process_options ( struct httplib_context *ctx, const struct httplib_
 		if ( check_bool( ctx, options, "enable_directory_listing", & ctx->enable_directory_listing             ) ) return true;
 		if ( check_bool( ctx, options, "enable_keep_alive",        & ctx->enable_keep_alive                    ) ) return true;
 		if ( check_int(  ctx, options, "num_threads",              & ctx->num_threads,              1, INT_MAX ) ) return true;
+		if ( check_int(  ctx, options, "request_timeout",          & ctx->request_timeout,          0, INT_MAX ) ) return true;
 		if ( check_bool( ctx, options, "ssl_short_trust",          & ctx->ssl_short_trust                      ) ) return true;
 		if ( check_bool( ctx, options, "ssl_verify_paths",         & ctx->ssl_verify_paths                     ) ) return true;
 		if ( check_bool( ctx, options, "ssl_verify_peer",          & ctx->ssl_verify_peer                      ) ) return true;

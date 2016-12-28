@@ -411,7 +411,6 @@ enum {
 	RUN_AS_USER,
 	REWRITE,
 	HIDE_FILES,
-	REQUEST_TIMEOUT,
 	SSL_CA_PATH,
 	SSL_CA_FILE,
 	SSL_VERIFY_DEPTH,
@@ -601,6 +600,7 @@ struct httplib_context {
 	struct ttimers *timers;
 #endif
 	int	num_threads;
+	int	request_timeout;
 	int	static_file_max_age;
 
 	bool	allow_sendfile_call;

@@ -33,7 +33,7 @@
  *
  * The function httplib_get_response() tries to get a response from a remote
  * peer. This function does some dirty action by temporarily replacing the
- * contect of the connection with a copy. The only thing which is changed in
+ * context of the connection with a copy. The only thing which is changed in
  * the copy is the timeout value which is set according to the timeout as it
  * was passed as a parameter to the function call. After the call to the
  * function XX_httplib_getreq() has finished, the old context is put back in
@@ -46,9 +46,8 @@ int httplib_get_response( struct httplib_connection *conn, char *ebuf, size_t eb
 	int ret;
 	struct httplib_context *octx;
 	struct httplib_context rctx;
-	char txt[32]; /* will not overflow */
 
-	if ( conn == NULL ) return -1;
+	if ( conn == NULL  ||  conn->ctx == NULL ) return -1;
 
 	/*
 	 * Replace the connection context with a copy of it where the timeout
@@ -60,12 +59,11 @@ int httplib_get_response( struct httplib_connection *conn, char *ebuf, size_t eb
 
 	if ( timeout >= 0 ) {
 
-		XX_httplib_snprintf( conn, NULL, txt, sizeof(txt), "%i", timeout );
-		rctx.cfg[REQUEST_TIMEOUT] = txt;
+		rctx.request_timeout = timeout;
 		XX_httplib_set_sock_timeout( conn->client.sock, timeout );
 	}
 	
-	else rctx.cfg[REQUEST_TIMEOUT] = NULL;
+	else rctx.request_timeout = 0;
 
 	conn->ctx = &rctx;
 	ret       = XX_httplib_getreq( conn, ebuf, ebuf_len, &err );

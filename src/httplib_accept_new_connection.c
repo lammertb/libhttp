@@ -42,7 +42,6 @@ void XX_httplib_accept_new_connection( const struct socket *listener, struct htt
 	char error_string[ERROR_STRING_LEN];
 	socklen_t len;
 	int on;
-	int timeout;
 
 	if ( listener == NULL ) return;
 
@@ -107,10 +106,7 @@ void XX_httplib_accept_new_connection( const struct socket *listener, struct htt
 			}
 		}
 
-		if ( ctx != NULL  &&  ctx->cfg[REQUEST_TIMEOUT] != NULL ) timeout = atoi( ctx->cfg[REQUEST_TIMEOUT] );
-		else                                                      timeout = -1;
-
-		if ( timeout > 0 ) XX_httplib_set_sock_timeout( so.sock, timeout );
+		if ( ctx->request_timeout > 0 ) XX_httplib_set_sock_timeout( so.sock, ctx->request_timeout );
 
 		XX_httplib_produce_socket( ctx, &so );
 	}

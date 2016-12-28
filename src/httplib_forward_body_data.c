@@ -48,10 +48,8 @@ bool XX_httplib_forward_body_data( struct httplib_connection *conn, FILE *fp, SO
 	if ( conn == NULL  ||  conn->ctx == NULL ) return false;
 
 	success = false;
-	if ( conn->ctx->cfg[REQUEST_TIMEOUT] != NULL ) timeout = atof( conn->ctx->cfg[REQUEST_TIMEOUT] ) / 1000.0;
-	else                                           timeout = -1.0;
-
-	expect = httplib_get_header( conn, "Expect" );
+	timeout = ((double)conn->ctx->request_timeout) / 1000.0;
+	expect  = httplib_get_header( conn, "Expect" );
 
 	if ( fp == NULL ) {
 

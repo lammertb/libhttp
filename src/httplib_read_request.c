@@ -46,16 +46,14 @@ int XX_httplib_read_request( FILE *fp, struct httplib_connection *conn, char *bu
 	struct timespec last_action_time;
 	double request_timeout;
 
-	if ( conn == NULL ) return 0;
+	if ( conn == NULL  ||  conn->ctx ==  NULL ) return 0;
 
 	n = 0;
 
 	memset( & last_action_time, 0, sizeof(last_action_time) );
 
-	if ( conn->ctx->cfg[REQUEST_TIMEOUT] != NULL ) request_timeout = atof( conn->ctx->cfg[REQUEST_TIMEOUT] ) / 1000.0;
-	else                                           request_timeout = -1.0;
-
-	request_len = XX_httplib_get_request_len( buf, *nread );
+	request_timeout = ((double)conn->ctx->request_timeout) / 1000.0;
+	request_len     = XX_httplib_get_request_len( buf, *nread );
 
 	/*
 	 * first time reading from this connection
