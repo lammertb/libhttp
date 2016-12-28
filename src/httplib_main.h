@@ -416,7 +416,6 @@ enum {
 	SSL_VERIFY_DEPTH,
 	SSL_CIPHER_LIST,
 	SSL_PROTOCOL_VERSION,
-	WEBSOCKET_TIMEOUT,
 	WEBSOCKET_ROOT,
 	ACCESS_CONTROL_ALLOW_ORIGIN,
 	ERROR_PAGES,
@@ -602,6 +601,7 @@ struct httplib_context {
 	int	num_threads;
 	int	request_timeout;
 	int	static_file_max_age;
+	int	websocket_timeout;
 
 	bool	allow_sendfile_call;
 	bool	decode_url;

@@ -78,11 +78,10 @@ void XX_httplib_read_websocket( struct httplib_connection *conn, httplib_websock
 
 	if ( conn == NULL  ||  conn->ctx == NULL ) return;
 
-	data    = mem;
-	timeout = -1.0;
+	data = mem;
 
-	if ( conn->ctx->cfg[WEBSOCKET_TIMEOUT] != NULL ) timeout = atof( conn->ctx->cfg[WEBSOCKET_TIMEOUT] ) / 1000.0;
-	if ( timeout                           <= 0.0  ) timeout = ((double)conn->ctx->request_timeout) / 1000.0;
+	timeout                       = ((double)conn->ctx->websocket_timeout) / 1000.0;
+	if ( timeout <= 0.0 ) timeout = ((double)conn->ctx->request_timeout) / 1000.0;
 
 	XX_httplib_set_thread_name( "wsock" );
 
