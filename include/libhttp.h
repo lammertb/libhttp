@@ -285,6 +285,11 @@ struct httplib_callbacks {
 	void (*exit_context)(const struct httplib_context *ctx);
 };
 
+struct httplib_option_t {
+	const char *	name;
+	const char *	value;
+};
+
 
 /* Start web server.
 
@@ -970,7 +975,7 @@ LIBHTTP_API int				httplib_remove( const char *path );
 LIBHTTP_API void			httplib_send_file( struct httplib_connection *conn, const char *path, const char *mime_type, const char *additional_headers );
 LIBHTTP_API void			httplib_set_alloc_callback_func( httplib_alloc_callback_func log_func );
 LIBHTTP_API void			httplib_set_user_connection_data( struct httplib_connection *conn, void *data );
-LIBHTTP_API struct httplib_context *	httplib_start(const struct httplib_callbacks *callbacks, void *user_data, const char **configuration_options );
+LIBHTTP_API struct httplib_context *	httplib_start(const struct httplib_callbacks *callbacks, void *user_data, const struct httplib_option_t *options );
 LIBHTTP_API void			httplib_stop( struct httplib_context *ctx );
 LIBHTTP_API int				httplib_strcasecmp( const char *s1, const char *s2 );
 LIBHTTP_API const char *		httplib_strcasestr( const char *big_str, const char *small_str );

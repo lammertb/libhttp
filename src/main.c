@@ -162,14 +162,14 @@ static struct tuser_data
 enum { OPTION_TITLE, OPTION_ICON, NUM_MAIN_OPTIONS };
 
 static struct httplib_option main_config_options[] = {
-    {"title", CONFIG_TYPE_STRING, NULL},
-    {"icon", CONFIG_TYPE_STRING, NULL},
-    {NULL, CONFIG_TYPE_UNKNOWN, NULL}};
+	{ "title",  CONFIG_TYPE_STRING,  NULL },
+	{ "icon",   CONFIG_TYPE_STRING,  NULL },
+	{ NULL,     CONFIG_TYPE_UNKNOWN, NULL }
+};
 
 
-static void WINCDECL
-signal_handler(int sig_num)
-{
+static void WINCDECL signal_handler(int sig_num) {
+
 	g_exit_flag = sig_num;
 }
 
@@ -210,14 +210,12 @@ show_server_name(void)
 }
 
 
-static NO_RETURN void show_usage_and_exit(const char *exeName) {
+static NO_RETURN void show_usage_and_exit( const char *exeName ) {
 
 	const struct httplib_option *options;
 	int i;
 
-	if (exeName == 0 || *exeName == 0) {
-		exeName = "libhttp";
-	}
+	if ( exeName == NULL  ||  *exeName == '\0' ) exeName = "libhttp";
 
 	show_server_name();
 
@@ -237,22 +235,12 @@ static NO_RETURN void show_usage_and_exit(const char *exeName) {
 
 	options = httplib_get_valid_options();
 	for (i = 0; options[i].name != NULL; i++) {
-		fprintf(stderr,
-		        "  -%s %s\n",
-		        options[i].name,
-		        ((options[i].default_value == NULL)
-		             ? "<empty>"
-		             : options[i].default_value));
+		fprintf(stderr, "  -%s %s\n", options[i].name, ((options[i].default_value == NULL) ? "<empty>" : options[i].default_value));
 	}
 
 	options = main_config_options;
 	for (i = 0; options[i].name != NULL; i++) {
-		fprintf(stderr,
-		        "  -%s %s\n",
-		        options[i].name,
-		        ((options[i].default_value == NULL)
-		             ? "<empty>"
-		             : options[i].default_value));
+		fprintf(stderr, "  -%s %s\n", options[i].name, ((options[i].default_value == NULL) ? "<empty>" : options[i].default_value));
 	}
 
 	exit(EXIT_FAILURE);
@@ -329,30 +317,22 @@ static char * sdup(const char *str) {
 }
 
 
-static const char * get_option(char **options, const char *option_name) {
+static const char * get_option( struct httplib_option_t *options, const char *option_name ) {
 
-	int i = 0;
-	const char *opt_value = NULL;
+	int i;
 
-	/* TODO (low, api makeover): options should be an array of key-value-pairs,
-	 * like
-	 *     struct {const char * key, const char * value} options[]
-	 * but it currently is an array with
-	 *     options[2*i] = key, options[2*i + 1] = value
-	 * (probably with a MG_LEGACY_INTERFACE definition)
-	 */
-	while (options[2 * i] != NULL) {
-		if (strcmp(options[2 * i], option_name) == 0) {
-			opt_value = options[2 * i + 1];
-			break;
-		}
+	i = 0;
+
+	while ( options[i].name != NULL ) {
+
+		if ( strcmp( options[i].name, option_name ) == 0 ) return options[i].value;
 		i++;
 	}
-	return opt_value;
+	return NULL;
 }
 
 
-static int set_option(char **options, const char *name, const char *value) {
+static int set_option( struct httplib_option_t *options, const char *name, const char *value ) {
 
 	int i;
 	int type;
@@ -368,10 +348,9 @@ static int set_option(char **options, const char *name, const char *value) {
 
 	type = CONFIG_TYPE_UNKNOWN;
 	for (i = 0; default_options[i].name != NULL; i++) {
-		if (!strcmp(default_options[i].name, name)) {
-			type = default_options[i].type;
-		}
+		if (!strcmp( default_options[i].name, name ) ) type = default_options[i].type;
 	}
+
 	switch (type) {
 	case CONFIG_TYPE_UNKNOWN:
 		/* unknown option */
@@ -406,32 +385,35 @@ static int set_option(char **options, const char *name, const char *value) {
 	}
 
 	for (i = 0; i < MAX_OPTIONS; i++) {
-		if (options[2 * i] == NULL) {
-			options[2 * i] = sdup(name);
-			options[2 * i + 1] = sdup(value);
-			options[2 * i + 2] = NULL;
+
+		if ( options[i].name == NULL ) {
+
+			options[i].name   = sdup( name  );
+			options[i].name   = sdup( value );
+			options[i+1].name = NULL;
+
 			break;
-		} else if (!strcmp(options[2 * i], name)) {
-			free(options[2 * i + 1]);
-			options[2 * i + 1] = sdup(value);
+		}
+		
+		if ( ! strcmp(options[i].name, name) ) {
+
+			free( (void *)options[i].value );
+			options[i].value = sdup( value );
+
 			break;
 		}
 	}
 
-	if (i == MAX_OPTIONS) {
-		die("Too many options specified");
-	}
+	if ( i == MAX_OPTIONS ) die( "Too many options specified" );
 
-	if (options[2 * i] == NULL || options[2 * i + 1] == NULL) {
-		die("Out of memory");
-	}
+	if ( options[i].name == NULL  ||  options[i].value == NULL ) die( "Out of memory" );
 
 	/* option set correctly */
 	return 1;
 }
 
 
-static int read_config_file(const char *config_file, char **options) {
+static int read_config_file( const char *config_file, struct httplib_option_t *options ) {
 
 	char line[MAX_CONF_FILE_LINE_SIZE], *p;
 	FILE *fp = NULL;
@@ -490,21 +472,17 @@ static int read_config_file(const char *config_file, char **options) {
 
 			/* Set option */
 			if (!set_option(options, line + i, line + j)) {
-				fprintf(stderr,
-				        "%s: line %d is invalid, ignoring it:\n %s",
-				        config_file,
-				        (int)line_no,
-				        p);
+				fprintf(stderr, "%s: line %d is invalid, ignoring it:\n %s", config_file, (int)line_no, p);
 			}
 		}
 
-		(void)fclose(fp);
+		fclose( fp );
 	}
 	return 1;
 }
 
 
-static void process_command_line_arguments(int argc, char *argv[], char **options) {
+static void process_command_line_arguments( int argc, char *argv[], struct httplib_option_t *options ) {
 
 	char *p;
 	char error_string[ERROR_STRING_LEN];
@@ -639,7 +617,7 @@ static int is_path_absolute(const char *path) {
 }
 
 
-static void verify_existence(char **options, const char *option_name, int must_be_dir) {
+static void verify_existence( struct httplib_option_t *options, const char *option_name, int must_be_dir) {
 
 	struct stat st;
 	char error_string[ERROR_STRING_LEN];
@@ -671,7 +649,7 @@ static void verify_existence(char **options, const char *option_name, int must_b
 }
 
 
-static void set_absolute_path(char *options[], const char *option_name, const char *path_to_libhttp_exe) {
+static void set_absolute_path( struct httplib_option_t *options, const char *option_name, const char *path_to_libhttp_exe ) {
 
 	char path[PATH_MAX] = "";
 	char absolute[PATH_MAX] = "";
@@ -711,10 +689,10 @@ static void set_absolute_path(char *options[], const char *option_name, const ch
 #endif  /* __MINGW32__  ||  __MINGW64__ */
 
 
-static void start_libhttp(int argc, char *argv[]) {
+static void start_libhttp( int argc, char *argv[] ) {
 
 	struct httplib_callbacks callbacks;
-	char *options[2 * MAX_OPTIONS + 1];
+	struct httplib_option_t options[MAX_OPTIONS+1] = { { NULL, NULL } };
 	int i;
 
 	/* Start option -I:
@@ -842,53 +820,53 @@ static void start_libhttp(int argc, char *argv[]) {
 		show_usage_and_exit(argv[0]);
 	}
 
-	options[0] = NULL;
-	set_option(options, "document_root", ".");
+	options[0].name = NULL;
+	set_option( options, "document_root", "." );
 
 	/* Update config based on command line arguments */
-	process_command_line_arguments(argc, argv, options);
+	process_command_line_arguments( argc, argv, options );
 
 	/* Make sure we have absolute paths for files and directories */
-	set_absolute_path(options, "document_root", argv[0]);
-	set_absolute_path(options, "put_delete_auth_file", argv[0]);
-	set_absolute_path(options, "cgi_interpreter", argv[0]);
-	set_absolute_path(options, "access_log_file", argv[0]);
-	set_absolute_path(options, "error_log_file", argv[0]);
-	set_absolute_path(options, "global_auth_file", argv[0]);
-	set_absolute_path(options, "ssl_certificate", argv[0]);
+	set_absolute_path( options, "document_root",        argv[0] );
+	set_absolute_path( options, "put_delete_auth_file", argv[0] );
+	set_absolute_path( options, "cgi_interpreter",      argv[0] );
+	set_absolute_path( options, "access_log_file",      argv[0] );
+	set_absolute_path( options, "error_log_file",       argv[0] );
+	set_absolute_path( options, "global_auth_file",     argv[0] );
+	set_absolute_path( options, "ssl_certificate",      argv[0] );
 
 	/* Make extra verification for certain options */
-	verify_existence(options, "document_root", 1);
-	verify_existence(options, "cgi_interpreter", 0);
-	verify_existence(options, "ssl_certificate", 0);
-	verify_existence(options, "ssl_ca_path", 1);
-	verify_existence(options, "ssl_ca_file", 0);
+	verify_existence( options, "document_root",   1 );
+	verify_existence( options, "cgi_interpreter", 0 );
+	verify_existence( options, "ssl_certificate", 0 );
+	verify_existence( options, "ssl_ca_path",     1 );
+	verify_existence( options, "ssl_ca_file",     0 );
 
 	/* Setup signal handler: quit on Ctrl-C */
-	signal(SIGTERM, signal_handler);
-	signal(SIGINT, signal_handler);
+	signal( SIGTERM, signal_handler );
+	signal( SIGINT,  signal_handler );
 
 	/* Initialize user data */
-	memset(&g_user_data, 0, sizeof(g_user_data));
+	memset( &g_user_data, 0, sizeof(g_user_data) );
 
 	/* Start LibHTTP */
 	memset(&callbacks, 0, sizeof(callbacks));
 	callbacks.log_message = &log_message;
-	g_ctx = httplib_start(&callbacks, &g_user_data, (const char **)options );
+	g_ctx = httplib_start( &callbacks, &g_user_data, options );
 
 	/* httplib_start copies all options to an internal buffer.
 	 * The options data field here is not required anymore. */
-	for (i = 0; options[i] != NULL; i++) {
-		free(options[i]);
+	for (i=0; options[i].name != NULL; i++) {
+		
+		if ( options[i].name  != NULL ) free( (void *)options[i].name  );
+		if ( options[i].value != NULL ) free( (void *)options[i].value );
+
+		options[i].name  = NULL;
+		options[i].value = NULL;
 	}
 
 	/* If httplib_start fails, it returns NULL */
-	if (g_ctx == NULL) {
-		die("Failed to start %s:\n%s",
-		    g_server_name,
-		    ((g_user_data.first_message == NULL) ? "unknown reason"
-		                                         : g_user_data.first_message));
-	}
+	if ( g_ctx == NULL ) die("Failed to start %s:\n%s", g_server_name, ((g_user_data.first_message == NULL) ? "unknown reason" : g_user_data.first_message));
 }
 
 

@@ -41,11 +41,9 @@ static struct httplib_context *		cleanup( struct httplib_context *ctx, PRINTF_FO
  * context to the running server for future reference.
  */
 
-struct httplib_context *httplib_start( const struct httplib_callbacks *callbacks, void *user_data, const char **options ) {
+struct httplib_context *httplib_start( const struct httplib_callbacks *callbacks, void *user_data, const struct httplib_option_t *options ) {
 
 	struct httplib_context *ctx;
-	const char *name;
-	const char *value;
 	const char *default_value;
 	int idx;
 	int workerthreadcount;
@@ -152,19 +150,21 @@ struct httplib_context *httplib_start( const struct httplib_callbacks *callbacks
 	ctx->user_data = user_data;
 	ctx->handlers  = NULL;
 
-	while ( options  &&  (name = *options++) != NULL ) {
+	while ( options  &&  options->name != NULL ) {
 
-		idx = XX_httplib_get_option_index( name );
-		if ( idx                   == -1   ) return cleanup( ctx, "Invalid option: %s",              name );
-		if ( (value = *options++)  == NULL ) return cleanup( ctx, "%s: option value cannot be NULL", name );
+		idx = XX_httplib_get_option_index( options->name );
+		if ( idx             == -1   ) return cleanup( ctx, "Invalid option: %s",              options->name );
+		if ( options->value  == NULL ) return cleanup( ctx, "%s: option value cannot be NULL", options->name );
 
 		if ( ctx->cfg[idx] != NULL ) {
 
-			httplib_cry( ctx, NULL, "warning: %s: duplicate option", name );
+			httplib_cry( ctx, NULL, "warning: %s: duplicate option", options->name );
 			httplib_free( ctx->cfg[idx] );
 		}
 
-		ctx->cfg[idx] = httplib_strdup( value );
+		ctx->cfg[idx] = httplib_strdup( options->value );
+
+		options++;
 	}
 
 	/*
