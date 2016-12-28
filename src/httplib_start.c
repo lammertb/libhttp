@@ -285,6 +285,7 @@ static bool process_options ( struct httplib_context *ctx, const struct httplib_
 	if ( ctx == NULL ) return false;
 
 	ctx->allow_sendfile_call      = true;
+	ctx->decode_url               = true;
 	ctx->enable_directory_listing = true;
 	ctx->enable_keep_alive        = false;
 	ctx->ssl_short_trust          = false;
@@ -294,6 +295,7 @@ static bool process_options ( struct httplib_context *ctx, const struct httplib_
 	while ( options != NULL  &&  options->name != NULL ) {
 
 		if (      ! httplib_strcasecmp( options->name, "allow_sendfile_call"      ) ) ctx->allow_sendfile_call      = XX_httplib_option_value_to_bool( options->value );
+		else if ( ! httplib_strcasecmp( options->name, "decode_url"               ) ) ctx->decode_url               = XX_httplib_option_value_to_bool( options->value );
 		else if ( ! httplib_strcasecmp( options->name, "enable_directory_listing" ) ) ctx->enable_directory_listing = XX_httplib_option_value_to_bool( options->value );
 		else if ( ! httplib_strcasecmp( options->name, "enable_keep_alive"        ) ) ctx->enable_keep_alive        = XX_httplib_option_value_to_bool( options->value );
 		else if ( ! httplib_strcasecmp( options->name, "ssl_short_trust"          ) ) ctx->ssl_short_trust          = XX_httplib_option_value_to_bool( options->value );

@@ -419,7 +419,6 @@ enum {
 	SSL_CIPHER_LIST,
 	SSL_PROTOCOL_VERSION,
 	WEBSOCKET_TIMEOUT,
-	DECODE_URL,
 	WEBSOCKET_ROOT,
 	ACCESS_CONTROL_ALLOW_ORIGIN,
 	ERROR_PAGES,
@@ -606,6 +605,7 @@ struct httplib_context {
 	struct ttimers *timers;
 #endif
 	bool	allow_sendfile_call;
+	bool	decode_url;
 	bool	enable_directory_listing;
 	bool	enable_keep_alive;
 	bool	ssl_short_trust;
