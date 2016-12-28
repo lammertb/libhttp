@@ -418,7 +418,6 @@ enum {
 	SSL_VERIFY_DEPTH,
 	SSL_CIPHER_LIST,
 	SSL_PROTOCOL_VERSION,
-	SSL_SHORT_TRUST,
 	WEBSOCKET_TIMEOUT,
 	DECODE_URL,
 	WEBSOCKET_ROOT,
@@ -609,6 +608,7 @@ struct httplib_context {
 	bool	allow_sendfile_call;
 	bool	enable_directory_listing;
 	bool	enable_keep_alive;
+	bool	ssl_short_trust;
 	bool	ssl_verify_paths;
 	bool	ssl_verify_peer;
 };

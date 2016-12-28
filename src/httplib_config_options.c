@@ -59,7 +59,6 @@ struct httplib_option XX_httplib_config_options[] = {
 	{ "ssl_verify_depth",            CONFIG_TYPE_NUMBER,      "9"                                                                },
 	{ "ssl_cipher_list",             CONFIG_TYPE_STRING,      NULL                                                               },
 	{ "ssl_protocol_version",        CONFIG_TYPE_NUMBER,      "0"                                                                },
-	{ "ssl_short_trust",             CONFIG_TYPE_BOOLEAN,     "no"                                                               },
 	{ "websocket_timeout_ms",        CONFIG_TYPE_NUMBER,      "30000"                                                            },
 	{ "decode_url",                  CONFIG_TYPE_BOOLEAN,     "yes"                                                              },
 	{ "websocket_root",              CONFIG_TYPE_DIRECTORY,   NULL                                                               },

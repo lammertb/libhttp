@@ -40,14 +40,11 @@ int XX_httplib_sslize( struct httplib_connection *conn, SSL_CTX *s, int (*func)(
 
 	int ret;
 	int err;
-	int short_trust;
 	unsigned i;
 
-	if ( conn == NULL ) return 0;
+	if ( conn == NULL  ||  conn->ctx == NULL ) return 0;
 
-	short_trust = ( conn->ctx->cfg[SSL_SHORT_TRUST] != NULL  &&  ! httplib_strcasecmp( conn->ctx->cfg[SSL_SHORT_TRUST], "yes" ) );
-
-	if ( short_trust ) {
+	if ( conn->ctx->ssl_short_trust ) {
 
 		int trust_ret = XX_httplib_refresh_trust( conn );
 		if ( ! trust_ret ) return trust_ret;
