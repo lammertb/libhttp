@@ -64,8 +64,7 @@ void XX_httplib_uninitialize_ssl( struct httplib_context *ctx ) {
 
 		for (i=0; i<CRYPTO_num_locks(); i++) httplib_pthread_mutex_destroy( & XX_httplib_ssl_mutexes[i] );
 
-		httplib_free( XX_httplib_ssl_mutexes );
-		XX_httplib_ssl_mutexes = NULL;
+		XX_httplib_ssl_mutexes = httplib_free( XX_httplib_ssl_mutexes );
 	}
 
 }  /* XX_httplib_unitialize_ssl */

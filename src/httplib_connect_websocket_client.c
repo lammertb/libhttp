@@ -86,7 +86,7 @@ struct httplib_connection *httplib_connect_websocket_client( const char *host, i
 			XX_httplib_snprintf( conn, NULL, error_buffer, error_buffer_size, "Unexpected server reply" );
 		}
 
-		if ( conn != NULL ) httplib_free( conn );
+		if ( conn != NULL ) conn = httplib_free( conn );
 		return NULL;
 	}
 
@@ -96,7 +96,7 @@ struct httplib_connection *httplib_connect_websocket_client( const char *host, i
 	 */
 
 	newctx = httplib_malloc( sizeof(struct httplib_context) );
-	if ( newctx == NULL ) { httplib_free( conn ); return NULL; }
+	if ( newctx == NULL ) { conn = httplib_free( conn ); return NULL; }
 
 	*newctx                 = *conn->ctx;
 	newctx->user_data       = user_data;
@@ -106,8 +106,8 @@ struct httplib_connection *httplib_connect_websocket_client( const char *host, i
 
 	if ( newctx->workerthreadids == NULL ) {
 
-		httplib_free( newctx );
-		httplib_free( conn   );
+		newctx = httplib_free( newctx );
+		conn   = httplib_free( conn   );
 
 		return NULL;
 	}
@@ -117,9 +117,9 @@ struct httplib_connection *httplib_connect_websocket_client( const char *host, i
 
 	if ( thread_data == NULL ) {
 
-		httplib_free( newctx->workerthreadids );
-		httplib_free( newctx                  );
-		httplib_free( conn                    );
+		newctx->workerthreadids = httplib_free( newctx->workerthreadids );
+		newctx                  = httplib_free( newctx                  );
+		conn                    = httplib_free( conn                    );
 
 		return NULL;
 	}
@@ -137,10 +137,10 @@ struct httplib_connection *httplib_connect_websocket_client( const char *host, i
 
 	if ( XX_httplib_start_thread_with_id( XX_httplib_websocket_client_thread, thread_data, newctx->workerthreadids) != 0 ) {
 
-		httplib_free( thread_data             );
-		httplib_free( newctx->workerthreadids );
-		httplib_free( newctx                  );
-		httplib_free( conn                    );
+		thread_data             = httplib_free( thread_data             );
+		newctx->workerthreadids = httplib_free( newctx->workerthreadids );
+		newctx                  = httplib_free( newctx                  );
+		conn                    = httplib_free( conn                    );
 
 		return NULL;
 	}

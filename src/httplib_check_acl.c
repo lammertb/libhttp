@@ -47,7 +47,7 @@ int XX_httplib_check_acl( struct httplib_context *ctx, uint32_t remote_ip ) {
 
 	if ( ctx == NULL ) return -1;
 
-	list = ctx->cfg[ACCESS_CONTROL_LIST];
+	list = ctx->access_control_list;
 
 	if ( list == NULL ) allowed = '+';
 	else                allowed = '-';

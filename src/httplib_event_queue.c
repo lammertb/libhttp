@@ -118,7 +118,7 @@ void *event_create(void) {
 		 * pthread mutex not available
 		 */
 
-		XX_httplib_free( ret );
+		ret = httplib_free( ret );
 		return NULL;
 	}
 	if ( httplib_pthread_cond_init( & ret->cond, NULL ) != 0 ) {
@@ -128,7 +128,7 @@ void *event_create(void) {
 		 */
 
 		httplib_pthread_mutex_destroy( & ret->mutex );
-		XX_httplib_free( ret );
+		ret = httplib_free( ret );
 		return NULL;
 	}
 
@@ -176,7 +176,7 @@ void event_destroy( void *eventhdl ) {
 	httplib_pthread_cond_destroy(  & ev->cond  );
 	httplib_pthread_mutex_destroy( & ev->mutex );
 
-	XX_httplib_free( ev );
+	ev = httplib_free( ev );
 
 }  /* event_destroy */
 

@@ -95,10 +95,10 @@ void XX_httplib_handle_directory_request( struct httplib_connection *conn, const
 		for (i=0; i<data.num_entries; i++) {
 
 			XX_httplib_print_dir_entry( & data.entries[i] );
-			httplib_free( data.entries[i].file_name );
+			data.entries[i].file_name = httplib_free( data.entries[i].file_name );
 		}
 
-		httplib_free( data.entries );
+		data.entries = httplib_free( data.entries );
 	}
 
 	conn->num_bytes_sent += httplib_printf( conn, "%s", "</table></body></html>" );

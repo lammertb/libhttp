@@ -53,18 +53,12 @@ void XX_httplib_free_context( struct httplib_context *ctx ) {
 
 	httplib_pthread_mutex_destroy( & ctx->thread_mutex );
 #if defined(ALTERNATIVE_QUEUE)
-	if ( ctx->client_socks != NULL ) {
-		
-		XX_httplib_free( ctx->client_socks );
-		ctx->client_socks = NULL;
-	}
+	if ( ctx->client_socks != NULL ) ctx->client_socks = httplib_free( ctx->client_socks );
 
 	if ( ctx->client_wait_events != NULL ) {
 
 		for (i=0; (unsigned)i < ctx->cfg_worker_threads; i++) event_destroy( ctx->client_wait_events[i] );
-		XX_httplib_free( ctx->client_wait_events );
-
-		ctx->client_wait_events = NULL;
+		ctx->client_wait_events = httplib_free( ctx->client_wait_events );
 	}
 #else
 	httplib_pthread_cond_destroy( & ctx->sq_empty );
@@ -85,22 +79,19 @@ void XX_httplib_free_context( struct httplib_context *ctx ) {
 	 * Deallocate config parameters
 	 */
 
-	if ( ctx->access_log_file  != NULL ) { httplib_free( ctx->access_log_file  ); ctx->access_log_file  = NULL; }
-	if ( ctx->cgi_environment  != NULL ) { httplib_free( ctx->cgi_environment  ); ctx->cgi_environment  = NULL; }
-	if ( ctx->error_log_file   != NULL ) { httplib_free( ctx->error_log_file   ); ctx->error_log_file   = NULL; }
-	if ( ctx->extra_mime_types != NULL ) { httplib_free( ctx->extra_mime_types ); ctx->extra_mime_types = NULL; }
-	if ( ctx->protect_uri      != NULL ) { httplib_free( ctx->protect_uri      ); ctx->protect_uri      = NULL; }
-	if ( ctx->run_as_user      != NULL ) { httplib_free( ctx->run_as_user      ); ctx->run_as_user      = NULL; }
-	if ( ctx->ssl_cipher_list  != NULL ) { httplib_free( ctx->ssl_cipher_list  ); ctx->ssl_cipher_list  = NULL; }
-	if ( ctx->throttle         != NULL ) { httplib_free( ctx->throttle         ); ctx->throttle         = NULL; }
+	if ( ctx->access_control_list != NULL ) ctx->access_control_list = httplib_free( ctx->access_control_list );
+	if ( ctx->access_log_file     != NULL ) ctx->access_log_file     = httplib_free( ctx->access_log_file     );
+	if ( ctx->cgi_environment     != NULL ) ctx->cgi_environment     = httplib_free( ctx->cgi_environment     );
+	if ( ctx->error_log_file      != NULL ) ctx->error_log_file      = httplib_free( ctx->error_log_file      );
+	if ( ctx->extra_mime_types    != NULL ) ctx->extra_mime_types    = httplib_free( ctx->extra_mime_types    );
+	if ( ctx->protect_uri         != NULL ) ctx->protect_uri         = httplib_free( ctx->protect_uri         );
+	if ( ctx->run_as_user         != NULL ) ctx->run_as_user         = httplib_free( ctx->run_as_user         );
+	if ( ctx->ssl_cipher_list     != NULL ) ctx->ssl_cipher_list     = httplib_free( ctx->ssl_cipher_list     );
+	if ( ctx->throttle            != NULL ) ctx->throttle            = httplib_free( ctx->throttle            );
 
 	for (i = 0; i < NUM_OPTIONS; i++) {
 
-		if (ctx->cfg[i] != NULL) {
-			
-			httplib_free( ctx->cfg[i] );
-			ctx->cfg[i] = NULL;
-		}
+		if ( ctx->cfg[i] != NULL ) ctx->cfg[i] = httplib_free( ctx->cfg[i] );
 	}
 
 	/*
@@ -112,8 +103,8 @@ void XX_httplib_free_context( struct httplib_context *ctx ) {
 		tmp_rh        = ctx->handlers;
 		ctx->handlers = tmp_rh->next;
 
-		httplib_free( tmp_rh->uri );
-		if ( tmp_rh != NULL ) httplib_free( tmp_rh );
+		tmp_rh->uri = httplib_free( tmp_rh->uri );
+		if ( tmp_rh != NULL ) tmp_rh = httplib_free( tmp_rh );
 	}
 
 #ifndef NO_SSL
@@ -134,11 +125,7 @@ void XX_httplib_free_context( struct httplib_context *ctx ) {
 	 * Deallocate worker thread ID array
 	 */
 
-	if ( ctx->workerthreadids != NULL ) {
-		
-		httplib_free( ctx->workerthreadids );
-		ctx->workerthreadids = NULL;
-	}
+	if ( ctx->workerthreadids != NULL ) ctx->workerthreadids = httplib_free( ctx->workerthreadids );
 
 	/*
 	 * Deallocate the tls variable
@@ -159,12 +146,12 @@ void XX_httplib_free_context( struct httplib_context *ctx ) {
 	 * deallocate system name string
 	 */
 
-	httplib_free( ctx->systemName );
+	if ( ctx->systemName != NULL ) ctx->systemName = httplib_free( ctx->systemName );
 
 	/*
 	 * Deallocate context itself
 	 */
 
-	httplib_free( ctx );
+	ctx = httplib_free( ctx );
 
 }  /* XX_httplib_free_context */

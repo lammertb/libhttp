@@ -46,7 +46,7 @@ LIBHTTP_API int httplib_closedir( DIR *dir ) {
 	if ( dir != NULL ) {
 
 		if ( dir->handle != INVALID_HANDLE_VALUE ) result = ( FindClose( dir->handle ) ) ? 0 : -1;
-		httplib_free( dir );
+		dir = httplib_free( dir );
 	}
 	else {
 

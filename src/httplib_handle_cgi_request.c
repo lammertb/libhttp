@@ -306,8 +306,8 @@ void XX_httplib_handle_cgi_request( struct httplib_connection *conn, const char 
 	XX_httplib_send_file_data( conn, &fout, 0, INT64_MAX );
 
 done:
-	httplib_free( blk.var );
-	httplib_free( blk.buf );
+	blk.var = httplib_free( blk.var );
+	blk.buf = httplib_free( blk.buf );
 
 	if ( pid != (pid_t)-1 ) {
 
@@ -326,7 +326,7 @@ done:
 	if ( out != NULL ) fclose( out ); else if ( fdout[0] != -1 ) close( fdout[0] );
 	if ( err != NULL ) fclose( err ); else if ( fderr[0] != -1 ) close( fderr[0] );
 
-	if ( buf != NULL ) httplib_free( buf );
+	if ( buf != NULL ) buf = httplib_free( buf );
 
 }  /* XX_httplib_handle_cgi_request */
 

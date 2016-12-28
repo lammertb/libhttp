@@ -110,9 +110,8 @@ static int url_encoded_field_get(const struct httplib_connection *conn,
 	httplib_url_decode( key, (int)key_len, key_dec, (int)sizeof(key_dec), 1 );
 
 	value_dec_len = httplib_url_decode( value, (int)value_len, value_dec, (int)value_len + 1, 1 );
-
-	ret = fdh->field_get( key_dec, value_dec, (size_t)value_dec_len, fdh->user_data ); 
-	httplib_free( value_dec );
+	ret           = fdh->field_get( key_dec, value_dec, (size_t)value_dec_len, fdh->user_data ); 
+	value_dec     = httplib_free( value_dec );
 
 	return ret;
 

@@ -97,8 +97,7 @@ static struct httplib_connection *httplib_connect_client_impl( const struct http
 
 		XX_httplib_snprintf( NULL, NULL, ebuf, ebuf_len, "SSL_CTX_new error" );
 		closesocket( sock );
-		httplib_free( conn );
-		conn = NULL;
+		conn = httplib_free( conn );
 	}
 #endif /* NO_SSL */
 
@@ -140,8 +139,7 @@ static struct httplib_connection *httplib_connect_client_impl( const struct http
 					XX_httplib_snprintf( NULL, NULL, ebuf, ebuf_len, "Can not use SSL client certificate" );
 					SSL_CTX_free( conn->client_ssl_ctx );
 					closesocket( sock );
-					httplib_free( conn );
-					conn = NULL;
+					conn = httplib_free( conn );
 				}
 			}
 
@@ -158,8 +156,7 @@ static struct httplib_connection *httplib_connect_client_impl( const struct http
 				XX_httplib_snprintf( NULL, NULL, ebuf, ebuf_len, "SSL connection error" );
 				SSL_CTX_free( conn->client_ssl_ctx );
 				closesocket( sock );
-				httplib_free( conn );
-				conn = NULL;
+				conn = httplib_free( conn );
 			}
 		}
 #endif

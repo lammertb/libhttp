@@ -60,10 +60,7 @@ LIBHTTP_API DIR *httplib_opendir( const char *name ) {
 			dir->handle = FindFirstFileW( wpath, &dir->info );
 			dir->result.d_name[0] = '\0';
 		}
-		else {
-			httplib_free( dir );
-			dir = NULL;
-		}
+		else dir = httplib_free( dir );
 	}
 
 	return dir;

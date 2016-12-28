@@ -46,10 +46,7 @@ void XX_httplib_close_all_listening_sockets( struct httplib_context *ctx ) {
 		ctx->listening_sockets[i].sock = INVALID_SOCKET;
 	}
 
-	httplib_free( ctx->listening_sockets    );
-	httplib_free( ctx->listening_socket_fds );
-
-	ctx->listening_sockets    = NULL;
-	ctx->listening_socket_fds = NULL;
+	ctx->listening_sockets    = httplib_free( ctx->listening_sockets    );
+	ctx->listening_socket_fds = httplib_free( ctx->listening_socket_fds );
 
 }  /* XX_close_all_listening_sockets */

@@ -110,23 +110,26 @@ LIBHTTP_API void *XX_httplib_calloc_ex( size_t count, size_t size, const char *f
 
 
 /*
- * void XX_httplib_free_ex( void *memory, const char *file, unsigned file );
+ * void *XX_httplib_free_ex( void *memory, const char *file, unsigned file );
  *
  * The function XX_httplib_free_ex() is a hidden function which frees a
  * previously allocated memory object which was allocated with one of the
  * LibHTTP allocation functions. The function has the option to do memory
  * tracking and memory leak debugging through a callback function which can
  * be registered by the main application.
+ *
+ * The function returns a (void *)NULL pointer which can be used to reset
+ * the value of pointers whose contents has been destroyed.
  */
 
-LIBHTTP_API void XX_httplib_free_ex( void *memory, const char *file, unsigned line ) {
+LIBHTTP_API void *XX_httplib_free_ex( void *memory, const char *file, unsigned line ) {
 
 	size_t *data;
 
 	if ( memory == NULL ) {
 		
 		if ( alloc_log_func != NULL ) alloc_log_func( file, line, "free", 0, httplib_memory_blocks_used, httplib_memory_bytes_used );
-		return;
+		return NULL;
 	}
 
 	data = ((size_t *)memory) - 1;
@@ -137,6 +140,8 @@ LIBHTTP_API void XX_httplib_free_ex( void *memory, const char *file, unsigned li
 	if ( alloc_log_func != NULL ) alloc_log_func( file, line, "free", - ((int64_t)*data), httplib_memory_blocks_used, httplib_memory_bytes_used );
 
 	free( data );
+
+	return NULL;
 
 }  /* XX_httplib_free_ex */
 

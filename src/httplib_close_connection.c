@@ -124,12 +124,12 @@ void httplib_close_connection( struct httplib_connection *conn ) {
 			if ( client_ctx->workerthreadids[i] != 0 ) httplib_pthread_join( client_ctx->workerthreadids[i], NULL );
 		}
 
-		httplib_free( client_ctx->workerthreadids );
-		httplib_free( client_ctx                  );
+		client_ctx->workerthreadids = httplib_free( client_ctx->workerthreadids );
+		client_ctx                  = httplib_free( client_ctx                  );
 
 		httplib_pthread_mutex_destroy( & conn->mutex );
 
-		httplib_free( conn );
+		conn = httplib_free( conn );
 	}
 
 }  /* httplib_close_connection */

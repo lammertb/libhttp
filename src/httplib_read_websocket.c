@@ -251,7 +251,7 @@ void XX_httplib_read_websocket( struct httplib_connection *conn, httplib_websock
 			exit_by_callback = 0;
 			if ((ws_data_handler != NULL) && !ws_data_handler(conn, mop, data, data_len, callback_data)) exit_by_callback = 1;
 
-			if ( data != mem ) httplib_free( data );
+			if ( data != mem ) data = httplib_free( data );
 
 			/*
 			 * Opcode == 8, connection close

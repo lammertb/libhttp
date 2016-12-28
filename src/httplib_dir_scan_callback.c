@@ -41,7 +41,7 @@ void XX_httplib_dir_scan_callback( struct de *de, void *data ) {
 		old_entries    = dsd->entries;
 		dsd->entries   = httplib_realloc( old_entries, dsd->arr_size * sizeof(dsd->entries[0]) );
 
-		if ( dsd->entries == NULL  &&  old_entries != NULL ) httplib_free( old_entries );
+		if ( dsd->entries == NULL  &&  old_entries != NULL ) old_entries = httplib_free( old_entries );
 	}
 
 	if ( dsd->entries == NULL ) {

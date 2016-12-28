@@ -398,7 +398,6 @@ enum {
 	SSI_EXTENSIONS,
 	GLOBAL_PASSWORDS_FILE,
 	INDEX_FILES,
-	ACCESS_CONTROL_LIST,
 	LISTENING_PORTS,
 	DOCUMENT_ROOT,
 	SSL_CERTIFICATE,
@@ -587,6 +586,7 @@ struct httplib_context {
 #ifdef USE_TIMERS
 	struct ttimers *timers;
 #endif
+	char *	access_control_list;
 	char *	access_log_file;
 	char *	cgi_environment;
 	char *	error_log_file;

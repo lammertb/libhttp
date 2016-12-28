@@ -58,8 +58,8 @@ int httplib_websocket_client_write( struct httplib_connection *conn, int opcode,
 
 	mask_data( data, dataLen, masking_key, masked_data );
 
-	retval = XX_httplib_websocket_write_exec( conn, opcode, masked_data, dataLen, masking_key );
-	httplib_free( masked_data );
+	retval      = XX_httplib_websocket_write_exec( conn, opcode, masked_data, dataLen, masking_key );
+	masked_data = httplib_free( masked_data );
 
 	return retval;
 

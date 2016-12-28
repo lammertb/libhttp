@@ -933,7 +933,7 @@ typedef void (*httplib_alloc_callback_func)( const char *file, unsigned line, co
 #define					httplib_realloc(a, b) XX_httplib_realloc_ex(a, b, __FILE__, __LINE__)
 
 LIBHTTP_API void *			XX_httplib_calloc_ex( size_t count, size_t size, const char *file, unsigned line );
-LIBHTTP_API void			XX_httplib_free_ex( void *memory, const char *file, unsigned line );
+LIBHTTP_API void *			XX_httplib_free_ex( void *memory, const char *file, unsigned line );
 LIBHTTP_API void *			XX_httplib_malloc_ex( size_t size, const char *file, unsigned line );
 LIBHTTP_API void *			XX_httplib_realloc_ex( void *memory, size_t newsize, const char *file, unsigned line );
 

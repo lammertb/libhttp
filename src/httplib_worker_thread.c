@@ -49,7 +49,7 @@ LIBHTTP_THREAD XX_httplib_worker_thread( void *thread_func_param ) {
 		pwta = thread_func_param;
 
 		worker_thread_run( pwta );
-		httplib_free( thread_func_param );
+		thread_func_param = httplib_free( thread_func_param );
 	}
 
 	return LIBHTTP_THREAD_RETNULL;
@@ -158,13 +158,11 @@ static void *worker_thread_run( struct worker_thread_args *thread_args ) {
 
 					if ( conn->request_info.client_cert != NULL ) {
 
-						ptr.con = conn->request_info.client_cert->subject; httplib_free( ptr.var );
-						ptr.con = conn->request_info.client_cert->issuer;  httplib_free( ptr.var );
-						ptr.con = conn->request_info.client_cert->serial;  httplib_free( ptr.var );
-						ptr.con = conn->request_info.client_cert->finger;  httplib_free( ptr.var );
-						httplib_free( conn->request_info.client_cert );
-
-						conn->request_info.client_cert = NULL;
+						ptr.con = conn->request_info.client_cert->subject; ptr.var = httplib_free( ptr.var );
+						ptr.con = conn->request_info.client_cert->issuer;  ptr.var = httplib_free( ptr.var );
+						ptr.con = conn->request_info.client_cert->serial;  ptr.var = httplib_free( ptr.var );
+						ptr.con = conn->request_info.client_cert->finger;  ptr.var = httplib_free( ptr.var );
+						conn->request_info.client_cert = httplib_free( conn->request_info.client_cert );
 					}
 				}
 #endif
@@ -181,7 +179,7 @@ static void *worker_thread_run( struct worker_thread_args *thread_args ) {
 	CloseHandle( tls.pthread_cond_helper_mutex );
 #endif
 	httplib_pthread_mutex_destroy( & conn->mutex );
-	httplib_free( conn );
+	conn = httplib_free( conn );
 
 	return NULL;
 

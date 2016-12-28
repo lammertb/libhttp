@@ -120,7 +120,7 @@ struct httplib_context *httplib_start( const struct httplib_callbacks *callbacks
 
 			httplib_atomic_dec( & XX_httplib_sTlsInit );
 			httplib_cry( ctx, NULL, "Cannot initialize thread local storage" );
-			httplib_free( ctx );
+			ctx = httplib_free( ctx );
 
 			return NULL;
 		}
@@ -248,7 +248,7 @@ struct httplib_context *httplib_start( const struct httplib_callbacks *callbacks
 			 * thread was not created
 			 */
 
-			if ( wta != NULL ) { httplib_free( wta ); wta = NULL; }
+			if ( wta != NULL ) wta = httplib_free( wta );
 
 			if ( i > 0 ) httplib_cry( ctx, NULL, "Cannot start worker thread %i: error %ld", i + 1, (long)ERRNO );
 			
@@ -284,6 +284,7 @@ static bool process_options( struct httplib_context *ctx, const struct httplib_o
 
 	if ( ctx == NULL ) return false;
 
+	ctx->access_control_list      = NULL;
 	ctx->access_log_file          = NULL;
 	ctx->allow_sendfile_call      = true;
 	ctx->cgi_environment          = NULL;
@@ -309,6 +310,7 @@ static bool process_options( struct httplib_context *ctx, const struct httplib_o
 
 	while ( options != NULL  &&  options->name != NULL ) {
 
+		if ( check_str(  ctx, options, "access_control_list",      & ctx->access_control_list                  ) ) return true;
 		if ( check_file( ctx, options, "access_log_file",          & ctx->access_log_file                      ) ) return true;
 		if ( check_bool( ctx, options, "allow_sendfile_call",      & ctx->allow_sendfile_call                  ) ) return true;
 		if ( check_str(  ctx, options, "cgi_environment",          & ctx->cgi_environment                      ) ) return true;
@@ -342,7 +344,7 @@ static bool process_options( struct httplib_context *ctx, const struct httplib_o
 			if ( ctx->cfg[idx] != NULL ) {
 
 				httplib_cry( ctx, NULL, "warning: %s: duplicate option", options->name );
-				httplib_free( ctx->cfg[idx] );
+				ctx->cfg[idx] = httplib_free( ctx->cfg[idx] );
 			}
 
 			ctx->cfg[idx] = httplib_strdup( options->value );
@@ -417,8 +419,7 @@ static bool check_file( struct httplib_context *ctx, const struct httplib_option
 
 	if ( httplib_strcasecmp( option->name, name ) ) return false;
 
-	if ( *config != NULL ) httplib_free( *config );
-	*config = NULL;
+	if ( *config != NULL ) *config = httplib_free( *config );
 
 	if ( option->value == NULL ) return false;
 
@@ -453,8 +454,7 @@ static bool check_str( struct httplib_context *ctx, const struct httplib_option_
 
 	if ( httplib_strcasecmp( option->name, name ) ) return false;
 
-	if ( *config != NULL ) httplib_free( *config );
-	*config = NULL;
+	if ( *config != NULL ) *config = httplib_free( *config );
 
 	if ( option->value == NULL ) return false;
 

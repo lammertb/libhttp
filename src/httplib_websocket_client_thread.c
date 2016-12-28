@@ -56,7 +56,7 @@ LIBHTTP_THREAD XX_httplib_websocket_client_thread( void *data ) {
 
 	if ( cdata->close_handler != NULL ) cdata->close_handler( cdata->conn, cdata->callback_data );
 
-	httplib_free( cdata );
+	cdata = httplib_free( cdata );
 
 	return LIBHTTP_THREAD_RETNULL;
 
