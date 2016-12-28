@@ -46,7 +46,7 @@ int XX_httplib_substitute_index_file( struct httplib_connection *conn, char *pat
 	bool found;
 
 	if ( conn == NULL  ||  conn->ctx == NULL  ||  path == NULL ) return 0;
-	if ( conn->ctx->cfg[DOCUMENT_ROOT] == NULL                 ) return 0;
+	if ( conn->ctx->document_root == NULL                      ) return 0;
 
 	list  = conn->ctx->index_files;
 	n     = strlen( path );

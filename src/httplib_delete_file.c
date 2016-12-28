@@ -39,8 +39,8 @@ void XX_httplib_delete_file( struct httplib_connection *conn, const char *path )
 	struct de de;
 	char error_string[ERROR_STRING_LEN];
 
-	if ( conn == NULL  ||  conn->ctx == NULL   ) return;
-	if ( conn->ctx->cfg[DOCUMENT_ROOT] == NULL ) {
+	if ( conn == NULL  ||  conn->ctx == NULL ) return;
+	if ( conn->ctx->document_root == NULL ) {
 
 		XX_httplib_send_http_error( conn, 405, "Error: File delete operations are not supported" );
 		return;

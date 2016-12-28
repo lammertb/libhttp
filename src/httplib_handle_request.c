@@ -270,7 +270,7 @@ no_callback_resource:
  * 6.2.1. thus, the server must have real files
  */
 
-		if ( conn->ctx->cfg[DOCUMENT_ROOT] == NULL ) {
+		if ( conn->ctx->document_root == NULL ) {
 
 			/*
 			 * This server does not have any real files, thus the
@@ -391,7 +391,7 @@ no_callback_resource:
 	 * by a script file. Thus, a DOCUMENT_ROOT must exist.
 	 */
 
-	if ( conn->ctx->cfg[DOCUMENT_ROOT] == NULL ) {
+	if ( conn->ctx->document_root == NULL ) {
 
 		XX_httplib_send_http_error( conn, 404, "%s", "Not Found" );
 		return;

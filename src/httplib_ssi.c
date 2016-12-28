@@ -44,7 +44,7 @@ static void do_ssi_include( struct httplib_connection *conn, const char *ssi, ch
 	size_t len;
 	bool truncated;
 
-	if ( conn == NULL  ||  conn->ctx == NULL  ||  conn->ctx->cfg[DOCUMENT_ROOT] == NULL ) return;
+	if ( conn == NULL  ||  conn->ctx == NULL  ||  conn->ctx->document_root == NULL ) return;
 
 	truncated = false;
 
@@ -61,7 +61,7 @@ static void do_ssi_include( struct httplib_connection *conn, const char *ssi, ch
 		 */
 
 		file_name[511] = 0;
-		doc_root       = conn->ctx->cfg[DOCUMENT_ROOT];
+		doc_root       = conn->ctx->document_root;
 
 		XX_httplib_snprintf( conn, &truncated, path, sizeof(path), "%s/%s", doc_root, file_name );
 

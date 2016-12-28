@@ -65,7 +65,7 @@ void XX_httplib_interpret_uri( struct httplib_connection *conn, char *filename, 
 	if ( conn == NULL  ||  conn->ctx == NULL  ||  filep == NULL ) return;
 
 	uri  = conn->request_info.local_uri;
-	root = conn->ctx->cfg[DOCUMENT_ROOT];
+	root = conn->ctx->document_root;
 
 	memset( filep, 0, sizeof(*filep) );
 

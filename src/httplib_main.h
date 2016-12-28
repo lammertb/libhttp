@@ -393,7 +393,6 @@ union usa {
 enum {
 	CGI_EXTENSIONS,
 	SSI_EXTENSIONS,
-	DOCUMENT_ROOT,
 	HIDE_FILES,
 	SSL_CA_PATH,
 	WEBSOCKET_ROOT,
@@ -583,6 +582,7 @@ struct httplib_context {
 	char *	authentication_domain;
 	char *	cgi_environment;
 	char *	cgi_interpreter;
+	char *	document_root;
 	char *	error_log_file;
 	char *	extra_mime_types;
 	char *	global_auth_file;

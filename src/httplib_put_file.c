@@ -46,8 +46,8 @@ void XX_httplib_put_file( struct httplib_connection *conn, const char *path ) {
 	char error_string[ERROR_STRING_LEN];
 	time_t curtime;
 
-	if ( conn == NULL   ||   conn->ctx == NULL ) return;
-	if ( conn->ctx->cfg[DOCUMENT_ROOT] == NULL ) return;
+	if ( conn == NULL  ||  conn->ctx == NULL ) return;
+	if ( conn->ctx->document_root    == NULL ) return;
 
 	curtime = time( NULL );
 

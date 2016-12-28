@@ -45,8 +45,8 @@ void XX_httplib_mkcol( struct httplib_connection *conn, const char *path ) {
 	time_t curtime;
 	char error_string[ERROR_STRING_LEN];
 
-	if ( conn == NULL   ||   conn->ctx == NULL ) return;
-	if ( conn->ctx->cfg[DOCUMENT_ROOT] == NULL ) return;
+	if ( conn == NULL  ||  conn->ctx == NULL ) return;
+	if ( conn->ctx->document_root    == NULL ) return;
 
 	curtime = time( NULL );
 

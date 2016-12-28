@@ -103,7 +103,7 @@ void XX_httplib_handle_propfind( struct httplib_connection *conn, const char *pa
 	time_t curtime;
 
 	if ( conn == NULL  ||  conn->ctx == NULL  ||  path == NULL  ||  filep == NULL ) return;
-	if ( conn->ctx->cfg[DOCUMENT_ROOT] == NULL ) return;
+	if ( conn->ctx->document_root == NULL ) return;
 
 	depth   = httplib_get_header( conn, "Depth" );
 	curtime = time( NULL );

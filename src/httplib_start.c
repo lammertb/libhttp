@@ -31,10 +31,11 @@
 #include "httplib_string.h"
 #include "httplib_utils.h"
 
-static bool			check_bool( struct httplib_context *ctx, const struct httplib_option_t *option, const char *name, bool *config );
+static bool			check_bool( struct httplib_context *ctx, const struct httplib_option_t *option, const char *name, bool *config  );
+static bool			check_dir(  struct httplib_context *ctx, const struct httplib_option_t *option, const char *name, char **config );
 static bool			check_file( struct httplib_context *ctx, const struct httplib_option_t *option, const char *name, char **config );
-static bool			check_int( struct httplib_context *ctx, const struct httplib_option_t *option, const char *name, int *config, int minval, int maxval );
-static bool			check_str( struct httplib_context *ctx, const struct httplib_option_t *option, const char *name, char **config );
+static bool			check_int(  struct httplib_context *ctx, const struct httplib_option_t *option, const char *name, int *config, int minval, int maxval );
+static bool			check_str(  struct httplib_context *ctx, const struct httplib_option_t *option, const char *name, char **config );
 static struct httplib_context *	cleanup( struct httplib_context *ctx, PRINTF_FORMAT_STRING(const char *fmt), ...) PRINTF_ARGS(2, 3);
 static bool			process_options( struct httplib_context *ctx, const struct httplib_option_t *options );
 
@@ -284,31 +285,40 @@ static bool process_options( struct httplib_context *ctx, const struct httplib_o
 
 	if ( ctx == NULL ) return false;
 
-	ctx->access_control_list      = NULL;
-	ctx->access_log_file          = NULL;
-	ctx->allow_sendfile_call      = true;
-	ctx->cgi_environment          = NULL;
-	ctx->decode_url               = true;
-	ctx->enable_directory_listing = true;
-	ctx->enable_keep_alive        = false;
-	ctx->error_log_file           = NULL;
-	ctx->extra_mime_types         = NULL;
-	ctx->num_threads              = 50;
-	ctx->protect_uri              = NULL;
-	ctx->request_timeout          = 30000;
-	ctx->run_as_user              = NULL;
-	ctx->ssl_ca_file              = NULL;
-	ctx->ssl_cipher_list          = NULL;
-	ctx->ssl_protocol_version     = 0;
-	ctx->ssl_short_trust          = false;
-	ctx->ssl_verify_depth         = 9;
-	ctx->ssl_verify_paths         = true;
-	ctx->ssl_verify_peer          = false;
-	ctx->static_file_max_age      = 0;
-	ctx->throttle                 = NULL;
-	ctx->tcp_nodelay              = false;
-	ctx->url_rewrite_patterns     = NULL;
-	ctx->websocket_timeout        = 30000;
+	ctx->access_control_allow_origin = NULL;
+	ctx->access_control_list         = NULL;
+	ctx->access_log_file             = NULL;
+	ctx->allow_sendfile_call         = true;
+	ctx->authentication_domain       = NULL;
+	ctx->cgi_environment             = NULL;
+	ctx->cgi_interpreter             = NULL;
+	ctx->decode_url                  = true;
+	ctx->document_root               = NULL;
+	ctx->enable_directory_listing    = true;
+	ctx->enable_keep_alive           = false;
+	ctx->error_log_file              = NULL;
+	ctx->extra_mime_types            = NULL;
+	ctx->global_auth_file            = NULL;
+	ctx->index_files                 = NULL;
+	ctx->listening_ports             = NULL;
+	ctx->num_threads                 = 50;
+	ctx->protect_uri                 = NULL;
+	ctx->put_delete_auth_file        = NULL;
+	ctx->request_timeout             = 30000;
+	ctx->run_as_user                 = NULL;
+	ctx->ssl_ca_file                 = NULL;
+	ctx->ssl_certificate             = NULL;
+	ctx->ssl_cipher_list             = NULL;
+	ctx->ssl_protocol_version        = 0;
+	ctx->ssl_short_trust             = false;
+	ctx->ssl_verify_depth            = 9;
+	ctx->ssl_verify_paths            = true;
+	ctx->ssl_verify_peer             = false;
+	ctx->static_file_max_age         = 0;
+	ctx->throttle                    = NULL;
+	ctx->tcp_nodelay                 = false;
+	ctx->url_rewrite_patterns        = NULL;
+	ctx->websocket_timeout           = 30000;
 
 	if ( (ctx->access_control_allow_origin = strdup( "*" )) == NULL ) {
 
@@ -344,6 +354,7 @@ static bool process_options( struct httplib_context *ctx, const struct httplib_o
 		if ( check_str(  ctx, options, "cgi_environment",             & ctx->cgi_environment                         ) ) return true;
 		if ( check_file( ctx, options, "cgi_interpreter",             & ctx->cgi_interpreter                         ) ) return true;
 		if ( check_bool( ctx, options, "decode_url",                  & ctx->decode_url                              ) ) return true;
+		if ( check_dir(  ctx, options, "document_root",               & ctx->document_root                           ) ) return true;
 		if ( check_bool( ctx, options, "enable_directory_listing",    & ctx->enable_directory_listing                ) ) return true;
 		if ( check_bool( ctx, options, "enable_keep_alive",           & ctx->enable_keep_alive                       ) ) return true;
 		if ( check_file( ctx, options, "error_log_file",              & ctx->error_log_file                          ) ) return true;
@@ -435,6 +446,42 @@ static bool check_bool( struct httplib_context *ctx, const struct httplib_option
 
 
 /*
+ * static bool check_dir( struct httplib_context *ctx, const struct httplib_option_t *option, const char *name, char **config );
+ *
+ * The function check_dir() checks if an option is equal to a directory config
+ * parameter and stores the value if that is the case. If the value cannot be
+ * recognized, true is returned and the function performs a complete cleanup.
+ * If the option name could not be found, the function returns false to
+ * indicate that the search should go on. IF the value could be found, also
+ * false is returned.
+ */
+
+static bool check_dir( struct httplib_context *ctx, const struct httplib_option_t *option, const char *name, char **config ) {
+
+	if ( ctx == NULL  ||  option == NULL  ||  option->name == NULL  ||  name == NULL  ||  config == NULL ) {
+
+		cleanup( ctx, "Internal error parsing directory option" );
+		return true;
+	}
+
+	if ( httplib_strcasecmp( option->name, name ) ) return false;
+
+	*config = httplib_free( *config );
+
+	if ( option->value == NULL ) return false;
+
+	*config = httplib_strdup( option->value );
+	if ( *config != NULL ) return false;
+
+	cleanup( ctx, "Out of memory assigning value \"%s\" to option \"%s\"", option->value, option->name );
+	return true;
+
+}  /* check_dir */
+
+
+
+
+/*
  * static bool check_file( struct httplib_context *ctx, const struct httplib_option_t *option, const char *name, char **config );
  *
  * The function check_file() checks if an option is equal to a filename config
@@ -449,7 +496,7 @@ static bool check_file( struct httplib_context *ctx, const struct httplib_option
 
 	if ( ctx == NULL  ||  option == NULL  ||  option->name == NULL  ||  name == NULL  ||  config == NULL ) {
 
-		cleanup( ctx, "Internal error parsing string option" );
+		cleanup( ctx, "Internal error parsing file option" );
 		return true;
 	}
 

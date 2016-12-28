@@ -34,7 +34,6 @@
 struct httplib_option XX_httplib_config_options[] = {
 	{ "cgi_pattern",                 CONFIG_TYPE_EXT_PATTERN, "**.cgi$|**.pl$|**.php$"                                           },
 	{ "ssi_pattern",                 CONFIG_TYPE_EXT_PATTERN, "**.shtml$|**.shtm$"                                               },
-	{ "document_root",               CONFIG_TYPE_DIRECTORY,   NULL                                                               },
 	{ "hide_files_patterns",         CONFIG_TYPE_EXT_PATTERN, NULL                                                               },
 	{ "ssl_ca_path",                 CONFIG_TYPE_DIRECTORY,   NULL                                                               },
 	{ "websocket_root",              CONFIG_TYPE_DIRECTORY,   NULL                                                               },
