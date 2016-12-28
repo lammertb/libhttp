@@ -308,11 +308,18 @@ static bool process_options( struct httplib_context *ctx, const struct httplib_o
 	ctx->tcp_nodelay              = false;
 	ctx->websocket_timeout        = 30000;
 
+	if ( (ctx->authentication_domain = strdup( "example.com" )) == NULL ) {
+
+		cleanup( ctx, "Out of memory creating context" );
+		return true;
+	}
+
 	while ( options != NULL  &&  options->name != NULL ) {
 
 		if ( check_str(  ctx, options, "access_control_list",      & ctx->access_control_list                  ) ) return true;
 		if ( check_file( ctx, options, "access_log_file",          & ctx->access_log_file                      ) ) return true;
 		if ( check_bool( ctx, options, "allow_sendfile_call",      & ctx->allow_sendfile_call                  ) ) return true;
+		if ( check_str(  ctx, options, "authentication_domain",    & ctx->authentication_domain                ) ) return true;
 		if ( check_str(  ctx, options, "cgi_environment",          & ctx->cgi_environment                      ) ) return true;
 		if ( check_bool( ctx, options, "decode_url",               & ctx->decode_url                           ) ) return true;
 		if ( check_bool( ctx, options, "enable_directory_listing", & ctx->enable_directory_listing             ) ) return true;

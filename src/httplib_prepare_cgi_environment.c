@@ -59,7 +59,7 @@ void XX_httplib_prepare_cgi_environment( struct httplib_connection *conn, const 
 	env->varused = 0;
 	env->var     = httplib_malloc( env->buflen * sizeof(char *) );
 
-	if ( conn->ctx->cfg[AUTHENTICATION_DOMAIN] != NULL ) XX_httplib_addenv( env, "SERVER_NAME=%s",   conn->ctx->cfg[AUTHENTICATION_DOMAIN] );
+	if ( conn->ctx->authentication_domain != NULL ) XX_httplib_addenv( env, "SERVER_NAME=%s",   conn->ctx->authentication_domain );
 	XX_httplib_addenv( env, "SERVER_ROOT=%s",                   conn->ctx->cfg[DOCUMENT_ROOT] );
 	XX_httplib_addenv( env, "DOCUMENT_ROOT=%s",                 conn->ctx->cfg[DOCUMENT_ROOT] );
 	XX_httplib_addenv( env, "SERVER_SOFTWARE=%s/%s", "LibHTTP", httplib_version()             );

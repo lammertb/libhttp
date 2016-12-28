@@ -34,7 +34,7 @@
  * uri at the current server.
  */
 
-const char * XX_httplib_get_rel_url_at_current_server( const char *uri, const struct httplib_connection *conn ) {
+const char *XX_httplib_get_rel_url_at_current_server( const char *uri, const struct httplib_connection *conn ) {
 
 	const char *server_domain;
 	size_t server_domain_len;
@@ -46,6 +46,8 @@ const char * XX_httplib_get_rel_url_at_current_server( const char *uri, const st
 	const char *portbegin;
 	char *portend;
 
+	if ( conn == NULL  ||  conn->ctx == NULL ) return NULL;
+
 	request_domain_len = 0;
 	port               = 0;
 	hostbegin          = NULL;
@@ -55,11 +57,11 @@ const char * XX_httplib_get_rel_url_at_current_server( const char *uri, const st
 	 * DNS is case insensitive, so use case insensitive string compare here
 	 */
 
-	server_domain = conn->ctx->cfg[AUTHENTICATION_DOMAIN];
-	if ( server_domain == NULL ) return 0;
+	server_domain = conn->ctx->authentication_domain;
+	if ( server_domain == NULL ) return NULL;
 
 	server_domain_len = strlen( server_domain );
-	if ( server_domain_len == 0 ) return 0;
+	if ( server_domain_len == 0 ) return NULL;
 
 	for (i=0; XX_httplib_abs_uri_protocols[i].proto != NULL; i++) {
 
@@ -68,7 +70,7 @@ const char * XX_httplib_get_rel_url_at_current_server( const char *uri, const st
 			hostbegin = uri + XX_httplib_abs_uri_protocols[i].proto_len;
 			hostend   = strchr( hostbegin, '/' );
 
-			if ( hostend == NULL ) return 0;
+			if ( hostend == NULL ) return NULL;
 
 			portbegin = strchr( hostbegin, ':' );
 
@@ -80,7 +82,7 @@ const char * XX_httplib_get_rel_url_at_current_server( const char *uri, const st
 			
 			else {
 				port = strtoul( portbegin + 1, &portend, 10 );
-				if ( portend != hostend  ||  ! port  ||  ! XX_httplib_is_valid_port( port ) ) return 0;
+				if ( portend != hostend  ||  ! port  ||  ! XX_httplib_is_valid_port( port ) ) return NULL;
 				request_domain_len = (size_t)(portbegin - hostbegin);
 			}
 
@@ -97,11 +99,11 @@ const char * XX_httplib_get_rel_url_at_current_server( const char *uri, const st
 		 * port remains 0 if the protocol is not found
 		 */
 
-		return 0;
+		return NULL;
 	}
 
-	if ( conn->client.lsa.sa.sa_family == AF_INET6 ) { if ( ntohs( conn->client.lsa.sin6.sin6_port ) != port ) return 0; }
-	else                                             { if ( ntohs( conn->client.lsa.sin.sin_port   ) != port ) return 0; }
+	if ( conn->client.lsa.sa.sa_family == AF_INET6 ) { if ( ntohs( conn->client.lsa.sin6.sin6_port ) != port ) return NULL; }
+	else                                             { if ( ntohs( conn->client.lsa.sin.sin_port   ) != port ) return NULL; }
 
 	if ( request_domain_len != server_domain_len  ||  ( memcmp( server_domain, hostbegin, server_domain_len ) != 0 ) ) {
 
@@ -109,7 +111,7 @@ const char * XX_httplib_get_rel_url_at_current_server( const char *uri, const st
 		 * Request is directed to another server
 		 */
 
-		return 0;
+		return NULL;
 	}
 
 	return hostend;

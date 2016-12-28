@@ -394,7 +394,6 @@ enum {
 	CGI_EXTENSIONS,
 	PUT_DELETE_PASSWORDS_FILE,
 	CGI_INTERPRETER,
-	AUTHENTICATION_DOMAIN,
 	SSI_EXTENSIONS,
 	GLOBAL_PASSWORDS_FILE,
 	INDEX_FILES,
@@ -588,6 +587,7 @@ struct httplib_context {
 #endif
 	char *	access_control_list;
 	char *	access_log_file;
+	char *	authentication_domain;
 	char *	cgi_environment;
 	char *	error_log_file;
 	char *	extra_mime_types;

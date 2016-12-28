@@ -53,8 +53,8 @@ void XX_httplib_send_authorization_request( struct httplib_connection *conn ) {
 
 	XX_httplib_gmt_time_string( date, sizeof(date), &curtime );
 
-	if ( conn->ctx->cfg[AUTHENTICATION_DOMAIN] != NULL ) auth_domain = conn->ctx->cfg[AUTHENTICATION_DOMAIN];
-	else                                                 auth_domain = "example.com";
+	if ( conn->ctx->authentication_domain != NULL ) auth_domain = conn->ctx->authentication_domain;
+	else                                            auth_domain = "example.com";
 
 	httplib_printf( conn, "HTTP/1.1 401 Unauthorized\r\n" );
 	XX_httplib_send_no_cache_header( conn );

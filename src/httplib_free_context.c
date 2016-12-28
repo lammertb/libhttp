@@ -79,15 +79,16 @@ void XX_httplib_free_context( struct httplib_context *ctx ) {
 	 * Deallocate config parameters
 	 */
 
-	if ( ctx->access_control_list != NULL ) ctx->access_control_list = httplib_free( ctx->access_control_list );
-	if ( ctx->access_log_file     != NULL ) ctx->access_log_file     = httplib_free( ctx->access_log_file     );
-	if ( ctx->cgi_environment     != NULL ) ctx->cgi_environment     = httplib_free( ctx->cgi_environment     );
-	if ( ctx->error_log_file      != NULL ) ctx->error_log_file      = httplib_free( ctx->error_log_file      );
-	if ( ctx->extra_mime_types    != NULL ) ctx->extra_mime_types    = httplib_free( ctx->extra_mime_types    );
-	if ( ctx->protect_uri         != NULL ) ctx->protect_uri         = httplib_free( ctx->protect_uri         );
-	if ( ctx->run_as_user         != NULL ) ctx->run_as_user         = httplib_free( ctx->run_as_user         );
-	if ( ctx->ssl_cipher_list     != NULL ) ctx->ssl_cipher_list     = httplib_free( ctx->ssl_cipher_list     );
-	if ( ctx->throttle            != NULL ) ctx->throttle            = httplib_free( ctx->throttle            );
+	if ( ctx->access_control_list   != NULL ) ctx->access_control_list   = httplib_free( ctx->access_control_list   );
+	if ( ctx->access_log_file       != NULL ) ctx->access_log_file       = httplib_free( ctx->access_log_file       );
+	if ( ctx->authentication_domain != NULL ) ctx->authentication_domain = httplib_free( ctx->authentication_domain );
+	if ( ctx->cgi_environment       != NULL ) ctx->cgi_environment       = httplib_free( ctx->cgi_environment       );
+	if ( ctx->error_log_file        != NULL ) ctx->error_log_file        = httplib_free( ctx->error_log_file        );
+	if ( ctx->extra_mime_types      != NULL ) ctx->extra_mime_types      = httplib_free( ctx->extra_mime_types      );
+	if ( ctx->protect_uri           != NULL ) ctx->protect_uri           = httplib_free( ctx->protect_uri           );
+	if ( ctx->run_as_user           != NULL ) ctx->run_as_user           = httplib_free( ctx->run_as_user           );
+	if ( ctx->ssl_cipher_list       != NULL ) ctx->ssl_cipher_list       = httplib_free( ctx->ssl_cipher_list       );
+	if ( ctx->throttle              != NULL ) ctx->throttle              = httplib_free( ctx->throttle              );
 
 	for (i = 0; i < NUM_OPTIONS; i++) {
 
