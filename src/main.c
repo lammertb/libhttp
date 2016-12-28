@@ -365,7 +365,7 @@ static int set_option( struct httplib_option_t *options, const char *name, const
 	case CONFIG_TYPE_STRING:
 		/* any text */
 		break;
-	case CONFIG_TYPE_BOOLEAN:
+	case 0x5 : /* CONFIG_TYPE_BOOLEAN: */
 		/* boolean value, yes or no */
 		if ((0 != strcmp(value, "yes")) && (0 != strcmp(value, "no"))) {
 			/* invalid boolean */
