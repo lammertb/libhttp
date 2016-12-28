@@ -120,17 +120,17 @@ LIBHTTP_API void *XX_httplib_calloc_ex( size_t count, size_t size, const char *f
  *
  * The function returns a (void *)NULL pointer which can be used to reset
  * the value of pointers whose contents has been destroyed.
+ *
+ * It is allowed to pass a NULL pointer to the function. The function will do
+ * effectively nothing in that case and just return NULL. This comes in handy
+ * when freeing fields in structures which are optional and NULL if not used.
  */
 
 LIBHTTP_API void *XX_httplib_free_ex( void *memory, const char *file, unsigned line ) {
 
 	size_t *data;
 
-	if ( memory == NULL ) {
-		
-		if ( alloc_log_func != NULL ) alloc_log_func( file, line, "free", 0, httplib_memory_blocks_used, httplib_memory_bytes_used );
-		return NULL;
-	}
+	if ( memory == NULL ) return NULL;
 
 	data = ((size_t *)memory) - 1;
 

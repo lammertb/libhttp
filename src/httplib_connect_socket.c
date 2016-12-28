@@ -103,7 +103,7 @@ int XX_httplib_connect_socket( struct httplib_context *ctx, const char *host, in
 				sa->sin6.sin6_port = htons( (uint16_t)port );
 				ip_ver = 6;
 			}
-			httplib_free( h );
+			h = httplib_free( h );
 		}
 	}
 

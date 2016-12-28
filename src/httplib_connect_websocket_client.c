@@ -86,7 +86,7 @@ struct httplib_connection *httplib_connect_websocket_client( const char *host, i
 			XX_httplib_snprintf( conn, NULL, error_buffer, error_buffer_size, "Unexpected server reply" );
 		}
 
-		if ( conn != NULL ) conn = httplib_free( conn );
+		conn = httplib_free( conn );
 		return NULL;
 	}
 

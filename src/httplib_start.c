@@ -248,7 +248,7 @@ struct httplib_context *httplib_start( const struct httplib_callbacks *callbacks
 			 * thread was not created
 			 */
 
-			if ( wta != NULL ) wta = httplib_free( wta );
+			wta = httplib_free( wta );
 
 			if ( i > 0 ) httplib_cry( ctx, NULL, "Cannot start worker thread %i: error %ld", i + 1, (long)ERRNO );
 			
@@ -426,7 +426,7 @@ static bool check_file( struct httplib_context *ctx, const struct httplib_option
 
 	if ( httplib_strcasecmp( option->name, name ) ) return false;
 
-	if ( *config != NULL ) *config = httplib_free( *config );
+	*config = httplib_free( *config );
 
 	if ( option->value == NULL ) return false;
 
@@ -461,7 +461,7 @@ static bool check_str( struct httplib_context *ctx, const struct httplib_option_
 
 	if ( httplib_strcasecmp( option->name, name ) ) return false;
 
-	if ( *config != NULL ) *config = httplib_free( *config );
+	*config = httplib_free( *config );
 
 	if ( option->value == NULL ) return false;
 
@@ -526,14 +526,20 @@ static struct httplib_context *cleanup( struct httplib_context *ctx, const char 
 	va_list ap;
 	char buf[MG_BUF_LEN];
 
-	va_start( ap, fmt );
-	vsnprintf_impl( buf, sizeof(buf), fmt, ap );
-	va_end( ap );
-	buf[sizeof(buf)-1] = 0;
+	if ( ctx == NULL ) return NULL;
 
-	httplib_cry( ctx, NULL, "%s", buf );
+	if ( fmt != NULL ) {
 
-	if ( ctx != NULL ) XX_httplib_free_context( ctx );
+		va_start( ap, fmt );
+		vsnprintf_impl( buf, sizeof(buf), fmt, ap );
+		va_end( ap );
+		buf[sizeof(buf)-1] = 0;
+
+		httplib_cry( ctx, NULL, "%s", buf );
+	}
+
+	XX_httplib_free_context( ctx );
+
 	httplib_pthread_setspecific( XX_httplib_sTlsKey, NULL );
 
 	return NULL;

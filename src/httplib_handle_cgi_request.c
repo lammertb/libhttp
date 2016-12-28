@@ -326,7 +326,7 @@ done:
 	if ( out != NULL ) fclose( out ); else if ( fdout[0] != -1 ) close( fdout[0] );
 	if ( err != NULL ) fclose( err ); else if ( fderr[0] != -1 ) close( fderr[0] );
 
-	if ( buf != NULL ) buf = httplib_free( buf );
+	buf = httplib_free( buf );
 
 }  /* XX_httplib_handle_cgi_request */
 

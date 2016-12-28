@@ -38,13 +38,15 @@ static int alloc_vprintf2( char **buf, const char *fmt, va_list ap ) {
 	size_t size;
 	int len;
 
+	if ( buf == NULL  ||  fmt == NULL ) return -1;
+
 	size = MG_BUF_LEN / 4;
 	len  = -1;
 	*buf = NULL;
 
 	while ( len < 0 ) {
 
-		if ( *buf != NULL ) *buf = httplib_free( *buf );
+		*buf = httplib_free( *buf );
 
 		size *= 4;
 		*buf = httplib_malloc( size );
@@ -152,7 +154,7 @@ int XX_httplib_vprintf( struct httplib_connection *conn, const char *fmt, va_lis
 	buf = NULL;
 
 	if ( (len = alloc_vprintf( &buf, mem, sizeof(mem), fmt, ap )) > 0 ) len = httplib_write( conn, buf, (size_t)len );
-	if ( buf != mem  &&  buf != NULL ) buf = httplib_free( buf );
+	if ( buf != mem ) buf = httplib_free( buf );
 
 	return len;
 
