@@ -47,7 +47,6 @@ int XX_httplib_refresh_trust( struct httplib_connection *conn ) {
 	struct stat cert_buf;
 	long int t;
 	char *pem;
-	int should_verify_peer;
 
 	if ( conn == NULL  ||  conn->ctx == NULL ) return 0;
 
@@ -63,9 +62,7 @@ int XX_httplib_refresh_trust( struct httplib_connection *conn ) {
 
 		data_check = t;
 
-		should_verify_peer = conn->ctx->cfg[SSL_DO_VERIFY_PEER] != NULL  &&  ! httplib_strcasecmp( conn->ctx->cfg[SSL_DO_VERIFY_PEER], "yes" );
-
-		if ( should_verify_peer ) {
+		if ( conn->ctx->ssl_verify_peer ) {
 
 			if ( SSL_CTX_load_verify_locations( conn->ctx->ssl_ctx, conn->ctx->cfg[SSL_CA_FILE], conn->ctx->cfg[SSL_CA_PATH] ) != 1 ) {
 

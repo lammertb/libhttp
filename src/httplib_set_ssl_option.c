@@ -42,7 +42,6 @@ bool XX_httplib_set_ssl_option( struct httplib_context *ctx ) {
 
 	const char *pem;
 	int callback_ret;
-	int should_verify_peer;
 	int use_default_verify_paths;
 	int verify_depth;
 	time_t now_rt;
@@ -51,8 +50,11 @@ bool XX_httplib_set_ssl_option( struct httplib_context *ctx ) {
 	md5_state_t md5state;
 	int protocol_ver;
 
-	/* If PEM file is not specified and the init_ssl callback
-	 * is not specified, skip SSL initialization. */
+	/*
+	 * If PEM file is not specified and the init_ssl callback
+	 * is not specified, skip SSL initialization.
+	 */
+
 	if ( ctx == NULL ) return false;
 
 	now_rt = time( NULL );
@@ -130,10 +132,9 @@ bool XX_httplib_set_ssl_option( struct httplib_context *ctx ) {
 
 	if ( pem != NULL  &&  ! XX_httplib_ssl_use_pem_file( ctx, pem ) ) return false;
 
-	should_verify_peer       = ctx->cfg[SSL_DO_VERIFY_PEER]       != NULL  &&  ! httplib_strcasecmp( ctx->cfg[SSL_DO_VERIFY_PEER],       "yes" );
 	use_default_verify_paths = ctx->cfg[SSL_DEFAULT_VERIFY_PATHS] != NULL  &&  ! httplib_strcasecmp( ctx->cfg[SSL_DEFAULT_VERIFY_PATHS], "yes" );
 
-	if ( should_verify_peer ) {
+	if ( ctx->ssl_verify_peer ) {
 
 		if ( SSL_CTX_load_verify_locations( ctx->ssl_ctx, ctx->cfg[SSL_CA_FILE], ctx->cfg[SSL_CA_PATH] ) != 1 ) {
 

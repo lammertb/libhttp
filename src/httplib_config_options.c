@@ -54,7 +54,6 @@ struct httplib_option XX_httplib_config_options[] = {
 	{ "url_rewrite_patterns",        CONFIG_TYPE_STRING,      NULL                                                               },
 	{ "hide_files_patterns",         CONFIG_TYPE_EXT_PATTERN, NULL                                                               },
 	{ "request_timeout_ms",          CONFIG_TYPE_NUMBER,      "30000"                                                            },
-	{ "ssl_verify_peer",             CONFIG_TYPE_BOOLEAN,     "no"                                                               },
 	{ "ssl_ca_path",                 CONFIG_TYPE_DIRECTORY,   NULL                                                               },
 	{ "ssl_ca_file",                 CONFIG_TYPE_FILE,        NULL                                                               },
 	{ "ssl_verify_depth",            CONFIG_TYPE_NUMBER,      "9"                                                                },
