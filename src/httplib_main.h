@@ -400,7 +400,6 @@ enum {
 	SSL_CERTIFICATE,
 	HIDE_FILES,
 	SSL_CA_PATH,
-	SSL_CA_FILE,
 	WEBSOCKET_ROOT,
 	ERROR_PAGES,
 	NUM_OPTIONS
@@ -593,6 +592,7 @@ struct httplib_context {
 	char *	listening_ports;
 	char *	protect_uri;
 	char *	run_as_user;
+	char *	ssl_ca_file;
 	char *	ssl_cipher_list;
 	char *	throttle;
 	char *	url_rewrite_patterns;

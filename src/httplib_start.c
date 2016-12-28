@@ -297,6 +297,7 @@ static bool process_options( struct httplib_context *ctx, const struct httplib_o
 	ctx->protect_uri              = NULL;
 	ctx->request_timeout          = 30000;
 	ctx->run_as_user              = NULL;
+	ctx->ssl_ca_file              = NULL;
 	ctx->ssl_cipher_list          = NULL;
 	ctx->ssl_protocol_version     = 0;
 	ctx->ssl_short_trust          = false;
@@ -335,32 +336,35 @@ static bool process_options( struct httplib_context *ctx, const struct httplib_o
 
 	while ( options != NULL  &&  options->name != NULL ) {
 
-		if ( check_str(  ctx, options, "access_control_list",      & ctx->access_control_list                  ) ) return true;
-		if ( check_file( ctx, options, "access_log_file",          & ctx->access_log_file                      ) ) return true;
-		if ( check_bool( ctx, options, "allow_sendfile_call",      & ctx->allow_sendfile_call                  ) ) return true;
-		if ( check_str(  ctx, options, "authentication_domain",    & ctx->authentication_domain                ) ) return true;
-		if ( check_str(  ctx, options, "cgi_environment",          & ctx->cgi_environment                      ) ) return true;
-		if ( check_bool( ctx, options, "decode_url",               & ctx->decode_url                           ) ) return true;
-		if ( check_bool( ctx, options, "enable_directory_listing", & ctx->enable_directory_listing             ) ) return true;
-		if ( check_bool( ctx, options, "enable_keep_alive",        & ctx->enable_keep_alive                    ) ) return true;
-		if ( check_file( ctx, options, "error_log_file",           & ctx->error_log_file                       ) ) return true;
-		if ( check_str(  ctx, options, "extra_mime_types",         & ctx->extra_mime_types                     ) ) return true;
-		if ( check_str(  ctx, options, "listening_ports",          & ctx->listening_ports                      ) ) return true;
-		if ( check_int(  ctx, options, "num_threads",              & ctx->num_threads,              1, INT_MAX ) ) return true;
-		if ( check_str(  ctx, options, "protect_uri",              & ctx->protect_uri                          ) ) return true;
-		if ( check_int(  ctx, options, "request_timeout",          & ctx->request_timeout,          0, INT_MAX ) ) return true;
-		if ( check_str(  ctx, options, "run_as_user",              & ctx->run_as_user                          ) ) return true;
-		if ( check_str(  ctx, options, "ssl_cipher_list",          & ctx->ssl_cipher_list                      ) ) return true;
-		if ( check_int(  ctx, options, "ssl_protocol_version",     & ctx->ssl_protocol_version,     0, 4       ) ) return true;
-		if ( check_bool( ctx, options, "ssl_short_trust",          & ctx->ssl_short_trust                      ) ) return true;
-		if ( check_int(  ctx, options, "ssl_verify_depth",         & ctx->ssl_verify_depth,         0, 9       ) ) return true;
-		if ( check_bool( ctx, options, "ssl_verify_paths",         & ctx->ssl_verify_paths                     ) ) return true;
-		if ( check_bool( ctx, options, "ssl_verify_peer",          & ctx->ssl_verify_peer                      ) ) return true;
-		if ( check_int(  ctx, options, "static_file_max_age",      & ctx->static_file_max_age,      0, INT_MAX ) ) return true;
-		if ( check_str(  ctx, options, "throttle",                 & ctx->throttle                             ) ) return true;
-		if ( check_bool( ctx, options, "tcp_nodelay",              & ctx->tcp_nodelay                          ) ) return true;
-		if ( check_str(  ctx, options, "url_rewrite_patterns",     & ctx->url_rewrite_patterns                 ) ) return true;
-		if ( check_int(  ctx, options, "websocket_timeout",        & ctx->websocket_timeout,        0, INT_MAX ) ) return true;
+		if ( check_str(  ctx, options, "access_control_allow_origin", & ctx->access_control_allow_origin             ) ) return true;
+		if ( check_str(  ctx, options, "access_control_list",         & ctx->access_control_list                     ) ) return true;
+		if ( check_file( ctx, options, "access_log_file",             & ctx->access_log_file                         ) ) return true;
+		if ( check_bool( ctx, options, "allow_sendfile_call",         & ctx->allow_sendfile_call                     ) ) return true;
+		if ( check_str(  ctx, options, "authentication_domain",       & ctx->authentication_domain                   ) ) return true;
+		if ( check_str(  ctx, options, "cgi_environment",             & ctx->cgi_environment                         ) ) return true;
+		if ( check_bool( ctx, options, "decode_url",                  & ctx->decode_url                              ) ) return true;
+		if ( check_bool( ctx, options, "enable_directory_listing",    & ctx->enable_directory_listing                ) ) return true;
+		if ( check_bool( ctx, options, "enable_keep_alive",           & ctx->enable_keep_alive                       ) ) return true;
+		if ( check_file( ctx, options, "error_log_file",              & ctx->error_log_file                          ) ) return true;
+		if ( check_str(  ctx, options, "extra_mime_types",            & ctx->extra_mime_types                        ) ) return true;
+		if ( check_str(  ctx, options, "index_files",                 & ctx->index_files                             ) ) return true;
+		if ( check_str(  ctx, options, "listening_ports",             & ctx->listening_ports                         ) ) return true;
+		if ( check_int(  ctx, options, "num_threads",                 & ctx->num_threads,                 1, INT_MAX ) ) return true;
+		if ( check_str(  ctx, options, "protect_uri",                 & ctx->protect_uri                             ) ) return true;
+		if ( check_int(  ctx, options, "request_timeout",             & ctx->request_timeout,             0, INT_MAX ) ) return true;
+		if ( check_str(  ctx, options, "run_as_user",                 & ctx->run_as_user                             ) ) return true;
+		if ( check_file( ctx, options, "ssl_ca_file",                 & ctx->ssl_ca_file                             ) ) return true;
+		if ( check_str(  ctx, options, "ssl_cipher_list",             & ctx->ssl_cipher_list                         ) ) return true;
+		if ( check_int(  ctx, options, "ssl_protocol_version",        & ctx->ssl_protocol_version,        0, 4       ) ) return true;
+		if ( check_bool( ctx, options, "ssl_short_trust",             & ctx->ssl_short_trust                         ) ) return true;
+		if ( check_int(  ctx, options, "ssl_verify_depth",            & ctx->ssl_verify_depth,            0, 9       ) ) return true;
+		if ( check_bool( ctx, options, "ssl_verify_paths",            & ctx->ssl_verify_paths                        ) ) return true;
+		if ( check_bool( ctx, options, "ssl_verify_peer",             & ctx->ssl_verify_peer                         ) ) return true;
+		if ( check_int(  ctx, options, "static_file_max_age",         & ctx->static_file_max_age,         0, INT_MAX ) ) return true;
+		if ( check_str(  ctx, options, "throttle",                    & ctx->throttle                                ) ) return true;
+		if ( check_bool( ctx, options, "tcp_nodelay",                 & ctx->tcp_nodelay                             ) ) return true;
+		if ( check_str(  ctx, options, "url_rewrite_patterns",        & ctx->url_rewrite_patterns                    ) ) return true;
+		if ( check_int(  ctx, options, "websocket_timeout",           & ctx->websocket_timeout,           0, INT_MAX ) ) return true;
 
 		else {
 
