@@ -31,6 +31,8 @@
 #include "httplib_string.h"
 #include "httplib_utils.h"
 
+static bool				check_bool( struct httplib_context *ctx, const struct httplib_option_t *option, const char *name, bool *config );
+static bool				check_int( struct httplib_context *ctx, const struct httplib_option_t *option, const char *name, int *config, int minval, int maxval );
 static struct httplib_context *		cleanup( struct httplib_context *ctx, PRINTF_FORMAT_STRING(const char *fmt), ...) PRINTF_ARGS(2, 3);
 static bool				process_options( struct httplib_context *ctx, const struct httplib_option_t *options );
 
@@ -291,14 +293,14 @@ static bool process_options ( struct httplib_context *ctx, const struct httplib_
 
 	while ( options != NULL  &&  options->name != NULL ) {
 
-		if (      ! httplib_strcasecmp( options->name, "allow_sendfile_call"      ) ) ctx->allow_sendfile_call      = XX_httplib_option_value_to_bool( options->value );
-		else if ( ! httplib_strcasecmp( options->name, "decode_url"               ) ) ctx->decode_url               = XX_httplib_option_value_to_bool( options->value );
-		else if ( ! httplib_strcasecmp( options->name, "enable_directory_listing" ) ) ctx->enable_directory_listing = XX_httplib_option_value_to_bool( options->value );
-		else if ( ! httplib_strcasecmp( options->name, "enable_keep_alive"        ) ) ctx->enable_keep_alive        = XX_httplib_option_value_to_bool( options->value );
-		else if ( ! httplib_strcasecmp( options->name, "num_threads"              ) ) ctx->num_threads              = XX_httplib_option_value_to_int(  options->value );
-		else if ( ! httplib_strcasecmp( options->name, "ssl_short_trust"          ) ) ctx->ssl_short_trust          = XX_httplib_option_value_to_bool( options->value );
-		else if ( ! httplib_strcasecmp( options->name, "ssl_verify_paths"         ) ) ctx->ssl_verify_paths         = XX_httplib_option_value_to_bool( options->value );
-		else if ( ! httplib_strcasecmp( options->name, "ssl_verify_peer"          ) ) ctx->ssl_verify_peer          = XX_httplib_option_value_to_bool( options->value );
+		if ( check_bool( ctx, options, "allow_sendfile_call",      & ctx->allow_sendfile_call                  ) ) return true;
+		if ( check_bool( ctx, options, "decode_url",               & ctx->decode_url                           ) ) return true;
+		if ( check_bool( ctx, options, "enable_directory_listing", & ctx->enable_directory_listing             ) ) return true;
+		if ( check_bool( ctx, options, "enable_keep_alive",        & ctx->enable_keep_alive                    ) ) return true;
+		if ( check_int(  ctx, options, "num_threads",              & ctx->num_threads,              1, INT_MAX ) ) return true;
+		if ( check_bool( ctx, options, "ssl_short_trust",          & ctx->ssl_short_trust                      ) ) return true;
+		if ( check_bool( ctx, options, "ssl_verify_paths",         & ctx->ssl_verify_paths                     ) ) return true;
+		if ( check_bool( ctx, options, "ssl_verify_peer",          & ctx->ssl_verify_peer                      ) ) return true;
 
 		else {
 
@@ -333,6 +335,73 @@ static bool process_options ( struct httplib_context *ctx, const struct httplib_
 
 }  /* process_options */
 
+
+
+/*
+ * static bool check_bool( struct httplib_context *ctx, const struct httplib_option_t *option, const char *name, bool *config );
+ *
+ * The function check_bool() checks if an option is equal to a boolean config
+ * parameter and stores the value if that is the case. If the value cannot be
+ * recognized, true is returned and the function performs a complete cleanup.
+ * If the option name could not be found, the function returns false to
+ * indicate that the search should go on. If the value could be found, also
+ * false is returned.
+ */
+
+static bool check_bool( struct httplib_context *ctx, const struct httplib_option_t *option, const char *name, bool *config ) {
+
+	if ( ctx == NULL  ||  option == NULL  ||  option->name == NULL  ||  name == NULL  ||  config == NULL ) {
+
+		cleanup( ctx, "Internal error parsing boolean option" );
+		return true;
+	}
+
+	if (      httplib_strcasecmp(           option->name,  name   ) ) return false;
+	if ( ! XX_httplib_option_value_to_bool( option->value, config ) ) return false;
+			
+	cleanup( ctx, "Invalid boolean value \"%s\" for option \"%s\"", option->value, option->name );
+	return true;
+
+}  /* check_bool */
+
+
+
+/*
+ * static bool check_int( struct httplib_context *ctx, const struct httplib_opion_t *option, const char *name, int *config, int minval, int maxval );
+ *
+ * The function check_int() checks in an option is equal to an integer config
+ * parameter and stores the value if that is the case. If the value cannot be
+ * recognized, true is returned and the function performs a complete cleanup.
+ * If the option name could not be found, the function returns false to
+ * indicate that the search should go on. If the value could be found and is
+ * valud, also false is returned.
+ */
+
+static bool check_int( struct httplib_context *ctx, const struct httplib_option_t *option, const char *name, int *config, int minval, int maxval ) {
+
+	int val;
+
+	if ( ctx == NULL  ||  option == NULL  ||  option->name == NULL  ||  name == NULL  ||  config == NULL ) {
+
+		cleanup( ctx, "Internal error parsing integer option" );
+		return true;
+	}
+
+	if ( httplib_strcasecmp( option->name, name ) ) return false;
+
+	if ( ! XX_httplib_option_value_to_int( option->value, & val ) ) {
+
+		if ( val < minval ) { cleanup( ctx, "Integer \"%s\" too small for option \"%s\"", option->value, option->name ); return true; }
+		if ( val > maxval ) { cleanup( ctx, "Integer \"%s\" too large for option \"%s\"", option->value, option->name ); return true; }
+
+		*config = val;
+		return false;
+	}
+
+	cleanup( ctx, "Invalid integer value \"%s\" for option \"%s\"", option->value, option->name );
+	return true;
+
+}  /* check_int */
 
 
 /* 
