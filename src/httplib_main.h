@@ -409,7 +409,6 @@ enum {
 	HIDE_FILES,
 	SSL_CA_PATH,
 	SSL_CA_FILE,
-	SSL_CIPHER_LIST,
 	WEBSOCKET_ROOT,
 	ACCESS_CONTROL_ALLOW_ORIGIN,
 	ERROR_PAGES,
@@ -595,6 +594,7 @@ struct httplib_context {
 	char *	cgi_environment;
 	char *	error_log_file;
 	char *	run_as_user;
+	char *	ssl_cipher_list;
 
 	int	num_threads;
 	int	request_timeout;

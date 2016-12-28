@@ -152,9 +152,9 @@ bool XX_httplib_set_ssl_option( struct httplib_context *ctx ) {
 		SSL_CTX_set_verify_depth( ctx->ssl_ctx, ctx->ssl_verify_depth );
 	}
 
-	if ( ctx->cfg[SSL_CIPHER_LIST] != NULL ) {
+	if ( ctx->ssl_cipher_list != NULL ) {
 
-		if ( SSL_CTX_set_cipher_list( ctx->ssl_ctx, ctx->cfg[SSL_CIPHER_LIST] ) != 1 ) {
+		if ( SSL_CTX_set_cipher_list( ctx->ssl_ctx, ctx->ssl_cipher_list ) != 1 ) {
 
 			httplib_cry( ctx, NULL, "SSL_CTX_set_cipher_list error: %s", XX_httplib_ssl_error());
 		}
