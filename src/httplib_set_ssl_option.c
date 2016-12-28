@@ -42,7 +42,6 @@ bool XX_httplib_set_ssl_option( struct httplib_context *ctx ) {
 
 	const char *pem;
 	int callback_ret;
-	int use_default_verify_paths;
 	int verify_depth;
 	time_t now_rt;
 	struct timespec now_mt;
@@ -132,8 +131,6 @@ bool XX_httplib_set_ssl_option( struct httplib_context *ctx ) {
 
 	if ( pem != NULL  &&  ! XX_httplib_ssl_use_pem_file( ctx, pem ) ) return false;
 
-	use_default_verify_paths = ctx->cfg[SSL_DEFAULT_VERIFY_PATHS] != NULL  &&  ! httplib_strcasecmp( ctx->cfg[SSL_DEFAULT_VERIFY_PATHS], "yes" );
-
 	if ( ctx->ssl_verify_peer ) {
 
 		if ( SSL_CTX_load_verify_locations( ctx->ssl_ctx, ctx->cfg[SSL_CA_FILE], ctx->cfg[SSL_CA_PATH] ) != 1 ) {
@@ -151,7 +148,7 @@ bool XX_httplib_set_ssl_option( struct httplib_context *ctx ) {
 
 		SSL_CTX_set_verify( ctx->ssl_ctx, SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT, NULL );
 
-		if ( use_default_verify_paths  &&  SSL_CTX_set_default_verify_paths( ctx->ssl_ctx ) != 1 ) {
+		if ( ctx->ssl_verify_paths  &&  SSL_CTX_set_default_verify_paths( ctx->ssl_ctx ) != 1 ) {
 
 			httplib_cry( ctx, NULL, "SSL_CTX_set_default_verify_paths error: %s", XX_httplib_ssl_error());
 			return false;

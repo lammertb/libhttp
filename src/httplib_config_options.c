@@ -57,7 +57,6 @@ struct httplib_option XX_httplib_config_options[] = {
 	{ "ssl_ca_path",                 CONFIG_TYPE_DIRECTORY,   NULL                                                               },
 	{ "ssl_ca_file",                 CONFIG_TYPE_FILE,        NULL                                                               },
 	{ "ssl_verify_depth",            CONFIG_TYPE_NUMBER,      "9"                                                                },
-	{ "ssl_default_verify_paths",    CONFIG_TYPE_BOOLEAN,     "yes"                                                              },
 	{ "ssl_cipher_list",             CONFIG_TYPE_STRING,      NULL                                                               },
 	{ "ssl_protocol_version",        CONFIG_TYPE_NUMBER,      "0"                                                                },
 	{ "ssl_short_trust",             CONFIG_TYPE_BOOLEAN,     "no"                                                               },

@@ -416,7 +416,6 @@ enum {
 	SSL_CA_PATH,
 	SSL_CA_FILE,
 	SSL_VERIFY_DEPTH,
-	SSL_DEFAULT_VERIFY_PATHS,
 	SSL_CIPHER_LIST,
 	SSL_PROTOCOL_VERSION,
 	SSL_SHORT_TRUST,
@@ -610,6 +609,7 @@ struct httplib_context {
 	bool	allow_sendfile_call;
 	bool	enable_directory_listing;
 	bool	enable_keep_alive;
+	bool	ssl_verify_paths;
 	bool	ssl_verify_peer;
 };
 
