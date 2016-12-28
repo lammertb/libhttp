@@ -399,7 +399,6 @@ enum {
 	INDEX_FILES,
 	DOCUMENT_ROOT,
 	SSL_CERTIFICATE,
-	REWRITE,
 	HIDE_FILES,
 	SSL_CA_PATH,
 	SSL_CA_FILE,
@@ -595,6 +594,7 @@ struct httplib_context {
 	char *	run_as_user;
 	char *	ssl_cipher_list;
 	char *	throttle;
+	char *	url_rewrite_patterns;
 
 	int	num_threads;
 	int	request_timeout;

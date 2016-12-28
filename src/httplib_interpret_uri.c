@@ -103,7 +103,7 @@ void XX_httplib_interpret_uri( struct httplib_connection *conn, char *filename, 
 
 	if ( truncated ) goto interpret_cleanup;
 
-	rewrite = conn->ctx->cfg[REWRITE];
+	rewrite = conn->ctx->url_rewrite_patterns;
 
 	while ( (rewrite = XX_httplib_next_option( rewrite, &a, &b )) != NULL ) {
 
