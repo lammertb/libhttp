@@ -43,7 +43,7 @@ void XX_httplib_log_access( const struct httplib_connection *conn ) {
 	struct file fi;
 	char date[64];
 	char src_addr[IP_ADDR_STR_LEN];
-	struct tm *tm;
+	struct tm tmm;
 	const char *referer;
 	const char *user_agent;
 	char buf[4096];
@@ -63,9 +63,7 @@ void XX_httplib_log_access( const struct httplib_connection *conn ) {
 
 	if ( fi.fp == NULL  &&  conn->ctx->callbacks.log_access == NULL ) return;
 
-	tm = localtime( & conn->conn_birth_time );
-
-	if ( tm != NULL ) strftime( date, sizeof(date), "%d/%b/%Y:%H:%M:%S %z", tm );
+	if ( httplib_localtime_r( &conn->conn_birth_time, &tmm ) != NULL ) strftime( date, sizeof(date), "%d/%b/%Y:%H:%M:%S %z", &tmm );
 	else {
 		httplib_strlcpy( date, "01/Jan/1970:00:00:00 +0000", sizeof(date) );
 		date[sizeof(date) - 1] = '\0';

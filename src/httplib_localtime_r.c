@@ -34,15 +34,19 @@
 
 const int		XX_httplib_days_per_month[] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 
+#endif  /* _WIN32_WCE */
+
 /*
- * struct tm *localtime_s( const time_t *ptime, struct tm *ptm );
+ * struct tm *httplib_localtime_r( const time_t *clock, struct tm *result );
  *
  * The function localtime_s() returns a converted time to tm structure. This
  * function is not available on all operating systems and this version offers
  * a subsitute for use on Windows CE.
  */
 
-struct tm *localtime_s( const time_t *ptime, struct tm *ptm ) {
+struct tm *httplib_localtime_r( const time_t *clock, struct tm *result ) {
+
+#if defined(_WIN32_WCE)
 
 	int a;
 	int doy;
@@ -51,30 +55,38 @@ struct tm *localtime_s( const time_t *ptime, struct tm *ptm ) {
 	SYSTEMTIME st;
 	TIME_ZONE_INFORMATION tzinfo;
 
-	if ( ptime == NULL  ||  ptm == NULL ) return NULL;
+	if ( clock == NULL  ||  result == NULL ) return NULL;
 
-	*(int64_t *)&ft = ((int64_t)*ptime) * RATE_DIFF + EPOCH_DIFF;
+	*(int64_t *)&ft = ((int64_t)*clock) * RATE_DIFF + EPOCH_DIFF;
 
 	FileTimeToLocalFileTime( & ft,  & lft );
 	FileTimeToSystemTime(    & lft, & st  );
 
-	ptm->tm_year  = st.wYear  - 1900;
-	ptm->tm_mon   = st.wMonth - 1;
-	ptm->tm_wday  = st.wDayOfWeek;
-	ptm->tm_mday  = st.wDay;
-	ptm->tm_hour  = st.wHour;
-	ptm->tm_min   = st.wMinute;
-	ptm->tm_sec   = st.wSecond;
-	ptm->tm_isdst = (GetTimeZoneInformation(&tzinfo) == TIME_ZONE_ID_DAYLIGHT) ? 1 : 0;
+	result->tm_year  = st.wYear  - 1900;
+	result->tm_mon   = st.wMonth - 1;
+	result->tm_wday  = st.wDayOfWeek;
+	result->tm_mday  = st.wDay;
+	result->tm_hour  = st.wHour;
+	result->tm_min   = st.wMinute;
+	result->tm_sec   = st.wSecond;
+	result->tm_isdst = (GetTimeZoneInformation(&tzinfo) == TIME_ZONE_ID_DAYLIGHT) ? 1 : 0;
 
-	doy           = ptm->tm_mday;
-	for (a=0; a<ptm->tm_mon; a++) doy += days_per_month[a];
-	if ( ptm->tm_mon >= 2  &&  LEAP_YEAR( ptm->tm_year+1900 ) ) doy++;
+	doy              = result->tm_mday;
+	for (a=0; a<result->tm_mon; a++) doy += days_per_month[a];
+	if ( result->tm_mon >= 2  &&  LEAP_YEAR( result->tm_year+1900 ) ) doy++;
 
-	ptm->tm_yday  = doy;
+	result->tm_yday  = doy;
 
-	return ptm;
+	return result;
 
-}  /* localtime_s */
+#elif defined(_WIN32)
 
-#endif /* defined(_WIN32_WCE) */
+	return localtime_s( clock, result );
+
+#else
+
+	return localtime_r( clock, result );
+
+#endif
+
+}  /* httplib_localtime_r */

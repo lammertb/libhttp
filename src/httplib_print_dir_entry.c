@@ -33,7 +33,7 @@ void XX_httplib_print_dir_entry( struct de *de ) {
 	char size[64];
 	char mod[64];
 	char href[PATH_MAX * 3 /* worst case */];
-	struct tm *tm;
+	struct tm tmm;
 
 	if ( de->file.is_directory ) XX_httplib_snprintf( de->conn, NULL, size, sizeof(size), "%s", "[DIRECTORY]" );
 	else {
@@ -53,8 +53,7 @@ void XX_httplib_print_dir_entry( struct de *de ) {
 	 * So, string truncation checks are not required here.
 	 */
 
-	tm = localtime( &de->file.last_modified );
-	if ( tm != NULL ) strftime( mod, sizeof(mod), "%d-%b-%Y %H:%M", tm );
+	if ( httplib_localtime_r( &de->file.last_modified, &tmm ) != NULL ) strftime( mod, sizeof(mod), "%d-%b-%Y %H:%M", &tmm );
 	
 	else {
 		httplib_strlcpy( mod, "01-Jan-1970 00:00", sizeof(mod) );

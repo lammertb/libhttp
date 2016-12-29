@@ -407,8 +407,7 @@ OBJLIST =									\
 	${OBJDIR}httplib_pthread_setspecific${OBJEXT}				\
 	${OBJDIR}wince_gmtime${OBJEXT}						\
 	${OBJDIR}wince_gmtime_s${OBJEXT}					\
-	${OBJDIR}wince_localtime${OBJEXT}					\
-	${OBJDIR}wince_localtime_s${OBJEXT}					\
+	${OBJDIR}httplib_localtime_r${OBJEXT}					\
 	${OBJDIR}wince_rename${OBJEXT}						\
 	${OBJDIR}wince_stat${OBJEXT}						\
 	${OBJDIR}wince_strftime${OBJEXT}					\
@@ -1447,11 +1446,7 @@ ${OBJDIR}wince_gmtime_s${OBJEXT}					: ${SRCDIR}wince_gmtime_s.c					\
 									  ${SRCDIR}httplib_utils.h					\
 									  ${INCDIR}libhttp.h
 
-${OBJDIR}wince_localtime${OBJEXT}					: ${SRCDIR}wince_localtime.c					\
-									  ${SRCDIR}httplib_main.h					\
-									  ${INCDIR}libhttp.h
-
-${OBJDIR}wince_localtime_s${OBJEXT}					: ${SRCDIR}wince_localtime_s.c					\
+${OBJDIR}httplib_localtime_r${OBJEXT}					: ${SRCDIR}httplib_localtime_r.c				\
 									  ${SRCDIR}httplib_main.h					\
 									  ${SRCDIR}httplib_utils.h					\
 									  ${INCDIR}libhttp.h
