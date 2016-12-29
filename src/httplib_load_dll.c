@@ -82,7 +82,7 @@ void *XX_httplib_load_dll( struct httplib_context *ctx, const char *dll_name, st
 
 	if ( dll_handle == NULL ) {
 
-		httplib_cry( ctx, NULL, "%s: cannot load %s", __func__, dll_name );
+		httplib_cry( DEBUG_LEVEL_CRASH, ctx, NULL, "%s: cannot load %s", __func__, dll_name );
 		return NULL;
 	}
 
@@ -109,7 +109,7 @@ void *XX_httplib_load_dll( struct httplib_context *ctx, const char *dll_name, st
 
 		if ( u.fp == NULL ) {
 
-			httplib_cry( ctx, NULL, "%s: %s: cannot find %s", __func__, dll_name, fp->name );
+			httplib_cry( DEBUG_LEVEL_CRASH, ctx, NULL, "%s: %s: cannot find %s", __func__, dll_name, fp->name );
 			dlclose( dll_handle );
 
 			return NULL;

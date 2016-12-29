@@ -90,7 +90,7 @@ static void *worker_thread_run( struct worker_thread_args *thread_args ) {
 	if ( ctx->callbacks.init_thread != NULL ) ctx->callbacks.init_thread( ctx, 1 ); /* call init_thread for a worker thread (type 1) */
 
 	conn = httplib_calloc( 1, sizeof(*conn) + MAX_REQUEST_SIZE );
-	if ( conn == NULL ) httplib_cry( ctx, NULL, "%s", "Cannot create new connection struct, OOM" );
+	if ( conn == NULL ) httplib_cry( DEBUG_LEVEL_ERROR, ctx, NULL, "%s", "Cannot create new connection struct, OOM" );
 	
 	else {
 		httplib_pthread_setspecific( XX_httplib_sTlsKey, &tls );

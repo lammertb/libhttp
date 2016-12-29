@@ -112,7 +112,7 @@ static struct httplib_connection *httplib_connect_client_impl( const struct http
 		conn->client.sock = sock;
 		conn->client.lsa  = sa;
 
-		if ( getsockname( sock, psa, &len ) != 0 ) httplib_cry( &fake_ctx, conn, "%s: getsockname() failed: %s", __func__, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
+		if ( getsockname( sock, psa, &len ) != 0 ) httplib_cry( DEBUG_LEVEL_ERROR, &fake_ctx, conn, "%s: getsockname() failed: %s", __func__, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 
 		conn->client.has_ssl = (use_ssl) ? true : false;
 		httplib_pthread_mutex_init( &conn->mutex, &XX_httplib_pthread_mutex_attr );

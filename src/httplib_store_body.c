@@ -47,7 +47,7 @@ int64_t httplib_store_body( struct httplib_connection *conn, const char *path ) 
 
 	if ( conn->consumed_content != 0 ) {
 
-		httplib_cry( conn->ctx, conn, "%s: Contents already consumed", __func__ );
+		httplib_cry( DEBUG_LEVEL_ERROR, conn->ctx, conn, "%s: Contents already consumed", __func__ );
 		return -11;
 	}
 

@@ -45,7 +45,7 @@ void XX_httplib_set_close_on_exec( SOCKET fd, const struct httplib_context *ctx 
 
 	if ( fcntl( fd, F_SETFD, FD_CLOEXEC ) != 0 ) {
 
-		if ( ctx != NULL ) httplib_cry( ctx, NULL, "%s: fcntl(F_SETFD FD_CLOEXEC) failed: %s", __func__, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
+		if ( ctx != NULL ) httplib_cry( DEBUG_LEVEL_ERROR, ctx, NULL, "%s: fcntl(F_SETFD FD_CLOEXEC) failed: %s", __func__, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 	}
 
 #endif  /* _WIN32 */

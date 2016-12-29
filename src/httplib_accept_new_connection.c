@@ -54,7 +54,7 @@ void XX_httplib_accept_new_connection( const struct socket *listener, struct htt
 	if ( ! XX_httplib_check_acl( ctx, ntohl(*(uint32_t *)&so.rsa.sin.sin_addr )) ) {
 
 		XX_httplib_sockaddr_to_string( src_addr, sizeof(src_addr), &so.rsa );
-		httplib_cry( ctx, NULL, "%s: %s is not allowed to connect", __func__, src_addr );
+		httplib_cry( DEBUG_LEVEL_INFO, ctx, NULL, "%s: %s is not allowed to connect", __func__, src_addr );
 		closesocket( so.sock );
 		so.sock = INVALID_SOCKET;
 	}
@@ -72,7 +72,7 @@ void XX_httplib_accept_new_connection( const struct socket *listener, struct htt
 
 		if ( getsockname( so.sock, &so.lsa.sa, &len ) != 0 ) {
 
-			httplib_cry( ctx, NULL, "%s: getsockname() failed: %s", __func__, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
+			httplib_cry( DEBUG_LEVEL_ERROR, ctx, NULL, "%s: getsockname() failed: %s", __func__, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 		}
 
 		/*
@@ -86,7 +86,7 @@ void XX_httplib_accept_new_connection( const struct socket *listener, struct htt
 
 		if ( setsockopt( so.sock, SOL_SOCKET, SO_KEEPALIVE, (SOCK_OPT_TYPE)&on, sizeof(on) ) != 0 ) {
 
-			httplib_cry( ctx, NULL, "%s: setsockopt(SOL_SOCKET SO_KEEPALIVE) failed: %s", __func__, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
+			httplib_cry( DEBUG_LEVEL_ERROR, ctx, NULL, "%s: setsockopt(SOL_SOCKET SO_KEEPALIVE) failed: %s", __func__, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 		}
 
 		/*
@@ -100,7 +100,7 @@ void XX_httplib_accept_new_connection( const struct socket *listener, struct htt
 
 		if ( ctx->tcp_nodelay  &&  XX_httplib_set_tcp_nodelay( so.sock, 1 ) != 0 ) {
 
-			httplib_cry( ctx, NULL, "%s: setsockopt(IPPROTO_TCP TCP_NODELAY) failed: %s", __func__, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
+			httplib_cry( DEBUG_LEVEL_ERROR, ctx, NULL, "%s: setsockopt(IPPROTO_TCP TCP_NODELAY) failed: %s", __func__, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 		}
 
 		if ( ctx->request_timeout > 0 ) XX_httplib_set_sock_timeout( so.sock, ctx->request_timeout );

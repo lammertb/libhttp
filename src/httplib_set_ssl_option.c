@@ -77,7 +77,7 @@ bool XX_httplib_set_ssl_option( struct httplib_context *ctx ) {
 	ctx->ssl_ctx = SSL_CTX_new( SSLv23_server_method() );
 	if ( ctx->ssl_ctx == NULL ) {
 
-		httplib_cry( ctx, NULL, "SSL_CTX_new (server) error: %s", XX_httplib_ssl_error() );
+		httplib_cry( DEBUG_LEVEL_CRASH, ctx, NULL, "SSL_CTX_new (server) error: %s", XX_httplib_ssl_error() );
 		return false;
 	}
 
@@ -101,7 +101,7 @@ bool XX_httplib_set_ssl_option( struct httplib_context *ctx ) {
 
 	if ( callback_ret < 0 ) {
 
-		httplib_cry( ctx, NULL, "SSL callback returned error: %i", callback_ret );
+		httplib_cry( DEBUG_LEVEL_CRASH, ctx, NULL, "SSL callback returned error: %i", callback_ret );
 		return false;
 	}
 
@@ -130,7 +130,7 @@ bool XX_httplib_set_ssl_option( struct httplib_context *ctx ) {
 
 		if ( SSL_CTX_load_verify_locations( ctx->ssl_ctx, ctx->ssl_ca_file, ctx->ssl_ca_path ) != 1 ) {
 
-			httplib_cry( ctx, NULL,
+			httplib_cry( DEBUG_LEVEL_CRASH, ctx, NULL,
 			       "SSL_CTX_load_verify_locations error: %s "
 			       "ssl_verify_peer requires setting "
 			       "either ssl_ca_path or ssl_ca_file. Is any of them "
@@ -145,7 +145,7 @@ bool XX_httplib_set_ssl_option( struct httplib_context *ctx ) {
 
 		if ( ctx->ssl_verify_paths  &&  SSL_CTX_set_default_verify_paths( ctx->ssl_ctx ) != 1 ) {
 
-			httplib_cry( ctx, NULL, "SSL_CTX_set_default_verify_paths error: %s", XX_httplib_ssl_error());
+			httplib_cry( DEBUG_LEVEL_CRASH, ctx, NULL, "SSL_CTX_set_default_verify_paths error: %s", XX_httplib_ssl_error());
 			return false;
 		}
 
@@ -156,7 +156,7 @@ bool XX_httplib_set_ssl_option( struct httplib_context *ctx ) {
 
 		if ( SSL_CTX_set_cipher_list( ctx->ssl_ctx, ctx->ssl_cipher_list ) != 1 ) {
 
-			httplib_cry( ctx, NULL, "SSL_CTX_set_cipher_list error: %s", XX_httplib_ssl_error());
+			httplib_cry( DEBUG_LEVEL_WARNING, ctx, NULL, "SSL_CTX_set_cipher_list error: %s", XX_httplib_ssl_error());
 		}
 	}
 

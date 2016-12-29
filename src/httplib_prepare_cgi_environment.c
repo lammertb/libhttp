@@ -138,7 +138,7 @@ void XX_httplib_prepare_cgi_environment( struct httplib_connection *conn, const 
 		XX_httplib_snprintf( conn, &truncated, http_var_name, sizeof(http_var_name), "HTTP_%s", conn->request_info.http_headers[i].name );
 
 		if ( truncated ) {
-			httplib_cry( conn->ctx, conn, "%s: HTTP header variable too long [%s]", __func__, conn->request_info.http_headers[i].name );
+			httplib_cry( DEBUG_LEVEL_ERROR, conn->ctx, conn, "%s: HTTP header variable too long [%s]", __func__, conn->request_info.http_headers[i].name );
 			continue;
 		}
 

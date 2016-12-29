@@ -66,7 +66,7 @@ int XX_httplib_refresh_trust( struct httplib_connection *conn ) {
 
 			if ( SSL_CTX_load_verify_locations( conn->ctx->ssl_ctx, conn->ctx->ssl_ca_file, conn->ctx->ssl_ca_path ) != 1 ) {
 
-				httplib_cry( conn->ctx, conn,
+				httplib_cry( DEBUG_LEVEL_ERROR, conn->ctx, conn,
 				       "SSL_CTX_load_verify_locations error: %s "
 				       "ssl_verify_peer requires setting "
 				       "either ssl_ca_path or ssl_ca_file. Is any of them "

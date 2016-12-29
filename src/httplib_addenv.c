@@ -79,7 +79,7 @@ void XX_httplib_addenv( struct cgi_environment *env, const char *fmt, ... ) {
 				 * Out of memory
 				 */
 
-				httplib_cry( env->conn->ctx, env->conn, "%s: Cannot allocate memory for CGI variable [%s]", __func__, fmt );
+				httplib_cry( DEBUG_LEVEL_ERROR, env->conn->ctx, env->conn, "%s: Cannot allocate memory for CGI variable [%s]", __func__, fmt );
 				return;
 			}
 
@@ -133,7 +133,7 @@ void XX_httplib_addenv( struct cgi_environment *env, const char *fmt, ... ) {
 
 	if ( space < 2 ) {
 
-		httplib_cry( env->conn->ctx, env->conn, "%s: Cannot register CGI variable [%s]", __func__, fmt );
+		httplib_cry( DEBUG_LEVEL_ERROR, env->conn->ctx, env->conn, "%s: Cannot register CGI variable [%s]", __func__, fmt );
 		return;
 	}
 

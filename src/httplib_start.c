@@ -122,7 +122,7 @@ struct httplib_context *httplib_start( const struct httplib_callbacks *callbacks
 			 */
 
 			httplib_atomic_dec( & XX_httplib_sTlsInit );
-			httplib_cry( ctx, NULL, "Cannot initialize thread local storage" );
+			httplib_cry( DEBUG_LEVEL_CRASH, ctx, NULL, "Cannot initialize thread local storage" );
 			ctx = httplib_free( ctx );
 
 			return NULL;
@@ -253,9 +253,9 @@ struct httplib_context *httplib_start( const struct httplib_callbacks *callbacks
 
 			wta = httplib_free( wta );
 
-			if ( i > 0 ) httplib_cry( ctx, NULL, "Cannot start worker thread %i: error %ld", i + 1, (long)ERRNO );
+			if ( i > 0 ) httplib_cry( DEBUG_LEVEL_ERROR, ctx, NULL, "Cannot start worker thread %i: error %ld", i + 1, (long)ERRNO );
 			
-			else return cleanup( ctx, "Cannot create threads: error %ld", (long)ERRNO );
+			else return cleanup( ctx, "Cannot create worker threads: error %ld", (long)ERRNO );
 
 			break;
 		}
@@ -692,7 +692,7 @@ static struct httplib_context *cleanup( struct httplib_context *ctx, const char 
 		va_end( ap );
 		buf[sizeof(buf)-1] = 0;
 
-		httplib_cry( ctx, NULL, "%s", buf );
+		httplib_cry( DEBUG_LEVEL_CRASH, ctx, NULL, "%s", buf );
 	}
 
 	XX_httplib_free_context( ctx );

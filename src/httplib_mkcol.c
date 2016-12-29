@@ -58,7 +58,7 @@ void XX_httplib_mkcol( struct httplib_connection *conn, const char *path ) {
 
 	if ( ! XX_httplib_stat( conn, path, & de.file ) ) {
 
-		httplib_cry( conn->ctx, conn, "%s: XX_httplib_stat(%s) failed: %s", __func__, path, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
+		httplib_cry( DEBUG_LEVEL_WARNING, conn->ctx, conn, "%s: XX_httplib_stat(%s) failed: %s", __func__, path, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 	}
 
 	if ( de.file.last_modified ) {

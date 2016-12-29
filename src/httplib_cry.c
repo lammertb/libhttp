@@ -26,14 +26,14 @@
 #include "httplib_ssl.h"
 
 /*
- * void httplib_cry( const struct httplib_context *ctx, const struct httplib_connection *conn, const char *fmt, ... );
+ * void httplib_cry( enum debug_level_t debug_level, const struct httplib_context *ctx, const struct httplib_connection *conn, const char *fmt, ... );
  *
  * The function httplib_cry() prints a formatted error message to the opened
  * error log stream. It first tries to use a user supplied error handler. If
  * that doesn't work, the alternative is to write to an error log file.
  */
 
-void httplib_cry( const struct httplib_context *ctx, const struct httplib_connection *conn, const char *fmt, ... ) {
+void httplib_cry( enum debug_level_t debug_level, const struct httplib_context *ctx, const struct httplib_connection *conn, const char *fmt, ... ) {
 
 	char buf[MG_BUF_LEN];
 	char src_addr[IP_ADDR_STR_LEN];
@@ -49,6 +49,13 @@ void httplib_cry( const struct httplib_context *ctx, const struct httplib_connec
 	 */
 
 	if ( ctx == NULL ) return;
+
+	/*
+	 * Check if the message is severe enough to display. This is controlled
+	 * with a context specific debug level.
+	 */
+
+	if ( debug_level > ctx->debug_level ) return;
 
 	/*
 	 * Gather all the information from the parameters of this function and

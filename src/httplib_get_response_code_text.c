@@ -118,7 +118,7 @@ const char *httplib_get_response_code_text( struct httplib_connection *conn, int
 		 * This error code is unknown. This should not happen.
 		 */
 
-		if ( conn != NULL  &&  conn->ctx != NULL ) httplib_cry( conn->ctx, conn, "Unknown HTTP response code: %u", response_code );
+		if ( conn != NULL  &&  conn->ctx != NULL ) httplib_cry( DEBUG_LEVEL_INFO, conn->ctx, conn, "Unknown HTTP response code: %u", response_code );
 
 		/*
 		 * Return at least a category according to RFC 2616 Section 10.
