@@ -564,6 +564,8 @@ struct httplib_context {
 	struct ttimers *timers;
 #endif
 
+	enum debug_level_t	debug_level;
+
 	char *	access_control_allow_origin;
 	char *	access_control_list;
 	char *	access_log_file;

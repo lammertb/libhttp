@@ -880,6 +880,15 @@ struct httplib_client_options {
 LIBHTTP_API struct httplib_connection *httplib_connect_client_secure(const struct httplib_client_options *client_options, char *error_buffer, size_t error_buffer_size);
 
 
+enum debug_level_t {
+	DEBUG_LEVEL_NONE,
+	DEBUG_LEVEL_CRASH,
+	DEBUG_LEVEL_ERROR,
+	DEBUG_LEVEL_WARNING,
+	DEBUG_LEVEL_INFO
+};
+
+
 enum { TIMEOUT_INFINITE = -1 };
 
 
@@ -918,6 +927,7 @@ LIBHTTP_API int				httplib_closedir( DIR *dir );
 LIBHTTP_API void			httplib_cry( const struct httplib_context *ctx, const struct httplib_connection *conn, PRINTF_FORMAT_STRING(const char *fmt), ...) PRINTF_ARGS(3, 4);
 LIBHTTP_API char *			httplib_error_string( int error_code, char *buf, size_t buf_len );
 LIBHTTP_API const char *		httplib_get_builtin_mime_type( const char *file_name );
+LIBHTTP_API enum debug_level_t		httplib_get_debug_level( struct httplib_context *ctx );
 LIBHTTP_API const char *		httplib_get_option( const struct httplib_context *ctx, const char *name, char *buffer, size_t buflen );
 LIBHTTP_API uint64_t			httplib_get_random( void );
 LIBHTTP_API void *			httplib_get_user_connection_data( const struct httplib_connection *conn );
@@ -947,6 +957,7 @@ LIBHTTP_API struct dirent *		httplib_readdir( DIR *dir );
 LIBHTTP_API int				httplib_remove( const char *path );
 LIBHTTP_API void			httplib_send_file( struct httplib_connection *conn, const char *path, const char *mime_type, const char *additional_headers );
 LIBHTTP_API void			httplib_set_alloc_callback_func( httplib_alloc_callback_func log_func );
+LIBHTTP_API enum debug_level_t		httplib_set_debug_level( struct httplib_context *ctx, enum debug_level_t new_level );
 LIBHTTP_API void			httplib_set_user_connection_data( struct httplib_connection *conn, void *data );
 LIBHTTP_API struct httplib_context *	httplib_start(const struct httplib_callbacks *callbacks, void *user_data, const struct httplib_option_t *options );
 LIBHTTP_API void			httplib_stop( struct httplib_context *ctx );

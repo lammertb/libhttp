@@ -227,6 +227,7 @@ OBJLIST =									\
 	${OBJDIR}httplib_get_builtin_mime_type${OBJEXT}				\
 	${OBJDIR}httplib_get_context${OBJEXT}					\
 	${OBJDIR}httplib_get_cookie${OBJEXT}					\
+	${OBJDIR}httplib_get_debug_level${OBJEXT}				\
 	${OBJDIR}httplib_get_first_ssl_listener_index${OBJEXT}			\
 	${OBJDIR}httplib_get_header${OBJEXT}					\
 	${OBJDIR}httplib_get_mime_type${OBJEXT}					\
@@ -331,6 +332,7 @@ OBJLIST =									\
 	${OBJDIR}httplib_set_acl_option${OBJEXT}				\
 	${OBJDIR}httplib_set_auth_handler${OBJEXT}				\
 	${OBJDIR}httplib_set_close_on_exec${OBJEXT}				\
+	${OBJDIR}httplib_set_debug_level${OBJEXT}				\
 	${OBJDIR}httplib_set_gpass_option${OBJEXT}				\
 	${OBJDIR}httplib_set_handler_type${OBJEXT}				\
 	${OBJDIR}httplib_set_non_blocking_mode${OBJEXT}				\
@@ -621,6 +623,10 @@ ${OBJDIR}httplib_get_context${OBJEXT}					: ${SRCDIR}httplib_get_context.c				\
 
 ${OBJDIR}httplib_get_cookie${OBJEXT}					: ${SRCDIR}httplib_get_cookie.c					\
 									  ${SRCDIR}httplib_string.h					\
+									  ${SRCDIR}httplib_main.h					\
+									  ${INCDIR}libhttp.h
+
+${OBJDIR}httplib_get_debug_level${OBJEXT}				: ${SRCDIR}httplib_get_debug_level.c				\
 									  ${SRCDIR}httplib_main.h					\
 									  ${INCDIR}libhttp.h
 
@@ -1098,6 +1104,10 @@ ${OBJDIR}httplib_set_auth_handler${OBJEXT}				: ${SRCDIR}httplib_set_auth_handle
 									  ${INCDIR}libhttp.h
 
 ${OBJDIR}httplib_set_close_on_exec${OBJEXT}				: ${SRCDIR}httplib_set_close_on_exec.c				\
+									  ${SRCDIR}httplib_main.h					\
+									  ${INCDIR}libhttp.h
+
+${OBJDIR}httplib_set_debug_level${OBJEXT}				: ${SRCDIR}httplib_set_debug_level.c				\
 									  ${SRCDIR}httplib_main.h					\
 									  ${INCDIR}libhttp.h
 

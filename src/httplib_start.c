@@ -32,6 +32,7 @@
 #include "httplib_utils.h"
 
 static bool			check_bool( struct httplib_context *ctx, const struct httplib_option_t *option, const char *name, bool *config  );
+static bool			check_dbg(  struct httplib_context *ctx, const struct httplib_option_t *option, const char *name, enum debug_level_t *config );
 static bool			check_dir(  struct httplib_context *ctx, const struct httplib_option_t *option, const char *name, char **config );
 static bool			check_file( struct httplib_context *ctx, const struct httplib_option_t *option, const char *name, char **config );
 static bool			check_int(  struct httplib_context *ctx, const struct httplib_option_t *option, const char *name, int *config, int minval, int maxval );
@@ -290,6 +291,7 @@ static bool process_options( struct httplib_context *ctx, const struct httplib_o
 	ctx->cgi_environment             = NULL;
 	ctx->cgi_interpreter             = NULL;
 	ctx->cgi_pattern                 = NULL;
+	ctx->debug_level                 = DEBUG_LEVEL_WARNING;
 	ctx->decode_url                  = true;
 	ctx->document_root               = NULL;
 	ctx->enable_directory_listing    = true;
@@ -369,6 +371,7 @@ static bool process_options( struct httplib_context *ctx, const struct httplib_o
 		if ( check_str(  ctx, options, "cgi_environment",             & ctx->cgi_environment                         ) ) return true;
 		if ( check_file( ctx, options, "cgi_interpreter",             & ctx->cgi_interpreter                         ) ) return true;
 		if ( check_patt( ctx, options, "cgi_pattern",                 & ctx->cgi_pattern                             ) ) return true;
+		if ( check_dbg(  ctx, options, "debug_level",                 & ctx->debug_level                             ) ) return true;
 		if ( check_bool( ctx, options, "decode_url",                  & ctx->decode_url                              ) ) return true;
 		if ( check_dir(  ctx, options, "document_root",               & ctx->document_root                           ) ) return true;
 		if ( check_bool( ctx, options, "enable_directory_listing",    & ctx->enable_directory_listing                ) ) return true;
@@ -620,6 +623,51 @@ static bool check_int( struct httplib_context *ctx, const struct httplib_option_
 	return true;
 
 }  /* check_int */
+
+
+
+/*
+ * static bool check_dbg( struct httplib_context *ctx, const struct httplib_option_t *option, const char *name );
+ *
+ * The function check_dbg() checks if an option is equal to a debug level
+ * config parameter and stores the value if that is the case. If the value
+ * cannot be recognized, true is returned and the function performs a complete
+ * cleanup. If the option name could not be found, the function returns false
+ * to indicate that the search should go on. If the value could be found and is
+ * valid, also false is returned.
+ */
+
+static bool check_dbg( struct httplib_context *ctx, const struct httplib_option_t *option, const char *name, enum debug_level_t *config ) {
+
+	int val;
+
+	if ( ctx == NULL  ||  option == NULL  ||  option->name == NULL  ||  name == NULL  ||  config == NULL ) {
+
+		cleanup( ctx, "Internal error parsing debug level option" );
+		return true;
+	}
+
+	if ( httplib_strcasecmp( option->name, name ) ) return false;
+
+	if ( ! XX_httplib_option_value_to_int( option->value, &val ) ) {
+
+		switch ( val ) {
+
+			case DEBUG_LEVEL_NONE    :
+			case DEBUG_LEVEL_CRASH   :
+			case DEBUG_LEVEL_ERROR   :
+			case DEBUG_LEVEL_WARNING :
+			case DEBUG_LEVEL_INFO    :
+				*config = val;
+				return false;
+		}
+	}
+
+	cleanup( ctx, "Invalid value \"%s\"  for option \"%s\"", option->value, option->name );
+	return true;
+
+}  /* check_dbg */
+
 
 
 /* 
