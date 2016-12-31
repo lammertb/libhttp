@@ -81,7 +81,8 @@ struct tm *httplib_localtime_r( const time_t *clock, struct tm *result ) {
 
 #elif defined(_WIN32)
 
-	return localtime_s( clock, result );
+	if ( localtime_s( result, clock ) == 0 ) return result;
+	return NULL;
 
 #else
 
