@@ -907,7 +907,7 @@ LIBHTTP_API int				httplib_closedir( DIR *dir );
 LIBHTTP_API struct httplib_connection *	httplib_connect_client( struct httplib_context *ctx, const char *host, int port, int use_ssl, char *error_buffer, size_t error_buffer_size );
 LIBHTTP_API struct httplib_connection *	httplib_connect_client_secure( struct httplib_context *ctx, const struct httplib_client_options *client_options, char *error_buffer, size_t error_buffer_size );
 LIBHTTP_API struct httplib_connection *	httplib_connect_websocket_client( struct httplib_context *ctx, const char *host, int port, int use_ssl, char *error_buffer, size_t error_buffer_size, const char *path, const char *origin, httplib_websocket_data_handler data_func, httplib_websocket_close_handler close_func, void *user_data );
-LIBHTTP_API struct httplib_context *	httplib_create_client_context( const struct httplib_option_t *options );
+LIBHTTP_API struct httplib_context *	httplib_create_client_context( const struct httplib_callbacks *callbacks, const struct httplib_option_t *options );
 LIBHTTP_API void			httplib_cry( enum debug_level_t debug_level, const struct httplib_context *ctx, const struct httplib_connection *conn, PRINTF_FORMAT_STRING(const char *fmt), ...) PRINTF_ARGS(4, 5);
 LIBHTTP_API void			httplib_destroy_client_context( struct httplib_context *ctx );
 LIBHTTP_API struct httplib_connection *	httplib_download( struct httplib_context *ctx, const char *host, int port, int use_ssl, char *error_buffer, size_t error_buffer_size, PRINTF_FORMAT_STRING(const char *request_fmt), ...) PRINTF_ARGS(7, 8);

@@ -23,7 +23,7 @@
 #include "httplib_main.h"
 
 /*
- * struct httplib_context *httplib_create_client_context( const struct httplib_option_t *options );
+ * struct httplib_context *httplib_create_client_context( const struct httplib_callbacks *callbacks, const struct httplib_option_t *options );
  *
  * The function httplib_create_client_context() creates a context to be used
  * for one simultaneous client connection. It is not possible to use one client
@@ -31,15 +31,29 @@
  * contains SSL context information which is specific for one connection.
  */
 
-struct httplib_context *httplib_create_client_context( const struct httplib_option_t *options ) {
+struct httplib_context *httplib_create_client_context( const struct httplib_callbacks *callbacks, const struct httplib_option_t *options ) {
 
 	struct httplib_context *ctx;
+	void (*exit_callback)(const struct httplib_context *ctx);
 
-	ctx = httplib_calloc( 1, sizeof(struct httplib_context) );
+	exit_callback = NULL;
+	ctx           = httplib_calloc( 1, sizeof(struct httplib_context) );
 	if ( ctx == NULL ) return NULL;
+
+	if ( callbacks != NULL ) {
+
+		ctx->callbacks              = *callbacks;
+		exit_callback               = callbacks->exit_context;
+		ctx->callbacks.exit_context = NULL;
+	}
 
 	if ( XX_httplib_init_options(    ctx          ) ) return NULL;
 	if ( XX_httplib_process_options( ctx, options ) ) return NULL;
+
+	if ( ctx->callbacks.init_context != NULL ) ctx->callbacks.init_context( ctx );
+
+	ctx->callbacks.exit_context = exit_callback;
+	ctx->ctx_type               = CTX_TYPE_CLIENT;
 
 	return ctx;
 
