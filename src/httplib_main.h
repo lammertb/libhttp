@@ -786,6 +786,7 @@ void			SHA1Final( unsigned char digest[20], SHA1_CTX *context );
 void			SHA1Init( SHA1_CTX *context );
 void			SHA1Update( SHA1_CTX *context, const unsigned char *data, uint32_t len );
 
+struct httplib_context *XX_httplib_abort_start( struct httplib_context *ctx, PRINTF_FORMAT_STRING(const char *fmt), ...) PRINTF_ARGS(2, 3);
 void			XX_httplib_accept_new_connection( const struct socket *listener, struct httplib_context *ctx );
 bool			XX_httplib_authorize( struct httplib_connection *conn, struct file *filep );
 const char *		XX_httplib_builtin_mime_ext( int index );
@@ -808,6 +809,7 @@ void			XX_httplib_fclose_on_exec( struct file *filep, struct httplib_connection 
 const char *		XX_httplib_fgets( char *buf, size_t size, struct file *filep, char **p );
 bool			XX_httplib_fopen( const struct httplib_connection *conn, const char *path, const char *mode, struct file *filep );
 bool			XX_httplib_forward_body_data( struct httplib_connection *conn, FILE *fp, SOCKET sock, SSL *ssl );
+void			XX_httplib_free_config_options( struct httplib_context *ctx );
 void			XX_httplib_free_context( struct httplib_context *ctx );
 const char *		XX_httplib_get_header( const struct httplib_request_info *ri, const char *name );
 void			XX_httplib_get_mime_type( struct httplib_context *ctx, const char *path, struct vec *vec );
@@ -828,6 +830,7 @@ void			XX_httplib_handle_ssi_file_request( struct httplib_connection *conn, cons
 void			XX_httplib_handle_static_file_request( struct httplib_connection *conn, const char *path, struct file *filep, const char *mime_type, const char *additional_headers );
 void			XX_httplib_handle_websocket_request( struct httplib_connection *conn, const char *path, int is_callback_resource, httplib_websocket_connect_handler ws_connect_handler, httplib_websocket_ready_handler ws_ready_handler, httplib_websocket_data_handler ws_data_handler, httplib_websocket_close_handler ws_close_handler, void *cbData );
 bool			XX_httplib_header_has_option( const char *header, const char *option );
+bool			XX_httplib_init_options( struct httplib_context *ctx );
 void			XX_httplib_interpret_uri( struct httplib_connection *conn, char *filename, size_t filename_buf_len, struct file *filep, bool *is_found, bool *is_script_resource, bool *is_websocket_request, bool *is_put_or_delete_request );
 bool			XX_httplib_is_authorized_for_put( struct httplib_connection *conn );
 bool			XX_httplib_is_file_in_memory( const struct httplib_connection *conn, const char *path, struct file *filep );
@@ -857,6 +860,7 @@ void			XX_httplib_path_to_unicode( const char *path, wchar_t *wbuf, size_t wbuf_
 void			XX_httplib_prepare_cgi_environment( struct httplib_connection *conn, const char *prog, struct cgi_environment *env );
 void			XX_httplib_print_dir_entry( struct de *de );
 void			XX_httplib_process_new_connection( struct httplib_connection *conn );
+bool			XX_httplib_process_options( struct httplib_context *ctx, const struct httplib_option_t *options );
 void			XX_httplib_produce_socket( struct httplib_context *ctx, const struct socket *sp );
 int			XX_httplib_pull( FILE *fp, struct httplib_connection *conn, char *buf, int len, double timeout );
 int			XX_httplib_pull_all( FILE *fp, struct httplib_connection *conn, char *buf, int len );
@@ -929,3 +933,5 @@ extern pthread_mutexattr_t			XX_httplib_pthread_mutex_attr;
 #endif /* _WIN32 */
 
 extern const struct uriprot_tp		XX_httplib_abs_uri_protocols[];
+extern int				XX_httplib_sTlsInit;
+extern pthread_key_t			XX_httplib_sTlsKey;

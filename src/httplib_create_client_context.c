@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2016 Lammert Bies
+ * Copyright (c) 2016 Lammert Bies
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,7 +20,27 @@
  * THE SOFTWARE.
  */
 
+#include "httplib_main.h"
 
+/*
+ * struct httplib_context *httplib_create_client_context( const struct httplib_option_t *options );
+ *
+ * The function httplib_create_client_context() creates a context to be used
+ * for one simultaneous client connection. It is not possible to use one client
+ * context for multiple connections at the same time, because the contect
+ * contains SSL context information which is specific for one connection.
+ */
 
-extern pthread_mutex_t *	XX_httplib_ssl_mutexes;
-extern int			XX_httplib_thread_idx_max;
+struct httplib_context *httplib_create_client_context( const struct httplib_option_t *options ) {
+
+	struct httplib_context *ctx;
+
+	ctx = httplib_calloc( 1, sizeof(struct httplib_context) );
+	if ( ctx == NULL ) return NULL;
+
+	if ( XX_httplib_init_options(    ctx          ) ) return NULL;
+	if ( XX_httplib_process_options( ctx, options ) ) return NULL;
+
+	return ctx;
+
+}  /* httplib_create_client_context */

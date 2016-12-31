@@ -667,14 +667,6 @@ LIBHTTP_API int httplib_get_cookie(const char *cookie, const char *var_name, cha
      conn = httplib_download("google.com", 80, 0, ebuf, sizeof(ebuf),
                         "%s", "GET / HTTP/1.0\r\nHost: google.com\r\n\r\n");
  */
-LIBHTTP_API struct httplib_connection *
-httplib_download(const char *host,
-            int port,
-            int use_ssl,
-            char *error_buffer,
-            size_t error_buffer_size,
-            PRINTF_FORMAT_STRING(const char *request_fmt),
-            ...) PRINTF_ARGS(6, 7);
 
 
 /* Close the connection opened by httplib_download(). */
@@ -841,16 +833,6 @@ LIBHTTP_API char *httplib_md5(char buf[33], ...);
      On success, valid httplib_connection object.
      On error, NULL. Se error_buffer for details.
 */
-LIBHTTP_API struct httplib_connection *httplib_connect_websocket_client( const char *host,
-                            int port,
-                            int use_ssl,
-                            char *error_buffer,
-                            size_t error_buffer_size,
-                            const char *path,
-                            const char *origin,
-                            httplib_websocket_data_handler data_func,
-                            httplib_websocket_close_handler close_func,
-                            void *user_data);
 
 
 /* Connect to a TCP server as a client (can be used to connect to a HTTP server)
@@ -865,7 +847,6 @@ LIBHTTP_API struct httplib_connection *httplib_connect_websocket_client( const c
      On success, valid httplib_connection object.
      On error, NULL. Se error_buffer for details.
 */
-LIBHTTP_API struct httplib_connection *httplib_connect_client(const char *host, int port, int use_ssl, char *error_buffer, size_t error_buffer_size);
 
 
 struct httplib_client_options {
@@ -877,7 +858,6 @@ struct httplib_client_options {
 };
 
 
-LIBHTTP_API struct httplib_connection *httplib_connect_client_secure(const struct httplib_client_options *client_options, char *error_buffer, size_t error_buffer_size);
 
 
 enum debug_level_t {
@@ -924,7 +904,13 @@ LIBHTTP_API int				httplib_atomic_inc( volatile int *addr );
 LIBHTTP_API int				httplib_base64_encode( const unsigned char *src, int src_len, char *dst, int dst_len );
 LIBHTTP_API unsigned			httplib_check_feature( unsigned feature );
 LIBHTTP_API int				httplib_closedir( DIR *dir );
+LIBHTTP_API struct httplib_connection *	httplib_connect_client( struct httplib_context *ctx, const char *host, int port, int use_ssl, char *error_buffer, size_t error_buffer_size );
+LIBHTTP_API struct httplib_connection *	httplib_connect_client_secure( struct httplib_context *ctx, const struct httplib_client_options *client_options, char *error_buffer, size_t error_buffer_size );
+LIBHTTP_API struct httplib_connection *	httplib_connect_websocket_client( struct httplib_context *ctx, const char *host, int port, int use_ssl, char *error_buffer, size_t error_buffer_size, const char *path, const char *origin, httplib_websocket_data_handler data_func, httplib_websocket_close_handler close_func, void *user_data );
+LIBHTTP_API struct httplib_context *	httplib_create_client_context( const struct httplib_option_t *options );
 LIBHTTP_API void			httplib_cry( enum debug_level_t debug_level, const struct httplib_context *ctx, const struct httplib_connection *conn, PRINTF_FORMAT_STRING(const char *fmt), ...) PRINTF_ARGS(4, 5);
+LIBHTTP_API void			httplib_destroy_client_context( struct httplib_context *ctx );
+LIBHTTP_API struct httplib_connection *	httplib_download( struct httplib_context *ctx, const char *host, int port, int use_ssl, char *error_buffer, size_t error_buffer_size, PRINTF_FORMAT_STRING(const char *request_fmt), ...) PRINTF_ARGS(7, 8);
 LIBHTTP_API char *			httplib_error_string( int error_code, char *buf, size_t buf_len );
 LIBHTTP_API const char *		httplib_get_builtin_mime_type( const char *file_name );
 LIBHTTP_API enum debug_level_t		httplib_get_debug_level( struct httplib_context *ctx );
@@ -967,6 +953,8 @@ LIBHTTP_API char *			httplib_strdup( const char *str );
 LIBHTTP_API void			httplib_strlcpy( char *dst, const char *src, size_t len );
 LIBHTTP_API int				httplib_strncasecmp( const char *s1, const char *s2, size_t len );
 LIBHTTP_API char *			httplib_strndup( const char *str, size_t len );
+LIBHTTP_API int				httplib_system_exit( void );
+LIBHTTP_API int				httplib_system_init( void );
 LIBHTTP_API const char *		httplib_version( void );
 
 #ifdef __cplusplus

@@ -69,8 +69,4 @@ void httplib_stop( struct httplib_context *ctx ) {
 	httplib_pthread_join( mt, NULL );
 	XX_httplib_free_context( ctx );
 
-#if defined(_WIN32)
-	WSACleanup();
-#endif /* _WIN32 */
-
 }  /* httplib_stop */

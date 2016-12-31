@@ -35,17 +35,19 @@
  * and returns a pointer to the connection on success, or NULL on error.
  */
 
-struct httplib_connection * httplib_download( const char *host, int port, int use_ssl, char *ebuf, size_t ebuf_len, const char *fmt, ... ) {
+struct httplib_connection * httplib_download( struct httplib_context *ctx, const char *host, int port, int use_ssl, char *ebuf, size_t ebuf_len, const char *fmt, ... ) {
 
 	struct httplib_connection *conn;
 	va_list ap;
 	int i;
 	int reqerr;
 
+	if ( ctx == NULL ) return NULL;
+
 	va_start( ap, fmt );
 	ebuf[0] = '\0';
 
-	conn = httplib_connect_client( host, port, use_ssl, ebuf, ebuf_len );
+	conn = httplib_connect_client( ctx, host, port, use_ssl, ebuf, ebuf_len );
 
 	if ( conn != NULL ) {
 

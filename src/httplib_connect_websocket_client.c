@@ -36,16 +36,14 @@
  * returned, otherwise NULL.
  */
 
-struct httplib_connection *httplib_connect_websocket_client( const char *host, int port, int use_ssl, char *error_buffer, size_t error_buffer_size, const char *path, const char *origin, httplib_websocket_data_handler data_func, httplib_websocket_close_handler close_func, void *user_data ) {
+struct httplib_connection *httplib_connect_websocket_client( struct httplib_context *ctx, const char *host, int port, int use_ssl, char *error_buffer, size_t error_buffer_size, const char *path, const char *origin, httplib_websocket_data_handler data_func, httplib_websocket_close_handler close_func, void *user_data ) {
 
 	struct httplib_connection *conn;
-	struct httplib_context *newctx;
 	struct websocket_client_thread_data *thread_data;
 	static const char *magic = "x3JJHMbDL1EzLkh9GBhXDw==";
 	const char *handshake_req;
 
-	conn   = NULL;
-	newctx = NULL;
+	conn = NULL;
 
 	if ( origin != NULL ) handshake_req = "GET %s HTTP/1.1\r\n"
 		                "Host: %s\r\n"
@@ -68,7 +66,7 @@ struct httplib_connection *httplib_connect_websocket_client( const char *host, i
 	 * Establish the client connection and request upgrade
 	 */
 
-	conn = httplib_download( host, port, use_ssl, error_buffer, error_buffer_size, handshake_req, path, host, magic, origin );
+	conn = httplib_download( ctx, host, port, use_ssl, error_buffer, error_buffer_size, handshake_req, path, host, magic, origin );
 
 	/*
 	 * Connection object will be null if something goes wrong
@@ -90,36 +88,28 @@ struct httplib_connection *httplib_connect_websocket_client( const char *host, i
 		return NULL;
 	}
 
-	/*
-	 * For client connections, httplib_context is fake. Since we need to set a
-	 * callback function, we need to create a copy and modify it.
-	 */
+	ctx->user_data       = user_data;
+	ctx->ctx_type        = CTX_TYPE_CLIENT;
+	ctx->num_threads     = 1;			/* one worker thread will be created	*/
+	ctx->workerthreadids = httplib_calloc( ctx->num_threads, sizeof(pthread_t) );
 
-	newctx = httplib_malloc( sizeof(struct httplib_context) );
-	if ( newctx == NULL ) { conn = httplib_free( conn ); return NULL; }
+	if ( ctx->workerthreadids == NULL ) {
 
-	*newctx                 = *conn->ctx;
-	newctx->user_data       = user_data;
-	newctx->ctx_type        = CTX_TYPE_CLIENT;
-	newctx->num_threads     = 1;			/* one worker thread will be created	*/
-	newctx->workerthreadids = httplib_calloc( newctx->num_threads, sizeof(pthread_t) );
-
-	if ( newctx->workerthreadids == NULL ) {
-
-		newctx = httplib_free( newctx );
-		conn   = httplib_free( conn   );
+		ctx->num_threads = 0;
+		ctx->user_data   = NULL;
+		conn             = httplib_free( conn );
 
 		return NULL;
 	}
 
-	conn->ctx                  = newctx;
-	thread_data                = httplib_calloc( sizeof(struct websocket_client_thread_data), 1 );
+	thread_data = httplib_calloc( sizeof(struct websocket_client_thread_data), 1 );
 
 	if ( thread_data == NULL ) {
 
-		newctx->workerthreadids = httplib_free( newctx->workerthreadids );
-		newctx                  = httplib_free( newctx                  );
-		conn                    = httplib_free( conn                    );
+		ctx->workerthreadids = httplib_free( ctx->workerthreadids );
+		ctx->num_threads     = 0;
+		ctx->user_data       = NULL;
+		conn                 = httplib_free( conn );
 
 		return NULL;
 	}
@@ -135,12 +125,13 @@ struct httplib_connection *httplib_connect_websocket_client( const char *host, i
 	 * called on the client connection
 	 */
 
-	if ( XX_httplib_start_thread_with_id( XX_httplib_websocket_client_thread, thread_data, newctx->workerthreadids) != 0 ) {
+	if ( XX_httplib_start_thread_with_id( XX_httplib_websocket_client_thread, thread_data, ctx->workerthreadids) != 0 ) {
 
-		thread_data             = httplib_free( thread_data             );
-		newctx->workerthreadids = httplib_free( newctx->workerthreadids );
-		newctx                  = httplib_free( newctx                  );
-		conn                    = httplib_free( conn                    );
+		thread_data          = httplib_free( thread_data          );
+		ctx->workerthreadids = httplib_free( ctx->workerthreadids );
+		ctx->num_threads     = 0;
+		ctx->user_data       = NULL;
+		conn                 = httplib_free( conn );
 
 		return NULL;
 	}

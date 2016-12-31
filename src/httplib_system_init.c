@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2016 Lammert Bies
+ * Copyright (c) 2016 Lammert Bies
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,7 +20,27 @@
  * THE SOFTWARE.
  */
 
+#include "httplib_main.h"
 
+/*
+ * int httplib_system_init( void );
+ *
+ * The function httplib_system_init() is called before any other LibHTTP
+ * functions to do some basic initialisation. The function returns 0 when
+ * successful and -1 if an error occured.
+ */
 
-extern pthread_mutex_t *	XX_httplib_ssl_mutexes;
-extern int			XX_httplib_thread_idx_max;
+int httplib_system_init( void ) {
+
+#if defined(_WIN32)
+
+	WSADATA data;
+	return ( WSAStartup( MAKEWORD(2,2), &data ) ) ? -1 : 0;
+
+#else  /* _WIN32 */
+
+	return 0;
+
+#endif  /* _WIN32 */
+
+}  /* httplib_system_init */

@@ -150,6 +150,5 @@ void				XX_httplib_uninitialize_ssl( struct httplib_context *ctx );
 extern int			XX_httplib_cryptolib_users;
 extern struct ssl_func		XX_httplib_crypto_sw[];
 extern struct ssl_func		XX_httplib_ssl_sw[];
-extern int			XX_httplib_sTlsInit;
 
 #endif  /* NO_SSL */

@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2016 Lammert Bies
+ * Copyright (c) 2016 Lammert Bies
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,7 +20,22 @@
  * THE SOFTWARE.
  */
 
+#include "httplib_main.h"
 
+/*
+ * void httplib_destroy_client_context( struct httplib_context *ctx );
+ *
+ * The function httplib_destroy_client_context() destroys the context for a
+ * client connection. This function should not be called for server contexts.
+ * Use httplib_stop() for server contexts instead.
+ */
 
-extern pthread_mutex_t *	XX_httplib_ssl_mutexes;
-extern int			XX_httplib_thread_idx_max;
+void httplib_destroy_client_context( struct httplib_context *ctx ) {
+
+	if ( ctx == NULL ) return;
+
+	XX_httplib_free_config_options( ctx );
+
+	httplib_free( ctx );
+
+}  /* httplib_destroy_client_context */

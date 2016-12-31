@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2016 Lammert Bies
+ * Copyright (c) 2016 Lammert Bies
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,7 +20,37 @@
  * THE SOFTWARE.
  */
 
+#include "httplib_main.h"
 
+/* 
+ * struct httplib_context *XX_httplib_abort_start( struct httplib_context *ctx, const char *fmt, ... );
+ *
+ * The function XX_httplib_abort_start() is called to do some cleanup work when
+ * an error occured initializing a context. The function returns NULL which is
+ * then further returned to the calling party.
+ */
 
-extern pthread_mutex_t *	XX_httplib_ssl_mutexes;
-extern int			XX_httplib_thread_idx_max;
+struct httplib_context *XX_httplib_abort_start( struct httplib_context *ctx, const char *fmt, ... ) {
+
+	va_list ap;
+	char buf[MG_BUF_LEN];
+
+	if ( ctx == NULL ) return NULL;
+
+	if ( fmt != NULL ) {
+
+		va_start( ap, fmt );
+		vsnprintf_impl( buf, sizeof(buf), fmt, ap );
+		va_end( ap );
+		buf[sizeof(buf)-1] = 0;
+
+		httplib_cry( DEBUG_LEVEL_CRASH, ctx, NULL, "%s", buf );
+	}
+
+	XX_httplib_free_context( ctx );
+
+	httplib_pthread_setspecific( XX_httplib_sTlsKey, NULL );
+
+	return NULL;
+
+}  /* XX_httplib_abort_start */

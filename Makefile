@@ -189,6 +189,7 @@ OBJLIST =									\
 	${OBJDIR}extern_md5${OBJEXT}						\
 	${OBJDIR}extern_sha1${OBJEXT}						\
 	${OBJDIR}extern_ssl_lut${OBJEXT}					\
+	${OBJDIR}httplib_abort_start${OBJEXT}					\
 	${OBJDIR}httplib_accept_new_connection${OBJEXT}				\
 	${OBJDIR}httplib_addenv${OBJEXT}					\
 	${OBJDIR}httplib_atomic_dec${OBJEXT}					\
@@ -204,14 +205,15 @@ OBJLIST =									\
 	${OBJDIR}httplib_close_socket_gracefully${OBJEXT}			\
 	${OBJDIR}httplib_closedir${OBJEXT}					\
 	${OBJDIR}httplib_compare_dir_entries${OBJEXT}				\
-	${OBJDIR}httplib_config_options${OBJEXT}				\
 	${OBJDIR}httplib_connect_client${OBJEXT}				\
 	${OBJDIR}httplib_connect_socket${OBJEXT}				\
 	${OBJDIR}httplib_connect_websocket_client${OBJEXT}			\
 	${OBJDIR}httplib_construct_etag${OBJEXT}				\
 	${OBJDIR}httplib_consume_socket${OBJEXT}				\
+	${OBJDIR}httplib_create_client_context${OBJEXT}				\
 	${OBJDIR}httplib_cry${OBJEXT}						\
 	${OBJDIR}httplib_delete_file${OBJEXT}					\
+	${OBJDIR}httplib_destroy_client_context${OBJEXT}			\
 	${OBJDIR}httplib_difftimespec${OBJEXT}					\
 	${OBJDIR}httplib_dir_scan_callback${OBJEXT}				\
 	${OBJDIR}httplib_discard_unread_request_data${OBJEXT}			\
@@ -223,6 +225,7 @@ OBJLIST =									\
 	${OBJDIR}httplib_fgets${OBJEXT}						\
 	${OBJDIR}httplib_fopen${OBJEXT}						\
 	${OBJDIR}httplib_forward_body_data${OBJEXT}				\
+	${OBJDIR}httplib_free_config_options${OBJEXT}				\
 	${OBJDIR}httplib_free_context${OBJEXT}					\
 	${OBJDIR}httplib_get_builtin_mime_type${OBJEXT}				\
 	${OBJDIR}httplib_get_context${OBJEXT}					\
@@ -260,6 +263,7 @@ OBJLIST =									\
 	${OBJDIR}httplib_handle_websocket_request${OBJEXT}			\
 	${OBJDIR}httplib_header_has_option${OBJEXT}				\
 	${OBJDIR}httplib_inet_pton${OBJEXT}					\
+	${OBJDIR}httplib_init_options${OBJEXT}					\
 	${OBJDIR}httplib_initialize_ssl${OBJEXT}				\
 	${OBJDIR}httplib_interpret_uri${OBJEXT}					\
 	${OBJDIR}httplib_is_authorized_for_put${OBJEXT}				\
@@ -270,6 +274,7 @@ OBJLIST =									\
 	${OBJDIR}httplib_is_valid_http_method${OBJEXT}				\
 	${OBJDIR}httplib_is_valid_port${OBJEXT}					\
 	${OBJDIR}httplib_is_websocket_protocol${OBJEXT}				\
+	${OBJDIR}httplib_process_options${OBJEXT}				\
 	${OBJDIR}httplib_pthread_join${OBJEXT}					\
 	${OBJDIR}httplib_kill${OBJEXT}						\
 	${OBJDIR}httplib_load_dll${OBJEXT}					\
@@ -375,6 +380,8 @@ OBJLIST =									\
 	${OBJDIR}httplib_strndup${OBJEXT}					\
 	${OBJDIR}httplib_substitute_index_file${OBJEXT}				\
 	${OBJDIR}httplib_suggest_connection_header${OBJEXT}			\
+	${OBJDIR}httplib_system_exit${OBJEXT}					\
+	${OBJDIR}httplib_system_init${OBJEXT}					\
 	${OBJDIR}httplib_timer${OBJEXT}						\
 	${OBJDIR}httplib_tls_dtor${OBJEXT}					\
 	${OBJDIR}httplib_uninitialize_ssl${OBJEXT}				\
@@ -448,6 +455,10 @@ ${OBJDIR}extern_ssl_lut${OBJEXT}					: ${SRCDIR}extern_ssl_lut.c					\
 									  ${SRCDIR}httplib_main.h					\
 									  ${INCDIR}libhttp.h
 
+${OBJDIR}httplib_abort_start${OBJEXT}					: ${SRCDIR}httplib_abort_start.c				\
+									  ${SRCDIR}httplib_main.h					\
+									  ${INCDIR}libhttp.h
+
 ${OBJDIR}httplib_accept_new_connection${OBJEXT}				: ${SRCDIR}httplib_accept_new_connection.c			\
 									  ${SRCDIR}httplib_ssl.h					\
 									  ${SRCDIR}httplib_main.h					\
@@ -517,10 +528,6 @@ ${OBJDIR}httplib_compare_dir_entries${OBJEXT}				: ${SRCDIR}httplib_compare_dir_
 									  ${SRCDIR}httplib_main.h					\
 									  ${INCDIR}libhttp.h
 
-${OBJDIR}httplib_config_options${OBJEXT}				: ${SRCDIR}httplib_config_options.c				\
-									  ${SRCDIR}httplib_main.h					\
-									  ${INCDIR}libhttp.h
-
 ${OBJDIR}httplib_connect_client${OBJEXT}				: ${SRCDIR}httplib_connect_client.c				\
 									  ${SRCDIR}httplib_pthread.h					\
 									  ${SRCDIR}httplib_ssl.h					\
@@ -550,12 +557,20 @@ ${OBJDIR}httplib_consume_socket${OBJEXT}				: ${SRCDIR}httplib_consume_socket.c	
 									  ${SRCDIR}httplib_main.h					\
 									  ${INCDIR}libhttp.h
 
+${OBJDIR}httplib_create_client_context${OBJEXT}				: ${SRCDIR}httplib_create_client_context.c			\
+									  ${SRCDIR}httplib_main.h					\
+									  ${INCDIR}libhttp.h
+
 ${OBJDIR}httplib_cry${OBJEXT}						: ${SRCDIR}httplib_cry.c					\
 									  ${SRCDIR}httplib_ssl.h					\
 									  ${SRCDIR}httplib_main.h					\
 									  ${INCDIR}libhttp.h
 
 ${OBJDIR}httplib_delete_file${OBJEXT}					: ${SRCDIR}httplib_delete_file.c				\
+									  ${SRCDIR}httplib_main.h					\
+									  ${INCDIR}libhttp.h
+
+${OBJDIR}httplib_destroy_client_context${OBJEXT}			: ${SRCDIR}httplib_destroy_client_context.c			\
 									  ${SRCDIR}httplib_main.h					\
 									  ${INCDIR}libhttp.h
 
@@ -603,6 +618,10 @@ ${OBJDIR}httplib_fopen${OBJEXT}						: ${SRCDIR}httplib_fopen.c					\
 									  ${INCDIR}libhttp.h
 
 ${OBJDIR}httplib_forward_body_data${OBJEXT}				: ${SRCDIR}httplib_forward_body_data.c				\
+									  ${SRCDIR}httplib_main.h					\
+									  ${INCDIR}libhttp.h
+
+${OBJDIR}httplib_free_config_options${OBJEXT}				: ${SRCDIR}httplib_free_config_options.c			\
 									  ${SRCDIR}httplib_main.h					\
 									  ${INCDIR}libhttp.h
 
@@ -776,6 +795,10 @@ ${OBJDIR}httplib_inet_pton${OBJEXT}					: ${SRCDIR}httplib_inet_pton.c					\
 									  ${SRCDIR}httplib_main.h					\
 									  ${INCDIR}libhttp.h
 
+${OBJDIR}httplib_init_options${OBJEXT}					: ${SRCDIR}httplib_init_options.c				\
+									  ${SRCDIR}httplib_main.h					\
+									  ${INCDIR}libhttp.h
+
 ${OBJDIR}httplib_initialize_ssl${OBJEXT}				: ${SRCDIR}httplib_initialize_ssl.c				\
 									  ${SRCDIR}httplib_pthread.h					\
 									  ${SRCDIR}httplib_ssl.h					\
@@ -818,6 +841,10 @@ ${OBJDIR}httplib_is_valid_port${OBJEXT}					: ${SRCDIR}httplib_is_valid_port.c		
 
 ${OBJDIR}httplib_is_websocket_protocol${OBJEXT}				: ${SRCDIR}httplib_is_websocket_protocol.c			\
 									  ${SRCDIR}httplib_string.h					\
+									  ${SRCDIR}httplib_main.h					\
+									  ${INCDIR}libhttp.h
+
+${OBJDIR}httplib_process_options${OBJEXT}				: ${SRCDIR}httplib_process_options.c				\
 									  ${SRCDIR}httplib_main.h					\
 									  ${INCDIR}libhttp.h
 
@@ -1300,6 +1327,14 @@ ${OBJDIR}httplib_strndup${OBJEXT}					: ${SRCDIR}httplib_strndup.c					\
 
 ${OBJDIR}httplib_substitute_index_file${OBJEXT}				: ${SRCDIR}httplib_substitute_index_file.c			\
 									  ${SRCDIR}httplib_string.h					\
+									  ${SRCDIR}httplib_main.h					\
+									  ${INCDIR}libhttp.h
+
+${OBJDIR}httplib_system_exit${OBJEXT}					: ${SRCDIR}httplib_system_exit.c				\
+									  ${SRCDIR}httplib_main.h					\
+									  ${INCDIR}libhttp.h
+
+${OBJDIR}httplib_system_init${OBJEXT}					: ${SRCDIR}httplib_system_init.c				\
 									  ${SRCDIR}httplib_main.h					\
 									  ${INCDIR}libhttp.h
 
