@@ -39,24 +39,24 @@ LIBHTTP_THREAD XX_httplib_websocket_client_thread( void *data ) {
 	struct websocket_client_thread_data *cdata;
 
 	cdata = data;
+	if ( cdata == NULL  ||  cdata->conn == NULL  ||  cdata->conn->ctx == NULL ) return LIBHTTP_THREAD_RETNULL;
+
+	cdata->conn->ctx->status = CTX_STATUS_RUNNING;
 
 	XX_httplib_set_thread_name( "ws-client" );
 
-	if ( cdata->conn->ctx != NULL ) {
-
-		/*
-		 * 3 indicates a websocket client thread
-		 * TODO: check if conn->ctx can be set
-		 */
-
-		if ( cdata->conn->ctx->callbacks.init_thread != NULL ) cdata->conn->ctx->callbacks.init_thread( cdata->conn->ctx, 3 );
-	}
+	if ( cdata->conn->ctx->callbacks.init_thread != NULL ) cdata->conn->ctx->callbacks.init_thread( cdata->conn->ctx, 3 );
 
 	XX_httplib_read_websocket( cdata->conn, cdata->data_handler, cdata->callback_data );
 
 	if ( cdata->close_handler != NULL ) cdata->close_handler( cdata->conn, cdata->callback_data );
 
-	cdata = httplib_free( cdata );
+	cdata->conn->ctx->workerthreadids = httplib_free( cdata->conn->ctx->workerthreadids );
+	cdata->conn                       = httplib_free( cdata->conn                       );
+	cdata                             = httplib_free( cdata                             );
+	cdata->conn->ctx->user_data       = NULL;
+	cdata->conn->ctx->num_threads     = 0;
+	cdata->conn->ctx->status          = CTX_STATUS_TERMINATED;
 
 	return LIBHTTP_THREAD_RETNULL;
 

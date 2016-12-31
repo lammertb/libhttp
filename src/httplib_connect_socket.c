@@ -41,26 +41,26 @@
  * has been established.
  */
 
-bool XX_httplib_connect_socket( const char *host, int port, int use_ssl, char *ebuf, size_t ebuf_len, SOCKET *sock, union usa *sa ) {
+bool XX_httplib_connect_socket( struct httplib_context *ctx, const char *host, int port, int use_ssl, SOCKET *sock, union usa *sa ) {
 
 	int ip_ver;
 	char error_string[ERROR_STRING_LEN];
+
+	if ( ctx == NULL ) return false;
 
 	ip_ver = 0;
 	*sock  = INVALID_SOCKET;
 	memset( sa, 0, sizeof(*sa) );
 
-	if ( ebuf_len > 0 ) *ebuf = 0;
-
 	if ( host == NULL ) {
 
-		XX_httplib_snprintf( NULL, NULL, ebuf, ebuf_len, "%s", "NULL host" );
+		httplib_cry( DEBUG_LEVEL_ERROR, ctx, NULL, "%s (%u): NULL host", __func__, __LINE__ );
 		return false;
 	}
 
 	if ( port < 0  ||  ! XX_httplib_is_valid_port( (unsigned)port) ) {
 
-		XX_httplib_snprintf( NULL, NULL, ebuf, ebuf_len, "%s", "invalid port" );
+		httplib_cry( DEBUG_LEVEL_ERROR, ctx, NULL, "%s (%u): invalid port", __func__, __LINE__ );
 		return false;
 	}
 
@@ -68,7 +68,7 @@ bool XX_httplib_connect_socket( const char *host, int port, int use_ssl, char *e
 
 	if ( use_ssl  &&  SSLv23_client_method == NULL ) {
 
-		XX_httplib_snprintf( NULL, NULL, ebuf, ebuf_len, "%s", "SSL is not initialized" );
+		httplib_cry( DEBUG_LEVEL_ERROR, ctx, NULL, "%s (%u): SSL is not initialized", __func__, __LINE__ );
 		return false;
 	}
 #else  /* NO_SSL */
@@ -112,7 +112,7 @@ bool XX_httplib_connect_socket( const char *host, int port, int use_ssl, char *e
 
 	if ( ip_ver == 0 ) {
 
-		XX_httplib_snprintf( NULL, NULL, ebuf, ebuf_len, "%s", "host not found" );
+		httplib_cry( DEBUG_LEVEL_ERROR, ctx, NULL, "%s (%u): host not found", __func__, __LINE__ );
 		return false;
 	}
 
@@ -121,8 +121,8 @@ bool XX_httplib_connect_socket( const char *host, int port, int use_ssl, char *e
 
 	if ( *sock == INVALID_SOCKET ) {
 
-		XX_httplib_snprintf( NULL, NULL, ebuf, ebuf_len, "socket(): %s", httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
-		return 0;
+		httplib_cry( DEBUG_LEVEL_ERROR, ctx, NULL, "%s (%u): socket(): %s", __func__, __LINE__, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
+		return false;
 	}
 
 	XX_httplib_set_close_on_exec( *sock );
@@ -134,7 +134,7 @@ bool XX_httplib_connect_socket( const char *host, int port, int use_ssl, char *e
 	 * Not connected
 	 */
 
-	XX_httplib_snprintf( NULL, NULL, ebuf, ebuf_len, "connect(%s:%d): %s", host, port, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
+	httplib_cry( DEBUG_LEVEL_ERROR, ctx, NULL, "%s (%u): connect(%s:%d): %s", __func__, __LINE__, host, port, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 	closesocket( *sock );
 	*sock = INVALID_SOCKET;
 

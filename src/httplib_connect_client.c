@@ -30,7 +30,7 @@
 #include "httplib_ssl.h"
 #include "httplib_string.h"
 
-static struct httplib_connection *	httplib_connect_client_impl( struct httplib_context *ctx, const struct httplib_client_options *client_options, int use_ssl, char *ebuf, size_t ebuf_len );
+static struct httplib_connection *	httplib_connect_client_impl( struct httplib_context *ctx, const struct httplib_client_options *client_options, int use_ssl );
 
 /*
  * struct httplib_connection *httplib_connect_client_secure( struct httplib_context_*ctx, const struct httplib_client_options *client options, char *error buffer, size_t error_buffer_size );
@@ -40,20 +40,20 @@ static struct httplib_connection *	httplib_connect_client_impl( struct httplib_c
  * information, or NULL if an error occured.
  */
 
-LIBHTTP_API struct httplib_connection *httplib_connect_client_secure( struct httplib_context *ctx, const struct httplib_client_options *client_options, char *error_buffer, size_t error_buffer_size ) {
+LIBHTTP_API struct httplib_connection *httplib_connect_client_secure( struct httplib_context *ctx, const struct httplib_client_options *client_options ) {
 
-	return httplib_connect_client_impl( ctx, client_options, 1, error_buffer, error_buffer_size );
+	return httplib_connect_client_impl( ctx, client_options, true );
 
 }  /* httplib_connect_client_secure */
 
 /*
- * struct httplib_connection *httplib_connect_client( struct httplib_context *ctx, const char *host, int port, int use_ssl, char *error_buffer, size_t error_buffer_size );
+ * struct httplib_connection *httplib_connect_client( struct httplib_context *ctx, const char *host, int port, int use_ssl );
  *
  * The function httplib_connect_client() connects to a remote server as a client
  * with the options of the connection provided as parameters.
  */
 
-struct httplib_connection *httplib_connect_client( struct httplib_context *ctx, const char *host, int port, int use_ssl, char *error_buffer, size_t error_buffer_size ) {
+struct httplib_connection *httplib_connect_client( struct httplib_context *ctx, const char *host, int port, int use_ssl ) {
 
 	struct httplib_client_options opts;
 
@@ -61,20 +61,20 @@ struct httplib_connection *httplib_connect_client( struct httplib_context *ctx, 
 	opts.host = host;
 	opts.port = port;
 
-	return httplib_connect_client_impl( ctx, &opts, use_ssl, error_buffer, error_buffer_size );
+	return httplib_connect_client_impl( ctx, &opts, use_ssl );
 
 }  /* httplib_connect_client */
 
 
 
 /*
- * static struct httplib_connection *httplib_connect_client_impl( struct httplib_context *ctx, const struct httplib_client_options *client_options, int use_ssl, char *ebuf, size_t ebuf_len );
+ * static struct httplib_connection *httplib_connect_client_impl( struct httplib_context *ctx, const struct httplib_client_options *client_options, int use_ssl );
  *
  * The function httplib_connect_client_impl() is the background function doing the
  * heavy lifting to make connections as a client to remote servers.
  */
 
-static struct httplib_connection *httplib_connect_client_impl( struct httplib_context *ctx, const struct httplib_client_options *client_options, int use_ssl, char *ebuf, size_t ebuf_len ) {
+static struct httplib_connection *httplib_connect_client_impl( struct httplib_context *ctx, const struct httplib_client_options *client_options, int use_ssl ) {
 
 	struct httplib_connection *conn;
 	SOCKET sock;
@@ -85,18 +85,18 @@ static struct httplib_connection *httplib_connect_client_impl( struct httplib_co
 
 	if ( ctx == NULL ) return NULL;
 
-	if ( ! XX_httplib_connect_socket( client_options->host, client_options->port, use_ssl, ebuf, ebuf_len, &sock, &sa ) ) return NULL;
+	if ( ! XX_httplib_connect_socket( ctx, client_options->host, client_options->port, use_ssl, &sock, &sa ) ) return NULL;
 	
 	if ( (conn = httplib_calloc( 1, sizeof(*conn) + MAX_REQUEST_SIZE )) == NULL ) {
 
-		XX_httplib_snprintf( NULL, NULL, ebuf, ebuf_len, "calloc(): %s", httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
+		httplib_cry( DEBUG_LEVEL_ERROR, ctx, NULL, "%s (%u): calloc(): %s", __func__, __LINE__, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 		closesocket( sock );
 	}
 #ifndef NO_SSL
 	
 	else if ( use_ssl  &&  (conn->client_ssl_ctx = SSL_CTX_new(SSLv23_client_method())) == NULL ) {
 
-		XX_httplib_snprintf( NULL, NULL, ebuf, ebuf_len, "SSL_CTX_new error" );
+		httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s (%u): SSL_CTX_new error", __func__, __LINE__ );
 		closesocket( sock );
 		conn = httplib_free( conn );
 	}
@@ -113,7 +113,7 @@ static struct httplib_connection *httplib_connect_client_impl( struct httplib_co
 		conn->client.sock = sock;
 		conn->client.lsa  = sa;
 
-		if ( getsockname( sock, psa, &len ) != 0 ) httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s: getsockname() failed: %s", __func__, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
+		if ( getsockname( sock, psa, &len ) != 0 ) httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s (%u): getsockname() failed: %s", __func__, __LINE__, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 
 		conn->client.has_ssl = (use_ssl) ? true : false;
 		httplib_pthread_mutex_init( &conn->mutex, &XX_httplib_pthread_mutex_attr );
@@ -137,7 +137,7 @@ static struct httplib_connection *httplib_connect_client_impl( struct httplib_co
 
 				if ( ! XX_httplib_ssl_use_pem_file( ctx, client_options->client_cert ) ) {
 
-					XX_httplib_snprintf( NULL, NULL, ebuf, ebuf_len, "Can not use SSL client certificate" );
+					httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s (%u): can not use SSL client certificate", __func__, __LINE__ );
 					SSL_CTX_free( conn->client_ssl_ctx );
 					closesocket( sock );
 					conn = httplib_free( conn );
@@ -154,7 +154,7 @@ static struct httplib_connection *httplib_connect_client_impl( struct httplib_co
 
 			if ( ! XX_httplib_sslize( conn, conn->client_ssl_ctx, SSL_connect ) ) {
 
-				XX_httplib_snprintf( NULL, NULL, ebuf, ebuf_len, "SSL connection error" );
+				httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s (%u): SSL connection error", __func__, __LINE__ );
 				SSL_CTX_free( conn->client_ssl_ctx );
 				closesocket( sock );
 				conn = httplib_free( conn );

@@ -47,13 +47,13 @@ struct httplib_connection * httplib_download( struct httplib_context *ctx, const
 	va_start( ap, fmt );
 	ebuf[0] = '\0';
 
-	conn = httplib_connect_client( ctx, host, port, use_ssl, ebuf, ebuf_len );
+	conn = httplib_connect_client( ctx, host, port, use_ssl );
 
 	if ( conn != NULL ) {
 
 		i = XX_httplib_vprintf( conn, fmt, ap );
 
-		if (i <= 0) XX_httplib_snprintf( conn, NULL, ebuf, ebuf_len, "%s", "Error sending request" );
+		if ( i <= 0 ) httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s (%d): error sending request", __func__, __LINE__ );
 		
 		else {
 			XX_httplib_getreq( conn, ebuf, ebuf_len, &reqerr );
@@ -67,11 +67,13 @@ struct httplib_connection * httplib_download( struct httplib_context *ctx, const
 		}
 	}
 
+	else i = 0;
+
 	/*
 	 * if an error occured, close the connection
 	 */
 
-	if ( ebuf[0] != '\0'  &&  conn != NULL ) {
+	if ( i <= 0  &&  conn != NULL ) {
 
 		httplib_close_connection( conn );
 		conn = NULL;

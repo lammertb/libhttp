@@ -43,7 +43,13 @@ struct httplib_connection *httplib_connect_websocket_client( struct httplib_cont
 	static const char *magic = "x3JJHMbDL1EzLkh9GBhXDw==";
 	const char *handshake_req;
 
-	conn = NULL;
+	if ( ctx == NULL ) return NULL;
+
+	if ( ctx->status != CTX_STATUS_TERMINATED ) {
+
+		httplib_cry( DEBUG_LEVEL_CRASH, ctx, NULL, "%s (%u): client context not in terminated state", __func__, __LINE__ );
+		return NULL;
+	}
 
 	if ( origin != NULL ) handshake_req = "GET %s HTTP/1.1\r\n"
 		                "Host: %s\r\n"
@@ -67,22 +73,15 @@ struct httplib_connection *httplib_connect_websocket_client( struct httplib_cont
 	 */
 
 	conn = httplib_download( ctx, host, port, use_ssl, error_buffer, error_buffer_size, handshake_req, path, host, magic, origin );
+	if ( conn == NULL ) {
 
-	/*
-	 * Connection object will be null if something goes wrong
-	 */
+		httplib_cry( DEBUG_LEVEL_ERROR, ctx, NULL, "%s (%u): Init of download failed", __func__, __LINE__ );
+		return NULL;
+	}
 
-	if ( conn == NULL  ||  strcmp( conn->request_info.request_uri, "101" ) ) {
+	if ( strcmp( conn->request_info.request_uri, "101" ) ) {
 
-		if ( ! *error_buffer ) {
-
-			/*
-			 * if there is a connection, but it did not return 101,
-			 * error_buffer is not yet set
-			 */
-
-			XX_httplib_snprintf( conn, NULL, error_buffer, error_buffer_size, "Unexpected server reply" );
-		}
+		httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s (%u): unexpected server reply \"%s\"", __func__, __LINE__, conn->request_info.request_uri );
 
 		conn = httplib_free( conn );
 		return NULL;
@@ -95,6 +94,8 @@ struct httplib_connection *httplib_connect_websocket_client( struct httplib_cont
 
 	if ( ctx->workerthreadids == NULL ) {
 
+		httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s (%u): out of memory allocating worker thread IDs", __func__, __LINE__ );
+
 		ctx->num_threads = 0;
 		ctx->user_data   = NULL;
 		conn             = httplib_free( conn );
@@ -105,6 +106,8 @@ struct httplib_connection *httplib_connect_websocket_client( struct httplib_cont
 	thread_data = httplib_calloc( sizeof(struct websocket_client_thread_data), 1 );
 
 	if ( thread_data == NULL ) {
+
+		httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s (%u): out of memory allocating thread data", __func__, __LINE__ );
 
 		ctx->workerthreadids = httplib_free( ctx->workerthreadids );
 		ctx->num_threads     = 0;
@@ -127,11 +130,13 @@ struct httplib_connection *httplib_connect_websocket_client( struct httplib_cont
 
 	if ( XX_httplib_start_thread_with_id( XX_httplib_websocket_client_thread, thread_data, ctx->workerthreadids) != 0 ) {
 
+		httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s (%u): thread failed to start", __func__, __LINE__ );
+
 		thread_data          = httplib_free( thread_data          );
 		ctx->workerthreadids = httplib_free( ctx->workerthreadids );
+		conn                 = httplib_free( conn                 );
 		ctx->num_threads     = 0;
 		ctx->user_data       = NULL;
-		conn                 = httplib_free( conn );
 
 		return NULL;
 	}

@@ -38,6 +38,7 @@ void httplib_destroy_client_context( struct httplib_context *ctx ) {
 
 	XX_httplib_free_config_options( ctx );
 
-	ctx = httplib_free( ctx );
+	ctx->workerthreadids = httplib_free( ctx->workerthreadids );
+	ctx                  = httplib_free( ctx );
 
 }  /* httplib_destroy_client_context */

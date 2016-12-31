@@ -797,7 +797,7 @@ void			XX_httplib_close_all_listening_sockets( struct httplib_context *ctx );
 void			XX_httplib_close_connection( struct httplib_connection *conn );
 void			XX_httplib_close_socket_gracefully( struct httplib_connection *conn );
 int WINCDECL		XX_httplib_compare_dir_entries( const void *p1, const void *p2 );
-bool			XX_httplib_connect_socket( const char *host, int port, int use_ssl, char *ebuf, size_t ebuf_len, SOCKET *sock, union usa *sa );
+bool			XX_httplib_connect_socket( struct httplib_context *ctx, const char *host, int port, int use_ssl, SOCKET *sock, union usa *sa );
 void			XX_httplib_construct_etag( char *buf, size_t buf_len, const struct file *filep );
 int			XX_httplib_consume_socket( struct httplib_context *ctx, struct socket *sp, int thread_index );
 void			XX_httplib_delete_file( struct httplib_connection *conn, const char *path );

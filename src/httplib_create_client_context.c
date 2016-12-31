@@ -54,6 +54,7 @@ struct httplib_context *httplib_create_client_context( const struct httplib_call
 
 	ctx->callbacks.exit_context = exit_callback;
 	ctx->ctx_type               = CTX_TYPE_CLIENT;
+	ctx->status                 = CTX_STATUS_TERMINATED;
 
 	return ctx;
 
