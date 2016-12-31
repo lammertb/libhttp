@@ -94,7 +94,6 @@ static void master_thread_run(void *thread_func_param) {
 #if defined(_WIN32)
 	tls.pthread_cond_helper_mutex = CreateEvent( NULL, FALSE, FALSE, NULL );
 #endif
-	tls.is_master = 1;
 	httplib_pthread_setspecific( XX_httplib_sTlsKey, &tls );
 
 	if ( ctx->callbacks.init_thread ) {

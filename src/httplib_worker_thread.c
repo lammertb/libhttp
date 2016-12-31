@@ -81,7 +81,6 @@ static void *worker_thread_run( struct worker_thread_args *thread_args ) {
 
 	XX_httplib_set_thread_name( "worker" );
 
-	tls.is_master  = 0;
 	tls.thread_idx = (unsigned)httplib_atomic_inc( & XX_httplib_thread_idx_max );
 #if defined(_WIN32)
 	tls.pthread_cond_helper_mutex = CreateEvent( NULL, FALSE, FALSE, NULL );

@@ -450,7 +450,6 @@ typedef struct x509_name X509_NAMEX;
 #endif  /* NO_SSL */
 
 struct httplib_workerTLS {
-	int is_master;
 	unsigned long thread_idx;
 #if defined(_WIN32)
 	HANDLE pthread_cond_helper_mutex;

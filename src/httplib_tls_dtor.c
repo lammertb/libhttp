@@ -32,25 +32,14 @@
 /*
  * void XX_httplib_tls_dtor( void *key );
  *
- * The function XX_httplib_tls_dtor() is used sets the TLS key for the thread.
- * The Thread Local Storage key is used in identifying thread specific storage.
+ * The function XX_httplib_tls_dtor() is used as a destructor to destroy the
+ * the Thread Local Storage key when usage is finished. In practice the key
+ * is not freed, but only removed from the thread.
  */
 
 void XX_httplib_tls_dtor( void *key ) {
 
-	struct httplib_workerTLS *tls;
-
-	tls = key;
-	/* key == httplib_pthread_getspecific( XX_httplib_sTlsKey ); */
-
-	if ( tls != NULL ) {
-
-		if ( tls->is_master == 2 ) {
-
-			tls->is_master = -3; /* Mark memory as dead */
-			tls            = httplib_free( tls );
-		}
-	}
+	UNUSED_PARAMETER(key);
 
 	httplib_pthread_setspecific( XX_httplib_sTlsKey, NULL );
 

@@ -74,9 +74,9 @@ unsigned long XX_httplib_ssl_id_callback( void ) {
 			 * SSL called from an unknown thread: Create some thread index.
 			 */
 
-			tls = httplib_malloc( sizeof(struct httplib_workerTLS) );
-			tls->is_master  = -2; /* -2 means "3rd party thread" */
+			tls             = httplib_malloc( sizeof(struct httplib_workerTLS) );
 			tls->thread_idx = (unsigned) httplib_atomic_inc( & XX_httplib_thread_idx_max );
+
 			httplib_pthread_setspecific( XX_httplib_sTlsKey, tls );
 		}
 
