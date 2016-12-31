@@ -34,8 +34,10 @@ void httplib_destroy_client_context( struct httplib_context *ctx ) {
 
 	if ( ctx == NULL ) return;
 
+	if ( ctx->callbacks.exit_context != NULL ) ctx->callbacks.exit_context( ctx );
+
 	XX_httplib_free_config_options( ctx );
 
-	httplib_free( ctx );
+	ctx = httplib_free( ctx );
 
 }  /* httplib_destroy_client_context */

@@ -43,7 +43,7 @@ void XX_httplib_free_context( struct httplib_context *ctx ) {
 
 	if ( ctx == NULL ) return;
 
-	if ( ctx->callbacks.exit_context ) ctx->callbacks.exit_context( ctx );
+	if ( ctx->callbacks.exit_context != NULL ) ctx->callbacks.exit_context( ctx );
 
 	/*
 	 * All threads exited, no sync is needed. Destroy thread mutex and
