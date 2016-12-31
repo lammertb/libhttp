@@ -221,7 +221,7 @@ int XX_httplib_set_ports_option( struct httplib_context *ctx ) {
 		}
 
 
-		XX_httplib_set_close_on_exec( so.sock, ctx );
+		XX_httplib_set_close_on_exec( so.sock );
 
 		ctx->listening_sockets[ctx->num_listening_sockets] = so;
 		ctx->num_listening_sockets++;

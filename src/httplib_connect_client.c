@@ -84,7 +84,7 @@ static struct httplib_connection *httplib_connect_client_impl( const struct http
 	struct sockaddr *psa;
 	char error_string[ERROR_STRING_LEN];
 
-	if ( ! XX_httplib_connect_socket( &fake_ctx, client_options->host, client_options->port, use_ssl, ebuf, ebuf_len, &sock, &sa ) ) return NULL;
+	if ( ! XX_httplib_connect_socket( client_options->host, client_options->port, use_ssl, ebuf, ebuf_len, &sock, &sa ) ) return NULL;
 	
 	if ( (conn = httplib_calloc( 1, sizeof(*conn) + MAX_REQUEST_SIZE )) == NULL ) {
 

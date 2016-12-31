@@ -127,12 +127,12 @@ void XX_httplib_handle_cgi_request( struct httplib_connection *conn, const char 
 	 * Make sure child closes all pipe descriptors. It must dup them to 0,1
 	 */
 
-	XX_httplib_set_close_on_exec( (SOCKET)fdin[0],  conn->ctx );		/* stdin read		*/
-	XX_httplib_set_close_on_exec( (SOCKET)fdout[1], conn->ctx );		/* stdout write		*/
-	XX_httplib_set_close_on_exec( (SOCKET)fderr[1], conn->ctx );		/* stderr write		*/
-	XX_httplib_set_close_on_exec( (SOCKET)fdin[1],  conn->ctx );		/* stdin write		*/
-	XX_httplib_set_close_on_exec( (SOCKET)fdout[0], conn->ctx );		/* stdout read		*/
-	XX_httplib_set_close_on_exec( (SOCKET)fderr[0], conn->ctx );		/* stderr read		*/
+	XX_httplib_set_close_on_exec( (SOCKET)fdin[0]  );		/* stdin read		*/
+	XX_httplib_set_close_on_exec( (SOCKET)fdout[1] );		/* stdout write		*/
+	XX_httplib_set_close_on_exec( (SOCKET)fderr[1] );		/* stderr write		*/
+	XX_httplib_set_close_on_exec( (SOCKET)fdin[1]  );		/* stdin write		*/
+	XX_httplib_set_close_on_exec( (SOCKET)fdout[0] );		/* stdout read		*/
+	XX_httplib_set_close_on_exec( (SOCKET)fderr[0] );		/* stderr read		*/
 
 	/*
 	 * Parent closes only one side of the pipes.

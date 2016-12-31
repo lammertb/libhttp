@@ -65,7 +65,7 @@ void XX_httplib_accept_new_connection( const struct socket *listener, struct htt
 		 * Put so socket structure into the queue
 		 */
 
-		XX_httplib_set_close_on_exec( so.sock, ctx );
+		XX_httplib_set_close_on_exec( so.sock );
 
 		so.has_ssl   = listener->has_ssl;
 		so.has_redir = listener->has_redir;

@@ -31,14 +31,17 @@
 #include "httplib_utils.h"
 
 /*
- * int XX_httplib_connect_socket();
+ * bool XX_httplib_connect_socket();
  *
  * The function XX_httplib_connect_socket() starts a connection over a socket.
  * The context structure may be NULL. The output socket and the socket address
  * may not be null for this function to succeed.
+ *
+ * The function returns false if an error occured, and true if the connection
+ * has been established.
  */
 
-int XX_httplib_connect_socket( struct httplib_context *ctx, const char *host, int port, int use_ssl, char *ebuf, size_t ebuf_len, SOCKET *sock, union usa *sa ) {
+bool XX_httplib_connect_socket( const char *host, int port, int use_ssl, char *ebuf, size_t ebuf_len, SOCKET *sock, union usa *sa ) {
 
 	int ip_ver;
 	char error_string[ERROR_STRING_LEN];
@@ -52,13 +55,13 @@ int XX_httplib_connect_socket( struct httplib_context *ctx, const char *host, in
 	if ( host == NULL ) {
 
 		XX_httplib_snprintf( NULL, NULL, ebuf, ebuf_len, "%s", "NULL host" );
-		return 0;
+		return false;
 	}
 
 	if ( port < 0  ||  ! XX_httplib_is_valid_port( (unsigned)port) ) {
 
 		XX_httplib_snprintf( NULL, NULL, ebuf, ebuf_len, "%s", "invalid port" );
-		return 0;
+		return false;
 	}
 
 #if !defined(NO_SSL)
@@ -66,7 +69,7 @@ int XX_httplib_connect_socket( struct httplib_context *ctx, const char *host, in
 	if ( use_ssl  &&  SSLv23_client_method == NULL ) {
 
 		XX_httplib_snprintf( NULL, NULL, ebuf, ebuf_len, "%s", "SSL is not initialized" );
-		return 0;
+		return false;
 	}
 #else  /* NO_SSL */
 	UNUSED_PARAMETER(use_ssl);
@@ -110,7 +113,7 @@ int XX_httplib_connect_socket( struct httplib_context *ctx, const char *host, in
 	if ( ip_ver == 0 ) {
 
 		XX_httplib_snprintf( NULL, NULL, ebuf, ebuf_len, "%s", "host not found" );
-		return 0;
+		return false;
 	}
 
 	if      ( ip_ver == 4 ) *sock = socket( PF_INET,  SOCK_STREAM, 0 );
@@ -122,10 +125,10 @@ int XX_httplib_connect_socket( struct httplib_context *ctx, const char *host, in
 		return 0;
 	}
 
-	XX_httplib_set_close_on_exec( *sock, ctx );
+	XX_httplib_set_close_on_exec( *sock );
 
-	if ( ip_ver == 4  &&  connect( *sock, (struct sockaddr *)&sa->sin,  sizeof(sa->sin)  ) == 0 ) return 1;
-	if ( ip_ver == 6  &&  connect( *sock, (struct sockaddr *)&sa->sin6, sizeof(sa->sin6) ) == 0 ) return 1;
+	if ( ip_ver == 4  &&  connect( *sock, (struct sockaddr *)&sa->sin,  sizeof(sa->sin)  ) == 0 ) return true;
+	if ( ip_ver == 6  &&  connect( *sock, (struct sockaddr *)&sa->sin6, sizeof(sa->sin6) ) == 0 ) return true;
 
 	/*
 	 * Not connected
@@ -135,6 +138,6 @@ int XX_httplib_connect_socket( struct httplib_context *ctx, const char *host, in
 	closesocket( *sock );
 	*sock = INVALID_SOCKET;
 
-	return 0;
+	return false;
 
 }  /* XX_httplib_connect_socket */
