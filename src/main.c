@@ -250,7 +250,8 @@ static const char *config_file_top_comment =
 static const char * get_url_to_first_open_port(const struct httplib_context *ctx) {
 
 	static char url[100];
-	const char *open_ports = httplib_get_option(ctx, "listening_ports");
+	char ports_str[256];
+	const char *open_ports = httplib_get_option( ctx, "listening_ports", ports_str, 256 );
 	int a;
 	int b;
 	int c;
@@ -927,30 +928,38 @@ static void * align(void *ptr, uintptr_t alig) {
 
 static void save_config(HWND hDlg, FILE *fp) {
 
-	char value[2000] = "";
-	const char *default_value;
-	const struct httplib_option *options;
-	int i;
-	int id;
+	UNUSED_PARAMETER(hDlg);
+	UNUSED_PARAMETER(fp);
 
-	fprintf(fp, "%s", config_file_top_comment);
-	options = httplib_get_valid_options();
-	for (i = 0; options[i].name != NULL; i++) {
-		id = ID_CONTROLS + i;
-		if (options[i].type == CONFIG_TYPE_BOOLEAN) {
-			snprintf(value, sizeof(value) - 1, "%s", IsDlgButtonChecked(hDlg, id) ? "yes" : "no");
-			value[sizeof(value) - 1] = 0;
-		} else {
-			GetDlgItemText(hDlg, id, value, sizeof(value));
-		}
-		default_value =
-		    options[i].default_value == NULL ? "" : options[i].default_value;
-		/* If value is the same as default, skip it */
-		if (strcmp(value, default_value) != 0) {
-			fprintf(fp, "%s %s\n", options[i].name, value);
-		}
-	}
-}
+	/*
+	 * No options currently saved
+	 */
+
+//	char value[2000] = "";
+//	const char *default_value;
+//	const struct httplib_option *options;
+//	int i;
+//	int id;
+
+//	fprintf(fp, "%s", config_file_top_comment);
+//	options = httplib_get_valid_options();
+//	for (i = 0; options[i].name != NULL; i++) {
+//		id = ID_CONTROLS + i;
+//		if (options[i].type == CONFIG_TYPE_BOOLEAN) {
+//			snprintf(value, sizeof(value) - 1, "%s", IsDlgButtonChecked(hDlg, id) ? "yes" : "no");
+//			value[sizeof(value) - 1] = 0;
+//		} else {
+//			GetDlgItemText(hDlg, id, value, sizeof(value));
+//		}
+//		default_value =
+//		    options[i].default_value == NULL ? "" : options[i].default_value;
+//		/* If value is the same as default, skip it */
+//		if (strcmp(value, default_value) != 0) {
+//			fprintf(fp, "%s %s\n", options[i].name, value);
+//		}
+//	}
+
+}  /* save_config */
 
 
 static INT_PTR CALLBACK SettingsDlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam) {
@@ -959,7 +968,6 @@ static INT_PTR CALLBACK SettingsDlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPAR
 	int i, j;
 	const char *name;
 	const char *value;
-	const struct httplib_option *default_options = httplib_get_valid_options();
 	char *file_options[MAX_OPTIONS * 2 + 1] = {0};
 	char *title;
 	(void)lParam;
@@ -991,10 +999,7 @@ static INT_PTR CALLBACK SettingsDlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPAR
 				            ? ""
 				            : default_options[i].default_value;
 				if (default_options[i].type == CONFIG_TYPE_BOOLEAN) {
-					CheckDlgButton(hDlg,
-					               ID_CONTROLS + i,
-					               !strcmp(value, "yes") ? BST_CHECKED
-					                                     : BST_UNCHECKED);
+					CheckDlgButton(hDlg, ID_CONTROLS + i, !strcmp(value, "yes") ? BST_CHECKED : BST_UNCHECKED);
 				} else {
 					SetWindowText(GetDlgItem(hDlg, ID_CONTROLS + i), value);
 				}
@@ -1486,13 +1491,18 @@ static void change_password_file( void ) {
 
 	OPENFILENAME of;
 	char path[PATH_MAX] = PASSWORDS_FILE_NAME;
-	char strbuf[256], u[256], d[256];
+	char strbuf[256];
+	char u[256];
+	char d[256];
 	HWND hDlg = NULL;
 	FILE *f;
-	short y, nelems;
-	unsigned char mem[4096], *p;
+	short y;
+	short nelems;
+	unsigned char mem[4096];
+	unsigned char *p;
 	DLGTEMPLATE *dia = (DLGTEMPLATE *)mem;
-	const char *domain = httplib_get_option(g_ctx, "authentication_domain");
+	char domain_str[256];
+	const char *domain = httplib_get_option( g_ctx, "authentication_domain", domain_str, 256 );
 
 	static struct {
 		DLGTEMPLATE template; /* 18 bytes */
@@ -1500,8 +1510,7 @@ static void change_password_file( void ) {
 		wchar_t caption[1];
 		WORD fontsiz;
 		wchar_t fontface[7];
-	} dialog_header = {{WS_CAPTION | WS_POPUP | WS_SYSMENU | WS_VISIBLE | DS_SETFONT | WS_DLGFRAME,
-	                    WS_EX_TOOLWINDOW,
+	} dialog_header = {{WS_CAPTION | WS_POPUP | WS_SYSMENU | WS_VISIBLE | DS_SETFONT | WS_DLGFRAME, WS_EX_TOOLWINDOW,
 	                    0,
 	                    200,
 	                    200,

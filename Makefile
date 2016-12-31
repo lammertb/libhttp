@@ -150,7 +150,12 @@ ${OBJDIR}%${OBJEXT} : ${SRCDIR}%.c
 ${TSTDIR}${OBJDIR}%${OBJEXT} : ${TSTDIR}%.c
 	${CC} -c ${CPPFLAGS} ${CFLAGS} ${DFLAGS} ${OFLAG}$@ $<
 
-all: ${LIBDIR}libhttp${LIBEXT} testmime${EXEEXT} libhttpserver${EXEEXT}
+all: ${LIBDIR}libhttp${LIBEXT} testmime${EXEEXT}
+
+#
+# Temporarily removed from all: rule
+# libhttpserver${EXEEXT}
+#
 
 clean:
 	${RM} ${OBJDIR}*${OBJEXT}

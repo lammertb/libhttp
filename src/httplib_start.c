@@ -323,37 +323,37 @@ static bool process_options( struct httplib_context *ctx, const struct httplib_o
 	ctx->websocket_root              = NULL;
 	ctx->websocket_timeout           = 30000;
 
-	if ( (ctx->access_control_allow_origin = strdup( "*" )) == NULL ) {
+	if ( (ctx->access_control_allow_origin = httplib_strdup( "*" )) == NULL ) {
 
 		cleanup( ctx, "Out of memory creating context allocating \"access_control_allow_origin\"" );
 		return true;
 	}
 
-	if ( (ctx->authentication_domain = strdup( "example.com" )) == NULL ) {
+	if ( (ctx->authentication_domain = httplib_strdup( "example.com" )) == NULL ) {
 
 		cleanup( ctx, "Out of memory creating context allocating \"authentication_domain\"" );
 		return true;
 	}
 
-	if ( (ctx->cgi_pattern = strdup( "**.cgi$|**.pl$|**.php$" )) == NULL ) {
+	if ( (ctx->cgi_pattern = httplib_strdup( "**.cgi$|**.pl$|**.php$" )) == NULL ) {
 
 		cleanup( ctx, "Out of memory creating context allocating \"cgi_pattern\"" );
 		return true;
 	}
 
-	if ( (ctx->index_files = strdup( "index.xhtml,index.html,index.htm,index.cgi,index.shtml,index.php" )) == NULL ) {
+	if ( (ctx->index_files = httplib_strdup( "index.xhtml,index.html,index.htm,index.cgi,index.shtml,index.php" )) == NULL ) {
 
 		cleanup( ctx, "Out of memory creating context allocating \"index_files\"" );
 		return true;
 	}
 
-	if ( (ctx->listening_ports = strdup( "8080" )) == NULL ) {
+	if ( (ctx->listening_ports = httplib_strdup( "8080" )) == NULL ) {
 
 		cleanup( ctx, "Out of memory creating context allocating \"listening_ports\"" );
 		return true;
 	}
 
-	if ( (ctx->ssi_pattern = strdup( "**.shtml$|**.shtm$" )) == NULL ) {
+	if ( (ctx->ssi_pattern = httplib_strdup( "**.shtml$|**.shtm$" )) == NULL ) {
 
 		cleanup( ctx, "Out of memory creating context allocating \"ssi_pattern\"" );
 		return true;

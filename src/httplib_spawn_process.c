@@ -56,6 +56,8 @@ pid_t XX_httplib_spawn_process( struct httplib_connection *conn, const char *pro
 
 	UNUSED_PARAMETER(envp);
 
+	if ( conn == NULL  ||  conn->ctx == NULL ) return 0;
+
 	memset( &si, 0, sizeof(si) );
 	si.cb = sizeof(si);
 
@@ -80,7 +82,7 @@ pid_t XX_httplib_spawn_process( struct httplib_connection *conn, const char *pro
 	 * If CGI file is a script, try to read the interpreter line
 	 */
 
-	interp = conn->ctx->cfg[CGI_INTERPRETER];
+	interp = conn->ctx->cgi_interpreter;
 
 	if ( interp == NULL ) {
 
