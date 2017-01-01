@@ -40,7 +40,7 @@ void XX_httplib_process_new_connection( struct httplib_connection *conn ) {
 	struct httplib_request_info *ri;
 	int keep_alive;
 	int discard_len;
-	char ebuf[100];
+	bool was_error;
 	const char *hostend;
 	int reqerr;
 	enum uri_type_t uri_type;
@@ -59,9 +59,10 @@ void XX_httplib_process_new_connection( struct httplib_connection *conn ) {
 	 */
 
 	conn->data_len = 0;
+	was_error      = false;
 
 	do {
-		if ( ! XX_httplib_getreq( conn, ebuf, sizeof(ebuf), &reqerr ) ) {
+		if ( ! XX_httplib_getreq( conn->ctx, conn, &reqerr ) ) {
 
 			/*
 			 * The request sent by the client could not be understood by
@@ -69,19 +70,20 @@ void XX_httplib_process_new_connection( struct httplib_connection *conn ) {
 			 * error message and close the connection.
 			 */
 
-			if ( reqerr > 0 ) {
-				/*assert(ebuf[0] != '\0');*/
-				XX_httplib_send_http_error( conn, reqerr, "%s", ebuf );
-			}
+			if ( reqerr > 0 ) XX_httplib_send_http_error( conn, reqerr, "%s", httplib_get_response_code_text( conn, reqerr ) );
+
+			was_error = true;
 		}
 		
 		else if ( strcmp( ri->http_version, "1.0" )  &&  strcmp( ri->http_version, "1.1" ) ) {
 
-			XX_httplib_snprintf( conn, NULL, ebuf, sizeof(ebuf), "Bad HTTP version: [%s]", ri->http_version );
-			XX_httplib_send_http_error( conn, 505, "%s", ebuf );
+			httplib_cry( DEBUG_LEVEL_ERROR, conn->ctx, conn, "%s (%u): bad HTTP version \"%s\"", __func__, __LINE__, ri->http_version );
+			XX_httplib_send_http_error( conn, 505, "%s", httplib_get_response_code_text( conn, 505 ) );
+
+			was_error = true;
 		}
 
-		if ( ebuf[0] == '\0' ) {
+		if ( ! was_error ) {
 
 			uri_type = XX_httplib_get_uri_type( conn->request_info.request_uri );
 
@@ -107,9 +109,11 @@ void XX_httplib_process_new_connection( struct httplib_connection *conn ) {
 					break;
 
 				default :
-					XX_httplib_snprintf( conn, NULL, ebuf, sizeof(ebuf), "Invalid URI" );
-					XX_httplib_send_http_error( conn, 400, "%s", ebuf );
+					httplib_cry( DEBUG_LEVEL_ERROR, conn->ctx, conn, "%s (%u): invalid URI", __func__, __LINE__ );
+					XX_httplib_send_http_error( conn, 400, "%s", httplib_get_response_code_text( conn, 400 ) );
+
 					conn->request_info.local_uri = NULL;
+					was_error                    = true;
 					break;
 			}
 
@@ -119,7 +123,7 @@ void XX_httplib_process_new_connection( struct httplib_connection *conn ) {
 			conn->request_info.uri = conn->request_info.local_uri;
 		}
 
-		if ( ebuf[0] == '\0' ) {
+		if ( ! was_error ) {
 
 			if ( conn->request_info.local_uri != NULL ) {
 

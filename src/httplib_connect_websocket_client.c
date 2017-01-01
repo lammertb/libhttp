@@ -36,7 +36,7 @@
  * returned, otherwise NULL.
  */
 
-struct httplib_connection *httplib_connect_websocket_client( struct httplib_context *ctx, const char *host, int port, int use_ssl, char *error_buffer, size_t error_buffer_size, const char *path, const char *origin, httplib_websocket_data_handler data_func, httplib_websocket_close_handler close_func, void *user_data ) {
+struct httplib_connection *httplib_connect_websocket_client( struct httplib_context *ctx, const char *host, int port, int use_ssl, const char *path, const char *origin, httplib_websocket_data_handler data_func, httplib_websocket_close_handler close_func, void *user_data ) {
 
 	struct httplib_connection *conn;
 	struct websocket_client_thread_data *thread_data;
@@ -72,7 +72,7 @@ struct httplib_connection *httplib_connect_websocket_client( struct httplib_cont
 	 * Establish the client connection and request upgrade
 	 */
 
-	conn = httplib_download( ctx, host, port, use_ssl, error_buffer, error_buffer_size, handshake_req, path, host, magic, origin );
+	conn = httplib_download( ctx, host, port, use_ssl, handshake_req, path, host, magic, origin );
 	if ( conn == NULL ) {
 
 		httplib_cry( DEBUG_LEVEL_ERROR, ctx, NULL, "%s (%u): Init of download failed", __func__, __LINE__ );

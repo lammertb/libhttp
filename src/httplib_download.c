@@ -35,7 +35,7 @@
  * and returns a pointer to the connection on success, or NULL on error.
  */
 
-struct httplib_connection * httplib_download( struct httplib_context *ctx, const char *host, int port, int use_ssl, char *ebuf, size_t ebuf_len, const char *fmt, ... ) {
+struct httplib_connection * httplib_download( struct httplib_context *ctx, const char *host, int port, int use_ssl, const char *fmt, ... ) {
 
 	struct httplib_connection *conn;
 	va_list ap;
@@ -45,7 +45,6 @@ struct httplib_connection * httplib_download( struct httplib_context *ctx, const
 	if ( ctx == NULL ) return NULL;
 
 	va_start( ap, fmt );
-	ebuf[0] = '\0';
 
 	conn = httplib_connect_client( ctx, host, port, use_ssl );
 
@@ -56,7 +55,7 @@ struct httplib_connection * httplib_download( struct httplib_context *ctx, const
 		if ( i <= 0 ) httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s (%d): error sending request", __func__, __LINE__ );
 		
 		else {
-			XX_httplib_getreq( conn, ebuf, ebuf_len, &reqerr );
+			XX_httplib_getreq( ctx, conn, &reqerr );
 
 			/*
 			 * TODO: 1) uri is deprecated;

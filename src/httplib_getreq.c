@@ -29,29 +29,27 @@
 #include "httplib_string.h"
 
 /*
- * int XX_httplib_getreq( struct httplib_connection *conn, char *ebuf, size_t ebuf_len, int *err );
+ * bool XX_httplib_getreq( struct httplib_context *ctx, struct httplib_connection *conn, int *err );
  *
  * The function XX_httplib_getreq() processes a request from a remote client.
  */
 
-int XX_httplib_getreq( struct httplib_connection *conn, char *ebuf, size_t ebuf_len, int *err ) {
+bool XX_httplib_getreq( struct httplib_context *ctx, struct httplib_connection *conn, int *err ) {
 
 	const char *cl;
 
-	if ( err  == NULL                   )               return 0;
-	if ( ebuf == NULL  ||  ebuf_len < 1 ) { *err = 500; return 0; }
+	if ( ctx == NULL  ||  err == NULL ) return false;
 
-	ebuf[0] = '\0';
-	*err    = 0;
-
-	XX_httplib_reset_per_request_attributes( conn );
+	*err = 0;
 
 	if ( conn == NULL ) {
 
-		XX_httplib_snprintf( conn, NULL, ebuf, ebuf_len, "%s", "Internal error" );
+		httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s (%u): internal error", __func__, __LINE__ );
 		*err = 500;
-		return 0;
+		return false;
 	}
+
+	XX_httplib_reset_per_request_attributes( conn );
 
 	/*
 	 * Set the time the request was received. This value should be used for
@@ -68,23 +66,23 @@ int XX_httplib_getreq( struct httplib_connection *conn, char *ebuf, size_t ebuf_
 
 	if ( conn->request_len >= 0  &&  conn->data_len < conn->request_len ) {
 
-		XX_httplib_snprintf( conn, NULL, ebuf, ebuf_len, "%s", "Invalid request size" );
+		httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s (%u): invalid request size", __func__, __LINE__ );
 		*err = 500;
-		return 0;
+		return false;
 	}
 
 	if ( conn->request_len == 0  &&  conn->data_len == conn->buf_size ) {
 
-		XX_httplib_snprintf( conn, NULL, ebuf, ebuf_len, "%s", "Request Too Large" );
+		httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s (%u): request too large", __func__, __LINE__ );
 		*err = 413;
-		return 0;
+		return false;
 	}
 	
 	else if ( conn->request_len <= 0 ) {
 
 		if ( conn->data_len > 0 ) {
 
-			XX_httplib_snprintf( conn, NULL, ebuf, ebuf_len, "%s", "Client sent malformed request" );
+			httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s (%u): client sent malformed request", __func__, __LINE__ );
 			*err = 400;
 		}
 		
@@ -95,17 +93,17 @@ int XX_httplib_getreq( struct httplib_connection *conn, char *ebuf, size_t ebuf_
 
 			conn->must_close = true;
 
-			XX_httplib_snprintf( conn, NULL, ebuf, ebuf_len, "%s", "Client did not send a request" );
+			httplib_cry( DEBUG_LEVEL_WARNING, ctx, conn, "%s (%u): client did not send a request", __func__, __LINE__ );
 			*err = 0;
 		}
-		return 0;
+		return false;
 	}
 	
 	else if ( XX_httplib_parse_http_message( conn->buf, conn->buf_size, &conn->request_info ) <= 0 ) {
 
-		XX_httplib_snprintf( conn, NULL, ebuf, ebuf_len, "%s", "Bad Request" );
+		httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s (%u): bad request", __func__, __LINE__ );
 		*err = 400;
-		return 0;
+		return false;
 	}
 	
 	else {
@@ -124,9 +122,9 @@ int XX_httplib_getreq( struct httplib_connection *conn, char *ebuf, size_t ebuf_
 
 			if ( endptr == cl ) {
 
-				XX_httplib_snprintf( conn, NULL, ebuf, ebuf_len, "%s", "Bad Request" );
+				httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s (%u): bad request", __func__, __LINE__ );
 				*err = 411;
-				return 0;
+				return false;
 			}
 
 			/*
@@ -167,6 +165,6 @@ int XX_httplib_getreq( struct httplib_connection *conn, char *ebuf, size_t ebuf_
 		}
 	}
 
-	return 1;
+	return true;
 
 }  /* XX_httplib_getreq */

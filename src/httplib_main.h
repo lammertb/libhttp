@@ -818,7 +818,7 @@ int			XX_httplib_get_request_handler( struct httplib_connection *conn, int handl
 int			XX_httplib_get_request_len( const char *buf, int buflen );
 void			XX_httplib_get_system_name( char **sysName );
 enum uri_type_t		XX_httplib_get_uri_type( const char *uri );
-int			XX_httplib_getreq( struct httplib_connection *conn, char *ebuf, size_t ebuf_len, int *err );
+bool			XX_httplib_getreq( struct httplib_context *ctx, struct httplib_connection *conn, int *err );
 void			XX_httplib_handle_cgi_request( struct httplib_connection *conn, const char *prog );
 void			XX_httplib_handle_directory_request( struct httplib_connection *conn, const char *dir );
 void			XX_httplib_handle_file_based_request( struct httplib_connection *conn, const char *path, struct file *filep );
