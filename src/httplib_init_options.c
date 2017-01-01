@@ -60,6 +60,7 @@ bool XX_httplib_init_options( struct httplib_context *ctx ) {
 	ctx->put_delete_auth_file        = NULL;
 	ctx->request_timeout             = 30000;
 	ctx->run_as_user                 = NULL;
+	ctx->ssi_include_depth           = 10;
 	ctx->ssi_pattern                 = NULL;
 	ctx->ssl_ca_file                 = NULL;
 	ctx->ssl_ca_path                 = NULL;

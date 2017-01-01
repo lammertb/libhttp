@@ -173,7 +173,7 @@ static void send_ssi_file( struct httplib_connection *conn, const char *path, st
 	int len;
 	int in_ssi_tag;
 
-	if ( include_level > 10 ) {
+	if ( include_level > conn->ctx->ssi_include_depth ) {
 
 		httplib_cry( DEBUG_LEVEL_ERROR, conn->ctx, conn, "%s: SSI #include level is too deep (%s)", __func__, path );
 		return;
@@ -278,7 +278,7 @@ void XX_httplib_handle_ssi_file_request( struct httplib_connection *conn, const 
 	const char *cors2;
 	const char *cors3;
 
-	if ( conn == NULL  ||  path == NULL  ||  filep == NULL ) return;
+	if ( conn == NULL  ||  conn->ctx == NULL  ||  path == NULL  ||  filep == NULL ) return;
 
 	curtime = time( NULL );
 
@@ -316,16 +316,7 @@ void XX_httplib_handle_ssi_file_request( struct httplib_connection *conn, const 
 		XX_httplib_fclose_on_exec( filep, conn );
 		httplib_printf(conn, "HTTP/1.1 200 OK\r\n");
 		XX_httplib_send_no_cache_header( conn );
-		httplib_printf( conn,
-		          "%s%s%s"
-		          "Date: %s\r\n"
-		          "Content-Type: text/html\r\n"
-		          "Connection: %s\r\n\r\n",
-		          cors1,
-		          cors2,
-		          cors3,
-		          date,
-		          XX_httplib_suggest_connection_header( conn ) );
+		httplib_printf( conn, "%s%s%s" "Date: %s\r\n" "Content-Type: text/html\r\n" "Connection: %s\r\n\r\n", cors1, cors2, cors3, date, XX_httplib_suggest_connection_header( conn ) );
 		send_ssi_file( conn, path, filep, 0 );
 		XX_httplib_fclose( filep );
 	}

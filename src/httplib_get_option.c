@@ -65,6 +65,7 @@ const char *httplib_get_option( const struct httplib_context *ctx, const char *n
 	if ( ! httplib_strcasecmp( name, "put_delete_auth_file"        ) ) return (ctx == NULL) ? buffer : store_str(  buffer, buflen, ctx->put_delete_auth_file        );
 	if ( ! httplib_strcasecmp( name, "request_timeout"             ) ) return (ctx == NULL) ? buffer : store_int(  buffer, buflen, ctx->request_timeout             );
 	if ( ! httplib_strcasecmp( name, "run_as_user"                 ) ) return (ctx == NULL) ? buffer : store_str(  buffer, buflen, ctx->run_as_user                 );
+	if ( ! httplib_strcasecmp( name, "ssi_include_depth"           ) ) return (ctx == NULL) ? buffer : store_int(  buffer, buflen, ctx->ssi_include_depth           );
 	if ( ! httplib_strcasecmp( name, "ssi_pattern"                 ) ) return (ctx == NULL) ? buffer : store_str(  buffer, buflen, ctx->ssi_pattern                 );
 	if ( ! httplib_strcasecmp( name, "ssl_ca_file"                 ) ) return (ctx == NULL) ? buffer : store_str(  buffer, buflen, ctx->ssl_ca_file                 );
 	if ( ! httplib_strcasecmp( name, "ssl_ca_path"                 ) ) return (ctx == NULL) ? buffer : store_str(  buffer, buflen, ctx->ssl_ca_path                 );

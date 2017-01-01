@@ -594,6 +594,7 @@ struct httplib_context {
 
 	int	num_threads;
 	int	request_timeout;
+	int	ssi_include_depth;
 	int	ssl_protocol_version;
 	int	ssl_verify_depth;
 	int	static_file_max_age;
