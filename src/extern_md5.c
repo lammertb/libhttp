@@ -454,9 +454,8 @@ md5_append(md5_state_t *pms, const md5_byte_t *data, size_t nbytes)
 		memcpy(pms->buf, p, left);
 }
 
-MD5_STATIC void
-md5_finish(md5_state_t *pms, md5_byte_t digest[16])
-{
+MD5_STATIC void md5_finish(md5_state_t *pms, md5_byte_t digest[16]) {
+
 	static const md5_byte_t pad[64] = {0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	                                   0,    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	                                   0,    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
