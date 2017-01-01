@@ -77,7 +77,7 @@ void XX_httplib_process_new_connection( struct httplib_connection *conn ) {
 		
 		else if ( strcmp( ri->http_version, "1.0" )  &&  strcmp( ri->http_version, "1.1" ) ) {
 
-			httplib_cry( DEBUG_LEVEL_ERROR, conn->ctx, conn, "%s (%u): bad HTTP version \"%s\"", __func__, __LINE__, ri->http_version );
+			httplib_cry( DEBUG_LEVEL_ERROR, conn->ctx, conn, "%s: bad HTTP version \"%s\"", __func__, ri->http_version );
 			XX_httplib_send_http_error( conn, 505, "%s", httplib_get_response_code_text( conn, 505 ) );
 
 			was_error = true;
@@ -109,7 +109,7 @@ void XX_httplib_process_new_connection( struct httplib_connection *conn ) {
 					break;
 
 				default :
-					httplib_cry( DEBUG_LEVEL_ERROR, conn->ctx, conn, "%s (%u): invalid URI", __func__, __LINE__ );
+					httplib_cry( DEBUG_LEVEL_ERROR, conn->ctx, conn, "%s: invalid URI", __func__ );
 					XX_httplib_send_http_error( conn, 400, "%s", httplib_get_response_code_text( conn, 400 ) );
 
 					conn->request_info.local_uri = NULL;

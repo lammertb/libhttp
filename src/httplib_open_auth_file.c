@@ -28,14 +28,15 @@
 #include "httplib_main.h"
 #include "httplib_string.h"
 
-/* Use the global passwords file, if specified by auth_gpass option,
- * or search for .htpasswd in the requested directory. */
+/*
+ * Use the global passwords file, if specified by auth_gpass option,
+ * or search for .htpasswd in the requested directory.
+ */
+
 void XX_httplib_open_auth_file( struct httplib_connection *conn, const char *path, struct file *filep ) {
 
 	char name[PATH_MAX];
-#ifdef DEBUG
 	char error_string[ERROR_STRING_LEN];
-#endif
 	const char *p;
 	const char *e;
 	const char *gpass;
@@ -53,9 +54,8 @@ void XX_httplib_open_auth_file( struct httplib_connection *conn, const char *pat
 		 */
 
 		if ( ! XX_httplib_fopen( conn, gpass, "r", filep ) ) {
-#ifdef DEBUG
-			httplib_cry( conn, "fopen(%s): %s", gpass, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
-#endif
+
+			httplib_cry( DEBUG_LEVEL_INFO, conn->ctx, conn, "%s: fopen(%s): %s", __func__, gpass, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 		}
 		/*
 		 * Important: using local struct file to test path for is_directory
@@ -70,9 +70,8 @@ void XX_httplib_open_auth_file( struct httplib_connection *conn, const char *pat
 		XX_httplib_snprintf( conn, &truncated, name, sizeof(name), "%s/%s", path, PASSWORDS_FILE_NAME );
 
 		if ( truncated  ||  ! XX_httplib_fopen( conn, name, "r", filep ) ) {
-#ifdef DEBUG
-			httplib_cry( conn, "fopen(%s): %s", name, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
-#endif
+
+			httplib_cry( DEBUG_LEVEL_INFO, conn->ctx, conn, "%s: fopen(%s): %s", __func__, name, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 		}
 	}
 	
@@ -88,9 +87,8 @@ void XX_httplib_open_auth_file( struct httplib_connection *conn, const char *pat
 		XX_httplib_snprintf( conn, &truncated, name, sizeof(name), "%.*s/%s", (int)(e - p), p, PASSWORDS_FILE_NAME );
 
 		if ( truncated  ||  ! XX_httplib_fopen( conn, name, "r", filep ) ) {
-#ifdef DEBUG
-			httplib_cry( conn, "fopen(%s): %s", name, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
-#endif
+
+			httplib_cry( DEBUG_LEVEL_INFO, conn->ctx, conn, "%s: fopen(%s): %s", __func__, name, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 		}
 	}
 

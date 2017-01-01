@@ -52,7 +52,7 @@ struct httplib_connection * httplib_download( struct httplib_context *ctx, const
 
 		i = XX_httplib_vprintf( conn, fmt, ap );
 
-		if ( i <= 0 ) httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s (%d): error sending request", __func__, __LINE__ );
+		if ( i <= 0 ) httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s: error sending request", __func__ );
 		
 		else {
 			XX_httplib_getreq( ctx, conn, &reqerr );

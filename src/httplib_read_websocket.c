@@ -96,7 +96,7 @@ void XX_httplib_read_websocket( struct httplib_connection *conn, httplib_websock
 
 		if ( conn->data_len < conn->request_len ) {
 
-			httplib_cry( DEBUG_LEVEL_ERROR, conn->ctx, conn, "websocket error: data len less than request len, closing connection" );
+			httplib_cry( DEBUG_LEVEL_ERROR, conn->ctx, conn, "%s: websocket error: data len less than request len, closing connection", __func__ );
 			break;
 		}
 
@@ -145,7 +145,7 @@ void XX_httplib_read_websocket( struct httplib_connection *conn, httplib_websock
 					 * connection
 					 */
 
-					httplib_cry( DEBUG_LEVEL_ERROR, conn->ctx, conn, "websocket out of memory; closing connection" );
+					httplib_cry( DEBUG_LEVEL_ERROR, conn->ctx, conn, "%s: websocket out of memory; closing connection", __func__ );
 					break;
 				}
 			}
@@ -161,7 +161,7 @@ void XX_httplib_read_websocket( struct httplib_connection *conn, httplib_websock
 
 			if ( body_len < header_len ) {
 
-				httplib_cry( DEBUG_LEVEL_ERROR, conn->ctx, conn, "websocket error: body len less than header len, closing connection" );
+				httplib_cry( DEBUG_LEVEL_ERROR, conn->ctx, conn, "%s: websocket error: body len less than header len, closing connection", __func__ );
 				break;
 			}
 
@@ -195,7 +195,7 @@ void XX_httplib_read_websocket( struct httplib_connection *conn, httplib_websock
 				
 				if (error) {
 
-					httplib_cry( DEBUG_LEVEL_ERROR, conn->ctx, conn, "Websocket pull failed; closing connection" );
+					httplib_cry( DEBUG_LEVEL_ERROR, conn->ctx, conn, "%s: websocket pull failed; closing connection", __func__ );
 					break;
 				}
 

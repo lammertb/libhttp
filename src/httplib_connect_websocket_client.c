@@ -47,7 +47,7 @@ struct httplib_connection *httplib_connect_websocket_client( struct httplib_cont
 
 	if ( ctx->status != CTX_STATUS_TERMINATED ) {
 
-		httplib_cry( DEBUG_LEVEL_CRASH, ctx, NULL, "%s (%u): client context not in terminated state", __func__, __LINE__ );
+		httplib_cry( DEBUG_LEVEL_CRASH, ctx, NULL, "%s: client context not in terminated state", __func__ );
 		return NULL;
 	}
 
@@ -75,13 +75,13 @@ struct httplib_connection *httplib_connect_websocket_client( struct httplib_cont
 	conn = httplib_download( ctx, host, port, use_ssl, handshake_req, path, host, magic, origin );
 	if ( conn == NULL ) {
 
-		httplib_cry( DEBUG_LEVEL_ERROR, ctx, NULL, "%s (%u): Init of download failed", __func__, __LINE__ );
+		httplib_cry( DEBUG_LEVEL_ERROR, ctx, NULL, "%s: init of download failed", __func__ );
 		return NULL;
 	}
 
 	if ( strcmp( conn->request_info.request_uri, "101" ) ) {
 
-		httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s (%u): unexpected server reply \"%s\"", __func__, __LINE__, conn->request_info.request_uri );
+		httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s: unexpected server reply \"%s\"", __func__, conn->request_info.request_uri );
 
 		conn = httplib_free( conn );
 		return NULL;
@@ -94,7 +94,7 @@ struct httplib_connection *httplib_connect_websocket_client( struct httplib_cont
 
 	if ( ctx->workerthreadids == NULL ) {
 
-		httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s (%u): out of memory allocating worker thread IDs", __func__, __LINE__ );
+		httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s: out of memory allocating worker thread IDs", __func__ );
 
 		ctx->num_threads = 0;
 		ctx->user_data   = NULL;
@@ -107,7 +107,7 @@ struct httplib_connection *httplib_connect_websocket_client( struct httplib_cont
 
 	if ( thread_data == NULL ) {
 
-		httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s (%u): out of memory allocating thread data", __func__, __LINE__ );
+		httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s: out of memory allocating thread data", __func__ );
 
 		ctx->workerthreadids = httplib_free( ctx->workerthreadids );
 		ctx->num_threads     = 0;
@@ -130,7 +130,7 @@ struct httplib_connection *httplib_connect_websocket_client( struct httplib_cont
 
 	if ( XX_httplib_start_thread_with_id( XX_httplib_websocket_client_thread, thread_data, ctx->workerthreadids) != 0 ) {
 
-		httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s (%u): thread failed to start", __func__, __LINE__ );
+		httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s: thread failed to start", __func__ );
 
 		thread_data          = httplib_free( thread_data          );
 		ctx->workerthreadids = httplib_free( ctx->workerthreadids );

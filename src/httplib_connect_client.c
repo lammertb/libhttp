@@ -89,14 +89,14 @@ static struct httplib_connection *httplib_connect_client_impl( struct httplib_co
 	
 	if ( (conn = httplib_calloc( 1, sizeof(*conn) + MAX_REQUEST_SIZE )) == NULL ) {
 
-		httplib_cry( DEBUG_LEVEL_ERROR, ctx, NULL, "%s (%u): calloc(): %s", __func__, __LINE__, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
+		httplib_cry( DEBUG_LEVEL_ERROR, ctx, NULL, "%s: calloc(): %s", __func__, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 		closesocket( sock );
 	}
 #ifndef NO_SSL
 	
 	else if ( use_ssl  &&  (conn->client_ssl_ctx = SSL_CTX_new(SSLv23_client_method())) == NULL ) {
 
-		httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s (%u): SSL_CTX_new error", __func__, __LINE__ );
+		httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s: SSL_CTX_new error", __func__ );
 		closesocket( sock );
 		conn = httplib_free( conn );
 	}
@@ -113,7 +113,7 @@ static struct httplib_connection *httplib_connect_client_impl( struct httplib_co
 		conn->client.sock = sock;
 		conn->client.lsa  = sa;
 
-		if ( getsockname( sock, psa, &len ) != 0 ) httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s (%u): getsockname() failed: %s", __func__, __LINE__, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
+		if ( getsockname( sock, psa, &len ) != 0 ) httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s: getsockname() failed: %s", __func__, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 
 		conn->client.has_ssl = (use_ssl) ? true : false;
 		httplib_pthread_mutex_init( &conn->mutex, &XX_httplib_pthread_mutex_attr );
@@ -137,7 +137,7 @@ static struct httplib_connection *httplib_connect_client_impl( struct httplib_co
 
 				if ( ! XX_httplib_ssl_use_pem_file( ctx, client_options->client_cert ) ) {
 
-					httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s (%u): can not use SSL client certificate", __func__, __LINE__ );
+					httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s: can not use SSL client certificate", __func__ );
 					SSL_CTX_free( conn->client_ssl_ctx );
 					closesocket( sock );
 					conn = httplib_free( conn );
@@ -154,7 +154,7 @@ static struct httplib_connection *httplib_connect_client_impl( struct httplib_co
 
 			if ( ! XX_httplib_sslize( conn, conn->client_ssl_ctx, SSL_connect ) ) {
 
-				httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s (%u): SSL connection error", __func__, __LINE__ );
+				httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s: SSL connection error", __func__ );
 				SSL_CTX_free( conn->client_ssl_ctx );
 				closesocket( sock );
 				conn = httplib_free( conn );

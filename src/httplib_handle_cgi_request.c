@@ -85,7 +85,7 @@ void XX_httplib_handle_cgi_request( struct httplib_connection *conn, const char 
 
 	if ( truncated ) {
 		
-		httplib_cry( DEBUG_LEVEL_ERROR, conn->ctx, conn, "Error: CGI program \"%s\": Path too long", prog );
+		httplib_cry( DEBUG_LEVEL_ERROR, conn->ctx, conn, "%s: CGI program \"%s\": Path too long", __func__, prog );
 		XX_httplib_send_http_error( conn, 500, "Error: %s", "CGI path too long" );
 
 		goto done;
@@ -106,7 +106,7 @@ void XX_httplib_handle_cgi_request( struct httplib_connection *conn, const char 
 	if ( pipe(fdin) != 0  ||  pipe(fdout) != 0  ||  pipe(fderr) != 0 ) {
 
 		status = httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN );
-		httplib_cry( DEBUG_LEVEL_ERROR, conn->ctx, conn, "Error: CGI program \"%s\": Can not create CGI pipes: %s", prog, status );
+		httplib_cry( DEBUG_LEVEL_ERROR, conn->ctx, conn, "%s: CGI program \"%s\": Can not create CGI pipes: %s", __func__, prog, status );
 		XX_httplib_send_http_error( conn, 500, "Error: Cannot create CGI pipe: %s", status );
 
 		goto done;
@@ -117,7 +117,7 @@ void XX_httplib_handle_cgi_request( struct httplib_connection *conn, const char 
 	if ( pid == (pid_t)-1 ) {
 
 		status = httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN );
-		httplib_cry( DEBUG_LEVEL_ERROR, conn->ctx, conn, "Error: CGI program \"%s\": Can not spawn CGI process: %s", prog, status );
+		httplib_cry( DEBUG_LEVEL_ERROR, conn->ctx, conn, "%s: CGI program \"%s\": Can not spawn CGI process: %s", __func__, prog, status );
 		XX_httplib_send_http_error( conn, 500, "Error: Cannot spawn CGI process [%s]: %s", prog, status );
 
 		goto done;
@@ -152,7 +152,7 @@ void XX_httplib_handle_cgi_request( struct httplib_connection *conn, const char 
 	if ( (in = fdopen( fdin[1], "wb" )) == NULL ) {
 
 		status = httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN );
-		httplib_cry( DEBUG_LEVEL_ERROR, conn->ctx, conn, "Error: CGI program \"%s\": Can not open stdin: %s", prog, status );
+		httplib_cry( DEBUG_LEVEL_ERROR, conn->ctx, conn, "%s: CGI program \"%s\": Can not open stdin: %s", __func__, prog, status );
 		XX_httplib_send_http_error( conn, 500, "Error: CGI can not open fdin\nfopen: %s", status );
 
 		goto done;
@@ -161,7 +161,7 @@ void XX_httplib_handle_cgi_request( struct httplib_connection *conn, const char 
 	if ( (out = fdopen( fdout[0], "rb" )) == NULL ) {
 
 		status = httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN );
-		httplib_cry( DEBUG_LEVEL_ERROR, conn->ctx, conn, "Error: CGI program \"%s\": Can not open stdout: %s", prog, status );
+		httplib_cry( DEBUG_LEVEL_ERROR, conn->ctx, conn, "%s: CGI program \"%s\": Can not open stdout: %s", __func__, prog, status );
 		XX_httplib_send_http_error( conn, 500, "Error: CGI can not open fdout\nfopen: %s", status );
 
 		goto done;
@@ -170,7 +170,7 @@ void XX_httplib_handle_cgi_request( struct httplib_connection *conn, const char 
 	if ( (err = fdopen( fderr[0], "rb" )) == NULL ) {
 
 		status = httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN );
-		httplib_cry( DEBUG_LEVEL_ERROR, conn->ctx, conn, "Error: CGI program \"%s\": Can not open stderr: %s", prog, status );
+		httplib_cry( DEBUG_LEVEL_ERROR, conn->ctx, conn, "%s: CGI program \"%s\": Can not open stderr: %s", __func__, prog, status );
 		XX_httplib_send_http_error( conn, 500, "Error: CGI can not open fdout\nfopen: %s", status );
 
 		goto done;
@@ -194,7 +194,7 @@ void XX_httplib_handle_cgi_request( struct httplib_connection *conn, const char 
 			 * Error sending the body data
 			 */
 
-			httplib_cry( DEBUG_LEVEL_ERROR, conn->ctx, conn, "Error: CGI program \"%s\": Forward body data failed", prog );
+			httplib_cry( DEBUG_LEVEL_ERROR, conn->ctx, conn, "%s: CGI program \"%s\": Forward body data failed", __func__, prog );
 
 			goto done;
 		}
@@ -222,7 +222,7 @@ void XX_httplib_handle_cgi_request( struct httplib_connection *conn, const char 
 	if ( buf == NULL ) {
 
 		XX_httplib_send_http_error( conn, 500, "Error: Not enough memory for CGI buffer (%u bytes)", (unsigned int)buflen );
-		httplib_cry( DEBUG_LEVEL_ERROR, conn->ctx, conn, "Error: CGI program \"%s\": Not enough memory for buffer (%u " "bytes)", prog, (unsigned int)buflen );
+		httplib_cry( DEBUG_LEVEL_ERROR, conn->ctx, conn, "%s: CGI program \"%s\": Not enough memory for buffer (%u " "bytes)", __func__, prog, (unsigned int)buflen );
 
 		goto done;
 	}
@@ -239,12 +239,12 @@ void XX_httplib_handle_cgi_request( struct httplib_connection *conn, const char 
 
 		if ( i > 0 ) {
 
-			httplib_cry( DEBUG_LEVEL_ERROR, conn->ctx, conn, "Error: CGI program \"%s\" sent error " "message: [%.*s]", prog, i, buf );
+			httplib_cry( DEBUG_LEVEL_ERROR, conn->ctx, conn, "%s: CGI program \"%s\" sent error " "message: [%.*s]", __func__, prog, i, buf );
 			XX_httplib_send_http_error( conn, 500, "Error: CGI program \"%s\" sent error " "message: [%.*s]", prog, i, buf );
 		}
 		
 		else {
-			httplib_cry( DEBUG_LEVEL_ERROR, conn->ctx, conn, "Error: CGI program sent malformed or too big " "(>%u bytes) HTTP headers: [%.*s]", (unsigned)buflen, data_len, buf );
+			httplib_cry( DEBUG_LEVEL_ERROR, conn->ctx, conn, "%s: CGI program sent malformed or too big " "(>%u bytes) HTTP headers: [%.*s]", __func__, (unsigned)buflen, data_len, buf );
 
 			XX_httplib_send_http_error( conn,
 			                500,

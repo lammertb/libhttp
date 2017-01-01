@@ -44,7 +44,7 @@ struct httplib_context *XX_httplib_abort_start( struct httplib_context *ctx, con
 		va_end( ap );
 		buf[sizeof(buf)-1] = 0;
 
-		httplib_cry( DEBUG_LEVEL_CRASH, ctx, NULL, "%s", buf );
+		httplib_cry( DEBUG_LEVEL_CRASH, ctx, NULL, "%s: %s", __func__, buf );
 	}
 
 	XX_httplib_free_context( ctx );

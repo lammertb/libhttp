@@ -885,7 +885,7 @@ int			XX_httplib_send_static_cache_header( struct httplib_connection *conn );
 int			XX_httplib_send_websocket_handshake( struct httplib_connection *conn, const char *websock_key );
 int			XX_httplib_set_acl_option( struct httplib_context *ctx );
 void			XX_httplib_set_close_on_exec( SOCKET sock );
-int			XX_httplib_set_gpass_option( struct httplib_context *ctx );
+bool			XX_httplib_set_gpass_option( struct httplib_context *ctx );
 void			XX_httplib_set_handler_type( struct httplib_context *ctx, const char *uri, int handler_type, int is_delete_request, httplib_request_handler handler, httplib_websocket_connect_handler connect_handler, httplib_websocket_ready_handler ready_handler, httplib_websocket_data_handler data_handler, httplib_websocket_close_handler close_handler, httplib_authorization_handler auth_handler, void *cbdata );
 int			XX_httplib_set_non_blocking_mode( SOCKET sock );
 int			XX_httplib_set_ports_option( struct httplib_context *ctx );

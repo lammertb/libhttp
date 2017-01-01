@@ -28,27 +28,28 @@
 #include "httplib_main.h"
 
 /*
- * int XX_httplib_set_gpass_option( struct httplib_context *ctx );
+ * bool XX_httplib_set_gpass_option( struct httplib_context *ctx );
  *
  * The function XX_httplib_set_gpass_option() sets the global password file
- * option for a context.
+ * option for a context. The function returns false when an error occurs and
+ * true when successful.
  */
 
-int XX_httplib_set_gpass_option( struct httplib_context *ctx ) {
+bool XX_httplib_set_gpass_option( struct httplib_context *ctx ) {
 
 	struct file file = STRUCT_FILE_INITIALIZER;
 	const char *path;
 	char error_string[ERROR_STRING_LEN];
 
-	if ( ctx == NULL ) return 0;
+	if ( ctx == NULL ) return false;
 
 	path = ctx->global_auth_file;
 
 	if ( path != NULL  &&  ! XX_httplib_stat( NULL, path, &file ) ) {
 
-		httplib_cry( DEBUG_LEVEL_ERROR, ctx, NULL, "Cannot open %s: %s", path, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
-		return 0;
+		httplib_cry( DEBUG_LEVEL_ERROR, ctx, NULL, "%s: cannot open %s: %s", __func__, path, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
+		return false;
 	}
-	return 1;
+	return true;
 
 }  /* XX_httplib_set_gpass_option */
