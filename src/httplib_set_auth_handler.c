@@ -34,7 +34,7 @@
  * authorization requests.
  */
 
-void httplib_set_auth_handler( struct httplib_context *ctx, const char *uri, httplib_request_handler handler, void *cbdata ) {
+LIBHTTP_API void httplib_set_auth_handler( struct httplib_context *ctx, const char *uri, httplib_request_handler handler, void *cbdata ) {
 
 	XX_httplib_set_handler_type( ctx, uri, AUTH_HANDLER, (handler == NULL), NULL, NULL, NULL, NULL, NULL, handler, cbdata );
 

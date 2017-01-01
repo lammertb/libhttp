@@ -122,7 +122,7 @@ void XX_httplib_handle_websocket_request( const struct httplib_context *ctx, str
 
 	if ( is_callback_resource ) {
 
-		if ( ws_connect_handler != NULL  &&  ws_connect_handler( conn, cbData ) != 0 ) {
+		if ( ws_connect_handler != NULL  &&  ws_connect_handler( ctx, conn, cbData ) != 0 ) {
 
 			/*
 			 * C callback has returned non-zero, do not proceed with
@@ -169,7 +169,7 @@ void XX_httplib_handle_websocket_request( const struct httplib_context *ctx, str
 
 	if ( is_callback_resource ) {
 
-		if ( ws_ready_handler != NULL ) ws_ready_handler( conn, cbData );
+		if ( ws_ready_handler != NULL ) ws_ready_handler( ctx, conn, cbData );
 	}
 
 	/*
@@ -182,6 +182,6 @@ void XX_httplib_handle_websocket_request( const struct httplib_context *ctx, str
 	 * Step 8: Call the close handler
 	 */
 
-	if ( ws_close_handler ) ws_close_handler( conn, cbData );
+	if ( ws_close_handler != NULL ) ws_close_handler( ctx, conn, cbData );
 
 }  /* XX_httplib_handle_websocket_request */

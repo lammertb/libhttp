@@ -55,7 +55,7 @@ void XX_httplib_send_http_error( const struct httplib_context *ctx, struct httpl
 
 	conn->status_code = status;
 
-	if ( conn->in_error_handler  ||  ctx->callbacks.http_error == NULL  ||  ctx->callbacks.http_error( conn, status ) ) {
+	if ( conn->in_error_handler  ||  ctx->callbacks.http_error == NULL  ||  ctx->callbacks.http_error( ctx, conn, status ) ) {
 
 		if ( ! conn->in_error_handler ) {
 

@@ -163,7 +163,7 @@ void XX_httplib_handle_request( struct httplib_context *ctx, struct httplib_conn
 		 * required, use a request_handler instead.
 		 */
 
-		i = ctx->callbacks.begin_request( conn );
+		i = ctx->callbacks.begin_request( ctx, conn );
 
 		if ( i > 0 ) {
 
@@ -253,7 +253,7 @@ no_callback_resource:
 
 	if ( XX_httplib_get_request_handler( ctx, conn, AUTH_HANDLER, NULL, NULL, NULL, NULL, NULL, &auth_handler, &auth_callback_data ) ) {
 
-		if ( ! auth_handler( conn, auth_callback_data ) ) return;
+		if ( ! auth_handler( ctx, conn, auth_callback_data ) ) return;
 	}
 	
 	else if ( is_put_or_delete_request  &&  ! is_script_resource  &&  ! is_callback_resource ) {
@@ -311,7 +311,7 @@ no_callback_resource:
 
 		if ( ! is_websocket_request ) {
 
-			i = callback_handler( conn, callback_data );
+			i = callback_handler( ctx, conn, callback_data );
 			if ( i > 0 ) {
 
 				/*

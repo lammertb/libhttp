@@ -94,7 +94,7 @@ void XX_httplib_log_access( const struct httplib_context *ctx, const struct http
 	            referer,
 	            user_agent );
 
-	if ( ctx->callbacks.log_access != NULL ) ctx->callbacks.log_access( conn, buf );
+	if ( ctx->callbacks.log_access != NULL ) ctx->callbacks.log_access( ctx, conn, buf );
 
 	if ( fi.fp ) {
 

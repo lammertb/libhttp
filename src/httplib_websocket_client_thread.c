@@ -55,7 +55,7 @@ LIBHTTP_THREAD XX_httplib_websocket_client_thread( void *data ) {
 
 	XX_httplib_read_websocket( ctx, conn, cdata->data_handler, cdata->callback_data );
 
-	if ( cdata->close_handler != NULL ) cdata->close_handler( conn, cdata->callback_data );
+	if ( cdata->close_handler != NULL ) cdata->close_handler( ctx, conn, cdata->callback_data );
 
 	ctx->workerthreadids = httplib_free( ctx->workerthreadids );
 	conn                 = httplib_free( conn                 );

@@ -91,7 +91,7 @@ bool XX_httplib_set_ssl_option( struct httplib_context *ctx ) {
 	/* If a callback has been specified, call it. */
 
 	if ( ctx->callbacks.init_ssl == NULL ) callback_ret = 0;
-	else                                   callback_ret = ctx->callbacks.init_ssl( ctx->ssl_ctx, ctx->user_data );
+	else                                   callback_ret = ctx->callbacks.init_ssl( ctx, ctx->ssl_ctx, ctx->user_data );
 
 	/*
 	 * If callback returns 0, LibHTTP sets up the SSL certificate.

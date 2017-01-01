@@ -249,7 +249,7 @@ void XX_httplib_read_websocket( const struct httplib_context *ctx, struct httpli
 			 */
 
 			exit_by_callback = 0;
-			if ((ws_data_handler != NULL) && !ws_data_handler(conn, mop, data, data_len, callback_data)) exit_by_callback = 1;
+			if ((ws_data_handler != NULL) && !ws_data_handler( ctx, conn, mop, data, data_len, callback_data)) exit_by_callback = 1;
 
 			if ( data != mem ) data = httplib_free( data );
 

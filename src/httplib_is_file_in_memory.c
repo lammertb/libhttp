@@ -44,10 +44,12 @@ bool XX_httplib_is_file_in_memory( const struct httplib_context *ctx, const stru
 
 	if ( ctx->callbacks.open_file ) {
 
-		filep->membuf = ctx->callbacks.open_file( conn, path, & size );
+		filep->membuf = ctx->callbacks.open_file( ctx, conn, path, & size );
 
-		/* NOTE: override filep->size only on success. Otherwise, it might
-		 * break constructs like if (!XX_httplib_stat() || !XX_httplib_fopen()) ... */
+		/*
+		 * NOTE: override filep->size only on success. Otherwise, it might
+		 * break constructs like if (!XX_httplib_stat() || !XX_httplib_fopen()) ...
+		 */
 
 		if ( filep->membuf != NULL ) filep->size = size;
 	}

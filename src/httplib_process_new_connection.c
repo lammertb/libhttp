@@ -132,7 +132,7 @@ void XX_httplib_process_new_connection( struct httplib_context *ctx, struct http
 				 */
 
 				XX_httplib_handle_request( ctx, conn );
-				if ( ctx->callbacks.end_request != NULL ) ctx->callbacks.end_request( conn, conn->status_code );
+				if ( ctx->callbacks.end_request != NULL ) ctx->callbacks.end_request( ctx, conn, conn->status_code );
 				XX_httplib_log_access( ctx, conn );
 			}
 			

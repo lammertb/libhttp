@@ -145,41 +145,35 @@ struct pollfd {
 #endif  /* _WIN32  &&  ! POLLIN */
 
 
-struct httplib_context;    /* Handle for the HTTP service itself */
-struct httplib_connection; /* Handle for the individual connection */
+struct httplib_context;					/* Handle for the HTTP service itself								*/
+struct httplib_connection;				/* Handle for the individual connection								*/
 
 
-/* This structure contains information about the HTTP request. */
-struct httplib_request_info {
-	const char *request_method; /* "GET", "POST", etc */
-	const char *request_uri;    /* URL-decoded URI (absolute or relative,
-	                             * as in the request) */
-	const char *local_uri;      /* URL-decoded URI (relative). Can be NULL
-	                             * if the request_uri does not address a
-	                             * resource at the server host. */
-	const char *uri;            /* Deprecated: use local_uri instead */
-	const char *http_version;   /* E.g. "1.0", "1.1" */
-	const char *query_string;   /* URL part after '?', not including '?', or
-	                               NULL */
-	const char *remote_user;    /* Authenticated user, or NULL if no auth
-	                               used */
-	char remote_addr[48];       /* Client's IP address as a string. */
-
-	int64_t content_length; /* Length (in bytes) of the request body,
-	                             can be -1 if no length was given. */
-	int remote_port;          /* Client's port */
-	bool has_ssl;               /* 1 if SSL-ed, 0 if not */
-	void *user_data;          /* User data pointer passed to httplib_start() */
-	void *conn_data;          /* Connection-specific user data */
-
-	int num_headers; /* Number of HTTP headers */
-	struct httplib_header {
-		const char *name;  /* HTTP header name */
-		const char *value; /* HTTP header value */
-	} http_headers[64];    /* Maximum 64 headers */
-
-	struct client_cert *client_cert; /* Client certificate information */
-};
+							/************************************************************************************************/
+							/*												*/
+							/* This structure contains information about the HTTP request.					*/
+struct httplib_request_info {				/*												*/
+	const char *		request_method;		/* "GET", "POST", etc										*/
+	const char *		request_uri;		/* URL-decoded URI (absolute or relative, as in the request)					*/
+	const char *		local_uri;		/* URL-decoded URI (relative). Can be NULL if request_uri is not a resource at the server host	*/
+	const char *		uri;			/* Deprecated: use local_uri instead								*/
+	const char *		http_version;		/* E.g. "1.0", "1.1"										*/
+	const char *		query_string;		/* URL part after '?', not including '?', or NULL						*/
+	const char *		remote_user;		/* Authenticated user, or NULL if no auth used							*/
+	char			remote_addr[48];	/* Client's IP address as a string.								*/
+	int64_t			content_length;		/* Length (in bytes) of the request body, can be -1 if no length was given.			*/
+	int			remote_port;		/* Client's port										*/
+	bool			has_ssl;		/* 1 if SSL-ed, 0 if not									*/
+	void *			user_data;		/* User data pointer passed to httplib_start()							*/
+	void *			conn_data;		/* Connection-specific user data								*/
+	int			num_headers;		/* Number of HTTP headers									*/
+	struct httplib_header {				/*												*/
+		const char *name;			/* HTTP header name										*/
+		const char *value;			/* HTTP header value										*/
+	}			http_headers[64];	/* Maximum 64 headers										*/
+	struct client_cert *	client_cert;		/* Client certificate information								*/
+};							/*												*/
+							/************************************************************************************************/
 
 
 /* Client certificate information (part of httplib_request_info) */
@@ -191,170 +185,37 @@ struct client_cert {
 };
 
 
-/* This structure needs to be passed to httplib_start(), to let LibHTTP know
-   which callbacks to invoke. For a detailed description, see
-   https://github.com/lammertb/libhttp/blob/master/docs/UserManual.md */
+/*
+ * This structure needs to be passed to httplib_start(), to let LibHTTP know
+ * which callbacks to invoke. For a detailed description, see
+ * https://github.com/lammertb/libhttp/blob/master/docs/UserManual.md
+ */
+
 struct httplib_callbacks {
-	/* Called when LibHTTP has received new HTTP request.
-	   If the callback returns one, it must process the request
-	   by sending valid HTTP headers and a body. LibHTTP will not do
-	   any further processing. Otherwise it must return zero.
-	   Note that since V1.7 the "begin_request" function is called
-	   before an authorization check. If an authorization check is
-	   required, use a request_handler instead.
-	   Return value:
-	     0: LibHTTP will process the request itself. In this case,
-	        the callback must not send any data to the client.
-	     1-999: callback already processed the request. LibHTTP will
-	            not send any data after the callback returned. The
-	            return code is stored as a HTTP status code for the
-	            access log. */
-	int (*begin_request)(struct httplib_connection *);
-
-	/* Called when LibHTTP has finished processing request. */
-	void (*end_request)(const struct httplib_connection *, int reply_status_code);
-	int (*log_message)( const struct httplib_context *ctx, const struct httplib_connection * conn, const char *message );
-
-	/* Called when LibHTTP is about to log access. If callback returns
-	   non-zero, LibHTTP does not log anything. */
-	int (*log_access)(const struct httplib_connection *, const char *message);
-
-	/* Called when LibHTTP initializes SSL library.
-	   Parameters:
-	     user_data: parameter user_data passed when starting the server.
-	   Return value:
-	     0: LibHTTP will set up the SSL certificate.
-	     1: LibHTTP assumes the callback already set up the certificate.
-	    -1: initializing ssl fails. */
-	int (*init_ssl)(void *ssl_context, void *user_data);
-
-	/* Called when LibHTTP is closing a connection.  The per-context mutex is
-	   locked when this is invoked.  This is primarily useful for noting when
-	   a websocket is closing and removing it from any application-maintained
-	   list of clients.
-	   Using this callback for websocket connections is deprecated: Use
-	   httplib_set_websocket_handler instead. */
-	void (*connection_close)(const struct httplib_connection *);
-
-	/* Called when LibHTTP tries to open a file. Used to intercept file open
-	   calls, and serve file data from memory instead.
-	   Parameters:
-	      path:     Full path to the file to open.
-	      data_len: Placeholder for the file size, if file is served from
-	                memory.
-	   Return value:
-	     NULL: do not serve file from memory, proceed with normal file open.
-	     non-NULL: pointer to the file contents in memory. data_len must be
-	       initialized with the size of the memory block. */
-	const char *(*open_file)(const struct httplib_connection *, const char *path, size_t *data_len);
-
-	/* Called when LibHTTP is about to serve Lua server page, if
-	   Lua support is enabled.
-	   Parameters:
-	     lua_context: "lua_State *" pointer. */
-	void (*init_lua)(const struct httplib_connection *, void *lua_context);
-
-	/* Called when LibHTTP is about to send HTTP error to the client.
-	   Implementing this callback allows to create custom error pages.
-	   Parameters:
-	     status: HTTP error status code.
-	   Return value:
-	     1: run LibHTTP error handler.
-	     0: callback already handled the error. */
-	int (*http_error)(struct httplib_connection *, int status);
-
-	/* Called after LibHTTP context has been created, before requests
-	   are processed.
-	   Parameters:
-	     ctx: context handle */
-	void (*init_context)(const struct httplib_context *ctx);
-
-	/* Called when a new worker thread is initialized.
-	   Parameters:
-	     ctx: context handle
-	     thread_type:
-	       0 indicates the master thread
-	       1 indicates a worker thread handling client connections
-	       2 indicates an internal helper thread (timer thread)
-	       */
-	void (*init_thread)(const struct httplib_context *ctx, int thread_type);
-
-	/* Called when LibHTTP context is deleted.
-	   Parameters:
-	     ctx: context handle */
-	void (*exit_context)(const struct httplib_context *ctx);
+	int		(*begin_request)(    const struct httplib_context *ctx,       struct httplib_connection *conn );
+	void		(*end_request)(      const struct httplib_context *ctx, const struct httplib_connection *conn, int reply_status_code );
+	int		(*log_message)(      const struct httplib_context *ctx, const struct httplib_connection *conn, const char *message );
+	int		(*log_access)(       const struct httplib_context *ctx, const struct httplib_connection *conn, const char *message );
+	int		(*init_ssl)(         const struct httplib_context *ctx, void *ssl_context, void *user_data );
+	void		(*connection_close)( const struct httplib_context *ctx, const struct httplib_connection *conn );
+	const char *	(*open_file)(        const struct httplib_context *ctx, const struct httplib_connection *conn, const char *path, size_t *data_len );
+	void		(*init_lua)(         const struct httplib_context *ctx, const struct httplib_connection *conn, void *lua_context );
+	int		(*http_error)(       const struct httplib_context *ctx, struct httplib_connection *, int status);
+	void		(*init_context)(     const struct httplib_context *ctx );
+	void		(*init_thread)(      const struct httplib_context *ctx, int thread_type );
+	void		(*exit_context)(     const struct httplib_context *ctx );
 };
 
-struct httplib_option_t {
-	const char *	name;
-	const char *	value;
-};
+							/************************************************************************************************/
+struct httplib_option_t {				/*												*/
+	const char *	name;				/* name of the option used when creating a context						*/
+	const char *	value;				/* value of the option										*/
+};							/*												*/
+							/************************************************************************************************/
 
 
-/* Start web server.
-
-   Parameters:
-     callbacks: httplib_callbacks structure with user-defined callbacks.
-     options: NULL terminated list of option_name, option_value pairs that
-              specify LibHTTP configuration parameters.
-
-   Side-effects: on UNIX, ignores SIGCHLD and SIGPIPE signals. If custom
-      processing is required for these, signal handlers must be set up
-      after calling httplib_start().
-
-
-   Example:
-     const char *options[] = {
-       "document_root", "/var/www",
-       "listening_ports", "80,443s",
-       NULL
-     };
-     struct httplib_context *ctx = httplib_start(&my_func, NULL, options);
-
-   Refer to https://github.com/lammertb/libhttp/blob/master/docs/UserManual.md
-   for the list of valid option and their possible values.
-
-   Return:
-     web server context, or NULL on error. */
-
-
-/* httplib_request_handler
-
-   Called when a new request comes in.  This callback is URI based
-   and configured with httplib_set_request_handler().
-
-   Parameters:
-      conn: current connection information.
-      cbdata: the callback data configured with httplib_set_request_handler().
-   Returns:
-      0: the handler could not handle the request, so fall through.
-      1 - 999: the handler processed the request. The return code is
-               stored as a HTTP status code for the access log. */
-typedef int (*httplib_request_handler)(struct httplib_connection *conn, void *cbdata);
-
-
-/* httplib_set_request_handler
-
-   Sets or removes a URI mapping for a request handler.
-   This function uses httplib_lock_context internally.
-
-   URI's are ordered and prefixed URI's are supported. For example,
-   consider two URIs: /a/b and /a
-           /a   matches /a
-           /a/b matches /a/b
-           /a/c matches /a
-
-   Parameters:
-      ctx: server context
-      uri: the URI (exact or pattern) for the handler
-      handler: the callback handler to use when the URI is requested.
-               If NULL, an already registered handler for this URI will be
-   removed.
-               The URI used to remove a handler must match exactly the one used
-   to
-               register it (not only a pattern match).
-      cbdata: the callback data to give to the handler when it is called. */
-LIBHTTP_API void httplib_set_request_handler(struct httplib_context *ctx, const char *uri, httplib_request_handler handler, void *cbdata);
+typedef int (*httplib_request_handler)( const struct httplib_context *ctx, const struct httplib_connection *conn, void *cbdata );
+typedef int (*httplib_authorization_handler)( const struct httplib_context *ctx, const struct httplib_connection *conn, void *cbdata );
 
 
 /* Callback types for websocket handlers in C/C++.
@@ -382,45 +243,16 @@ LIBHTTP_API void httplib_set_request_handler(struct httplib_context *ctx, const 
 
    httplib_connection_close_handler
        Is called, when the connection is closed.*/
-typedef int (*httplib_websocket_connect_handler)(const struct httplib_connection *, void *);
-typedef void (*httplib_websocket_ready_handler)(struct httplib_connection *, void *);
-typedef int (*httplib_websocket_data_handler)(struct httplib_connection *, int, char *, size_t, void *);
-typedef void (*httplib_websocket_close_handler)(const struct httplib_connection *, void *);
-
-
-/* httplib_set_websocket_handler
-
-   Set or remove handler functions for websocket connections.
-   This function works similar to httplib_set_request_handler - see there. */
-LIBHTTP_API void
-httplib_set_websocket_handler(struct httplib_context *ctx,
-                         const char *uri,
-                         httplib_websocket_connect_handler connect_handler,
-                         httplib_websocket_ready_handler ready_handler,
-                         httplib_websocket_data_handler data_handler,
-                         httplib_websocket_close_handler close_handler,
-                         void *cbdata);
-
-
-/* httplib_authorization_handler
-
-   Some description here
-
-   Parameters:
-      conn: current connection information.
-      cbdata: the callback data configured with httplib_set_request_handler().
-   Returns:
-      0: access denied
-      1: access granted
- */
-typedef int (*httplib_authorization_handler)(struct httplib_connection *conn, void *cbdata);
+typedef int	(*httplib_websocket_connect_handler)( const struct httplib_context *ctx, const struct httplib_connection *conn, void *);
+typedef void	(*httplib_websocket_ready_handler)(   const struct httplib_context *ctx, const struct httplib_connection *conn, void *);
+typedef int	(*httplib_websocket_data_handler)(    const struct httplib_context *ctx, const struct httplib_connection *conn, int, char *, size_t, void *);
+typedef void	(*httplib_websocket_close_handler)(   const struct httplib_context *ctx, const struct httplib_connection *conn, void *);
 
 
 /* httplib_set_auth_handler
 
    Sets or removes a URI mapping for an authorization handler.
    This function works similar to httplib_set_request_handler - see there. */
-LIBHTTP_API void httplib_set_auth_handler(struct httplib_context *ctx, const char *uri, httplib_authorization_handler handler, void *cbdata);
 
 
 /* Get the value of particular configuration parameter.
@@ -504,19 +336,6 @@ LIBHTTP_API const struct httplib_request_info *httplib_get_request_info(const st
     >0  number of bytes written on success */
 
 
-/* Blocks until unique access is obtained to this connection. Intended for use
-   with websockets only.
-   Invoke this before httplib_write or httplib_printf when communicating with a
-   websocket if your code has server-initiated communication as well as
-   communication in direct response to a message. */
-LIBHTTP_API void httplib_lock_connection(struct httplib_connection *conn);
-LIBHTTP_API void httplib_unlock_connection(struct httplib_connection *conn);
-
-
-/* Lock server context.  This lock may be used to protect resources
-   that are shared between different connection/worker threads. */
-LIBHTTP_API void httplib_lock_context(struct httplib_context *ctx);
-LIBHTTP_API void httplib_unlock_context(struct httplib_context *ctx);
 
 
 /* Opcodes, from http://tools.ietf.org/html/rfc6455 */
@@ -550,19 +369,6 @@ enum {
 #endif
 
 
-/* Send data to the client using printf() semantics.
-   Works exactly like httplib_write(), but allows to do message formatting. */
-
-
-
-/* Store body data into a file. */
-/* Read entire request body and store it in a file "path".
-   Return:
-     < 0   Error
-     >= 0  Number of bytes stored in file "path".
-*/
-
-
 /* Read data from the remote end, return number of bytes read.
    Return:
      0     connection has been closed by peer. No more data could be read.
@@ -575,7 +381,6 @@ enum {
    This is a helper function. It traverses request_info->http_headers array,
    and if the header is present in the array, returns its value. If it is
    not present, NULL is returned. */
-LIBHTTP_API const char *httplib_get_header(const struct httplib_connection *, const char *name);
 
 
 /* Get a value of particular form variable.
@@ -597,7 +402,6 @@ LIBHTTP_API const char *httplib_get_header(const struct httplib_connection *, co
 
    Destination buffer is guaranteed to be '\0' - terminated if it is not
    NULL or zero length. */
-LIBHTTP_API int httplib_get_var(const char *data, size_t data_len, const char *var_name, char *dst, size_t dst_len);
 
 
 /* Get a value of particular form variable.
@@ -623,7 +427,6 @@ LIBHTTP_API int httplib_get_var(const char *data, size_t data_len, const char *v
 
    Destination buffer is guaranteed to be '\0' - terminated if it is not
    NULL or zero length. */
-LIBHTTP_API int httplib_get_var2(const char *data, size_t data_len, const char *var_name, char *dst, size_t dst_len, size_t occurrence);
 
 
 /* Fetch value of certain cookie variable into the destination buffer.
@@ -639,7 +442,6 @@ LIBHTTP_API int httplib_get_var2(const char *data, size_t data_len, const char *
             parameter is not found).
         -2 (destination buffer is NULL, zero length or too small to hold the
             value). */
-LIBHTTP_API int httplib_get_cookie(const char *cookie, const char *var_name, char *buf, size_t buf_len);
 
 
 /* Download data from the remote web server.
@@ -722,18 +524,16 @@ struct httplib_form_data_handler {
 };
 
 
-/* Return values definition for the "field_found" callback in
- * httplib_form_data_handler. */
+/*
+ * Return values definition for the "field_found" callback in
+ * httplib_form_data_handler.
+ */
+
 enum {
-	/* Skip this field (neither get nor store it). Continue with the
-     * next field. */
-	FORM_FIELD_STORAGE_SKIP = 0x0,
-	/* Get the field value. */
-	FORM_FIELD_STORAGE_GET = 0x1,
-	/* Store the field value into a file. */
-	FORM_FIELD_STORAGE_STORE = 0x2,
-	/* Stop parsing this request. Skip the remaining fields. */
-	FORM_FIELD_STORAGE_ABORT = 0x10
+	FORM_FIELD_STORAGE_SKIP  = 0x00,	/* Skip this field (neither get nor store it). Continue with the next field.	*/
+	FORM_FIELD_STORAGE_GET   = 0x01,	/* Get the field value.								*/
+	FORM_FIELD_STORAGE_STORE = 0x02,	/* Store the field value into a file.						*/
+	FORM_FIELD_STORAGE_ABORT = 0x10		/* Stop parsing this request. Skip the remaining fields				*/
 };
 
 
@@ -768,72 +568,12 @@ typedef LIBHTTP_THREAD_TYPE (LIBHTTP_THREAD_CALLING_CONV *httplib_thread_func_t)
 LIBHTTP_API int httplib_start_thread(httplib_thread_func_t f, void *p);
 
 
-
-
-/* Get text representation of HTTP status code. */
-
-
-
-
 /* URL-decode input buffer into destination buffer.
    0-terminate the destination buffer.
    form-url-encoded data differs from URI encoding in a way that it
    uses '+' as character for space, see RFC 1866 section 8.2.1
    http://ftp.ics.uci.edu/pub/ietf/html/rfc1866.txt
    Return: length of the decoded data, or -1 if dst buffer is too small. */
-LIBHTTP_API int httplib_url_decode(const char *src, int src_len, char *dst, int dst_len, int is_form_url_encoded);
-
-
-/* URL-encode input buffer into destination buffer.
-   returns the length of the resulting buffer or -1
-   is the buffer is too small. */
-LIBHTTP_API int httplib_url_encode(const char *src, char *dst, size_t dst_len);
-
-
-/* MD5 hash given strings.
-   Buffer 'buf' must be 33 bytes long. Varargs is a NULL terminated list of
-   ASCIIz strings. When function returns, buf will contain human-readable
-   MD5 hash. Example:
-     char buf[33];
-     httplib_md5(buf, "aa", "bb", NULL); */
-LIBHTTP_API char *httplib_md5(char buf[33], ...);
-
-
-/* utility methods to compare two buffers, case insensitive. */
-
-
-/* Connect to a websocket as a client
-   Parameters:
-     host: host to connect to, i.e. "echo.websocket.org" or "192.168.1.1" or
-   "localhost"
-     port: server port
-     use_ssl: make a secure connection to server
-     error_buffer, error_buffer_size: buffer for an error message
-     path: server path you are trying to connect to, i.e. if connection to
-   localhost/app, path should be "/app"
-     origin: value of the Origin HTTP header
-     data_func: callback that should be used when data is received from the
-   server
-     user_data: user supplied argument
-
-   Return:
-     On success, valid httplib_connection object.
-     On error, NULL. Se error_buffer for details.
-*/
-
-
-/* Connect to a TCP server as a client (can be used to connect to a HTTP server)
-   Parameters:
-     host: host to connect to, i.e. "www.wikipedia.org" or "192.168.1.1" or
-   "localhost"
-     port: server port
-     use_ssl: make a secure connection to server
-     error_buffer, error_buffer_size: buffer for an error message
-
-   Return:
-     On success, valid httplib_connection object.
-     On error, NULL. Se error_buffer for details.
-*/
 
 
 struct httplib_client_options {
@@ -857,20 +597,6 @@ enum debug_level_t {
 
 
 enum { TIMEOUT_INFINITE = -1 };
-
-
-/* Wait for a response from the server
-   Parameters:
-     conn: connection
-     ebuf, ebuf_len: error message placeholder.
-     timeout: time to wait for a response in milliseconds (if < 0 then wait
-   forever)
-
-   Return:
-     On success, >= 0
-     On error/timeout, < 0
-*/
-
 
 
 typedef void (*httplib_alloc_callback_func)( const char *file, unsigned line, const char *action, int64_t current_bytes, int64_t total_blocks, int64_t total_bytes );
@@ -900,16 +626,23 @@ LIBHTTP_API void			httplib_destroy_client_context( struct httplib_context *ctx )
 LIBHTTP_API struct httplib_connection *	httplib_download( struct httplib_context *ctx, const char *host, int port, int use_ssl, PRINTF_FORMAT_STRING(const char *request_fmt), ...) PRINTF_ARGS(5, 6);
 LIBHTTP_API char *			httplib_error_string( int error_code, char *buf, size_t buf_len );
 LIBHTTP_API const char *		httplib_get_builtin_mime_type( const char *file_name );
+LIBHTTP_API int				httplib_get_cookie( const char *cookie, const char *var_name, char *buf, size_t buf_len );
 LIBHTTP_API enum debug_level_t		httplib_get_debug_level( struct httplib_context *ctx );
+LIBHTTP_API const char *		httplib_get_header( const struct httplib_connection *conn, const char *name );
 LIBHTTP_API const char *		httplib_get_option( const struct httplib_context *ctx, const char *name, char *buffer, size_t buflen );
 LIBHTTP_API uint64_t			httplib_get_random( void );
 LIBHTTP_API int				httplib_get_response( const struct httplib_context *ctx, struct httplib_connection *conn, int timeout );
 LIBHTTP_API const char *		httplib_get_response_code_text( const struct httplib_context *ctx, struct httplib_connection *conn, int response_code );
 LIBHTTP_API void *			httplib_get_user_connection_data( const struct httplib_connection *conn );
+LIBHTTP_API int				httplib_get_var( const char *data, size_t data_len, const char *var_name, char *dst, size_t dst_len );
+LIBHTTP_API int				httplib_get_var2( const char *data, size_t data_len, const char *var_name, char *dst, size_t dst_len, size_t occurrence );
 LIBHTTP_API struct tm *			httplib_gmtime_r( const time_t *clock, struct tm *result );
 LIBHTTP_API int				httplib_handle_form_request( const struct httplib_context *ctx, struct httplib_connection *conn, struct httplib_form_data_handler *fdh );
 LIBHTTP_API int				httplib_kill( pid_t pid, int sig_num );
 LIBHTTP_API struct tm *			httplib_localtime_r( const time_t *clock, struct tm *result );
+LIBHTTP_API void			httplib_lock_connection( struct httplib_connection *conn );
+LIBHTTP_API void			httplib_lock_context( struct httplib_context *ctx );
+LIBHTTP_API char *			httplib_md5( char buf[33], ... );
 LIBHTTP_API int				httplib_mkdir( const char *path, int mode );
 LIBHTTP_API DIR *			httplib_opendir( const char *name );
 LIBHTTP_API int				httplib_poll( struct pollfd *pfd, unsigned int nfds, int timeout );
@@ -936,8 +669,11 @@ LIBHTTP_API struct dirent *		httplib_readdir( DIR *dir );
 LIBHTTP_API int				httplib_remove( const char *path );
 LIBHTTP_API void			httplib_send_file( const struct httplib_context *ctx, struct httplib_connection *conn, const char *path, const char *mime_type, const char *additional_headers );
 LIBHTTP_API void			httplib_set_alloc_callback_func( httplib_alloc_callback_func log_func );
+LIBHTTP_API void			httplib_set_auth_handler( struct httplib_context *ctx, const char *uri, httplib_authorization_handler handler, void *cbdata );
 LIBHTTP_API enum debug_level_t		httplib_set_debug_level( struct httplib_context *ctx, enum debug_level_t new_level );
+LIBHTTP_API void			httplib_set_request_handler( struct httplib_context *ctx, const char *uri, httplib_request_handler handler, void *cbdata );
 LIBHTTP_API void			httplib_set_user_connection_data( struct httplib_connection *conn, void *data );
+LIBHTTP_API void			httplib_set_websocket_handler( struct httplib_context *ctx, const char *uri, httplib_websocket_connect_handler connect_handler, httplib_websocket_ready_handler ready_handler, httplib_websocket_data_handler data_handler, httplib_websocket_close_handler close_handler, void *cbdata );
 LIBHTTP_API struct httplib_context *	httplib_start(const struct httplib_callbacks *callbacks, void *user_data, const struct httplib_option_t *options );
 LIBHTTP_API void			httplib_stop( struct httplib_context *ctx );
 LIBHTTP_API int64_t			httplib_store_body( const struct httplib_context *ctx, struct httplib_connection *conn, const char *path );
@@ -949,6 +685,10 @@ LIBHTTP_API int				httplib_strncasecmp( const char *s1, const char *s2, size_t l
 LIBHTTP_API char *			httplib_strndup( const char *str, size_t len );
 LIBHTTP_API int				httplib_system_exit( void );
 LIBHTTP_API int				httplib_system_init( void );
+LIBHTTP_API void			httplib_unlock_connection( struct httplib_connection *conn );
+LIBHTTP_API void			httplib_unlock_context( struct httplib_context *ctx );
+LIBHTTP_API int				httplib_url_decode( const char *src, int src_len, char *dst, int dst_len, int is_form_url_encoded );
+LIBHTTP_API int				httplib_url_encode( const char *src, char *dst, size_t dst_len );
 LIBHTTP_API const char *		httplib_version( void );
 LIBHTTP_API int				httplib_websocket_client_write( const struct httplib_context *ctx, struct httplib_connection *conn, int opcode, const char *data, size_t data_len );
 LIBHTTP_API int				httplib_websocket_write( const struct httplib_context *ctx, struct httplib_connection *conn, int opcode, const char *data, size_t data_len );
