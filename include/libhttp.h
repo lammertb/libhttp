@@ -214,8 +214,8 @@ struct httplib_option_t {				/*												*/
 							/************************************************************************************************/
 
 
-typedef int (*httplib_request_handler)( const struct httplib_context *ctx, const struct httplib_connection *conn, void *cbdata );
-typedef int (*httplib_authorization_handler)( const struct httplib_context *ctx, const struct httplib_connection *conn, void *cbdata );
+typedef int (*httplib_request_handler)( const struct httplib_context *ctx, struct httplib_connection *conn, void *cbdata );
+typedef int (*httplib_authorization_handler)( const struct httplib_context *ctx, struct httplib_connection *conn, void *cbdata );
 
 
 /* Callback types for websocket handlers in C/C++.
@@ -243,10 +243,10 @@ typedef int (*httplib_authorization_handler)( const struct httplib_context *ctx,
 
    httplib_connection_close_handler
        Is called, when the connection is closed.*/
-typedef int	(*httplib_websocket_connect_handler)( const struct httplib_context *ctx, const struct httplib_connection *conn, void *);
-typedef void	(*httplib_websocket_ready_handler)(   const struct httplib_context *ctx, const struct httplib_connection *conn, void *);
-typedef int	(*httplib_websocket_data_handler)(    const struct httplib_context *ctx, const struct httplib_connection *conn, int, char *, size_t, void *);
-typedef void	(*httplib_websocket_close_handler)(   const struct httplib_context *ctx, const struct httplib_connection *conn, void *);
+typedef int	(*httplib_websocket_connect_handler)( const struct httplib_context *ctx, struct httplib_connection *conn, void *);
+typedef void	(*httplib_websocket_ready_handler)(   const struct httplib_context *ctx, struct httplib_connection *conn, void *);
+typedef int	(*httplib_websocket_data_handler)(    const struct httplib_context *ctx, struct httplib_connection *conn, int, char *, size_t, void *);
+typedef void	(*httplib_websocket_close_handler)(   const struct httplib_context *ctx, struct httplib_connection *conn, void *);
 
 
 /* httplib_set_auth_handler
