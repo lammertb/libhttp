@@ -33,13 +33,11 @@
  * included in all responses other than 100, 101, 5xx. */
 void XX_httplib_gmt_time_string( char *buf, size_t buf_len, time_t *t ) {
 
-	struct tm *tm;
+	struct tm tmm;
 
 	if ( buf == NULL  ||  buf_len < 1 ) return;
 
-	tm = ( t != NULL ) ? gmtime(t) : NULL;
-
-	if ( tm != NULL ) strftime( buf, buf_len, "%a, %d %b %Y %H:%M:%S GMT", tm );
+	if ( httplib_gmtime_r( t, &tmm ) != NULL ) strftime( buf, buf_len, "%a, %d %b %Y %H:%M:%S GMT", &tmm );
 	 
 	else {
 		httplib_strlcpy( buf, "Thu, 01 Jan 1970 00:00:00 GMT", buf_len );

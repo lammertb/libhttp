@@ -414,8 +414,7 @@ OBJLIST =									\
 	${OBJDIR}httplib_pthread_mutex_unlock${OBJEXT}				\
 	${OBJDIR}httplib_pthread_self${OBJEXT}					\
 	${OBJDIR}httplib_pthread_setspecific${OBJEXT}				\
-	${OBJDIR}wince_gmtime${OBJEXT}						\
-	${OBJDIR}wince_gmtime_s${OBJEXT}					\
+	${OBJDIR}httplib_gmtime_r${OBJEXT}					\
 	${OBJDIR}httplib_localtime_r${OBJEXT}					\
 	${OBJDIR}wince_rename${OBJEXT}						\
 	${OBJDIR}wince_stat${OBJEXT}						\
@@ -1482,11 +1481,7 @@ ${OBJDIR}httplib_pthread_setspecific${OBJEXT}				: ${SRCDIR}httplib_pthread_sets
 									  ${SRCDIR}httplib_main.h					\
 									  ${INCDIR}libhttp.h
 
-${OBJDIR}wince_gmtime${OBJEXT}						: ${SRCDIR}wince_gmtime.c					\
-									  ${SRCDIR}httplib_main.h					\
-									  ${INCDIR}libhttp.h
-
-${OBJDIR}wince_gmtime_s${OBJEXT}					: ${SRCDIR}wince_gmtime_s.c					\
+${OBJDIR}httplib_gmtime_r${OBJEXT}					: ${SRCDIR}httplib_gmtime_r.c					\
 									  ${SRCDIR}httplib_main.h					\
 									  ${SRCDIR}httplib_utils.h					\
 									  ${INCDIR}libhttp.h

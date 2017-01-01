@@ -917,6 +917,7 @@ LIBHTTP_API enum debug_level_t		httplib_get_debug_level( struct httplib_context 
 LIBHTTP_API const char *		httplib_get_option( const struct httplib_context *ctx, const char *name, char *buffer, size_t buflen );
 LIBHTTP_API uint64_t			httplib_get_random( void );
 LIBHTTP_API void *			httplib_get_user_connection_data( const struct httplib_connection *conn );
+LIBHTTP_API struct tm *			httplib_gmtime_r( const time_t *clock, struct tm *result );
 LIBHTTP_API int				httplib_kill( pid_t pid, int sig_num );
 LIBHTTP_API struct tm *			httplib_localtime_r( const time_t *clock, struct tm *result );
 LIBHTTP_API int				httplib_mkdir( const char *path, int mode );

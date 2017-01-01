@@ -28,46 +28,54 @@
 #include "httplib_main.h"
 #include "httplib_utils.h"
 
-#if defined(_WIN32_WCE)
-
 /*
- * struct tm *gmtime_s( const time_t *ptime, struct tm *ptm );
+ * struct tm *httplib_gmtime_r( const time_t *clock, struct tm *result );
  *
- * The function gmtime_s() converts a number of seconds since the EPOCH to
- * a tm time structure. This standard function is not available on all
- * platforms and this implementation provides the functionality for Windows CE.
+ * The function httplib_gmtime_r() returns a converted time to tm structure.
+ * No timezone conversion takes place. UTC as zone is assumed.
  */
 
-struct tm * gmtime_s( const time_t *ptime, struct tm *ptm ) {
+struct tm * httplib_gmtime_r( const time_t *clock, struct tm *result ) {
+
+#if defined(_WIN32_CE)
 
 	int a;
 	int doy;
 	FILETIME ft;
 	SYSTEMTIME st;
 	
-	if ( ptime == NULL  ||  ptm == NULL ) return NULL;
+	if ( clock == NULL  ||  result == NULL ) return NULL;
 
-	*(int64_t)&ft = ((int64_t)*ptime) * RATE_DIFF * EPOCH_DIFF;
+	*(int64_t)&ft = ((int64_t)*clock) * RATE_DIFF * EPOCH_DIFF;
 
 	FileTimeToSystemTime( & ft, & st );
 
-	ptm->tm_year  = st.wYear  - 1900;
-	ptm->tm_mon   = st.wMonth - 1;
-	ptm->tm_wday  = st.wDayOfWeek;
-	ptm->tm_mday  = st.wDay;
-	ptm->tm_hour  = st.wHour;
-	ptm->tm_min   = st.wMinute;
-	ptm->tm_sec   = st.wSecond;
-	ptm->tm_isdst = false;
+	result->tm_year  = st.wYear  - 1900;
+	result->tm_mon   = st.wMonth - 1;
+	result->tm_wday  = st.wDayOfWeek;
+	result->tm_mday  = st.wDay;
+	result->tm_hour  = st.wHour;
+	result->tm_min   = st.wMinute;
+	result->tm_sec   = st.wSecond;
+	result->tm_isdst = false;
 
-	doy           = ptm->tm_mday;
-	for (a=0; a<ptm->tm_mon; a++) doy += days_per_month[a];
-	if ( ptm->tm_mon >= 2  &&  LEAP_YEAR( ptm->tm_year+1900 ) ) doy++;
+	doy              = result->tm_mday;
+	for (a=0; a<result->tm_mon; a++) doy += days_per_month[a];
+	if ( result->tm_mon >= 2  &&  LEAP_YEAR( result->tm_year+1900 ) ) doy++;
 
-	ptm->tm_yday  = doy;
+	result->tm_yday  = doy;
 
-	return ptm;
+	return result;
 
-}  /* gmtime_s */
+#elif defined(_WIN32)
 
-#endif /* defined(_WIN32_WCE) */
+	if ( gmtime_s( result, clock ) == 0 ) return result;
+	return NULL;
+
+#else
+
+	return gmtime_r( clock, result );
+
+#endif
+
+}  /* httplib_gmtime_r */
