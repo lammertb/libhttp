@@ -88,7 +88,7 @@ void XX_httplib_close_socket_gracefully( const struct httplib_context *ctx, stru
 	 */
 
 	do {
-		n = XX_httplib_pull( NULL, conn, buf, sizeof(buf), 1E-10 /* TODO: allow 0 as timeout */ );
+		n = XX_httplib_pull( ctx, NULL, conn, buf, sizeof(buf), 1E-10 /* TODO: allow 0 as timeout */ );
 	} while ( n > 0 );
 #endif
 

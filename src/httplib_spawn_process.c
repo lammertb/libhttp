@@ -93,7 +93,7 @@ pid_t XX_httplib_spawn_process( const struct httplib_context *ctx, struct httpli
 		 * Read the first line of the script into the buffer
 		 */
 
-		XX_httplib_snprintf( conn, &truncated, cmdline, sizeof(cmdline), "%s/%s", dir, prog );
+		XX_httplib_snprintf( ctx, conn, &truncated, cmdline, sizeof(cmdline), "%s/%s", dir, prog );
 
 		if ( truncated ) {
 
@@ -101,7 +101,7 @@ pid_t XX_httplib_spawn_process( const struct httplib_context *ctx, struct httpli
 			goto spawn_cleanup;
 		}
 
-		if ( XX_httplib_fopen( conn, cmdline, "r", &file ) ) {
+		if ( XX_httplib_fopen( ctx, conn, cmdline, "r", &file ) ) {
 			p = (char *)file.membuf;
 			XX_httplib_fgets( buf, sizeof(buf), &file, &p );
 			XX_httplib_fclose( & file );
@@ -122,8 +122,8 @@ pid_t XX_httplib_spawn_process( const struct httplib_context *ctx, struct httpli
 
 	GetFullPathNameA( dir, sizeof(full_dir), full_dir, NULL );
 
-	if ( interp[0] != '\0' ) XX_httplib_snprintf( conn, &truncated, cmdline, sizeof(cmdline), "\"%s\" \"%s\\%s\"", interp, full_dir, prog);
-	else                     XX_httplib_snprintf( conn, &truncated, cmdline, sizeof(cmdline), "\"%s\\%s\"",                full_dir, prog);
+	if ( interp[0] != '\0' ) XX_httplib_snprintf( ctx, conn, &truncated, cmdline, sizeof(cmdline), "\"%s\" \"%s\\%s\"", interp, full_dir, prog);
+	else                     XX_httplib_snprintf( ctx, conn, &truncated, cmdline, sizeof(cmdline), "\"%s\\%s\"",                full_dir, prog);
 
 	if ( truncated ) {
 
