@@ -29,20 +29,20 @@
 #include "httplib_string.h"
 
 /*
- * void XX_httplib_redirect_to_https_port( struct httplib_connection *conn, int ssl_index );
+ * void XX_httplib_redirect_to_https_port( const struct httplib_context *ctx, struct httplib_connection *conn, int ssl_index );
  *
  * The function XX_httplib_redirect_to_https_port() redirects a request to an
  * encrypted connection over HTTPS.
  */
 
-void XX_httplib_redirect_to_https_port( struct httplib_connection *conn, int ssl_index ) {
+void XX_httplib_redirect_to_https_port( const struct httplib_context *ctx, struct httplib_connection *conn, int ssl_index ) {
 
 	char host[1024+1];
 	const char *host_header;
 	size_t hostlen;
 	char *pos;
 
-	if ( conn == NULL ) return;
+	if ( ctx == NULL  ||  conn == NULL ) return;
 
 	host_header = httplib_get_header(conn, "Host");
 	hostlen     = sizeof( host );
@@ -68,11 +68,11 @@ void XX_httplib_redirect_to_https_port( struct httplib_connection *conn, int ssl
 	 * Send host, port, uri and (if it exists) ?query_string
 	 */
 
-	httplib_printf( conn, "HTTP/1.1 302 Found\r\nLocation: https://%s:%d%s%s%s\r\n\r\n",
+	httplib_printf( ctx, conn, "HTTP/1.1 302 Found\r\nLocation: https://%s:%d%s%s%s\r\n\r\n",
 	          host,
-	          (conn->ctx->listening_sockets[ssl_index].lsa.sa.sa_family == AF_INET6)
-	              ? (int)ntohs( conn->ctx->listening_sockets[ssl_index].lsa.sin6.sin6_port )
-	              : (int)ntohs( conn->ctx->listening_sockets[ssl_index].lsa.sin.sin_port   ),
+	          (ctx->listening_sockets[ssl_index].lsa.sa.sa_family == AF_INET6)
+	              ? (int)ntohs( ctx->listening_sockets[ssl_index].lsa.sin6.sin6_port )
+	              : (int)ntohs( ctx->listening_sockets[ssl_index].lsa.sin.sin_port   ),
 	          conn->request_info.local_uri,
 	          (conn->request_info.query_string == NULL) ? "" : "?",
 	          (conn->request_info.query_string == NULL) ? "" : conn->request_info.query_string);

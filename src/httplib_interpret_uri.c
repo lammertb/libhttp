@@ -44,7 +44,7 @@
  * is_put_or_delete_request:	out: put/delete file?
  */
 
-void XX_httplib_interpret_uri( struct httplib_connection *conn, char *filename, size_t filename_buf_len, struct file *filep, bool *is_found, bool *is_script_resource, bool *is_websocket_request, bool *is_put_or_delete_request ) {
+void XX_httplib_interpret_uri( const struct httplib_context *ctx, struct httplib_connection *conn, char *filename, size_t filename_buf_len, struct file *filep, bool *is_found, bool *is_script_resource, bool *is_websocket_request, bool *is_put_or_delete_request ) {
 
 /* TODO (high): Restructure this function */
 
@@ -62,10 +62,10 @@ void XX_httplib_interpret_uri( struct httplib_connection *conn, char *filename, 
 	const char *cgi_ext;
 #endif  /* !NO_CGI */
 
-	if ( conn == NULL  ||  conn->ctx == NULL  ||  filep == NULL ) return;
+	if ( ctx == NULL  ||  conn == NULL  ||  filep == NULL ) return;
 
 	uri  = conn->request_info.local_uri;
-	root = conn->ctx->document_root;
+	root = ctx->document_root;
 
 	memset( filep, 0, sizeof(*filep) );
 
@@ -76,7 +76,7 @@ void XX_httplib_interpret_uri( struct httplib_connection *conn, char *filename, 
 
 	*is_websocket_request     = XX_httplib_is_websocket_protocol( conn );
 
-	if ( *is_websocket_request  &&  conn->ctx->websocket_root != NULL ) root = conn->ctx->websocket_root;
+	if ( *is_websocket_request  &&  ctx->websocket_root != NULL ) root = ctx->websocket_root;
 
 	/*
 	 * Note that root == NULL is a regular use case here. This occurs,
@@ -99,11 +99,11 @@ void XX_httplib_interpret_uri( struct httplib_connection *conn, char *filename, 
 	 * If document_root is NULL, leave the file empty.
 	 */
 
-	XX_httplib_snprintf( conn, &truncated, filename, filename_buf_len - 1, "%s%s", root, uri );
+	XX_httplib_snprintf( ctx, conn, &truncated, filename, filename_buf_len - 1, "%s%s", root, uri );
 
 	if ( truncated ) goto interpret_cleanup;
 
-	rewrite = conn->ctx->url_rewrite_patterns;
+	rewrite = ctx->url_rewrite_patterns;
 
 	while ( (rewrite = XX_httplib_next_option( rewrite, &a, &b )) != NULL ) {
 
@@ -111,7 +111,7 @@ void XX_httplib_interpret_uri( struct httplib_connection *conn, char *filename, 
 
 		if ( match_len > 0 ) {
 
-			XX_httplib_snprintf( conn, &truncated, filename, filename_buf_len - 1, "%.*s%s", (int)b.len, b.ptr, uri + match_len );
+			XX_httplib_snprintf( ctx, conn, &truncated, filename, filename_buf_len - 1, "%.*s%s", (int)b.len, b.ptr, uri + match_len );
 			break;
 		}
 	}
@@ -123,14 +123,14 @@ void XX_httplib_interpret_uri( struct httplib_connection *conn, char *filename, 
 	 * is now stored in "filename" variable.
 	 */
 
-	if ( XX_httplib_stat( conn, filename, filep ) ) {
+	if ( XX_httplib_stat( ctx, conn, filename, filep ) ) {
 #if !defined(NO_CGI)
 
 		/*
 		 * File exists. Check if it is a script type.
 		 */
 
-		if ( conn->ctx->cgi_pattern != NULL  &&  XX_httplib_match_prefix( conn->ctx->cgi_pattern, strlen( conn->ctx->cgi_pattern ), filename ) > 0 ) {
+		if ( ctx->cgi_pattern != NULL  &&  XX_httplib_match_prefix( ctx->cgi_pattern, strlen( ctx->cgi_pattern ), filename ) > 0 ) {
 
 			/*
 			 * The request addresses a CGI script or a Lua script. The URI
@@ -167,11 +167,11 @@ void XX_httplib_interpret_uri( struct httplib_connection *conn, char *filename, 
 
 		if ( strstr( accept_encoding, "gzip" ) != NULL ) {
 
-			XX_httplib_snprintf( conn, &truncated, gz_path, sizeof(gz_path), "%s.gz", filename );
+			XX_httplib_snprintf( ctx, conn, &truncated, gz_path, sizeof(gz_path), "%s.gz", filename );
 
 			if ( truncated ) goto interpret_cleanup;
 
-			if ( XX_httplib_stat( conn, gz_path, filep ) ) {
+			if ( XX_httplib_stat( ctx, conn, gz_path, filep ) ) {
 
 				if ( filep ) {
 
@@ -199,9 +199,9 @@ void XX_httplib_interpret_uri( struct httplib_connection *conn, char *filename, 
 		if ( *p == '/' ) {
 
 			*p      = '\0';
-			cgi_ext = conn->ctx->cgi_pattern;
+			cgi_ext = ctx->cgi_pattern;
 
-			if ( cgi_ext != NULL  &&  XX_httplib_match_prefix( cgi_ext, strlen( cgi_ext ), filename ) > 0  &&  XX_httplib_stat( conn, filename, filep ) ) {
+			if ( cgi_ext != NULL  &&  XX_httplib_match_prefix( cgi_ext, strlen( cgi_ext ), filename ) > 0  &&  XX_httplib_stat( ctx, conn, filename, filep ) ) {
 
 				/*
 				 * Shift PATH_INFO block one character right, e.g.

@@ -33,7 +33,7 @@
  * Report errors if length is exceeded.
  */
 
-void XX_httplib_vsnprintf( const struct httplib_connection *conn, bool *truncated, char *buf, size_t buflen, const char *fmt, va_list ap ) {
+void XX_httplib_vsnprintf( const struct httplib_context *ctx, const struct httplib_connection *conn, bool *truncated, char *buf, size_t buflen, const char *fmt, va_list ap ) {
 
 	int n;
 	bool ok;
@@ -60,7 +60,7 @@ void XX_httplib_vsnprintf( const struct httplib_connection *conn, bool *truncate
 
 	else {
 		if ( truncated != NULL ) *truncated = true;
-		if ( conn != NULL  &&  conn->ctx != NULL ) httplib_cry( DEBUG_LEVEL_WARNING, conn->ctx, conn, "%s: truncating vsnprintf buffer: [%.*s]", __func__, (int)((buflen > 200) ? 200 : (buflen - 1)), buf );
+		if ( ctx !=  NULL  &&  conn != NULL) httplib_cry( DEBUG_LEVEL_WARNING, ctx, conn, "%s: truncating vsnprintf buffer: [%.*s]", __func__, (int)((buflen > 200) ? 200 : (buflen - 1)), buf );
 		n = (int)buflen - 1;
 	}
 	buf[n] = '\0';

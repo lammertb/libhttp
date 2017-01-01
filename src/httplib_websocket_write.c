@@ -20,22 +20,19 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
- *
- * ============
- * Release: 2.0
  */
 
 #include "httplib_main.h"
 
 /*
- * int httplib_websocket_write( struct httplib_connection *conn, int opcode, const char *data, size_t dataLen );
+ * int httplib_websocket_write( const struct httplib_context *ctx, struct httplib_connection *conn, int opcode, const char *data, size_t dataLen );
  *
  * The function httplib_websocket_write() writes data over a websocket
  * connection.
  */
 
-int httplib_websocket_write( struct httplib_connection *conn, int opcode, const char *data, size_t dataLen ) {
+int httplib_websocket_write( const struct httplib_context *ctx, struct httplib_connection *conn, int opcode, const char *data, size_t dataLen ) {
 
-	return XX_httplib_websocket_write_exec( conn, opcode, data, dataLen, 0 );
+	return XX_httplib_websocket_write_exec( ctx, conn, opcode, data, dataLen, 0 );
 
 }  /* httplib_websocket_write */

@@ -28,13 +28,13 @@
 #include "httplib_main.h"
 #include "httplib_string.h"
 
-int httplib_printf( struct httplib_connection *conn, const char *fmt, ... ) {
+int httplib_printf( const struct httplib_context *ctx, struct httplib_connection *conn, const char *fmt, ... ) {
 
 	va_list ap;
 	int result;
 
 	va_start( ap, fmt );
-	result = XX_httplib_vprintf( conn, fmt, ap );
+	result = XX_httplib_vprintf( ctx, conn, fmt, ap );
 	va_end( ap );
 
 	return result;

@@ -30,7 +30,7 @@
 #include "httplib_utils.h"
 
 /*
- * void XX_httplib_handle_request( struct httplib_connection *conn );
+ * void XX_httplib_handle_request( const struct httplib_context *ctx, struct httplib_connection *conn );
  *
  * The function XX_httplib_handle_request() handles an incoming request. This
  * is the heart of the LibHTTP's logic. This function is called when the
@@ -38,7 +38,7 @@
  * to take: serve a file, or a directory, or call embedded function, etcetera.
  */
 
-void XX_httplib_handle_request( struct httplib_connection *conn ) {
+void XX_httplib_handle_request( struct httplib_context *ctx, struct httplib_connection *conn ) {
 
 	struct httplib_request_info *ri;
 	char path[PATH_MAX];
@@ -66,7 +66,7 @@ void XX_httplib_handle_request( struct httplib_connection *conn ) {
 		char *		var;
 	} ptr;
 
-	if ( conn == NULL  ||  conn->ctx == NULL ) return;
+	if ( ctx == NULL  ||  conn == NULL ) return;
 
 	ri                       = & conn->request_info;
 	is_found                 = false;
@@ -105,9 +105,9 @@ void XX_httplib_handle_request( struct httplib_connection *conn ) {
 
 	if ( ! conn->client.has_ssl  &&  conn->client.has_redir ) {
 
-		ssl_index = XX_httplib_get_first_ssl_listener_index( conn->ctx );
+		ssl_index = XX_httplib_get_first_ssl_listener_index( ctx );
 
-		if ( ssl_index >= 0 ) XX_httplib_redirect_to_https_port( conn, ssl_index );
+		if ( ssl_index >= 0 ) XX_httplib_redirect_to_https_port( ctx, conn, ssl_index );
 		
 		else {
 			/*
@@ -115,8 +115,8 @@ void XX_httplib_handle_request( struct httplib_connection *conn ) {
 			 * but no https port to forward to.
 			 */
 
-			XX_httplib_send_http_error( conn, 503, "%s", "Error: SSL forward not configured properly" );
-			httplib_cry( DEBUG_LEVEL_ERROR, conn->ctx, conn, "%s: can not redirect to SSL, no SSL port available", __func__ );
+			XX_httplib_send_http_error( ctx, conn, 503, "%s", "Error: SSL forward not configured properly" );
+			httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s: can not redirect to SSL, no SSL port available", __func__ );
 		}
 
 		return;
@@ -129,7 +129,7 @@ void XX_httplib_handle_request( struct httplib_connection *conn ) {
 	 */
 
 	ptr.con = ri->local_uri;
-	if ( XX_httplib_should_decode_url( conn ) ) httplib_url_decode( ptr.con, uri_len, ptr.var, uri_len + 1, 0 );
+	if ( XX_httplib_should_decode_url( ctx ) ) httplib_url_decode( ptr.con, uri_len, ptr.var, uri_len + 1, 0 );
 
 	/*
 	 * 1.4. clean URIs, so a path like allowed_dir/../forbidden_file is
@@ -149,13 +149,13 @@ void XX_httplib_handle_request( struct httplib_connection *conn ) {
 	 * 3. if this ip has limited speed, set it for this connection
 	 */
 
-	conn->throttle = XX_httplib_set_throttle( conn->ctx->throttle, XX_httplib_get_remote_ip( conn ), ri->local_uri );
+	conn->throttle = XX_httplib_set_throttle( ctx->throttle, XX_httplib_get_remote_ip( conn ), ri->local_uri );
 
 	/*
 	 * 4. call a "handle everything" callback, if registered
 	 */
 
-	if ( conn->ctx->callbacks.begin_request != NULL ) {
+	if ( ctx->callbacks.begin_request != NULL ) {
 
 		/*
 		 * Note that since V1.7 the "begin_request" function is called
@@ -163,7 +163,7 @@ void XX_httplib_handle_request( struct httplib_connection *conn ) {
 		 * required, use a request_handler instead.
 		 */
 
-		i = conn->ctx->callbacks.begin_request( conn );
+		i = ctx->callbacks.begin_request( conn );
 
 		if ( i > 0 ) {
 
@@ -210,7 +210,7 @@ void XX_httplib_handle_request( struct httplib_connection *conn ) {
 	 * 5.2. check if the request will be handled by a callback
 	 */
 
-	if ( XX_httplib_get_request_handler( conn,
+	if ( XX_httplib_get_request_handler( ctx, conn,
 	                        is_websocket_request ? WEBSOCKET_HANDLER : REQUEST_HANDLER,
 	                        &callback_handler,
 	                        &ws_connect_handler,
@@ -242,14 +242,7 @@ no_callback_resource:
 		 */
 
 		is_callback_resource = false;
-		XX_httplib_interpret_uri( conn,
-		              path,
-		              sizeof(path),
-		              &file,
-		              &is_found,
-		              &is_script_resource,
-		              &is_websocket_request,
-		              &is_put_or_delete_request );
+		XX_httplib_interpret_uri( ctx, conn, path, sizeof(path), &file, &is_found, &is_script_resource, &is_websocket_request, &is_put_or_delete_request );
 	}
 
 	/*
@@ -258,7 +251,7 @@ no_callback_resource:
 	 * 6.1. a custom authorization handler is installed
 	 */
 
-	if ( XX_httplib_get_request_handler( conn, AUTH_HANDLER, NULL, NULL, NULL, NULL, NULL, &auth_handler, &auth_callback_data ) ) {
+	if ( XX_httplib_get_request_handler( ctx, conn, AUTH_HANDLER, NULL, NULL, NULL, NULL, NULL, &auth_handler, &auth_callback_data ) ) {
 
 		if ( ! auth_handler( conn, auth_callback_data ) ) return;
 	}
@@ -270,14 +263,14 @@ no_callback_resource:
  * 6.2.1. thus, the server must have real files
  */
 
-		if ( conn->ctx->document_root == NULL ) {
+		if ( ctx->document_root == NULL ) {
 
 			/*
 			 * This server does not have any real files, thus the
 			 * PUT/DELETE methods are not valid.
 			 */
 
-			XX_httplib_send_http_error( conn, 405, "%s method not allowed", conn->request_info.request_method );
+			XX_httplib_send_http_error( ctx, conn, 405, "%s method not allowed", conn->request_info.request_method );
 			return;
 		}
 
@@ -285,9 +278,9 @@ no_callback_resource:
 		 * 6.2.2. Check if put authorization for static files is
 		 * available.
 		 */
-		if ( ! XX_httplib_is_authorized_for_put( conn ) ) {
+		if ( ! XX_httplib_is_authorized_for_put( ctx, conn ) ) {
 
-			XX_httplib_send_authorization_request( conn );
+			XX_httplib_send_authorization_request( ctx, conn );
 			return;
 		}
 	}
@@ -299,9 +292,9 @@ no_callback_resource:
 		 * correspond to a file. Check authorization.
 		 */
 
-		if ( ! XX_httplib_check_authorization( conn, path ) ) {
+		if ( ! XX_httplib_check_authorization( ctx, conn, path ) ) {
 
-			XX_httplib_send_authorization_request( conn );
+			XX_httplib_send_authorization_request( ctx, conn );
 			return;
 		}
 	}
@@ -328,7 +321,7 @@ no_callback_resource:
 				 */
 
 				conn->status_code = i;
-				XX_httplib_discard_unread_request_data( conn );
+				XX_httplib_discard_unread_request_data( ctx, conn );
 			}
 			
 			else {
@@ -338,14 +331,7 @@ no_callback_resource:
 				 * the authorization check might be different
 				 */
 
-				XX_httplib_interpret_uri( conn,
-				              path,
-				              sizeof(path),
-				              &file,
-				              &is_found,
-				              &is_script_resource,
-				              &is_websocket_request,
-				              &is_put_or_delete_request );
+				XX_httplib_interpret_uri( ctx, conn, path, sizeof(path), &file, &is_found, &is_script_resource, &is_websocket_request, &is_put_or_delete_request );
 				callback_handler = NULL;
 
 				goto no_callback_resource;
@@ -353,14 +339,7 @@ no_callback_resource:
 		}
 		
 		else {
-			XX_httplib_handle_websocket_request( conn,
-			                         path,
-			                         is_callback_resource,
-			                         ws_connect_handler,
-			                         ws_ready_handler,
-			                         ws_data_handler,
-			                         ws_close_handler,
-			                         callback_data );
+			XX_httplib_handle_websocket_request( ctx, conn, path, is_callback_resource, ws_connect_handler, ws_ready_handler, ws_data_handler, ws_close_handler, callback_data );
 		}
 
 		return;
@@ -378,10 +357,10 @@ no_callback_resource:
 			 * Websocket Lua script, the 0 in the third parameter indicates Lua
 			 */
 
-			XX_httplib_handle_websocket_request( conn, path, 0, NULL, NULL, NULL, NULL, &conn->ctx->callbacks );
+			XX_httplib_handle_websocket_request( ctx, conn, path, 0, NULL, NULL, NULL, NULL, &ctx->callbacks );
 		}
 		
-		else XX_httplib_send_http_error( conn, 404, "%s", "Not found" );
+		else XX_httplib_send_http_error( ctx, conn, 404, "%s", "Not found" );
 
 		return;
 	}
@@ -391,9 +370,9 @@ no_callback_resource:
 	 * by a script file. Thus, a DOCUMENT_ROOT must exist.
 	 */
 
-	if ( conn->ctx->document_root == NULL ) {
+	if ( ctx->document_root == NULL ) {
 
-		XX_httplib_send_http_error( conn, 404, "%s", "Not Found" );
+		XX_httplib_send_http_error( ctx, conn, 404, "%s", "Not Found" );
 		return;
 	}
 
@@ -403,7 +382,7 @@ no_callback_resource:
 
 	if ( is_script_resource ) {
 
-		XX_httplib_handle_file_based_request( conn, path, &file );
+		XX_httplib_handle_file_based_request( ctx, conn, path, &file );
 		return;
 	}
 
@@ -413,9 +392,9 @@ no_callback_resource:
 
 	if ( is_put_or_delete_request ) {
 
-		if ( ! strcmp( ri->request_method, "PUT"    ) ) { XX_httplib_put_file(    conn, path ); return; }
-		if ( ! strcmp( ri->request_method, "DELETE" ) ) { XX_httplib_delete_file( conn, path ); return; }
-		if ( ! strcmp( ri->request_method, "MKCOL"  ) ) { XX_httplib_mkcol(       conn, path ); return; }
+		if ( ! strcmp( ri->request_method, "PUT"    ) ) { XX_httplib_put_file(    ctx, conn, path ); return; }
+		if ( ! strcmp( ri->request_method, "DELETE" ) ) { XX_httplib_delete_file( ctx, conn, path ); return; }
+		if ( ! strcmp( ri->request_method, "MKCOL"  ) ) { XX_httplib_mkcol(       ctx, conn, path ); return; }
 
 		/*
 		 * 11.4. PATCH method
@@ -423,7 +402,7 @@ no_callback_resource:
 		 * only for scripts (Lua, CGI) and callbacks.
 		 */
 
-		XX_httplib_send_http_error( conn, 405, "%s method not allowed", conn->request_info.request_method );
+		XX_httplib_send_http_error( ctx, conn, 405, "%s method not allowed", conn->request_info.request_method );
 		return;
 	}
 
@@ -432,9 +411,9 @@ no_callback_resource:
 	 * hidden
 	 */
 
-	if ( ! is_found  ||  XX_httplib_must_hide_file( conn, path ) ) {
+	if ( ! is_found  ||  XX_httplib_must_hide_file( ctx, path ) ) {
 
-		XX_httplib_send_http_error( conn, 404, "%s", "Not found" );
+		XX_httplib_send_http_error( ctx, conn, 404, "%s", "Not found" );
 		return;
 	}
 
@@ -445,7 +424,7 @@ no_callback_resource:
 	if ( file.is_directory  &&  uri_len > 0  &&  ri->local_uri[uri_len - 1] != '/' ) {
 
 		XX_httplib_gmt_time_string( date, sizeof(date), &curtime );
-		httplib_printf( conn,
+		httplib_printf( ctx, conn,
 		          "HTTP/1.1 301 Moved Permanently\r\n"
 		          "Location: %s/\r\n"
 		          "Date: %s\r\n"
@@ -454,7 +433,7 @@ no_callback_resource:
 		          "Connection: %s\r\n\r\n",
 		          ri->request_uri,
 		          date,
-		          XX_httplib_suggest_connection_header( conn ) );
+		          XX_httplib_suggest_connection_header( ctx, conn ) );
 		return;
 	}
 
@@ -465,7 +444,7 @@ no_callback_resource:
 
 	if ( ! strcmp( ri->request_method, "PROPFIND" ) ) {
 
-		XX_httplib_handle_propfind( conn, path, & file );
+		XX_httplib_handle_propfind( ctx, conn, path, & file );
 		return;
 	}
 
@@ -483,7 +462,7 @@ no_callback_resource:
 		 * preflights).
 		 */
 
-		XX_httplib_send_options( conn );
+		XX_httplib_send_options( ctx, conn );
 		return;
 	}
 
@@ -493,7 +472,7 @@ no_callback_resource:
 
 	if ( strcmp( ri->request_method, "GET" )  &&  strcmp( ri->request_method, "HEAD" ) ) {
 
-		XX_httplib_send_http_error( conn, 405, "%s method not allowed", conn->request_info.request_method );
+		XX_httplib_send_http_error( ctx, conn, 405, "%s method not allowed", conn->request_info.request_method );
 		return;
 	}
 
@@ -503,7 +482,7 @@ no_callback_resource:
 
 	if ( file.is_directory ) {
 
-		if ( XX_httplib_substitute_index_file( conn, path, sizeof(path), &file ) ) {
+		if ( XX_httplib_substitute_index_file( ctx, conn, path, sizeof(path), &file ) ) {
 
 			/*
 			 * 14.1. use a substitute file
@@ -517,14 +496,14 @@ no_callback_resource:
 			 * 14.2. no substitute file
 			 */
 
-			if ( conn->ctx->enable_directory_listing ) XX_httplib_handle_directory_request( conn, path );
-			else                                       XX_httplib_send_http_error( conn, 403, "%s", "Error: Directory listing denied" );
+			if ( ctx->enable_directory_listing ) XX_httplib_handle_directory_request( ctx, conn, path );
+			else                                 XX_httplib_send_http_error( ctx, conn, 403, "%s", "Error: Directory listing denied" );
 
 			return;
 		}
 	}
 
-	XX_httplib_handle_file_based_request( conn, path, &file );
+	XX_httplib_handle_file_based_request( ctx, conn, path, &file );
 
 #if 0
 	/*

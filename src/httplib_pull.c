@@ -34,7 +34,7 @@
  * Return negative value on error, or number of bytes read on success.
  */
 
-int XX_httplib_pull( FILE *fp, struct httplib_connection *conn, char *buf, int len, double timeout ) {
+int XX_httplib_pull( const struct httplib_context *ctx, FILE *fp, struct httplib_connection *conn, char *buf, int len, double timeout ) {
 
 	int nread;
 	int err;
@@ -102,7 +102,7 @@ int XX_httplib_pull( FILE *fp, struct httplib_connection *conn, char *buf, int l
 			if (nread == 0) return -1; /* shutdown of the socket at client side */
 		}
 
-		if ( conn->ctx->status != CTX_STATUS_RUNNING ) return -1;
+		if ( ctx->status != CTX_STATUS_RUNNING ) return -1;
 
 		if ( nread > 0  || (nread == 0 && len == 0) ) {
 

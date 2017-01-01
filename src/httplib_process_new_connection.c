@@ -29,13 +29,13 @@
 #include "httplib_string.h"
 
 /*
- * void XX_httplib_process_new_connection( struct httplib_connection *conn );
+ * void XX_httplib_process_new_connection( struct httplib_context *ctx, struct httplib_connection *conn );
  *
  * The function XX_httplib_process_new_connection() is used to process a new
  * incoming connection on a socket.
  */
 
-void XX_httplib_process_new_connection( struct httplib_connection *conn ) {
+void XX_httplib_process_new_connection( struct httplib_context *ctx, struct httplib_connection *conn ) {
 
 	struct httplib_request_info *ri;
 	int keep_alive;
@@ -49,7 +49,7 @@ void XX_httplib_process_new_connection( struct httplib_connection *conn ) {
 		void *		var;
 	} ptr;
 
-	if ( conn == NULL  ||  conn->ctx == NULL ) return;
+	if ( ctx == NULL  ||  conn == NULL ) return;
 
 	ri = & conn->request_info;
 
@@ -62,7 +62,7 @@ void XX_httplib_process_new_connection( struct httplib_connection *conn ) {
 	was_error      = false;
 
 	do {
-		if ( ! XX_httplib_getreq( conn->ctx, conn, &reqerr ) ) {
+		if ( ! XX_httplib_getreq( ctx, conn, &reqerr ) ) {
 
 			/*
 			 * The request sent by the client could not be understood by
@@ -70,15 +70,15 @@ void XX_httplib_process_new_connection( struct httplib_connection *conn ) {
 			 * error message and close the connection.
 			 */
 
-			if ( reqerr > 0 ) XX_httplib_send_http_error( conn, reqerr, "%s", httplib_get_response_code_text( conn, reqerr ) );
+			if ( reqerr > 0 ) XX_httplib_send_http_error( ctx, conn, reqerr, "%s", httplib_get_response_code_text( ctx, conn, reqerr ) );
 
 			was_error = true;
 		}
 		
 		else if ( strcmp( ri->http_version, "1.0" )  &&  strcmp( ri->http_version, "1.1" ) ) {
 
-			httplib_cry( DEBUG_LEVEL_ERROR, conn->ctx, conn, "%s: bad HTTP version \"%s\"", __func__, ri->http_version );
-			XX_httplib_send_http_error( conn, 505, "%s", httplib_get_response_code_text( conn, 505 ) );
+			httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s: bad HTTP version \"%s\"", __func__, ri->http_version );
+			XX_httplib_send_http_error( ctx, conn, 505, "%s", httplib_get_response_code_text( ctx, conn, 505 ) );
 
 			was_error = true;
 		}
@@ -102,15 +102,15 @@ void XX_httplib_process_new_connection( struct httplib_connection *conn ) {
 				case URI_TYPE_ABS_NOPORT :
 				case URI_TYPE_ABS_PORT   :
 
-					hostend = XX_httplib_get_rel_url_at_current_server( conn->request_info.request_uri, conn );
+					hostend = XX_httplib_get_rel_url_at_current_server( ctx, conn->request_info.request_uri, conn );
 
 					if ( hostend != NULL ) conn->request_info.local_uri = hostend;
 					else                   conn->request_info.local_uri = NULL;
 					break;
 
 				default :
-					httplib_cry( DEBUG_LEVEL_ERROR, conn->ctx, conn, "%s: invalid URI", __func__ );
-					XX_httplib_send_http_error( conn, 400, "%s", httplib_get_response_code_text( conn, 400 ) );
+					httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s: invalid URI", __func__ );
+					XX_httplib_send_http_error( ctx, conn, 400, "%s", httplib_get_response_code_text( ctx, conn, 400 ) );
 
 					conn->request_info.local_uri = NULL;
 					was_error                    = true;
@@ -131,9 +131,9 @@ void XX_httplib_process_new_connection( struct httplib_connection *conn ) {
 				 * handle request to local server
 				 */
 
-				XX_httplib_handle_request( conn );
-				if ( conn->ctx->callbacks.end_request != NULL ) conn->ctx->callbacks.end_request( conn, conn->status_code );
-				XX_httplib_log_access(conn);
+				XX_httplib_handle_request( ctx, conn );
+				if ( ctx->callbacks.end_request != NULL ) ctx->callbacks.end_request( conn, conn->status_code );
+				XX_httplib_log_access( ctx, conn );
 			}
 			
 			else {
@@ -166,7 +166,7 @@ void XX_httplib_process_new_connection( struct httplib_connection *conn ) {
 		 * in loop exit condition.
 		 */
 
-		keep_alive = conn->ctx->status == CTX_STATUS_RUNNING  &&  conn->ctx->enable_keep_alive  &&  conn->content_len >= 0  &&  XX_httplib_should_keep_alive( conn );
+		keep_alive = ctx->status == CTX_STATUS_RUNNING  &&  ctx->enable_keep_alive  &&  conn->content_len >= 0  &&  XX_httplib_should_keep_alive( ctx, conn );
 
 		/*
 		 * Discard all buffered data for this request

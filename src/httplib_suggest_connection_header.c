@@ -28,15 +28,15 @@
 #include "httplib_main.h"
 
 /*
- * const char *XX_httplib_suggest_connection_header( const struct httlib_connection *conn );
+ * const char *XX_httplib_suggest_connection_header( const struct httplib_context *ctx, const struct httlib_connection *conn );
  *
  * Based on the connection type, the function XX_httplib_connection_header()
  * returns a string to be used in the header which suggests the connection to
  * be either closed, or kept alive for further requests.
  */
 
-const char *XX_httplib_suggest_connection_header( const struct httplib_connection *conn ) {
+const char *XX_httplib_suggest_connection_header( const struct httplib_context *ctx, const struct httplib_connection *conn ) {
 
-	return XX_httplib_should_keep_alive( conn ) ? "keep-alive" : "close";
+	return XX_httplib_should_keep_alive( ctx, conn ) ? "keep-alive" : "close";
 
 }  /* XX_httplib_suggest_connection_header */

@@ -25,27 +25,27 @@
 #include "httplib_main.h"
 
 /*
- * bool XX_httplib_is_authorized_for_put( struct httplib_connection *conn );
+ * bool XX_httplib_is_authorized_for_put( const struct httplib_context *ctx, struct httplib_connection *conn );
  *
  * The function XX_httplib_is_authorized_for_put() returns true, if the client
  * on the connection has authorization to use put and equivalent methods to
  * write information to the server.
  */
 
-bool XX_httplib_is_authorized_for_put( struct httplib_connection *conn ) {
+bool XX_httplib_is_authorized_for_put( const struct httplib_context *ctx, struct httplib_connection *conn ) {
 
 	struct file file = STRUCT_FILE_INITIALIZER;
 	const char *passfile;
 	bool ret;
 
-	if ( conn == NULL  ||  conn->ctx == NULL ) return false;
-	if ( conn->ctx->document_root    == NULL ) return false;
+	if ( ctx == NULL  ||  conn == NULL ) return false;
+	if ( ctx->document_root    == NULL ) return false;
 
-	passfile = conn->ctx->put_delete_auth_file;
+	passfile = ctx->put_delete_auth_file;
 
-	if ( passfile != NULL  &&  XX_httplib_fopen( conn, passfile, "r", &file ) ) {
+	if ( passfile != NULL  &&  XX_httplib_fopen( ctx, conn, passfile, "r", &file ) ) {
 
-		ret = XX_httplib_authorize( conn, &file );
+		ret = XX_httplib_authorize( ctx, conn, &file );
 		XX_httplib_fclose( & file );
 
 		return ret;

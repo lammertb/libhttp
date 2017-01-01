@@ -29,7 +29,7 @@
 #include "httplib_ssl.h"
 
 /*
- * int XX_httplib_ssl_use_pem_file( struct httplib_context *ctx, const char *pem );
+ * int XX_httplib_ssl_use_pem_file( const  struct httplib_context *ctx, const char *pem );
  *
  * The function XX_httplib_ssl_use_pem_file() tries to use a certificate which
  * is passed as a parameter with the filename of the certificate.
@@ -37,7 +37,7 @@
 
 #if ! defined(NO_SSL)
 
-int XX_httplib_ssl_use_pem_file( struct httplib_context *ctx, const char *pem ) {
+int XX_httplib_ssl_use_pem_file( const struct httplib_context *ctx, const char *pem ) {
 
 	if ( ctx == NULL  ||  pem == NULL ) return 0;
 

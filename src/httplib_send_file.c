@@ -28,29 +28,29 @@
 #include "httplib_main.h"
 
 /*
- * void httplib_send_file( struct httplib_connection *conn, const char *path, const char *mime_type, const char *additional_headers );
+ * void httplib_send_file( const struct httplib_context *ctx, struct httplib_connection *conn, const char *path, const char *mime_type, const char *additional_headers );
  *
  * The function httplib_send_file() sends a file to the other peer. Optionally
  * the MIME type and additional headers can be specified.
  */
 
-void httplib_send_file( struct httplib_connection *conn, const char *path, const char *mime_type, const char *additional_headers ) {
+void httplib_send_file( const struct httplib_context *ctx, struct httplib_connection *conn, const char *path, const char *mime_type, const char *additional_headers ) {
 
 	struct file file = STRUCT_FILE_INITIALIZER;
 
-	if ( XX_httplib_stat( conn, path, &file ) ) {
+	if ( ctx == NULL  ||  conn == NULL ) return;
+
+	if ( XX_httplib_stat( ctx, conn, path, &file ) ) {
 
 		if ( file.is_directory ) {
 
-			if ( conn == NULL  ||  conn->ctx == NULL ) return;
-
-			if ( conn->ctx->enable_directory_listing ) XX_httplib_handle_directory_request( conn, path );
-			else XX_httplib_send_http_error( conn, 403, "%s", "Error: Directory listing denied" );
+			if ( ctx->enable_directory_listing ) XX_httplib_handle_directory_request( ctx, conn, path );
+			else XX_httplib_send_http_error( ctx, conn, 403, "%s", "Error: Directory listing denied" );
 		}
 		
-		else XX_httplib_handle_static_file_request( conn, path, &file, mime_type, additional_headers );
+		else XX_httplib_handle_static_file_request( ctx, conn, path, &file, mime_type, additional_headers );
 	}
 	
-	else XX_httplib_send_http_error( conn, 404, "%s", "Error: File not found" );
+	else XX_httplib_send_http_error( ctx, conn, 404, "%s", "Error: File not found" );
 
 }  /* httplib_send_file */

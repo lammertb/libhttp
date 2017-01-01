@@ -30,7 +30,7 @@
 #include "httplib_utils.h"
 
 /*
- * void XX_httplib_addenv( struct cgi_environment *env, const char *fmt, ... );
+ * void XX_httplib_addenv( const struct httplib_context *ctx, struct cgi_environment *env, const char *fmt, ... );
  *
  * The function XX_httplib_addenv() adds one item to the environment before
  * a CGI script is called. The environment variable has the form
@@ -44,7 +44,7 @@
 
 #if !defined(NO_CGI)
 
-void XX_httplib_addenv( struct cgi_environment *env, const char *fmt, ... ) {
+void XX_httplib_addenv( const struct httplib_context *ctx, struct cgi_environment *env, const char *fmt, ... ) {
 
 	size_t n;
 	size_t space;
@@ -52,7 +52,7 @@ void XX_httplib_addenv( struct cgi_environment *env, const char *fmt, ... ) {
 	char *added;
 	va_list ap;
 
-	if ( env == NULL  ||  env->conn == NULL  ||  env->conn->ctx == NULL ) return;
+	if ( ctx == NULL  ||  env == NULL  ||  env->conn == NULL ) return;
 
 	/*
 	 * Calculate how much space is left in the buffer
@@ -79,7 +79,7 @@ void XX_httplib_addenv( struct cgi_environment *env, const char *fmt, ... ) {
 				 * Out of memory
 				 */
 
-				httplib_cry( DEBUG_LEVEL_ERROR, env->conn->ctx, env->conn, "%s: Cannot allocate memory for CGI variable [%s]", __func__, fmt );
+				httplib_cry( DEBUG_LEVEL_ERROR, ctx, env->conn, "%s: Cannot allocate memory for CGI variable [%s]", __func__, fmt );
 				return;
 			}
 
@@ -99,7 +99,7 @@ void XX_httplib_addenv( struct cgi_environment *env, const char *fmt, ... ) {
 		 */
 
 		va_start( ap, fmt );
-		XX_httplib_vsnprintf( env->conn, &truncated, added, (size_t)space, fmt, ap );
+		XX_httplib_vsnprintf( ctx, env->conn, &truncated, added, (size_t)space, fmt, ap );
 		va_end( ap );
 
 		/*
@@ -133,7 +133,7 @@ void XX_httplib_addenv( struct cgi_environment *env, const char *fmt, ... ) {
 
 	if ( space < 2 ) {
 
-		httplib_cry( DEBUG_LEVEL_ERROR, env->conn->ctx, env->conn, "%s: Cannot register CGI variable [%s]", __func__, fmt );
+		httplib_cry( DEBUG_LEVEL_ERROR, ctx, env->conn, "%s: Cannot register CGI variable [%s]", __func__, fmt );
 		return;
 	}
 

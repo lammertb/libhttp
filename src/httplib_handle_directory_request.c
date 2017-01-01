@@ -28,7 +28,7 @@
 #include "httplib_main.h"
 #include "httplib_utils.h"
 
-void XX_httplib_handle_directory_request( struct httplib_connection *conn, const char *dir ) {
+void XX_httplib_handle_directory_request( const struct httplib_context *ctx, struct httplib_connection *conn, const char *dir ) {
 
 	unsigned int i;
 	int sort_direction;
@@ -37,12 +37,12 @@ void XX_httplib_handle_directory_request( struct httplib_connection *conn, const
 	char error_string[ERROR_STRING_LEN];
 	time_t curtime;
 
-	if ( conn == NULL  ||  conn->ctx == NULL )                                                                      return;
-	if ( dir  == NULL ) { XX_httplib_send_http_error( conn, 500, "Internal server error\nOpening NULL directory" ); return; }
+	if ( ctx == NULL  ||  conn == NULL )                                                                                 return;
+	if ( dir  == NULL ) { XX_httplib_send_http_error( ctx, conn, 500, "Internal server error\nOpening NULL directory" ); return; }
 
-	if ( ! XX_httplib_scan_directory( conn, dir, & data, XX_httplib_dir_scan_callback ) ) {
+	if ( ! XX_httplib_scan_directory( ctx, conn, dir, & data, XX_httplib_dir_scan_callback ) ) {
 
-		XX_httplib_send_http_error( conn, 500, "Error: Cannot open directory\nopendir(%s): %s", dir, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
+		XX_httplib_send_http_error( ctx, conn, 500, "Error: Cannot open directory\nopendir(%s): %s", dir, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 		return;
 	}
 
@@ -53,11 +53,11 @@ void XX_httplib_handle_directory_request( struct httplib_connection *conn, const
 
 	conn->must_close = true;
 
-	httplib_printf( conn, "HTTP/1.1 200 OK\r\n" );
-	XX_httplib_send_static_cache_header( conn );
-	httplib_printf( conn, "Date: %s\r\n" "Connection: close\r\n" "Content-Type: text/html; charset=utf-8\r\n\r\n", date );
+	httplib_printf( ctx, conn, "HTTP/1.1 200 OK\r\n" );
+	XX_httplib_send_static_cache_header( ctx, conn );
+	httplib_printf( ctx, conn, "Date: %s\r\n" "Connection: close\r\n" "Content-Type: text/html; charset=utf-8\r\n\r\n", date );
 
-	conn->num_bytes_sent += httplib_printf( conn,
+	conn->num_bytes_sent += httplib_printf( ctx, conn,
 	              "<html><head><title>Index of %s</title>"
 	              "<style>th {text-align: left;}</style></head>"
 	              "<body><h1>Index of %s</h1><pre><table cellpadding=\"0\">"
@@ -75,7 +75,7 @@ void XX_httplib_handle_directory_request( struct httplib_connection *conn, const
 	 * Print first entry - link to a parent directory
 	 */
 
-	conn->num_bytes_sent += httplib_printf(conn,
+	conn->num_bytes_sent += httplib_printf( ctx, conn,
 	              "<tr><td><a href=\"%s%s\">%s</a></td>"
 	              "<td>&nbsp;%s</td><td>&nbsp;&nbsp;%s</td></tr>\n",
 	              conn->request_info.local_uri,
@@ -94,14 +94,14 @@ void XX_httplib_handle_directory_request( struct httplib_connection *conn, const
 
 		for (i=0; i<data.num_entries; i++) {
 
-			XX_httplib_print_dir_entry( & data.entries[i] );
+			XX_httplib_print_dir_entry( ctx, & data.entries[i] );
 			data.entries[i].file_name = httplib_free( data.entries[i].file_name );
 		}
 
 		data.entries = httplib_free( data.entries );
 	}
 
-	conn->num_bytes_sent += httplib_printf( conn, "%s", "</table></body></html>" );
+	conn->num_bytes_sent += httplib_printf( ctx, conn, "%s", "</table></body></html>" );
 	conn->status_code     = 200;
 
 }  /* XX_httplib_handle_directory_request */

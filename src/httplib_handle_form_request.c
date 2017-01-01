@@ -26,14 +26,7 @@
 
 #include "httplib_main.h"
 
-static int url_encoded_field_found(const struct httplib_connection *conn,
-                        const char *key,
-                        size_t key_len,
-                        const char *filename,
-                        size_t filename_len,
-                        char *path,
-                        size_t path_len,
-                        struct httplib_form_data_handler *fdh) {
+static int url_encoded_field_found( const struct httplib_context *ctx, const struct httplib_connection *conn, const char *key, size_t key_len, const char *filename, size_t filename_len, char *path, size_t path_len, struct httplib_form_data_handler *fdh ) {
 
 	char key_dec[1024];
 	char filename_dec[1024];
@@ -55,7 +48,7 @@ static int url_encoded_field_found(const struct httplib_connection *conn,
 			 * Log error message and skip this field.
 			 */
 
-			httplib_cry( DEBUG_LEVEL_WARNING, conn->ctx, conn, "%s: Cannot decode filename", __func__ );
+			httplib_cry( DEBUG_LEVEL_WARNING, ctx, conn, "%s: Cannot decode filename", __func__ );
 			return FORM_FIELD_STORAGE_SKIP;
 		}
 
@@ -67,7 +60,7 @@ static int url_encoded_field_found(const struct httplib_connection *conn,
 
 		if ( fdh->field_get == NULL ) {
 
-			httplib_cry( DEBUG_LEVEL_WARNING, conn->ctx, conn, "%s: Function \"Get\" not available", __func__ );
+			httplib_cry( DEBUG_LEVEL_WARNING, ctx, conn, "%s: Function \"Get\" not available", __func__ );
 			return FORM_FIELD_STORAGE_SKIP;
 		}
 	}
@@ -75,7 +68,7 @@ static int url_encoded_field_found(const struct httplib_connection *conn,
 
 		if ( fdh->field_store == NULL ) {
 
-			httplib_cry( DEBUG_LEVEL_WARNING, conn->ctx, conn, "%s: Function \"Store\" not available", __func__ );
+			httplib_cry( DEBUG_LEVEL_WARNING, ctx, conn, "%s: Function \"Store\" not available", __func__ );
 			return FORM_FIELD_STORAGE_SKIP;
 		}
 	}
@@ -84,12 +77,7 @@ static int url_encoded_field_found(const struct httplib_connection *conn,
 }
 
 
-static int url_encoded_field_get(const struct httplib_connection *conn,
-                      const char *key,
-                      size_t key_len,
-                      const char *value,
-                      size_t value_len,
-                      struct httplib_form_data_handler *fdh) {
+static int url_encoded_field_get( const struct httplib_context *ctx, const struct httplib_connection *conn, const char *key, size_t key_len, const char *value, size_t value_len, struct httplib_form_data_handler *fdh ) {
 
 	char key_dec[1024];
 
@@ -103,7 +91,7 @@ static int url_encoded_field_get(const struct httplib_connection *conn,
 		 * Log error message and stop parsing the form data.
 		 */
 
-		httplib_cry( DEBUG_LEVEL_ERROR, conn->ctx, conn, "%s: Not enough memory (required: %lu)", __func__, (unsigned long)(value_len + 1));
+		httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s: Not enough memory (required: %lu)", __func__, (unsigned long)(value_len + 1));
 		return FORM_FIELD_STORAGE_ABORT;
 	}
 
@@ -167,7 +155,7 @@ static const char * search_boundary(const char *buf, size_t buf_len, const char 
 }
 
 
-int httplib_handle_form_request(struct httplib_connection *conn, struct httplib_form_data_handler *fdh) {
+int httplib_handle_form_request( const struct httplib_context *ctx, struct httplib_connection *conn, struct httplib_form_data_handler *fdh ) {
 
 	const char *content_type;
 	char path[512];
@@ -245,7 +233,7 @@ int httplib_handle_form_request(struct httplib_connection *conn, struct httplib_
 
 			memset( path, 0, sizeof(path) );
 			field_count++;
-			field_storage = url_encoded_field_found( conn, data, (size_t)keylen, NULL, 0, path, sizeof(path) - 1, fdh );
+			field_storage = url_encoded_field_found( ctx, conn, data, (size_t)keylen, NULL, 0, path, sizeof(path) - 1, fdh );
 
 			val++;
 			next = strchr( val, '&' );
@@ -266,7 +254,7 @@ int httplib_handle_form_request(struct httplib_connection *conn, struct httplib_
 				 * Call callback
 				 */
 
-				url_encoded_field_get( conn, data, (size_t)keylen, val, (size_t)vallen, fdh );
+				url_encoded_field_get( ctx, conn, data, (size_t)keylen, val, (size_t)vallen, fdh );
 			}
 
 			if ( field_storage == FORM_FIELD_STORAGE_STORE ) {
@@ -275,17 +263,17 @@ int httplib_handle_form_request(struct httplib_connection *conn, struct httplib_
 				 * Store the content to a file
 				 */
 
-				if ( XX_httplib_fopen( conn, path, "wb", &fstore ) == 0 ) fstore.fp = NULL;
+				if ( XX_httplib_fopen( ctx, conn, path, "wb", &fstore ) == 0 ) fstore.fp = NULL;
 				file_size = 0;
 
 				if ( fstore.fp != NULL ) {
 
 					size_t n = (size_t)fwrite(val, 1, (size_t)vallen, fstore.fp);
 					if ((n != (size_t)vallen) || (ferror(fstore.fp))) {
-						httplib_cry( DEBUG_LEVEL_ERROR, conn->ctx, conn, "%s: Cannot write file %s", __func__, path );
+						httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s: Cannot write file %s", __func__, path );
 						fclose( fstore.fp );
 						fstore.fp = NULL;
-						XX_httplib_remove_bad_file( conn, path );
+						XX_httplib_remove_bad_file( ctx, conn, path );
 					}
 					file_size += (int64_t)n;
 
@@ -302,14 +290,14 @@ int httplib_handle_form_request(struct httplib_connection *conn, struct httplib_
 						}
 						
 						else {
-							httplib_cry( DEBUG_LEVEL_ERROR, conn->ctx, conn, "%s: Error saving file %s", __func__, path );
-							XX_httplib_remove_bad_file( conn, path );
+							httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s: Error saving file %s", __func__, path );
+							XX_httplib_remove_bad_file( ctx, conn, path );
 						}
 
 						fstore.fp = NULL;
 					}
 
-				} else httplib_cry( DEBUG_LEVEL_ERROR, conn->ctx, conn, "%s: Cannot create file %s", __func__, path );
+				} else httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s: Cannot create file %s", __func__, path );
 			}
 
 			/*
@@ -371,7 +359,7 @@ int httplib_handle_form_request(struct httplib_connection *conn, struct httplib_
 			if ((size_t)buf_fill < (sizeof(buf) - 1)) {
 
 				size_t to_read = sizeof(buf) - 1 - (size_t)buf_fill;
-				r = httplib_read( conn, buf + (size_t)buf_fill, to_read );
+				r = httplib_read( ctx, conn, buf + (size_t)buf_fill, to_read );
 				if ( r < 0 )  return -1; /* read error */
 
 				if ( r != (int)to_read ) {
@@ -402,15 +390,15 @@ int httplib_handle_form_request(struct httplib_connection *conn, struct httplib_
 
 			memset( path, 0, sizeof(path) );
 			field_count++;
-			field_storage = url_encoded_field_found( conn, buf, (size_t)keylen, NULL, 0, path, sizeof(path) - 1, fdh );
+			field_storage = url_encoded_field_found( ctx, conn, buf, (size_t)keylen, NULL, 0, path, sizeof(path) - 1, fdh );
 
 			if ( (field_storage & FORM_FIELD_STORAGE_ABORT) == FORM_FIELD_STORAGE_ABORT ) break; /* Stop parsing the request */
 
 			if ( field_storage == FORM_FIELD_STORAGE_STORE ) {
 
-				if (XX_httplib_fopen(conn, path, "wb", &fstore) == 0) fstore.fp = NULL;
+				if ( XX_httplib_fopen( ctx, conn, path, "wb", &fstore ) == 0 ) fstore.fp = NULL;
 				file_size = 0;
-				if (!fstore.fp) httplib_cry( DEBUG_LEVEL_ERROR, conn->ctx, conn, "%s: Cannot create file %s", __func__, path);
+				if (!fstore.fp) httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s: Cannot create file %s", __func__, path);
 			}
 
 			get_block = 0;
@@ -444,7 +432,7 @@ int httplib_handle_form_request(struct httplib_connection *conn, struct httplib_
 #endif
 
 					/* Call callback */
-					url_encoded_field_get(conn,
+					url_encoded_field_get( ctx, conn,
 					                      ((get_block > 0) ? NULL : buf),
 					                      ((get_block > 0) ? 0    : (size_t)keylen),
 					                      val,
@@ -455,10 +443,10 @@ int httplib_handle_form_request(struct httplib_connection *conn, struct httplib_
 				if ( fstore.fp ) {
 					size_t n = (size_t)fwrite(val, 1, (size_t)vallen, fstore.fp);
 					if ((n != (size_t)vallen) || (ferror(fstore.fp))) {
-						httplib_cry( DEBUG_LEVEL_ERROR, conn->ctx, conn, "%s: Cannot write file %s", __func__, path);
+						httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s: Cannot write file %s", __func__, path);
 						fclose(fstore.fp);
 						fstore.fp = NULL;
-						XX_httplib_remove_bad_file(conn, path);
+						XX_httplib_remove_bad_file( ctx, conn, path );
 					}
 					file_size += (int64_t)n;
 				}
@@ -471,7 +459,7 @@ int httplib_handle_form_request(struct httplib_connection *conn, struct httplib_
 					if ((size_t)buf_fill < (sizeof(buf) - 1)) {
 
 						size_t to_read = sizeof(buf) - 1 - (size_t)buf_fill;
-						r = httplib_read(conn, buf + (size_t)buf_fill, to_read);
+						r = httplib_read( ctx, conn, buf + (size_t)buf_fill, to_read );
 						if ( r < 0 ) return -1; /* read error */
 
 						if (r != (int)to_read) {
@@ -506,8 +494,8 @@ int httplib_handle_form_request(struct httplib_connection *conn, struct httplib_
 				}
 				
 				else {
-					httplib_cry( DEBUG_LEVEL_ERROR, conn->ctx, conn, "%s: Error saving file %s", __func__, path );
-					XX_httplib_remove_bad_file( conn, path );
+					httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s: Error saving file %s", __func__, path );
+					XX_httplib_remove_bad_file( ctx, conn, path );
 				}
 
 				fstore.fp = NULL;
@@ -593,7 +581,7 @@ int httplib_handle_form_request(struct httplib_connection *conn, struct httplib_
 			size_t n;
 			int get_block;
 
-			r = httplib_read( conn, buf + (size_t)buf_fill, sizeof(buf) - 1 - (size_t)buf_fill );
+			r = httplib_read( ctx, conn, buf + (size_t)buf_fill, sizeof(buf) - 1 - (size_t)buf_fill );
 			if ( r < 0 ) return -1; /* read error */
 
 			buf_fill     += r;
@@ -690,7 +678,7 @@ int httplib_handle_form_request(struct httplib_connection *conn, struct httplib_
 
 			memset( path, 0, sizeof(path) );
 			field_count++;
-			field_storage = url_encoded_field_found( conn, nbeg, (size_t)(nend - nbeg), fbeg, (size_t)(fend - fbeg), path, sizeof(path) - 1, fdh );
+			field_storage = url_encoded_field_found( ctx, conn, nbeg, (size_t)(nend - nbeg), fbeg, (size_t)(fend - fbeg), path, sizeof(path) - 1, fdh );
 
 			/*
 			 * If the boundary is already in the buffer, get the address,
@@ -705,10 +693,10 @@ int httplib_handle_form_request(struct httplib_connection *conn, struct httplib_
 				 * Store the content to a file
 				 */
 
-				if ( XX_httplib_fopen( conn, path, "wb", &fstore ) == 0 ) fstore.fp = NULL;
+				if ( XX_httplib_fopen( ctx, conn, path, "wb", &fstore ) == 0 ) fstore.fp = NULL;
 				file_size = 0;
 
-				if ( ! fstore.fp ) httplib_cry( DEBUG_LEVEL_ERROR, conn->ctx, conn, "%s: Cannot create file %s", __func__, path );
+				if ( ! fstore.fp ) httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s: Cannot create file %s", __func__, path );
 			}
 
 			get_block = 0;
@@ -752,10 +740,10 @@ int httplib_handle_form_request(struct httplib_connection *conn, struct httplib_
 
 						if ( n != towrite  ||  ferror( fstore.fp ) ) {
 
-							httplib_cry( DEBUG_LEVEL_ERROR, conn->ctx, conn, "%s: Cannot write file %s", __func__, path );
+							httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s: Cannot write file %s", __func__, path );
 							fclose( fstore.fp );
 							fstore.fp = NULL;
-							XX_httplib_remove_bad_file( conn, path );
+							XX_httplib_remove_bad_file( ctx, conn, path );
 						}
 
 						file_size += (int64_t)n;
@@ -770,7 +758,7 @@ int httplib_handle_form_request(struct httplib_connection *conn, struct httplib_
 				 * Read new data
 				 */
 
-				r = httplib_read( conn, buf + (size_t)buf_fill, sizeof(buf) - 1 - (size_t)buf_fill );
+				r = httplib_read( ctx, conn, buf + (size_t)buf_fill, sizeof(buf) - 1 - (size_t)buf_fill );
 				if ( r < 0 ) return -1; /* read error */
 
 				buf_fill     += r;
@@ -808,10 +796,10 @@ int httplib_handle_form_request(struct httplib_connection *conn, struct httplib_
 
 					if ( n != towrite  ||  ferror( fstore.fp ) ) {
 
-						httplib_cry( DEBUG_LEVEL_ERROR, conn->ctx, conn, "%s: Cannot write file %s", __func__, path );
+						httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s: Cannot write file %s", __func__, path );
 						fclose( fstore.fp );
 						fstore.fp = NULL;
-						XX_httplib_remove_bad_file( conn, path );
+						XX_httplib_remove_bad_file( ctx, conn, path );
 					}
 					file_size += (int64_t)n;
 				}
@@ -832,8 +820,8 @@ int httplib_handle_form_request(struct httplib_connection *conn, struct httplib_
 					}
 					
 					else {
-						httplib_cry( DEBUG_LEVEL_ERROR, conn->ctx, conn, "%s: Error saving file %s", __func__, path );
-						XX_httplib_remove_bad_file( conn, path );
+						httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s: Error saving file %s", __func__, path );
+						XX_httplib_remove_bad_file( ctx, conn, path );
 					}
 					fstore.fp = NULL;
 				}

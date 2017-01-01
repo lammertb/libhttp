@@ -40,7 +40,7 @@ static void trim_trailing_whitespaces( char *s ) {
 }  /* trim_trailing_whitespaces */
 
 
-pid_t XX_httplib_spawn_process( struct httplib_connection *conn, const char *prog, char *envblk, char *envp[], int fdin[2], int fdout[2], int fderr[2], const char *dir ) {
+pid_t XX_httplib_spawn_process( const struct httplib_context *ctx, struct httplib_connection *conn, const char *prog, char *envblk, char *envp[], int fdin[2], int fdout[2], int fderr[2], const char *dir ) {
 
 	HANDLE me;
 	char *p;
@@ -56,7 +56,7 @@ pid_t XX_httplib_spawn_process( struct httplib_connection *conn, const char *pro
 
 	UNUSED_PARAMETER(envp);
 
-	if ( conn == NULL  ||  conn->ctx == NULL ) return 0;
+	if ( ctx == NULL  ||  conn == NULL ) return 0;
 
 	memset( &si, 0, sizeof(si) );
 	si.cb = sizeof(si);
@@ -82,7 +82,7 @@ pid_t XX_httplib_spawn_process( struct httplib_connection *conn, const char *pro
 	 * If CGI file is a script, try to read the interpreter line
 	 */
 
-	interp = conn->ctx->cgi_interpreter;
+	interp = ctx->cgi_interpreter;
 
 	if ( interp == NULL ) {
 
@@ -133,7 +133,7 @@ pid_t XX_httplib_spawn_process( struct httplib_connection *conn, const char *pro
 
 	if ( CreateProcessA( NULL, cmdline, NULL, NULL, TRUE, CREATE_NEW_PROCESS_GROUP, envblk, NULL, &si, &pi ) == 0 ) {
 
-		httplib_cry( DEBUG_LEVEL_ERROR, conn->ctx, conn, "%s: CreateProcess(%s): %ld", __func__, cmdline, (long)ERRNO);
+		httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s: CreateProcess(%s): %ld", __func__, cmdline, (long)ERRNO);
 		pi.hProcess = (pid_t)-1;
 
 		/*
@@ -157,7 +157,7 @@ spawn_cleanup:
 #else  /* _WIN32 */
 
 #ifndef NO_CGI
-pid_t XX_httplib_spawn_process( struct httplib_connection *conn, const char *prog, char *envblk, char *envp[], int fdin[2], int fdout[2], int fderr[2], const char *dir ) {
+pid_t XX_httplib_spawn_process( const struct httplib_context *ctx, struct httplib_connection *conn, const char *prog, char *envblk, char *envp[], int fdin[2], int fdout[2], int fderr[2], const char *dir ) {
 
 	pid_t pid;
 	const char *interp;
@@ -165,7 +165,7 @@ pid_t XX_httplib_spawn_process( struct httplib_connection *conn, const char *pro
 
 	UNUSED_PARAMETER(envblk);
 
-	if ( conn == NULL  ||  conn->ctx == NULL ) return 0;
+	if ( ctx == NULL  ||  conn == NULL ) return 0;
 
 	if ( (pid = fork()) == -1 ) {
 
@@ -173,7 +173,7 @@ pid_t XX_httplib_spawn_process( struct httplib_connection *conn, const char *pro
 		 * Parent
 		 */
 
-		XX_httplib_send_http_error( conn, 500, "Error: Creating CGI process\nfork(): %s", httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
+		XX_httplib_send_http_error( ctx, conn, 500, "Error: Creating CGI process\nfork(): %s", httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 	}
 	
 	else if ( pid == 0 ) {
@@ -182,10 +182,10 @@ pid_t XX_httplib_spawn_process( struct httplib_connection *conn, const char *pro
 		 * Child
 		 */
 
-		if      ( chdir( dir        ) !=  0 ) httplib_cry( DEBUG_LEVEL_ERROR, conn->ctx, conn, "%s: chdir(%s): %s", __func__,   dir,      httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
-		else if ( dup2( fdin[0], 0  ) == -1 ) httplib_cry( DEBUG_LEVEL_ERROR, conn->ctx, conn, "%s: dup2(%d, 0): %s", __func__, fdin[0],  httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
-		else if ( dup2( fdout[1], 1 ) == -1 ) httplib_cry( DEBUG_LEVEL_ERROR, conn->ctx, conn, "%s: dup2(%d, 1): %s", __func__, fdout[1], httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
-		else if ( dup2( fderr[1], 2 ) == -1 ) httplib_cry( DEBUG_LEVEL_ERROR, conn->ctx, conn, "%s: dup2(%d, 2): %s", __func__, fderr[1], httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
+		if      ( chdir( dir        ) !=  0 ) httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s: chdir(%s): %s", __func__,   dir,      httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
+		else if ( dup2( fdin[0], 0  ) == -1 ) httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s: dup2(%d, 0): %s", __func__, fdin[0],  httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
+		else if ( dup2( fdout[1], 1 ) == -1 ) httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s: dup2(%d, 1): %s", __func__, fdout[1], httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
+		else if ( dup2( fderr[1], 2 ) == -1 ) httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s: dup2(%d, 2): %s", __func__, fderr[1], httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 		else {
 			/*
 			 * Keep stderr and stdout in two different pipes.
@@ -215,17 +215,17 @@ pid_t XX_httplib_spawn_process( struct httplib_connection *conn, const char *pro
 
 			signal( SIGCHLD, SIG_DFL );
 
-			interp = conn->ctx->cgi_interpreter;
+			interp = ctx->cgi_interpreter;
 
 			if ( interp == NULL ) {
 
 				execle( prog, prog, NULL, envp );
-				httplib_cry( DEBUG_LEVEL_ERROR, conn->ctx, conn, "%s: execle(%s): %s", __func__, prog, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
+				httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s: execle(%s): %s", __func__, prog, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 			}
 			
 			else {
 				execle( interp, interp, prog, NULL, envp );
-				httplib_cry( DEBUG_LEVEL_ERROR, conn->ctx, conn, "%s: execle(%s %s): %s", __func__, interp, prog, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
+				httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s: execle(%s %s): %s", __func__, interp, prog, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 			}
 		}
 

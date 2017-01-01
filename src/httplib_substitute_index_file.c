@@ -29,7 +29,7 @@
 #include "httplib_string.h"
 
 /*
- * bool XX_httplib_substitute_index_file( struct httplib_connection *conn, char *path, size_t path_len, struct file *filep );
+ * bool XX_httplib_substitute_index_file( const struct httplib_context *ctx, struct httplib_connection *conn, char *path, size_t path_len, struct file *filep );
  *
  * The function XX_httplib_substiture_index_file() tries to find an index file
  * matching a given directory path. The function returns true of an index file
@@ -37,7 +37,7 @@
  * located, it's stats are returnd in stp.
  */
 
-int XX_httplib_substitute_index_file( struct httplib_connection *conn, char *path, size_t path_len, struct file *filep ) {
+int XX_httplib_substitute_index_file( const struct httplib_context *ctx, struct httplib_connection *conn, char *path, size_t path_len, struct file *filep ) {
 
 	const char *list;
 	struct file file = STRUCT_FILE_INITIALIZER;
@@ -45,10 +45,10 @@ int XX_httplib_substitute_index_file( struct httplib_connection *conn, char *pat
 	size_t n;
 	bool found;
 
-	if ( conn == NULL  ||  conn->ctx == NULL  ||  path == NULL ) return 0;
-	if ( conn->ctx->document_root == NULL                      ) return 0;
+	if ( ctx == NULL  ||  conn == NULL  ||  path == NULL ) return 0;
+	if ( ctx->document_root == NULL                      ) return 0;
 
-	list  = conn->ctx->index_files;
+	list  = ctx->index_files;
 	n     = strlen( path );
 	found = false;
 
@@ -84,7 +84,7 @@ int XX_httplib_substitute_index_file( struct httplib_connection *conn, char *pat
 		 * Does it exist?
 		 */
 
-		if ( XX_httplib_stat( conn, path, &file ) ) {
+		if ( XX_httplib_stat( ctx, conn, path, &file ) ) {
 
 			/*
 			 * Yes it does, break the loop

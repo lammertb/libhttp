@@ -35,14 +35,14 @@
  * and 0 otherwise.
  */
 
-int XX_httplib_get_request_handler( struct httplib_connection *conn, int handler_type, httplib_request_handler *handler, httplib_websocket_connect_handler *connect_handler, httplib_websocket_ready_handler *ready_handler, httplib_websocket_data_handler *data_handler, httplib_websocket_close_handler *close_handler, httplib_authorization_handler *auth_handler, void **cbdata ) {
+int XX_httplib_get_request_handler( struct httplib_context *ctx, struct httplib_connection *conn, int handler_type, httplib_request_handler *handler, httplib_websocket_connect_handler *connect_handler, httplib_websocket_ready_handler *ready_handler, httplib_websocket_data_handler *data_handler, httplib_websocket_close_handler *close_handler, httplib_authorization_handler *auth_handler, void **cbdata ) {
 
 	const struct httplib_request_info *request_info;
 	const char *uri;
 	size_t urilen;
 	struct httplib_handler_info *tmp_rh;
 
-	if ( conn == NULL  ||  conn->ctx == NULL ) return 0;
+	if ( ctx == NULL  ||  conn == NULL ) return 0;
 
 	request_info = httplib_get_request_info( conn );
 	if ( request_info == NULL ) return 0;
@@ -50,13 +50,13 @@ int XX_httplib_get_request_handler( struct httplib_connection *conn, int handler
 	uri    = request_info->local_uri;
 	urilen = strlen( uri );
 
-	httplib_lock_context( conn->ctx );
+	httplib_lock_context( ctx );
 
 	/*
 	 * first try for an exact match
 	 */
 
-	for (tmp_rh = conn->ctx->handlers; tmp_rh != NULL; tmp_rh = tmp_rh->next) {
+	for (tmp_rh = ctx->handlers; tmp_rh != NULL; tmp_rh = tmp_rh->next) {
 
 		if ( tmp_rh->handler_type == handler_type ) {
 
@@ -73,7 +73,7 @@ int XX_httplib_get_request_handler( struct httplib_connection *conn, int handler
 				else                                        *auth_handler = tmp_rh->auth_handler;
 
 				*cbdata = tmp_rh->cbdata;
-				httplib_unlock_context( conn->ctx );
+				httplib_unlock_context( ctx );
 
 				return 1;
 			}
@@ -84,7 +84,7 @@ int XX_httplib_get_request_handler( struct httplib_connection *conn, int handler
 	 * next try for a partial match, we will accept uri/something
 	 */
 
-	for (tmp_rh = conn->ctx->handlers; tmp_rh != NULL; tmp_rh = tmp_rh->next) {
+	for (tmp_rh = ctx->handlers; tmp_rh != NULL; tmp_rh = tmp_rh->next) {
 
 		if ( tmp_rh->handler_type == handler_type ) {
 
@@ -102,7 +102,7 @@ int XX_httplib_get_request_handler( struct httplib_connection *conn, int handler
 				else                                        *auth_handler = tmp_rh->auth_handler;
 
 				*cbdata = tmp_rh->cbdata;
-				httplib_unlock_context( conn->ctx );
+				httplib_unlock_context( ctx );
 
 				return 1;
 			}
@@ -113,7 +113,7 @@ int XX_httplib_get_request_handler( struct httplib_connection *conn, int handler
 	 * finally try for pattern match
 	 */
 
-	for (tmp_rh = conn->ctx->handlers; tmp_rh != NULL; tmp_rh = tmp_rh->next) {
+	for (tmp_rh = ctx->handlers; tmp_rh != NULL; tmp_rh = tmp_rh->next) {
 
 		if ( tmp_rh->handler_type == handler_type ) {
 
@@ -131,14 +131,14 @@ int XX_httplib_get_request_handler( struct httplib_connection *conn, int handler
 				else                                        *auth_handler = tmp_rh->auth_handler;
 
 				*cbdata = tmp_rh->cbdata;
-				httplib_unlock_context( conn->ctx );
+				httplib_unlock_context( ctx );
 
 				return 1;
 			}
 		}
 	}
 
-	httplib_unlock_context( conn->ctx );
+	httplib_unlock_context( ctx );
 
 	return 0; /* none found */
 

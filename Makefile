@@ -228,7 +228,6 @@ OBJLIST =									\
 	${OBJDIR}httplib_free_config_options${OBJEXT}				\
 	${OBJDIR}httplib_free_context${OBJEXT}					\
 	${OBJDIR}httplib_get_builtin_mime_type${OBJEXT}				\
-	${OBJDIR}httplib_get_context${OBJEXT}					\
 	${OBJDIR}httplib_get_cookie${OBJEXT}					\
 	${OBJDIR}httplib_get_debug_level${OBJEXT}				\
 	${OBJDIR}httplib_get_first_ssl_listener_index${OBJEXT}			\
@@ -632,10 +631,6 @@ ${OBJDIR}httplib_free_context${OBJEXT}					: ${SRCDIR}httplib_free_context.c				
 									  ${INCDIR}libhttp.h
 
 ${OBJDIR}httplib_get_builtin_mime_type${OBJEXT}				: ${SRCDIR}httplib_get_builtin_mime_type.c			\
-									  ${SRCDIR}httplib_main.h					\
-									  ${INCDIR}libhttp.h
-
-${OBJDIR}httplib_get_context${OBJEXT}					: ${SRCDIR}httplib_get_context.c				\
 									  ${SRCDIR}httplib_main.h					\
 									  ${INCDIR}libhttp.h
 

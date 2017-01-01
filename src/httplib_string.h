@@ -22,6 +22,6 @@
 
 
 
-void			XX_httplib_snprintf( const struct httplib_connection *conn, bool *truncated, char *buf, size_t buflen, PRINTF_FORMAT_STRING(const char *fmt), ... ) PRINTF_ARGS(5, 6);
-int			XX_httplib_vprintf( struct httplib_connection *conn, const char *fmt, va_list ap );
-void			XX_httplib_vsnprintf( const struct httplib_connection *conn, bool *truncated, char *buf, size_t buflen, const char *fmt, va_list ap );
+void			XX_httplib_snprintf( const struct httplib_context *ctx, const struct httplib_connection *conn, bool *truncated, char *buf, size_t buflen, PRINTF_FORMAT_STRING(const char *fmt), ... ) PRINTF_ARGS(6, 7);
+int			XX_httplib_vprintf( const struct httplib_context *ctx, struct httplib_connection *conn, const char *fmt, va_list ap );
+void			XX_httplib_vsnprintf( const struct httplib_context *ctx, const struct httplib_connection *conn, bool *truncated, char *buf, size_t buflen, const char *fmt, va_list ap );

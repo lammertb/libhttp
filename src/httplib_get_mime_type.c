@@ -30,7 +30,7 @@
 /* Look at the "path" extension and figure what mime type it has.
  * Store mime type in the vector. */
 
-void XX_httplib_get_mime_type( struct httplib_context *ctx, const char *path, struct vec *vec ) {
+void XX_httplib_get_mime_type( const struct httplib_context *ctx, const char *path, struct vec *vec ) {
 
 	struct vec ext_vec;
 	struct vec mime_vec;

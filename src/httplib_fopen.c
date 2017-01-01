@@ -28,7 +28,7 @@
 #include "httplib_main.h"
 
 /*
- * bool XX_httplib_fopen( const struct httplib_connection *conn, const char *path, const char *mode, struct file *filep );
+ * bool XX_httplib_fopen( const struct httplib_context *ctx, const struct httplib_connection *conn, const char *path, const char *mode, struct file *filep );
  *
  * The function XX_httplib_fopen() can be used to open a file which is either
  * in memory or on the disk. The path is in UTF-8 and therefore needs
@@ -44,17 +44,17 @@
  * of the same structure (bad cohesion).
  */
 
-bool XX_httplib_fopen( const struct httplib_connection *conn, const char *path, const char *mode, struct file *filep ) {
+bool XX_httplib_fopen( const struct httplib_context *ctx, const struct httplib_connection *conn, const char *path, const char *mode, struct file *filep ) {
 
 	struct stat st;
 
-	if ( filep == NULL ) return false;
+	if ( ctx == NULL  ||  filep == NULL ) return false;
 
 	memset( filep, 0, sizeof(*filep) );
 
 	if ( stat( path, &st ) == 0 ) filep->size = (uint64_t)st.st_size;
 
-	if ( ! XX_httplib_is_file_in_memory( conn, path, filep ) ) {
+	if ( ! XX_httplib_is_file_in_memory( ctx, conn, path, filep ) ) {
 #ifdef _WIN32
 		wchar_t wbuf[PATH_MAX];
 		wchar_t wmode[20];

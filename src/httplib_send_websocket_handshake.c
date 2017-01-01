@@ -32,13 +32,13 @@
 #define B64_SHA_LEN	(sizeof(sha)*2)
 
 /*
- * int XX_httplib_send_websocket_handshake( struct httplib_connection *conn, const char *websock_key );
+ * int XX_httplib_send_websocket_handshake( const struct httplib_context *ctx, struct httplib_connection *conn, const char *websock_key );
  *
  * The function XX_httplib_send_websocket_handshake() sends a handshake over
  * a websocket connection.
  */
 
-int XX_httplib_send_websocket_handshake( struct httplib_connection *conn, const char *websock_key ) {
+int XX_httplib_send_websocket_handshake( const struct httplib_context *ctx, struct httplib_connection *conn, const char *websock_key ) {
 
 	static const char *magic = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
 	const char *protocol;
@@ -48,13 +48,15 @@ int XX_httplib_send_websocket_handshake( struct httplib_connection *conn, const 
 	SHA1_CTX sha_ctx;
 	bool truncated;
 
+	if ( ctx == NULL ) return 0;
+
 	protocol = NULL;
 
 	/*
 	 * Calculate Sec-WebSocket-Accept reply from Sec-WebSocket-Key.
 	 */
 
-	XX_httplib_snprintf( conn, &truncated, buf, sizeof(buf), "%s%s", websock_key, magic );
+	XX_httplib_snprintf( ctx, conn, &truncated, buf, sizeof(buf), "%s%s", websock_key, magic );
 	if ( truncated ) {
 
 		conn->must_close = true;
@@ -66,7 +68,7 @@ int XX_httplib_send_websocket_handshake( struct httplib_connection *conn, const 
 	SHA1Final( (unsigned char *)sha, &sha_ctx );
 
 	httplib_base64_encode( (unsigned char *)sha, sizeof(sha), b64_sha, B64_SHA_LEN );
-	httplib_printf( conn,
+	httplib_printf( ctx, conn,
 	          "HTTP/1.1 101 Switching Protocols\r\n"
 	          "Upgrade: websocket\r\n"
 	          "Connection: Upgrade\r\n"
@@ -87,7 +89,7 @@ int XX_httplib_send_websocket_handshake( struct httplib_connection *conn, const 
 			 * Just a single protocol -> accept it.
 			 */
 
-			httplib_printf(conn, "Sec-WebSocket-Protocol: %s\r\n\r\n", protocol);
+			httplib_printf( ctx, conn, "Sec-WebSocket-Protocol: %s\r\n\r\n", protocol );
 		}
 		
 		else {
@@ -103,14 +105,14 @@ int XX_httplib_send_websocket_handshake( struct httplib_connection *conn, const 
 			 * no subprotocol is acceptable.
 			 */
 
-			httplib_printf( conn, "Sec-WebSocket-Protocol: %.*s\r\n\r\n", (int)(sep - protocol), protocol );
+			httplib_printf( ctx, conn, "Sec-WebSocket-Protocol: %.*s\r\n\r\n", (int)(sep - protocol), protocol );
 		}
 		/*
 		 * TODO: Real subprotocol negotiation instead of just taking the first
 		 * websocket subprotocol suggested by the client.
 		 */
 	}
-	else httplib_printf( conn, "%s", "\r\n" );
+	else httplib_printf( ctx, conn, "%s", "\r\n" );
 
 	return 1;
 

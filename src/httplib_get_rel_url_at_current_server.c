@@ -28,13 +28,13 @@
 #include "httplib_main.h"
 
 /*
- * const char *XX_httplib_get_rel_url_at_current_server( const char *uri, const struct httplib_connection *conn );
+ * const char *XX_httplib_get_rel_url_at_current_server( const struct httplib_context *ctx, const char *uri, const struct httplib_connection *conn );
  *
  * The function XX_httplib_get_rel_url_at_current_server() returns the relative
  * uri at the current server.
  */
 
-const char *XX_httplib_get_rel_url_at_current_server( const char *uri, const struct httplib_connection *conn ) {
+const char *XX_httplib_get_rel_url_at_current_server( const struct httplib_context *ctx, const char *uri, const struct httplib_connection *conn ) {
 
 	const char *server_domain;
 	size_t server_domain_len;
@@ -46,7 +46,7 @@ const char *XX_httplib_get_rel_url_at_current_server( const char *uri, const str
 	const char *portbegin;
 	char *portend;
 
-	if ( conn == NULL  ||  conn->ctx == NULL ) return NULL;
+	if ( ctx == NULL  ||  conn == NULL ) return NULL;
 
 	request_domain_len = 0;
 	port               = 0;
@@ -57,7 +57,7 @@ const char *XX_httplib_get_rel_url_at_current_server( const char *uri, const str
 	 * DNS is case insensitive, so use case insensitive string compare here
 	 */
 
-	server_domain = conn->ctx->authentication_domain;
+	server_domain = ctx->authentication_domain;
 	if ( server_domain == NULL ) return NULL;
 
 	server_domain_len = strlen( server_domain );

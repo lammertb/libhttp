@@ -109,7 +109,6 @@ static struct httplib_connection *httplib_connect_client_impl( struct httplib_co
 
 		conn->buf_size    = MAX_REQUEST_SIZE;
 		conn->buf         = (char *)(conn + 1);
-		conn->ctx         = ctx;
 		conn->client.sock = sock;
 		conn->client.lsa  = sa;
 
@@ -152,7 +151,7 @@ static struct httplib_connection *httplib_connect_client_impl( struct httplib_co
 			
 			else SSL_CTX_set_verify( conn->client_ssl_ctx, SSL_VERIFY_NONE, NULL );
 
-			if ( ! XX_httplib_sslize( conn, conn->client_ssl_ctx, SSL_connect ) ) {
+			if ( ! XX_httplib_sslize( ctx, conn, conn->client_ssl_ctx, SSL_connect ) ) {
 
 				httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s: SSL connection error", __func__ );
 				SSL_CTX_free( conn->client_ssl_ctx );

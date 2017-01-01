@@ -140,8 +140,8 @@ void				XX_httplib_ssl_get_client_cert_info( struct httplib_connection *conn );
 long				XX_httplib_ssl_get_protocol( int version_id );
 unsigned long			XX_httplib_ssl_id_callback( void );
 void				XX_httplib_ssl_locking_callback( int mode, int mutex_num, const char *file, int line );
-int				XX_httplib_ssl_use_pem_file( struct httplib_context *ctx, const char *pem );
-int				XX_httplib_sslize( struct httplib_connection *conn, SSL_CTX *s, int (*func)(SSL *) );
+int				XX_httplib_ssl_use_pem_file( const struct httplib_context *ctx, const char *pem );
+int				XX_httplib_sslize( const struct httplib_context *ctx, struct httplib_connection *conn, SSL_CTX *s, int (*func)(SSL *) );
 void				XX_httplib_tls_dtor( void *key );
 void				XX_httplib_uninitialize_ssl( struct httplib_context *ctx );
 

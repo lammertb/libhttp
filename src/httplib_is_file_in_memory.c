@@ -28,23 +28,23 @@
 #include "httplib_main.h"
 
 /*
- * bool XX_httplib_is_file_in_memory( const struct httplib_connection *conn, const char *path, struct file *filep );
+ * bool XX_httplib_is_file_in_memory( const struct httplib_context *ctx, const struct httplib_connection *conn, const char *path, struct file *filep );
  *
  * The function XX_httplib_is_file_in_memory() returns true, if a file defined
  * by a specific path is located in memory.
  */
 
-bool XX_httplib_is_file_in_memory( const struct httplib_connection *conn, const char *path, struct file *filep ) {
+bool XX_httplib_is_file_in_memory( const struct httplib_context *ctx, const struct httplib_connection *conn, const char *path, struct file *filep ) {
 
 	size_t size;
 
-	if ( conn == NULL  ||  conn->ctx == NULL  ||  filep == NULL ) return false;
+	if ( ctx == NULL  ||  conn == NULL  ||  filep == NULL ) return false;
 
 	size = 0;
 
-	if ( conn->ctx->callbacks.open_file ) {
+	if ( ctx->callbacks.open_file ) {
 
-		filep->membuf = conn->ctx->callbacks.open_file( conn, path, & size );
+		filep->membuf = ctx->callbacks.open_file( conn, path, & size );
 
 		/* NOTE: override filep->size only on success. Otherwise, it might
 		 * break constructs like if (!XX_httplib_stat() || !XX_httplib_fopen()) ... */

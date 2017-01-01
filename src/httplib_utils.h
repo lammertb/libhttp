@@ -22,7 +22,7 @@
 
 #define LEAP_YEAR(x)	( ((x)%4) == 0  &&  ( ((x)%100) != 0  ||  ((x)%400) == 0 ) )
 
-void			XX_httplib_addenv( struct cgi_environment *env, PRINTF_FORMAT_STRING(const char *fmt), ... ) PRINTF_ARGS(2, 3);
+void			XX_httplib_addenv( const struct httplib_context *ctx, struct cgi_environment *env, PRINTF_FORMAT_STRING(const char *fmt), ... ) PRINTF_ARGS(3, 4);
 double			XX_httplib_difftimespec( const struct timespec *ts_now, const struct timespec *ts_before );
 void			XX_httplib_gmt_time_string( char *buf, size_t buf_len, time_t *t );
 int			XX_httplib_inet_pton( int af, const char *src, void *dst, size_t dstlen );

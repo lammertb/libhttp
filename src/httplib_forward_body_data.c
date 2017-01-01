@@ -28,13 +28,13 @@
 #include "httplib_main.h"
 
 /*
- * bool XX_httplib_forward_body_data( struct httplib_connection *conn, FILE *fp, SOCKET sock, SSL *ssl );
+ * bool XX_httplib_forward_body_data( const struct httplib_context *ctx, struct httplib_connection *conn, FILE *fp, SOCKET sock, SSL *ssl );
  *
  * The function XX_httplib_forward_body_data() forwards body data to the
  * client. The function returns true if successful, and false otherwise.
  */
 
-bool XX_httplib_forward_body_data( struct httplib_connection *conn, FILE *fp, SOCKET sock, SSL *ssl ) {
+bool XX_httplib_forward_body_data( const struct httplib_context *ctx, struct httplib_connection *conn, FILE *fp, SOCKET sock, SSL *ssl ) {
 
 	const char *expect;
 	const char *body;
@@ -45,15 +45,15 @@ bool XX_httplib_forward_body_data( struct httplib_connection *conn, FILE *fp, SO
 	int64_t buffered_len;
 	double timeout;
 
-	if ( conn == NULL  ||  conn->ctx == NULL ) return false;
+	if ( ctx == NULL  ||  conn == NULL ) return false;
 
 	success = false;
-	timeout = ((double)conn->ctx->request_timeout) / 1000.0;
+	timeout = ((double)ctx->request_timeout) / 1000.0;
 	expect  = httplib_get_header( conn, "Expect" );
 
 	if ( fp == NULL ) {
 
-		XX_httplib_send_http_error( conn, 500, "%s", "Error: NULL File" );
+		XX_httplib_send_http_error( ctx, conn, 500, "%s", "Error: NULL File" );
 		return false;
 	}
 
@@ -63,7 +63,7 @@ bool XX_httplib_forward_body_data( struct httplib_connection *conn, FILE *fp, SO
 		 * Content length is not specified by the client.
 		 */
 
-		XX_httplib_send_http_error( conn, 411, "%s", "Error: Client did not specify content length" );
+		XX_httplib_send_http_error( ctx, conn, 411, "%s", "Error: Client did not specify content length" );
 
 	}
 	
@@ -73,14 +73,14 @@ bool XX_httplib_forward_body_data( struct httplib_connection *conn, FILE *fp, SO
 		 * Client sent an "Expect: xyz" header and xyz is not 100-continue.
 		 */
 
-		XX_httplib_send_http_error( conn, 417, "Error: Can not fulfill expectation %s", expect );
+		XX_httplib_send_http_error( ctx, conn, 417, "Error: Can not fulfill expectation %s", expect );
 
 	}
 	
 	else {
 		if ( expect != NULL ) {
 
-			httplib_printf(conn, "%s", "HTTP/1.1 100 Continue\r\n\r\n");
+			httplib_printf( ctx, conn, "%s", "HTTP/1.1 100 Continue\r\n\r\n" );
 			conn->status_code = 100;
 		}
 		
@@ -90,7 +90,7 @@ bool XX_httplib_forward_body_data( struct httplib_connection *conn, FILE *fp, SO
 
 		if ( buffered_len < 0  ||  conn->consumed_content != 0 ) {
 
-			XX_httplib_send_http_error( conn, 500, "%s", "Error: Size mismatch" );
+			XX_httplib_send_http_error( ctx, conn, 500, "%s", "Error: Size mismatch" );
 			return false;
 		}
 
@@ -99,7 +99,7 @@ bool XX_httplib_forward_body_data( struct httplib_connection *conn, FILE *fp, SO
 			if ((int64_t)buffered_len > conn->content_len) buffered_len = (int)conn->content_len;
 
 			body = conn->buf + conn->request_len + conn->consumed_content;
-			XX_httplib_push_all( conn->ctx, fp, sock, ssl, body, (int64_t)buffered_len );
+			XX_httplib_push_all( ctx, fp, sock, ssl, body, (int64_t)buffered_len );
 			conn->consumed_content += buffered_len;
 		}
 
@@ -110,8 +110,8 @@ bool XX_httplib_forward_body_data( struct httplib_connection *conn, FILE *fp, SO
 			to_read = sizeof(buf);
 			if ( (int64_t)to_read > conn->content_len - conn->consumed_content ) to_read = (int)(conn->content_len - conn->consumed_content);
 
-			nread = XX_httplib_pull( NULL, conn, buf, to_read, timeout );
-			if ( nread <= 0  ||  XX_httplib_push_all( conn->ctx, fp, sock, ssl, buf, nread ) != nread ) break;
+			nread = XX_httplib_pull( ctx, NULL, conn, buf, to_read, timeout );
+			if ( nread <= 0  ||  XX_httplib_push_all( ctx, fp, sock, ssl, buf, nread ) != nread ) break;
 			conn->consumed_content += nread;
 		}
 
@@ -129,7 +129,7 @@ bool XX_httplib_forward_body_data( struct httplib_connection *conn, FILE *fp, SO
 			 * reply can no longer be sent, so just close the connection
 			 */
 
-			XX_httplib_send_http_error( conn, 500, "%s", "" );
+			XX_httplib_send_http_error( ctx, conn, 500, "%s", "" );
 		}
 	}
 

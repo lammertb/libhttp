@@ -48,7 +48,7 @@ static bool path_cannot_disclose_cgi( const char *path ) {
 }
 
 
-int XX_httplib_stat( struct httplib_connection *conn, const char *path, struct file *filep ) {
+int XX_httplib_stat( const struct httplib_context *ctx, struct httplib_connection *conn, const char *path, struct file *filep ) {
 
 	wchar_t wbuf[PATH_MAX];
 	WIN32_FILE_ATTRIBUTE_DATA info;
@@ -71,7 +71,7 @@ int XX_httplib_stat( struct httplib_connection *conn, const char *path, struct f
 		 * last_modified = now ... assumes the file may change during runtime,
 		 * so every XX_httplib_fopen call may return different data
 		 *
-		 * last_modified = conn->ctx.start_time;
+		 * last_modified = ctx.start_time;
 		 * May be used it the data does not change during runtime. This allows
 		 * browser caching. Since we do not know, we have to assume the file
 		 * in memory may change.
@@ -121,7 +121,7 @@ int XX_httplib_stat( struct httplib_connection *conn, const char *path, struct f
 
 #else
 
-int XX_httplib_stat( struct httplib_connection *conn, const char *path, struct file *filep ) {
+int XX_httplib_stat( const struct httplib_context *ctx, struct httplib_connection *conn, const char *path, struct file *filep ) {
 
 	struct stat st;
 
@@ -129,7 +129,7 @@ int XX_httplib_stat( struct httplib_connection *conn, const char *path, struct f
 
 	memset( filep, 0, sizeof(*filep) );
 
-	if ( conn != NULL  &&  XX_httplib_is_file_in_memory( conn, path, filep ) ) return 1;
+	if ( conn != NULL  &&  ctx != NULL  &&  XX_httplib_is_file_in_memory( ctx, conn, path, filep ) ) return 1;
 
 	if ( stat( path, &st ) == 0 ) {
 

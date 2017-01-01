@@ -35,7 +35,7 @@
  * negative number to indicate a failure.
  */
 
-int64_t httplib_store_body( struct httplib_connection *conn, const char *path ) {
+int64_t httplib_store_body( const struct httplib_context *ctx, struct httplib_connection *conn, const char *path ) {
 
 	char buf[MG_BUF_LEN];
 	int64_t len;
@@ -43,15 +43,17 @@ int64_t httplib_store_body( struct httplib_connection *conn, const char *path ) 
 	int n;
 	struct file fi;
 
+	if ( ctx == NULL ) return -1;
+
 	len = 0;
 
 	if ( conn->consumed_content != 0 ) {
 
-		httplib_cry( DEBUG_LEVEL_ERROR, conn->ctx, conn, "%s: Contents already consumed", __func__ );
+		httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s: Contents already consumed", __func__ );
 		return -11;
 	}
 
-	ret = XX_httplib_put_dir( conn, path );
+	ret = XX_httplib_put_dir( ctx, conn, path );
 	if ( ret < 0 ) {
 
 		/*
@@ -71,9 +73,9 @@ int64_t httplib_store_body( struct httplib_connection *conn, const char *path ) 
 		return 0;
 	}
 
-	if ( XX_httplib_fopen( conn, path, "w",  & fi ) == 0 ) return -12;
+	if ( XX_httplib_fopen( ctx, conn, path, "w",  & fi ) == 0 ) return -12;
 
-	ret = httplib_read( conn, buf, sizeof(buf) );
+	ret = httplib_read( ctx, conn, buf, sizeof(buf) );
 
 	while ( ret > 0 )  {
 
@@ -81,15 +83,15 @@ int64_t httplib_store_body( struct httplib_connection *conn, const char *path ) 
 		if ( n != ret ) {
 
 			XX_httplib_fclose( & fi );
-			XX_httplib_remove_bad_file( conn, path );
+			XX_httplib_remove_bad_file( ctx, conn, path );
 			return -13;
 		}
-		ret = httplib_read( conn, buf, sizeof(buf) );
+		ret = httplib_read( ctx, conn, buf, sizeof(buf) );
 	}
 
 	if ( XX_httplib_fclose( & fi ) != 0 ) {
 
-		XX_httplib_remove_bad_file( conn, path );
+		XX_httplib_remove_bad_file( ctx, conn, path );
 		return -14;
 	}
 

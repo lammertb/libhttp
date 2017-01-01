@@ -29,10 +29,10 @@
 #include "httplib_string.h"
 #include "httplib_utils.h"
 
-static void send_ssi_file(struct httplib_connection *, const char *, struct file *, int);
+static void send_ssi_file( const struct httplib_context *ctx, struct httplib_connection *conn, const char *, struct file *, int );
 
 
-static void do_ssi_include( struct httplib_connection *conn, const char *ssi, char *tag, int include_level ) {
+static void do_ssi_include( const struct httplib_context *ctx, struct httplib_connection *conn, const char *ssi, char *tag, int include_level ) {
 
 	char file_name[MG_BUF_LEN];
 	char path[512];
@@ -44,7 +44,7 @@ static void do_ssi_include( struct httplib_connection *conn, const char *ssi, ch
 	size_t len;
 	bool truncated;
 
-	if ( conn == NULL  ||  conn->ctx == NULL  ||  conn->ctx->document_root == NULL ) return;
+	if ( ctx == NULL  ||  conn == NULL  ||  ctx->document_root == NULL ) return;
 
 	truncated = false;
 
@@ -61,9 +61,9 @@ static void do_ssi_include( struct httplib_connection *conn, const char *ssi, ch
 		 */
 
 		file_name[511] = 0;
-		doc_root       = conn->ctx->document_root;
+		doc_root       = ctx->document_root;
 
-		XX_httplib_snprintf( conn, &truncated, path, sizeof(path), "%s/%s", doc_root, file_name );
+		XX_httplib_snprintf( ctx, conn, &truncated, path, sizeof(path), "%s/%s", doc_root, file_name );
 
 	}
 	
@@ -75,7 +75,7 @@ static void do_ssi_include( struct httplib_connection *conn, const char *ssi, ch
 		 */
 
 		file_name[511] = 0;
-		XX_httplib_snprintf( conn, &truncated, path, sizeof(path), "%s", file_name );
+		XX_httplib_snprintf( ctx, conn, &truncated, path, sizeof(path), "%s", file_name );
 
 	}
 	
@@ -86,40 +86,40 @@ static void do_ssi_include( struct httplib_connection *conn, const char *ssi, ch
 		 */
 
 		file_name[511] = 0;
-		XX_httplib_snprintf( conn, &truncated, path, sizeof(path), "%s", ssi );
+		XX_httplib_snprintf( ctx, conn, &truncated, path, sizeof(path), "%s", ssi );
 
 		if ( ! truncated ) {
 
 			if ( (p = strrchr( path, '/' )) != NULL) p[1] = '\0';
 			len = strlen( path );
-			XX_httplib_snprintf( conn, &truncated, path + len, sizeof(path) - len, "%s", file_name );
+			XX_httplib_snprintf( ctx, conn, &truncated, path + len, sizeof(path) - len, "%s", file_name );
 		}
 
 	}
 	
 	else {
-		httplib_cry( DEBUG_LEVEL_ERROR, conn->ctx, conn, "%s: bad SSI #include: [%s]", __func__, tag );
+		httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s: bad SSI #include: [%s]", __func__, tag );
 		return;
 	}
 
 	if ( truncated ) {
 
-		httplib_cry( DEBUG_LEVEL_ERROR, conn->ctx, conn, "%s: SSI #include path length overflow: [%s]", __func__, tag );
+		httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s: SSI #include path length overflow: [%s]", __func__, tag );
 		return;
 	}
 
-	if ( ! XX_httplib_fopen( conn, path, "rb", &file ) ) {
+	if ( ! XX_httplib_fopen( ctx, conn, path, "rb", &file ) ) {
 
-		httplib_cry( DEBUG_LEVEL_ERROR, conn->ctx, conn, "%s: cannot open SSI #include: [%s]: fopen(%s): %s", __func__, tag, path, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
+		httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s: cannot open SSI #include: [%s]: fopen(%s): %s", __func__, tag, path, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 		return;
 	}
 	
-	XX_httplib_fclose_on_exec( & file, conn );
+	XX_httplib_fclose_on_exec( ctx, &file, conn );
 
-	ssi_ext = conn->ctx->ssi_pattern;
+	ssi_ext = ctx->ssi_pattern;
 
-	if ( ssi_ext != NULL  &&  XX_httplib_match_prefix( ssi_ext, strlen( ssi_ext ), path ) > 0 ) send_ssi_file( conn, path, &file, include_level+1 );
-	else XX_httplib_send_file_data( conn, &file, 0, INT64_MAX );
+	if ( ssi_ext != NULL  &&  XX_httplib_match_prefix( ssi_ext, strlen( ssi_ext ), path ) > 0 ) send_ssi_file( ctx, conn, path, &file, include_level+1 );
+	else XX_httplib_send_file_data( ctx, conn, &file, 0, INT64_MAX );
 
 	XX_httplib_fclose( & file );
 
@@ -127,7 +127,7 @@ static void do_ssi_include( struct httplib_connection *conn, const char *ssi, ch
 
 
 #if !defined(NO_POPEN)
-static void do_ssi_exec( struct httplib_connection *conn, char *tag ) {
+static void do_ssi_exec( const struct httplib_context *ctx, struct httplib_connection *conn, char *tag ) {
 
 	char cmd[1024] = "";
 	char error_string[ERROR_STRING_LEN];
@@ -135,18 +135,18 @@ static void do_ssi_exec( struct httplib_connection *conn, char *tag ) {
 
 	if ( sscanf(tag, " \"%1023[^\"]\"", cmd) != 1 ) {
 
-		httplib_cry( DEBUG_LEVEL_ERROR, conn->ctx, conn, "%s: bad SSI #exec: [%s]", __func__, tag );
+		httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s: bad SSI #exec: [%s]", __func__, tag );
 	}
 	
 	else {
 		cmd[1023] = 0;
 		if ( (file.fp = popen( cmd, "r" ) ) == NULL ) {
 
-			httplib_cry( DEBUG_LEVEL_ERROR, conn->ctx, conn, "%s: cannot SSI #exec: [%s]: %s", __func__, cmd, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
+			httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s: cannot SSI #exec: [%s]: %s", __func__, cmd, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 		}
 		
 		else {
-			XX_httplib_send_file_data( conn, &file, 0, INT64_MAX );
+			XX_httplib_send_file_data( ctx, conn, &file, 0, INT64_MAX );
 			pclose( file.fp );
 		}
 	}
@@ -165,7 +165,7 @@ static int httplib_fgetc( struct file *filep, int offset ) {
 }  /* httplib_fgetc */
 
 
-static void send_ssi_file( struct httplib_connection *conn, const char *path, struct file *filep, int include_level ) {
+static void send_ssi_file( const struct httplib_context *ctx, struct httplib_connection *conn, const char *path, struct file *filep, int include_level ) {
 
 	char buf[MG_BUF_LEN];
 	int ch;
@@ -173,9 +173,9 @@ static void send_ssi_file( struct httplib_connection *conn, const char *path, st
 	int len;
 	int in_ssi_tag;
 
-	if ( include_level > conn->ctx->ssi_include_depth ) {
+	if ( include_level > ctx->ssi_include_depth ) {
 
-		httplib_cry( DEBUG_LEVEL_ERROR, conn->ctx, conn, "%s: SSI #include level is too deep (%s)", __func__, path );
+		httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s: SSI #include level is too deep (%s)", __func__, path );
 		return;
 	}
 
@@ -199,21 +199,21 @@ static void send_ssi_file( struct httplib_connection *conn, const char *path, st
 				 * Not an SSI tag, pass it
 				 */
 
-				httplib_write( conn, buf, (size_t)len );
+				httplib_write( ctx, conn, buf, (size_t)len );
 			}
 			
 			else {
 				if ( ! memcmp( buf + 5, "include", 7 ) ) {
 
-					do_ssi_include( conn, path, buf + 12, include_level );
+					do_ssi_include( ctx, conn, path, buf+12, include_level );
+				}
 #if !defined(NO_POPEN)
-				}
-				else if (!memcmp(buf + 5, "exec", 4)) {
+				else if ( ! memcmp( buf+5, "exec", 4 ) ) {
 
-					do_ssi_exec(conn, buf + 9);
-#endif /* !NO_POPEN */
+					do_ssi_exec( ctx, conn, buf+9 );
 				}
-				else httplib_cry( DEBUG_LEVEL_ERROR, conn->ctx, conn, "%s: %s: unknown SSI command: \"%s\"", __func__, path, buf );
+#endif /* !NO_POPEN */
+				else httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s: %s: unknown SSI command: \"%s\"", __func__, path, buf );
 			}
 
 			len = 0;
@@ -232,7 +232,7 @@ static void send_ssi_file( struct httplib_connection *conn, const char *path, st
 			
 			else if ( len == (int)sizeof(buf) - 2 ) {
 
-				httplib_cry( DEBUG_LEVEL_ERROR, conn->ctx, conn, "%s: %s: SSI tag is too large", __func__, path );
+				httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s: %s: SSI tag is too large", __func__, path );
 				len = 0;
 			}
 
@@ -243,7 +243,7 @@ static void send_ssi_file( struct httplib_connection *conn, const char *path, st
 
 			in_ssi_tag = 1;
 
-			if ( len > 0 ) httplib_write( conn, buf, (size_t)len );
+			if ( len > 0 ) httplib_write( ctx, conn, buf, (size_t)len );
 
 			len = 0;
 			buf[len++] = (char)(ch & 0xff);
@@ -254,7 +254,7 @@ static void send_ssi_file( struct httplib_connection *conn, const char *path, st
 
 			if (len == (int)sizeof(buf)) {
 
-				httplib_write(conn, buf, (size_t)len);
+				httplib_write( ctx, conn, buf, (size_t)len );
 				len = 0;
 			}
 		}
@@ -264,12 +264,12 @@ static void send_ssi_file( struct httplib_connection *conn, const char *path, st
 	 * Send the rest of buffered data
 	 */
 
-	if (len > 0) httplib_write( conn, buf, (size_t)len );
+	if (len > 0) httplib_write( ctx, conn, buf, (size_t)len );
 
 }  /* send_ssi_file */
 
 
-void XX_httplib_handle_ssi_file_request( struct httplib_connection *conn, const char *path, struct file *filep ) {
+void XX_httplib_handle_ssi_file_request( const struct httplib_context *ctx, struct httplib_connection *conn, const char *path, struct file *filep ) {
 
 	char date[64];
 	char error_string[ERROR_STRING_LEN];
@@ -278,7 +278,7 @@ void XX_httplib_handle_ssi_file_request( struct httplib_connection *conn, const 
 	const char *cors2;
 	const char *cors3;
 
-	if ( conn == NULL  ||  conn->ctx == NULL  ||  path == NULL  ||  filep == NULL ) return;
+	if ( ctx == NULL  ||  conn == NULL  ||  path == NULL  ||  filep == NULL ) return;
 
 	curtime = time( NULL );
 
@@ -289,7 +289,7 @@ void XX_httplib_handle_ssi_file_request( struct httplib_connection *conn, const 
 		 */
 
 		cors1 = "Access-Control-Allow-Origin: ";
-		cors2 = ( conn->ctx->access_control_allow_origin != NULL ) ? conn->ctx->access_control_allow_origin : "";
+		cors2 = ( ctx->access_control_allow_origin != NULL ) ? ctx->access_control_allow_origin : "";
 		cors3 = "\r\n";
 	}
 	
@@ -299,25 +299,25 @@ void XX_httplib_handle_ssi_file_request( struct httplib_connection *conn, const 
 		cors3 = "";
 	}
 
-	if ( ! XX_httplib_fopen( conn, path, "rb", filep ) ) {
+	if ( ! XX_httplib_fopen( ctx, conn, path, "rb", filep ) ) {
 
 		/*
 		 * File exists (precondition for calling this function),
 		 * but can not be opened by the server.
 		 */
 
-		XX_httplib_send_http_error(conn, 500, "Error: Cannot read file\nfopen(%s): %s", path, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
+		XX_httplib_send_http_error( ctx, conn, 500, "Error: Cannot read file\nfopen(%s): %s", path, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 	}
 	
 	else {
 		conn->must_close = true;
 
 		XX_httplib_gmt_time_string( date, sizeof(date), &curtime );
-		XX_httplib_fclose_on_exec( filep, conn );
-		httplib_printf(conn, "HTTP/1.1 200 OK\r\n");
-		XX_httplib_send_no_cache_header( conn );
-		httplib_printf( conn, "%s%s%s" "Date: %s\r\n" "Content-Type: text/html\r\n" "Connection: %s\r\n\r\n", cors1, cors2, cors3, date, XX_httplib_suggest_connection_header( conn ) );
-		send_ssi_file( conn, path, filep, 0 );
+		XX_httplib_fclose_on_exec( ctx, filep, conn );
+		httplib_printf( ctx, conn, "HTTP/1.1 200 OK\r\n" );
+		XX_httplib_send_no_cache_header( ctx, conn );
+		httplib_printf( ctx, conn, "%s%s%s" "Date: %s\r\n" "Content-Type: text/html\r\n" "Connection: %s\r\n\r\n", cors1, cors2, cors3, date, XX_httplib_suggest_connection_header( ctx, conn ) );
+		send_ssi_file( ctx, conn, path, filep, 0 );
 		XX_httplib_fclose( filep );
 	}
 

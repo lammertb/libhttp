@@ -27,20 +27,20 @@
 
 #include "httplib_main.h"
 
-int XX_httplib_pull_all( FILE *fp, struct httplib_connection *conn, char *buf, int len ) {
+int XX_httplib_pull_all( const struct httplib_context *ctx, FILE *fp, struct httplib_connection *conn, char *buf, int len ) {
 
 	int n;
 	int nread;
 	double timeout;
 
-	if ( conn == NULL  ||  conn->ctx == NULL ) return 0;
+	if ( ctx == NULL  ||   conn == NULL ) return 0;
 
 	nread   = 0;
-	timeout = ((double)conn->ctx->request_timeout) / 1000.0;
+	timeout = ((double)ctx->request_timeout) / 1000.0;
 
-	while ( len > 0  &&  conn->ctx->status == CTX_STATUS_RUNNING ) {
+	while ( len > 0  &&  ctx->status == CTX_STATUS_RUNNING ) {
 
-		n = XX_httplib_pull( fp, conn, buf + nread, len, timeout );
+		n = XX_httplib_pull( ctx, fp, conn, buf + nread, len, timeout );
 
 		if ( n < 0 ) {
 

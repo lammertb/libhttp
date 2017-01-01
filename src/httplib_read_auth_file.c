@@ -28,14 +28,14 @@
 #include "httplib_main.h"
 
 /*
- * bool XX_httplib_read_auth_file( struct file *filep, struct read_auth_file_struct *workdata );
+ * bool XX_httplib_read_auth_file( const struct httplib_context *ctx, struct file *filep, struct read_auth_file_struct *workdata );
  *
  * The function XX_httpib_read_auth_file() loops over the password file to
  * read its contents. Include statements are honored which lets the routine
  * also open and scan child files.
  */
 
-bool XX_httplib_read_auth_file( struct file *filep, struct read_auth_file_struct *workdata ) {
+bool XX_httplib_read_auth_file( const struct httplib_context *ctx, struct file *filep, struct read_auth_file_struct *workdata ) {
 
 	int is_authorized;
 	struct file fp;
@@ -45,7 +45,7 @@ bool XX_httplib_read_auth_file( struct file *filep, struct read_auth_file_struct
 		char *		var;
 	} ptr;
 
-	if ( filep == NULL  ||  workdata == NULL ) return false;
+	if ( ctx == NULL  ||  filep == NULL  ||  workdata == NULL ) return false;
 
 	is_authorized = false;
 
@@ -85,13 +85,13 @@ bool XX_httplib_read_auth_file( struct file *filep, struct read_auth_file_struct
 			
 			else if ( ! strncmp( workdata->f_user + 1, "include=", 8 ) ) {
 
-				if ( XX_httplib_fopen( workdata->conn, workdata->f_user + 9, "r", &fp ) ) {
+				if ( XX_httplib_fopen( ctx, workdata->conn, workdata->f_user + 9, "r", &fp ) ) {
 
-					is_authorized = XX_httplib_read_auth_file( &fp, workdata );
+					is_authorized = XX_httplib_read_auth_file( ctx, &fp, workdata );
 					XX_httplib_fclose( &fp );
 				}
 				
-				else httplib_cry( DEBUG_LEVEL_ERROR, workdata->conn->ctx, workdata->conn, "%s: cannot open authorization file: %s", __func__, workdata->buf );
+				else httplib_cry( DEBUG_LEVEL_ERROR, ctx, workdata->conn, "%s: cannot open authorization file: %s", __func__, workdata->buf );
 
 				continue;
 			}
@@ -100,7 +100,7 @@ bool XX_httplib_read_auth_file( struct file *filep, struct read_auth_file_struct
 			 * future)
 			 */
 
-			httplib_cry( DEBUG_LEVEL_ERROR, workdata->conn->ctx, workdata->conn, "%s: syntax error in authorization file: %s", __func__, workdata->buf );
+			httplib_cry( DEBUG_LEVEL_ERROR, ctx, workdata->conn, "%s: syntax error in authorization file: %s", __func__, workdata->buf );
 			continue;
 		}
 
@@ -108,7 +108,7 @@ bool XX_httplib_read_auth_file( struct file *filep, struct read_auth_file_struct
 
 		if ( workdata->f_domain == NULL ) {
 
-			httplib_cry( DEBUG_LEVEL_ERROR, workdata->conn->ctx, workdata->conn, "%s: syntax error in authorization file: %s", __func__, workdata->buf );
+			httplib_cry( DEBUG_LEVEL_ERROR, ctx, workdata->conn, "%s: syntax error in authorization file: %s", __func__, workdata->buf );
 			continue;
 		}
 
@@ -119,7 +119,7 @@ bool XX_httplib_read_auth_file( struct file *filep, struct read_auth_file_struct
 
 		if ( workdata->f_ha1 == NULL ) {
 
-			httplib_cry( DEBUG_LEVEL_ERROR, workdata->conn->ctx, workdata->conn, "%s: syntax error in authorization file: %s", __func__, workdata->buf );
+			httplib_cry( DEBUG_LEVEL_ERROR, ctx, workdata->conn, "%s: syntax error in authorization file: %s", __func__, workdata->buf );
 			continue;
 		}
 

@@ -28,13 +28,13 @@
 #include "httplib_main.h"
 
 /*
- * int XX_httplib_websocket_write_exec( struct httplib_connection *conn, int opcode, const char *data, size_t data_len, uint32_t masking_key );
+ * int XX_httplib_websocket_write_exec( const struct httplib_context *ctx, struct httplib_connection *conn, int opcode, const char *data, size_t data_len, uint32_t masking_key );
  *
  * The function XX_httplib_websocket_write_exec() does the heavy lifting in
  * writing data over a websocket connectin to a remote peer.
  */
 
-int XX_httplib_websocket_write_exec( struct httplib_connection *conn, int opcode, const char *data, size_t data_len, uint32_t masking_key ) {
+int XX_httplib_websocket_write_exec( const struct httplib_context *ctx, struct httplib_connection *conn, int opcode, const char *data, size_t data_len, uint32_t masking_key ) {
 
 	unsigned char header[14];
 	size_t header_len;
@@ -42,6 +42,8 @@ int XX_httplib_websocket_write_exec( struct httplib_connection *conn, int opcode
 	uint16_t len;
 	uint32_t len1;
 	uint32_t len2;
+
+	if ( ctx == NULL ) return -1;
 
 	retval     = -1;
 	header_len = 1;
@@ -108,8 +110,8 @@ int XX_httplib_websocket_write_exec( struct httplib_connection *conn, int opcode
 
 	httplib_lock_connection( conn );
 
-	retval = httplib_write( conn, header, header_len );
-	if ( data_len > 0 ) retval = httplib_write( conn, data, data_len );
+	retval = httplib_write( ctx, conn, header, header_len );
+	if ( data_len > 0 ) retval = httplib_write( ctx, conn, data, data_len );
 
 	httplib_unlock_connection( conn );
 

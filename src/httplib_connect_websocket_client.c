@@ -117,6 +117,7 @@ struct httplib_connection *httplib_connect_websocket_client( struct httplib_cont
 		return NULL;
 	}
 
+	thread_data->ctx           = ctx;
 	thread_data->conn          = conn;
 	thread_data->data_handler  = data_func;
 	thread_data->close_handler = close_func;
@@ -133,8 +134,8 @@ struct httplib_connection *httplib_connect_websocket_client( struct httplib_cont
 		httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s: thread failed to start", __func__ );
 
 		thread_data          = httplib_free( thread_data          );
-		ctx->workerthreadids = httplib_free( ctx->workerthreadids );
 		conn                 = httplib_free( conn                 );
+		ctx->workerthreadids = httplib_free( ctx->workerthreadids );
 		ctx->num_threads     = 0;
 		ctx->user_data       = NULL;
 

@@ -28,13 +28,13 @@
 #include "httplib_main.h"
 
 /*
- * void XX_httplib_close_socket_gracefully( struct httplib_connection *conn );
+ * void XX_httplib_close_socket_gracefully( const struct httplib_context *ctx, struct httplib_connection *conn );
  *
  * The function XX_httplib_close_socket_gracefully() closes a socket in a
  * graceful way.
  */
 
-void XX_httplib_close_socket_gracefully( struct httplib_connection *conn ) {
+void XX_httplib_close_socket_gracefully( const struct httplib_context *ctx, struct httplib_connection *conn ) {
 
 #if defined(_WIN32)
 	char buf[MG_BUF_LEN];
@@ -45,7 +45,7 @@ void XX_httplib_close_socket_gracefully( struct httplib_connection *conn ) {
 	int error_code;
 	socklen_t opt_len;
 
-	if ( conn == NULL  ||  conn->ctx == NULL ) return;
+	if ( ctx == NULL  ||  conn == NULL ) return;
 
 	error_code = 0;
 	opt_len    = sizeof(error_code);
@@ -67,7 +67,7 @@ void XX_httplib_close_socket_gracefully( struct httplib_connection *conn ) {
 	else {
 		if ( setsockopt( conn->client.sock, SOL_SOCKET, SO_LINGER, (char *)&linger, sizeof(linger) ) != 0 ) {
 
-			httplib_cry( DEBUG_LEVEL_ERROR, conn->ctx, conn, "%s: setsockopt(SOL_SOCKET SO_LINGER) failed: %s", __func__, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
+			httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s: setsockopt(SOL_SOCKET SO_LINGER) failed: %s", __func__, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 		}
 	}
 

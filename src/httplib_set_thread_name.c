@@ -54,11 +54,11 @@ typedef struct tagTHREADNAME_INFO {
 
 #endif  /* __linux__ */
 
-void XX_httplib_set_thread_name( const char *name ) {
+void XX_httplib_set_thread_name( const struct httplib_context *ctx, const char *name ) {
 
 	char thread_name[16+1]; /* 16 = Max. thread length in Linux/OSX/.. */
 
-	XX_httplib_snprintf( NULL, NULL, thread_name, sizeof(thread_name), "libhttp-%s", name );
+	XX_httplib_snprintf( ctx, NULL, NULL, thread_name, sizeof(thread_name), "libhttp-%s", name );
 
 #if defined(_WIN32)
 

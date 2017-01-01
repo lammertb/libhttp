@@ -39,7 +39,7 @@
  * Return -2  if path can not be created.
  */
 
-int XX_httplib_put_dir( struct httplib_connection *conn, const char *path ) {
+int XX_httplib_put_dir( const struct httplib_context *ctx, struct httplib_connection *conn, const char *path ) {
 
 	char buf[PATH_MAX];
 	const char *s;
@@ -47,6 +47,8 @@ int XX_httplib_put_dir( struct httplib_connection *conn, const char *path ) {
 	struct file file = STRUCT_FILE_INITIALIZER;
 	size_t len;
 	int res;
+
+	if ( ctx == NULL ) return -2;
 
 	res = 1;
 
@@ -73,7 +75,7 @@ int XX_httplib_put_dir( struct httplib_connection *conn, const char *path ) {
 		 * Try to create intermediate directory
 		 */
 
-		if ( ! XX_httplib_stat( conn, buf, &file ) && httplib_mkdir( buf, 0755 ) != 0 ) {
+		if ( ! XX_httplib_stat( ctx, conn, buf, &file ) && httplib_mkdir( buf, 0755 ) != 0 ) {
 
 			/*
 			 * path does not exixt and can not be created

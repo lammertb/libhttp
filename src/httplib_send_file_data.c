@@ -34,7 +34,7 @@
  * Send len bytes from the opened file to the client.
  */
 
-void XX_httplib_send_file_data( struct httplib_connection *conn, struct file *filep, int64_t offset, int64_t len ) {
+void XX_httplib_send_file_data( const struct httplib_context *ctx, struct httplib_connection *conn, struct file *filep, int64_t offset, int64_t len ) {
 
 	char buf[MG_BUF_LEN];
 	char error_string[ERROR_STRING_LEN];
@@ -49,7 +49,7 @@ void XX_httplib_send_file_data( struct httplib_connection *conn, struct file *fi
 	int loop_cnt;
 #endif  /* __linux__ */
 
-	if ( filep == NULL  ||  conn == NULL  ||  conn->ctx == NULL ) return;
+	if ( ctx == NULL  ||  filep == NULL  ||  conn == NULL ) return;
 
 	/*
 	 * Sanity check the offset
@@ -68,7 +68,7 @@ void XX_httplib_send_file_data( struct httplib_connection *conn, struct file *fi
 		 */
 
 		if (len > size - offset) len = size - offset;
-		httplib_write( conn, filep->membuf + offset, (size_t)len );
+		httplib_write( ctx, conn, filep->membuf + offset, (size_t)len );
 
 	}
 	
@@ -81,7 +81,7 @@ void XX_httplib_send_file_data( struct httplib_connection *conn, struct file *fi
 		 * sendfile is only available for Linux
 		 */
 
-		if ( conn->ctx->allow_sendfile_call  &&  conn->ssl == 0  &&  conn->throttle == 0 ) {
+		if ( ctx->allow_sendfile_call  &&  conn->ssl == 0  &&  conn->throttle == 0 ) {
 
 			sf_offs  = (off_t)offset;
 			sf_file  = fileno( filep->fp );
@@ -140,8 +140,8 @@ void XX_httplib_send_file_data( struct httplib_connection *conn, struct file *fi
 #endif
 		if ( offset > 0  &&  fseeko( filep->fp, offset, SEEK_SET ) != 0 ) {
 
-			httplib_cry( DEBUG_LEVEL_ERROR, conn->ctx, conn, "%s: fseeko() failed: %s", __func__, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
-			XX_httplib_send_http_error( conn, 500, "%s", "Error: Unable to access file at requested position." );
+			httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s: fseeko() failed: %s", __func__, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
+			XX_httplib_send_http_error( ctx, conn, 500, "%s", "Error: Unable to access file at requested position." );
 		}
 		
 		else {
@@ -164,7 +164,7 @@ void XX_httplib_send_file_data( struct httplib_connection *conn, struct file *fi
 				 * Send read bytes to the client, exit the loop on error
 				 */
 
-				if ( (num_written = httplib_write( conn, buf, (size_t)num_read )) != num_read ) break;
+				if ( (num_written = httplib_write( ctx, conn, buf, (size_t)num_read )) != num_read ) break;
 
 				/*
 				 * Both read and were successful, adjust counters

@@ -36,17 +36,17 @@
 
 #if !defined(NO_SSL)
 
-int XX_httplib_sslize( struct httplib_connection *conn, SSL_CTX *s, int (*func)(SSL *) ) {
+int XX_httplib_sslize( const struct httplib_context *ctx, struct httplib_connection *conn, SSL_CTX *s, int (*func)(SSL *) ) {
 
 	int ret;
 	int err;
 	unsigned i;
 
-	if ( conn == NULL  ||  conn->ctx == NULL ) return 0;
+	if ( ctx == NULL  ||  conn == NULL ) return 0;
 
-	if ( conn->ctx->ssl_short_trust ) {
+	if ( ctx->ssl_short_trust ) {
 
-		int trust_ret = XX_httplib_refresh_trust( conn );
+		int trust_ret = XX_httplib_refresh_trust( ctx, conn );
 		if ( ! trust_ret ) return trust_ret;
 	}
 

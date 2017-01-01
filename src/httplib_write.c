@@ -25,6 +25,8 @@
 #include "httplib_main.h"
 
 /*
+ * int httplib_write( const struct httplib_context *ctx, struct httplib_connection *conn, const void *buffie, size_t lennie );
+ *
  * The function httplib_write() writes a number of bytes over a connection.
  * The amount of characters written is returned. If an error occurs
  * the value 0 is returned.
@@ -37,7 +39,7 @@
  * case a monotonic clock with guaranteed increase would be a better choice.
  */
 
-int httplib_write( struct httplib_connection *conn, const void *buffie, size_t lennie ) {
+int httplib_write( const struct httplib_context *ctx, struct httplib_connection *conn, const void *buffie, size_t lennie ) {
 
 	time_t now;
 	int64_t n;
@@ -46,7 +48,7 @@ int httplib_write( struct httplib_connection *conn, const void *buffie, size_t l
 	int64_t allowed;
 	const char *buf;
 
-	if ( conn == NULL  ||  buffie == NULL  ||  lennie == 0 ) return 0;
+	if ( ctx == NULL  ||  conn == NULL  ||  buffie == NULL  ||  lennie == 0 ) return 0;
 
 	buf = buffie;
 	len = lennie;
@@ -64,19 +66,19 @@ int httplib_write( struct httplib_connection *conn, const void *buffie, size_t l
 		allowed = conn->throttle - conn->last_throttle_bytes;
 		if ( allowed > len ) allowed = len;
 
-		total = XX_httplib_push_all( conn->ctx, NULL, conn->client.sock, conn->ssl, buf, allowed );
+		total = XX_httplib_push_all( ctx, NULL, conn->client.sock, conn->ssl, buf, allowed );
 
 		if ( total == allowed ) {
 
 			buf                        = buf + total;
 			conn->last_throttle_bytes += total;
 
-			while ( total < len  &&  conn->ctx->status == CTX_STATUS_RUNNING ) {
+			while ( total < len  &&  ctx->status == CTX_STATUS_RUNNING ) {
 
 				if ( conn->throttle > len-total ) allowed = len-total;
 				else                              allowed = conn->throttle;
 
-				n = XX_httplib_push_all( conn->ctx, NULL, conn->client.sock, conn->ssl, buf, allowed );
+				n = XX_httplib_push_all( ctx, NULL, conn->client.sock, conn->ssl, buf, allowed );
 				if ( n != allowed ) {
 				
 					if ( n > 0 ) total += n;	
@@ -93,7 +95,7 @@ int httplib_write( struct httplib_connection *conn, const void *buffie, size_t l
 		}
 	}
 	
-	else total = XX_httplib_push_all( conn->ctx, NULL, conn->client.sock, conn->ssl, buf, len );
+	else total = XX_httplib_push_all( ctx, NULL, conn->client.sock, conn->ssl, buf, len );
 
 	return (int)total;
 

@@ -29,14 +29,14 @@
 #include "httplib_utils.h"
 
 /*
- * void XX_httplib_mkcol( struct httplib_connection *conn, const char *path );
+ * void XX_httplib_mkcol( const struct httplib_context *ctx, struct httplib_connection *conn, const char *path );
  *
  * The function XX_httplib_mkcol() handles a MKCOL command from a remote
  * client. The MKCOL method is used to create a new collection resource at the
  * location specificied by the request URI.
  */
 
-void XX_httplib_mkcol( struct httplib_connection *conn, const char *path ) {
+void XX_httplib_mkcol( const struct httplib_context *ctx, struct httplib_connection *conn, const char *path ) {
 
 	int rc;
 	int body_len;
@@ -45,8 +45,8 @@ void XX_httplib_mkcol( struct httplib_connection *conn, const char *path ) {
 	time_t curtime;
 	char error_string[ERROR_STRING_LEN];
 
-	if ( conn == NULL  ||  conn->ctx == NULL ) return;
-	if ( conn->ctx->document_root    == NULL ) return;
+	if ( ctx == NULL  ||  conn == NULL ) return;
+	if ( ctx->document_root    == NULL ) return;
 
 	curtime = time( NULL );
 
@@ -56,9 +56,9 @@ void XX_httplib_mkcol( struct httplib_connection *conn, const char *path ) {
 
 	memset( & de.file, 0, sizeof(de.file) );
 
-	if ( ! XX_httplib_stat( conn, path, & de.file ) ) {
+	if ( ! XX_httplib_stat( ctx, conn, path, & de.file ) ) {
 
-		httplib_cry( DEBUG_LEVEL_WARNING, conn->ctx, conn, "%s: XX_httplib_stat(%s) failed: %s", __func__, path, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
+		httplib_cry( DEBUG_LEVEL_WARNING, ctx, conn, "%s: XX_httplib_stat(%s) failed: %s", __func__, path, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 	}
 
 	if ( de.file.last_modified ) {
@@ -67,7 +67,7 @@ void XX_httplib_mkcol( struct httplib_connection *conn, const char *path ) {
 		 * TODO (high): This check does not seem to make any sense !
 		 */
 
-		XX_httplib_send_http_error( conn, 405, "Error: mkcol(%s): %s", path, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
+		XX_httplib_send_http_error( ctx, conn, 405, "Error: mkcol(%s): %s", path, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 		return;
 	}
 
@@ -75,7 +75,7 @@ void XX_httplib_mkcol( struct httplib_connection *conn, const char *path ) {
 
 	if ( body_len > 0 ) {
 
-		XX_httplib_send_http_error( conn, 415, "Error: mkcol(%s): %s", path, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
+		XX_httplib_send_http_error( ctx, conn, 415, "Error: mkcol(%s): %s", path, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 		return;
 	}
 
@@ -85,17 +85,17 @@ void XX_httplib_mkcol( struct httplib_connection *conn, const char *path ) {
 
 		conn->status_code = 201;
 		XX_httplib_gmt_time_string( date, sizeof(date), &curtime );
-		httplib_printf( conn, "HTTP/1.1 %d Created\r\n" "Date: %s\r\n", conn->status_code, date );
-		XX_httplib_send_static_cache_header( conn );
-		httplib_printf( conn, "Content-Length: 0\r\n" "Connection: %s\r\n\r\n", XX_httplib_suggest_connection_header(conn) );
+		httplib_printf( ctx, conn, "HTTP/1.1 %d Created\r\n" "Date: %s\r\n", conn->status_code, date );
+		XX_httplib_send_static_cache_header( ctx, conn );
+		httplib_printf( ctx, conn, "Content-Length: 0\r\n" "Connection: %s\r\n\r\n", XX_httplib_suggest_connection_header( ctx, conn ) );
 	}
 	
 	else if ( rc == -1 ) {
 
-		if      ( errno == EEXIST ) XX_httplib_send_http_error( conn, 405, "Error: mkcol(%s): %s", path, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
-		else if ( errno == EACCES ) XX_httplib_send_http_error( conn, 403, "Error: mkcol(%s): %s", path, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
-		else if ( errno == ENOENT ) XX_httplib_send_http_error( conn, 409, "Error: mkcol(%s): %s", path, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
-		else                        XX_httplib_send_http_error( conn, 500, "fopen(%s): %s",        path, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
+		if      ( errno == EEXIST ) XX_httplib_send_http_error( ctx, conn, 405, "Error: mkcol(%s): %s", path, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
+		else if ( errno == EACCES ) XX_httplib_send_http_error( ctx, conn, 403, "Error: mkcol(%s): %s", path, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
+		else if ( errno == ENOENT ) XX_httplib_send_http_error( ctx, conn, 409, "Error: mkcol(%s): %s", path, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
+		else                        XX_httplib_send_http_error( ctx, conn, 500, "fopen(%s): %s",        path, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 	}
 
 }  /* XX_httplib_mkcol */

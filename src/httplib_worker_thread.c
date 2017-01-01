@@ -67,7 +67,7 @@ LIBHTTP_THREAD XX_httplib_worker_thread( void *thread_func_param ) {
 
 static void *worker_thread_run( struct worker_thread_args *thread_args ) {
 
-	struct httplib_context *ctx = thread_args->ctx;
+	struct httplib_context *ctx;
 	struct httplib_connection *conn;
 	struct httplib_workerTLS tls;
 	union {
@@ -79,7 +79,7 @@ static void *worker_thread_run( struct worker_thread_args *thread_args ) {
 
 	ctx = thread_args->ctx;
 
-	XX_httplib_set_thread_name( "worker" );
+	XX_httplib_set_thread_name( ctx, "worker" );
 
 	tls.thread_idx = (unsigned)httplib_atomic_inc( & XX_httplib_thread_idx_max );
 #if defined(_WIN32)
@@ -96,7 +96,6 @@ static void *worker_thread_run( struct worker_thread_args *thread_args ) {
 
 		conn->buf_size               = MAX_REQUEST_SIZE;
 		conn->buf                    = (char *)(conn+1);
-		conn->ctx                    = ctx;
 		conn->thread_index           = thread_args->index;
 		conn->request_info.user_data = ctx->user_data;
 
@@ -137,7 +136,7 @@ static void *worker_thread_run( struct worker_thread_args *thread_args ) {
 				 * HTTPS connection
 				 */
 
-				if ( XX_httplib_sslize( conn, conn->ctx->ssl_ctx, SSL_accept ) ) {
+				if ( XX_httplib_sslize( ctx, conn, ctx->ssl_ctx, SSL_accept ) ) {
 
 					/*
 					 * Get SSL client certificate information (if set)
@@ -149,7 +148,7 @@ static void *worker_thread_run( struct worker_thread_args *thread_args ) {
 					 * process HTTPS connection
 					 */
 
-					XX_httplib_process_new_connection( conn );
+					XX_httplib_process_new_connection( ctx, conn );
 
 					/*
 					 * Free client certificate info
@@ -167,9 +166,9 @@ static void *worker_thread_run( struct worker_thread_args *thread_args ) {
 #endif
 			}
 			
-			else XX_httplib_process_new_connection( conn );
+			else XX_httplib_process_new_connection( ctx, conn );
 
-			XX_httplib_close_connection( conn );
+			XX_httplib_close_connection( ctx, conn );
 		}
 	}
 

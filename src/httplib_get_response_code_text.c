@@ -28,13 +28,13 @@
 #include "httplib_main.h"
 
 /*
- * const char *httplib_get_response_code_text( struct httplib_connection *conn, int response_code );
+ * const char *httplib_get_response_code_text( const struct httplib_context *ctx, struct httplib_connection *conn, int response_code );
  *
  * The function httplib_get_response_code_text() returns a text associated with an
  * HTTP response code.
  */
 
-const char *httplib_get_response_code_text( struct httplib_connection *conn, int response_code ) {
+const char *httplib_get_response_code_text( const struct httplib_context *ctx, struct httplib_connection *conn, int response_code ) {
 
 	/*
 	 * See IANA HTTP status code assignment:
@@ -118,7 +118,7 @@ const char *httplib_get_response_code_text( struct httplib_connection *conn, int
 		 * This error code is unknown. This should not happen.
 		 */
 
-		if ( conn != NULL  &&  conn->ctx != NULL ) httplib_cry( DEBUG_LEVEL_INFO, conn->ctx, conn, "%s: unknown HTTP response code: %u", __func__, response_code );
+		if ( ctx != NULL  &&  conn != NULL ) httplib_cry( DEBUG_LEVEL_INFO, ctx, conn, "%s: unknown HTTP response code: %u", __func__, response_code );
 
 		/*
 		 * Return at least a category according to RFC 2616 Section 10.

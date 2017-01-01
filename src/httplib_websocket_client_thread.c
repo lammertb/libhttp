@@ -20,9 +20,6 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
- *
- * ============
- * Release: 2.0
  */
 
 #include "httplib_main.h"
@@ -31,32 +28,41 @@
  * LIBHTTP_THREAD XX_httplib_websocket_client_thread( void *data );
  *
  * The function XX_httplib_websocket_client_thread() is the worker thread which
- * connects as a client to a remote websocket server.
+ * connects as a client to a remote websocket server. When finished, the
+ * function frees the memory associated with the thread and the connection, but
+ * it does not free any context data, because the context can be reused for
+ * another connection.
+ *
+ * To signal the calling application that the context is in use or can be
+ * reused, a status flag is set to the appropriate value.
  */
 
 LIBHTTP_THREAD XX_httplib_websocket_client_thread( void *data ) {
 
 	struct websocket_client_thread_data *cdata;
+	struct httplib_context *ctx;
+	struct httplib_connection *conn;
 
-	cdata = data;
-	if ( cdata == NULL  ||  cdata->conn == NULL  ||  cdata->conn->ctx == NULL ) return LIBHTTP_THREAD_RETNULL;
+	if ( (cdata = data       ) == NULL ) return LIBHTTP_THREAD_RETNULL;
+	if ( (conn  = cdata->conn) == NULL ) return LIBHTTP_THREAD_RETNULL;
+	if ( (ctx   = cdata->ctx ) == NULL ) return LIBHTTP_THREAD_RETNULL;
 
-	cdata->conn->ctx->status = CTX_STATUS_RUNNING;
+	ctx->status = CTX_STATUS_RUNNING;
 
-	XX_httplib_set_thread_name( "ws-client" );
+	XX_httplib_set_thread_name( ctx, "ws-client" );
 
-	if ( cdata->conn->ctx->callbacks.init_thread != NULL ) cdata->conn->ctx->callbacks.init_thread( cdata->conn->ctx, 3 );
+	if ( ctx->callbacks.init_thread != NULL ) ctx->callbacks.init_thread( ctx, 3 );
 
-	XX_httplib_read_websocket( cdata->conn, cdata->data_handler, cdata->callback_data );
+	XX_httplib_read_websocket( ctx, conn, cdata->data_handler, cdata->callback_data );
 
-	if ( cdata->close_handler != NULL ) cdata->close_handler( cdata->conn, cdata->callback_data );
+	if ( cdata->close_handler != NULL ) cdata->close_handler( conn, cdata->callback_data );
 
-	cdata->conn->ctx->workerthreadids = httplib_free( cdata->conn->ctx->workerthreadids );
-	cdata->conn                       = httplib_free( cdata->conn                       );
-	cdata                             = httplib_free( cdata                             );
-	cdata->conn->ctx->user_data       = NULL;
-	cdata->conn->ctx->num_threads     = 0;
-	cdata->conn->ctx->status          = CTX_STATUS_TERMINATED;
+	ctx->workerthreadids = httplib_free( ctx->workerthreadids );
+	conn                 = httplib_free( conn                 );
+	cdata                = httplib_free( cdata                );
+	ctx->user_data       = NULL;
+	ctx->num_threads     = 0;
+	ctx->status          = CTX_STATUS_TERMINATED;
 
 	return LIBHTTP_THREAD_RETNULL;
 

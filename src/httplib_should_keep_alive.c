@@ -25,7 +25,7 @@
 #include "httplib_main.h"
 
 /*
- * bool XX_httplib_should_keep_alive( const struct httplib_connection *conn );
+ * bool XX_httplib_should_keep_alive( const struct httplib_context *ctx, const struct httplib_connection *conn );
  *
  * The function XX_httplib_should_keep_alive() returns true if the connection
  * should be kept alive and false if it should be closed.
@@ -35,19 +35,19 @@
  * request parsing failed.
  */
 
-bool XX_httplib_should_keep_alive( const struct httplib_connection *conn ) {
+bool XX_httplib_should_keep_alive( const struct httplib_context *ctx, const struct httplib_connection *conn ) {
 
 	const char *http_version;
 	const char *header;
 
-	if ( conn == NULL  ||  conn->ctx == NULL ) return false;
+	if ( ctx == NULL  ||  conn == NULL ) return false;
 
 	http_version = conn->request_info.http_version;
 	header       = httplib_get_header( conn, "Connection" );
 
 	if (   conn->must_close                                                                                    ) return false;
 	if (   conn->status_code == 401                                                                            ) return false;
-	if ( ! conn->ctx->enable_keep_alive                                                                        ) return false;
+	if ( ! ctx->enable_keep_alive                                                                              ) return false;
 	if ( header != NULL                             &&  ! XX_httplib_header_has_option( header, "keep-alive" ) ) return false;
 	if ( header == NULL  &&  http_version != NULL   &&  strcmp( http_version, "1.1" )                          ) return false;
 

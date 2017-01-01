@@ -29,17 +29,17 @@
 #include "httplib_string.h"
 
 /*
- * void XX_httplib_construct_etag( char *buf, size_t buf_len, const struct file *filep );
+ * void XX_httplib_construct_etag( const struct httplib_context *ctx, char *buf, size_t buf_len, const struct file *filep );
  *
  * The function XX_httplib_construct_etag() is used to construct an etag which
  * can be used to identify a file on a specific moment.
  */
 
-void XX_httplib_construct_etag( char *buf, size_t buf_len, const struct file *filep ) {
+void XX_httplib_construct_etag( const struct httplib_context *ctx, char *buf, size_t buf_len, const struct file *filep ) {
 
 	if ( filep != NULL  &&  buf != NULL  &&  buf_len > 0 ) {
 
-		XX_httplib_snprintf( NULL, NULL, buf, buf_len, "\"%lx.%" INT64_FMT "\"", (unsigned long)filep->last_modified, filep->size );
+		XX_httplib_snprintf( ctx, NULL, NULL, buf, buf_len, "\"%lx.%" INT64_FMT "\"", (unsigned long)filep->last_modified, filep->size );
 	}
 
 }  /* XX_httplib_construct_etag */

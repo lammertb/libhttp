@@ -27,13 +27,13 @@
 
 #include "httplib_main.h"
 
-int XX_httplib_send_no_cache_header( struct httplib_connection *conn ) {
+int XX_httplib_send_no_cache_header( const struct httplib_context *ctx, struct httplib_connection *conn ) {
 
 	/*
 	 * Send all current and obsolete cache opt-out directives.
 	 */
 
-	return httplib_printf( conn,
+	return httplib_printf( ctx, conn,
 	                 "Cache-Control: no-cache, no-store, "
 	                 "must-revalidate, private, max-age=0\r\n"
 	                 "Pragma: no-cache\r\n"

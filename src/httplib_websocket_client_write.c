@@ -38,13 +38,13 @@ static void mask_data( const char *in, size_t in_len, uint32_t masking_key, char
  * otherwise the amount of bytes written.
  */
 
-int httplib_websocket_client_write( struct httplib_connection *conn, int opcode, const char *data, size_t dataLen ) {
+int httplib_websocket_client_write( const struct httplib_context *ctx, struct httplib_connection *conn, int opcode, const char *data, size_t dataLen ) {
 
 	int retval;
 	char *masked_data;
 	uint32_t masking_key;
 
-	if ( conn == NULL  ||  conn->ctx == NULL ) return -1;
+	if ( ctx == NULL  ||  conn == NULL ) return -1;
 
 	retval      = -1;
 	masked_data = httplib_malloc( ((dataLen + 7) / 4) * 4 );
@@ -52,13 +52,13 @@ int httplib_websocket_client_write( struct httplib_connection *conn, int opcode,
 
 	if ( masked_data == NULL ) {
 
-		httplib_cry( DEBUG_LEVEL_ERROR, conn->ctx, conn, "%s: cannot allocate buffer for masked websocket response: Out of memory", __func__ );
+		httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s: cannot allocate buffer for masked websocket response: Out of memory", __func__ );
 		return -1;
 	}
 
 	mask_data( data, dataLen, masking_key, masked_data );
 
-	retval      = XX_httplib_websocket_write_exec( conn, opcode, masked_data, dataLen, masking_key );
+	retval      = XX_httplib_websocket_write_exec( ctx, conn, opcode, masked_data, dataLen, masking_key );
 	masked_data = httplib_free( masked_data );
 
 	return retval;

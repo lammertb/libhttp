@@ -28,25 +28,25 @@
 #include "httplib_main.h"
 
 /*
- * bool XX_httplib_authorize( struct httplib_connection *conn, struct file *filep );
+ * bool XX_httplib_authorize( const struct httplib_context *ctx, struct httplib_connection *conn, struct file *filep );
  *
  * The function XX_httplib_authorize() authorizes agains the open passwords
  * file. It returns 1 if authorized.
  */
 
-bool XX_httplib_authorize( struct httplib_connection *conn, struct file *filep ) {
+bool XX_httplib_authorize( const struct httplib_context *ctx, struct httplib_connection *conn, struct file *filep ) {
 
 	struct read_auth_file_struct workdata;
 	char buf[MG_BUF_LEN];
 
-	if ( conn == NULL  ||  conn->ctx == NULL ) return false;
+	if ( ctx == NULL  ||  conn == NULL ) return false;
 
 	memset( & workdata, 0, sizeof(workdata) );
 	workdata.conn = conn;
 
-	if ( ! XX_httplib_parse_auth_header( conn, buf, sizeof(buf), &workdata.ah ) ) return false;
-	workdata.domain = conn->ctx->authentication_domain;
+	if ( ! XX_httplib_parse_auth_header( ctx, conn, buf, sizeof(buf), &workdata.ah ) ) return false;
+	workdata.domain = ctx->authentication_domain;
 
-	return XX_httplib_read_auth_file( filep, &workdata );
+	return XX_httplib_read_auth_file( ctx, filep, &workdata );
 
 }  /* XX_httplib_authorize */

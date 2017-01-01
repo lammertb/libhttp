@@ -28,21 +28,21 @@
 #include "httplib_main.h"
 
 /*
- * bool XX_httplib_is_not_modified( const struct httplib_connection *conn, const struct file *filep );
+ * bool XX_httplib_is_not_modified( const struct httplib_context *ctx, const struct httplib_connection *conn, const struct file *filep );
  *
  * The function XX_httplib_is_not_modified() returns true, if a resource has
  * not been modified sinze a given datetime and a 304 response should therefore
  * be sufficient.
  */
 
-bool XX_httplib_is_not_modified( const struct httplib_connection *conn, const struct file *filep ) {
+bool XX_httplib_is_not_modified( const struct httplib_context *ctx, const struct httplib_connection *conn, const struct file *filep ) {
 
 	char etag[64];
 	const char *ims = httplib_get_header( conn, "If-Modified-Since" );
 	const char *inm = httplib_get_header( conn, "If-None-Match"     );
 
-	if ( conn == NULL  ||  filep == NULL ) return false;
-	XX_httplib_construct_etag( etag, sizeof(etag), filep );
+	if ( ctx == NULL  ||  conn == NULL  ||  filep == NULL ) return false;
+	XX_httplib_construct_etag( ctx, etag, sizeof(etag), filep );
 
 	return  (inm != NULL  &&  ! httplib_strcasecmp( etag, inm ) )                                 ||
 		(ims != NULL  &&  ( filep->last_modified <= XX_httplib_parse_date_string( ims ) ) ) ;

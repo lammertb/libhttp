@@ -24,8 +24,8 @@
 
 #include "httplib_main.h"
 
-bool XX_httplib_should_decode_url( const struct httplib_connection *conn ) {
+bool XX_httplib_should_decode_url( const struct httplib_context *ctx ) {
 
-	return ( conn != NULL  &&  conn->ctx != NULL  &&  conn->ctx->decode_url );
+	return ( ctx != NULL  &&  ctx->decode_url );
 
 }  /* XX_httplib_should_decode_url */

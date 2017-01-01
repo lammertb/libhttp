@@ -29,31 +29,31 @@
 #include "httplib_utils.h"
 
 /*
- * void XX_httplib_handle_not_modified_static_file_request( struct httplib_connection *conn, struct file *filep );
+ * void XX_httplib_handle_not_modified_static_file_request( const struct httplib_context *ctx, struct httplib_connection *conn, struct file *filep );
  *
  * The function XX_httplib_handle_not_modified_static_file_request() is used to
  * send a 304 response to a client to indicate that the requested resource has
  * not been changed.
  */
 
-void XX_httplib_handle_not_modified_static_file_request( struct httplib_connection *conn, struct file *filep ) {
+void XX_httplib_handle_not_modified_static_file_request( const struct httplib_context *ctx, struct httplib_connection *conn, struct file *filep ) {
 
 	char date[64];
 	char lm[64];
 	char etag[64];
 	time_t curtime;
 
-	if ( conn == NULL || filep == NULL ) return;
+	if ( ctx == NULL  ||  conn == NULL  ||  filep == NULL ) return;
 
 	curtime           = time( NULL );
 	conn->status_code = 304;
 
 	XX_httplib_gmt_time_string( date, sizeof(date), & curtime              );
 	XX_httplib_gmt_time_string( lm,   sizeof(lm),   & filep->last_modified );
-	XX_httplib_construct_etag(  etag, sizeof(etag), filep                  );
+	XX_httplib_construct_etag(  ctx, etag, sizeof(etag), filep             );
 
-	httplib_printf( conn, "HTTP/1.1 %d %s\r\n" "Date: %s\r\n", conn->status_code, httplib_get_response_code_text( conn, conn->status_code ), date );
-	XX_httplib_send_static_cache_header( conn );
-	httplib_printf( conn, "Last-Modified: %s\r\n" "Etag: %s\r\n" "Connection: %s\r\n" "\r\n", lm, etag, XX_httplib_suggest_connection_header( conn ) );
+	httplib_printf( ctx, conn, "HTTP/1.1 %d %s\r\n" "Date: %s\r\n", conn->status_code, httplib_get_response_code_text( ctx, conn, conn->status_code ), date );
+	XX_httplib_send_static_cache_header( ctx, conn );
+	httplib_printf( ctx, conn, "Last-Modified: %s\r\n" "Etag: %s\r\n" "Connection: %s\r\n" "\r\n", lm, etag, XX_httplib_suggest_connection_header( ctx, conn ) );
 
 }  /* XX_httplib_handle_not_modified_static_file_request */

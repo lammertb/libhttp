@@ -28,22 +28,22 @@
 #include "httplib_main.h"
 
 /*
- * int XX_httlib_send_static_cache_header( struct httplib_connection *conn );
+ * int XX_httlib_send_static_cache_header( const struct httplib_context *ctx, struct httplib_connection *conn );
  *
  * The function XX_httplib_send_static_cache_header() sends cache headers
  * depending on the cache setting of the current context.
  */
 
-int XX_httplib_send_static_cache_header( struct httplib_connection *conn ) {
+int XX_httplib_send_static_cache_header( const struct httplib_context *ctx, struct httplib_connection *conn ) {
 
-	if ( conn == NULL  ||  conn->ctx == NULL ) return 0;
+	if ( ctx == NULL  ||  conn == NULL ) return 0;
 
 	/*
 	 * Read the server config to check how long a file may be cached.
 	 * The configuration is in seconds.
 	 */
 
-	if ( conn->ctx->static_file_max_age <= 0 ) {
+	if ( ctx->static_file_max_age <= 0 ) {
 
 		/*
 		 * 0 means "do not cache". All values <0 are reserved
@@ -52,7 +52,7 @@ int XX_httplib_send_static_cache_header( struct httplib_connection *conn ) {
 		 * max-age=0, but also pragmas and Expires headers.
 		 */
 
-		return XX_httplib_send_no_cache_header( conn );
+		return XX_httplib_send_no_cache_header( ctx, conn );
 	}
 
 	/*
@@ -66,6 +66,6 @@ int XX_httplib_send_static_cache_header( struct httplib_connection *conn ) {
 	 * as undefined.
 	 */
 
-	return httplib_printf( conn, "Cache-Control: max-age=%d\r\n", conn->ctx->static_file_max_age );
+	return httplib_printf( ctx, conn, "Cache-Control: max-age=%d\r\n", ctx->static_file_max_age );
 
 }  /* XX_httplib_send_static_cache_header */

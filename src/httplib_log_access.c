@@ -32,12 +32,12 @@
 static const char *header_val( const struct httplib_connection *conn, const char *header );
 
 /*
- * void XX_httplib_log_access( const struct httplib_connection *conn );
+ * void XX_httplib_log_access( const struct httplib_context *ctx, const struct httplib_connection *conn );
  *
  * The function XX_httplib_log_access() logs an access of a client.
  */
 
-void XX_httplib_log_access( const struct httplib_connection *conn ) {
+void XX_httplib_log_access( const struct httplib_context *ctx, const struct httplib_connection *conn ) {
 
 	const struct httplib_request_info *ri;
 	struct file fi;
@@ -48,11 +48,11 @@ void XX_httplib_log_access( const struct httplib_connection *conn ) {
 	const char *user_agent;
 	char buf[4096];
 
-	if ( conn == NULL  ||  conn->ctx == NULL ) return;
+	if ( ctx == NULL  ||  conn == NULL ) return;
 
-	if ( conn->ctx->access_log_file != NULL ) {
+	if ( ctx->access_log_file != NULL ) {
 
-		if ( XX_httplib_fopen( conn, conn->ctx->access_log_file, "a+", &fi ) == 0 ) fi.fp = NULL;
+		if ( XX_httplib_fopen( ctx, conn, ctx->access_log_file, "a+", &fi ) == 0 ) fi.fp = NULL;
 	}
 	else fi.fp = NULL;
 
@@ -61,7 +61,7 @@ void XX_httplib_log_access( const struct httplib_connection *conn ) {
 	 * executing the rest of the function is pointless.
 	 */
 
-	if ( fi.fp == NULL  &&  conn->ctx->callbacks.log_access == NULL ) return;
+	if ( fi.fp == NULL  &&  ctx->callbacks.log_access == NULL ) return;
 
 	if ( httplib_localtime_r( &conn->conn_birth_time, &tmm ) != NULL ) strftime( date, sizeof(date), "%d/%b/%Y:%H:%M:%S %z", &tmm );
 	else {
@@ -76,7 +76,7 @@ void XX_httplib_log_access( const struct httplib_connection *conn ) {
 	referer    = header_val( conn, "Referer"    );
 	user_agent = header_val( conn, "User-Agent" );
 
-	XX_httplib_snprintf( conn,
+	XX_httplib_snprintf( ctx, conn,
 	            NULL, /* Ignore truncation in access log */
 	            buf,
 	            sizeof(buf),
@@ -94,7 +94,7 @@ void XX_httplib_log_access( const struct httplib_connection *conn ) {
 	            referer,
 	            user_agent );
 
-	if ( conn->ctx->callbacks.log_access != NULL ) conn->ctx->callbacks.log_access( conn, buf );
+	if ( ctx->callbacks.log_access != NULL ) ctx->callbacks.log_access( conn, buf );
 
 	if ( fi.fp ) {
 

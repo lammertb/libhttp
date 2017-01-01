@@ -28,7 +28,7 @@
 #include "httplib_main.h"
 #include "httplib_string.h"
 
-int XX_httplib_scan_directory( struct httplib_connection *conn, const char *dir, void *data, void (*cb)(struct de *, void *) ) {
+int XX_httplib_scan_directory( const struct httplib_context *ctx, struct httplib_connection *conn, const char *dir, void *data, void (*cb)(const struct httplib_context *ctx, struct de *, void *) ) {
 
 	char path[PATH_MAX];
 	char error_string[ERROR_STRING_LEN];
@@ -36,6 +36,8 @@ int XX_httplib_scan_directory( struct httplib_connection *conn, const char *dir,
 	DIR *dirp;
 	struct de de;
 	bool truncated;
+
+	if ( ctx == NULL ) return 0;
 
 	dirp = httplib_opendir( dir );
 	if ( dirp == NULL ) return 0;
@@ -48,9 +50,9 @@ int XX_httplib_scan_directory( struct httplib_connection *conn, const char *dir,
 		 * Do not show current dir and hidden files
 		 */
 
-		if ( ! strcmp( dp->d_name, "." )  ||  ! strcmp(dp->d_name, "..")  ||  XX_httplib_must_hide_file( conn, dp->d_name ) ) continue;
+		if ( ! strcmp( dp->d_name, "." )  ||  ! strcmp(dp->d_name, "..")  ||  XX_httplib_must_hide_file( ctx, dp->d_name ) ) continue;
 
-		XX_httplib_snprintf( conn, &truncated, path, sizeof(path), "%s/%s", dir, dp->d_name );
+		XX_httplib_snprintf( ctx, conn, &truncated, path, sizeof(path), "%s/%s", dir, dp->d_name );
 
 		/*
 		 * If we don't memset stat structure to zero, mtime will have
@@ -64,13 +66,13 @@ int XX_httplib_scan_directory( struct httplib_connection *conn, const char *dir,
 
 		if ( truncated ) continue; /* If the path is not complete, skip processing. */
 
-		if ( ! XX_httplib_stat( conn, path, &de.file ) ) {
+		if ( ! XX_httplib_stat( ctx, conn, path, &de.file ) ) {
 
-			httplib_cry( DEBUG_LEVEL_WARNING, conn->ctx, conn, "%s: XX_httplib_stat(%s) failed: %s", __func__, path, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
+			httplib_cry( DEBUG_LEVEL_WARNING, ctx, conn, "%s: XX_httplib_stat(%s) failed: %s", __func__, path, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 		}
 
 		de.file_name = dp->d_name;
-		cb( &de, data );
+		cb( ctx, &de, data );
 	}
 
 	httplib_closedir( dirp );

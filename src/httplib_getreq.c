@@ -29,12 +29,12 @@
 #include "httplib_string.h"
 
 /*
- * bool XX_httplib_getreq( struct httplib_context *ctx, struct httplib_connection *conn, int *err );
+ * bool XX_httplib_getreq( const struct httplib_context *ctx, struct httplib_connection *conn, int *err );
  *
  * The function XX_httplib_getreq() processes a request from a remote client.
  */
 
-bool XX_httplib_getreq( struct httplib_context *ctx, struct httplib_connection *conn, int *err ) {
+bool XX_httplib_getreq( const struct httplib_context *ctx, struct httplib_connection *conn, int *err ) {
 
 	const char *cl;
 
@@ -58,7 +58,7 @@ bool XX_httplib_getreq( struct httplib_context *ctx, struct httplib_connection *
 
 	clock_gettime( CLOCK_MONOTONIC, &conn->req_time );
 
-	conn->request_len = XX_httplib_read_request( NULL, conn, conn->buf, conn->buf_size, &conn->data_len );
+	conn->request_len = XX_httplib_read_request( ctx, NULL, conn, conn->buf, conn->buf_size, &conn->data_len );
 
 	/* 
 	 * assert(conn->request_len < 0 || conn->data_len >= conn->request_len);

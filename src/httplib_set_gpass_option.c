@@ -45,7 +45,7 @@ bool XX_httplib_set_gpass_option( struct httplib_context *ctx ) {
 
 	path = ctx->global_auth_file;
 
-	if ( path != NULL  &&  ! XX_httplib_stat( NULL, path, &file ) ) {
+	if ( path != NULL  &&  ! XX_httplib_stat( ctx, NULL, path, &file ) ) {
 
 		httplib_cry( DEBUG_LEVEL_ERROR, ctx, NULL, "%s: cannot open %s: %s", __func__, path, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 		return false;

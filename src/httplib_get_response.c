@@ -29,7 +29,7 @@
 #include "httplib_string.h"
 
 /*
- * int httplib_get_response( struct httplib_connection *conn, int timeout );
+ * int httplib_get_response( const struct httplib_context *ctx, struct httplib_connection *conn, int timeout );
  *
  * The function httplib_get_response() tries to get a response from a remote
  * peer. This function does some dirty action by temporarily replacing the
@@ -40,22 +40,20 @@
  * place.
  */
 
-int httplib_get_response( struct httplib_connection *conn, int timeout ) {
+int httplib_get_response( const struct httplib_context *ctx, struct httplib_connection *conn, int timeout ) {
 
 	int err;
 	int ret;
-	struct httplib_context *octx;
 	struct httplib_context rctx;
 
-	if ( conn == NULL  ||  conn->ctx == NULL ) return -1;
+	if ( ctx == NULL  ||  conn == NULL ) return -1;
 
 	/*
 	 * Replace the connection context with a copy of it where the timeout
 	 * value is changed to a parameter passed value.
 	 */
 
-	octx =   conn->ctx;
-	rctx = *(conn->ctx);
+	rctx = *ctx;
 
 	if ( timeout >= 0 ) {
 
@@ -65,9 +63,7 @@ int httplib_get_response( struct httplib_connection *conn, int timeout ) {
 	
 	else rctx.request_timeout = 0;
 
-	conn->ctx = &rctx;
-	ret       = XX_httplib_getreq( conn->ctx, conn, &err );
-	conn->ctx = octx;
+	ret = XX_httplib_getreq( &rctx, conn, &err );
 
 	/*
 	 * End of dirty context swap code.

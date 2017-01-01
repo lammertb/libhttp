@@ -30,21 +30,21 @@
 #include "httplib_ssl.h"
 
 /*
- * void XX_httplib_close_connection( struct httplib_connection *conn );
+ * void XX_httplib_close_connection( struct httplib_context *ctx, struct httplib_connection *conn );
  *
  * The function XX_httplib_close_connection() is the internal function which
  * does the heavy lifting to close a connection.
  */
 
-void XX_httplib_close_connection( struct httplib_connection *conn ) {
+void XX_httplib_close_connection( struct httplib_context *ctx, struct httplib_connection *conn ) {
 
-	if ( conn == NULL  ||  conn->ctx == NULL ) return;
+	if ( ctx == NULL  ||  conn == NULL ) return;
 
 	/*
 	 * call the connection_close callback if assigned
 	 */
 
-	if ( conn->ctx->callbacks.connection_close != NULL  &&  conn->ctx->ctx_type == CTX_TYPE_SERVER ) conn->ctx->callbacks.connection_close( conn );
+	if ( ctx->callbacks.connection_close != NULL  &&  ctx->ctx_type == CTX_TYPE_SERVER ) ctx->callbacks.connection_close( conn );
 
 	httplib_lock_connection( conn );
 
@@ -71,7 +71,7 @@ void XX_httplib_close_connection( struct httplib_connection *conn ) {
 #endif
 	if ( conn->client.sock != INVALID_SOCKET ) {
 
-		XX_httplib_close_socket_gracefully( conn );
+		XX_httplib_close_socket_gracefully( ctx, conn );
 		conn->client.sock = INVALID_SOCKET;
 	}
 
@@ -82,24 +82,24 @@ void XX_httplib_close_connection( struct httplib_connection *conn ) {
 
 
 /*
- * void httplib_close_connection( struct httplib_connection *conn );
+ * void httplib_close_connection( const struct httplib_context *ctx, struct httplib_connection *conn );
  *
  * The function httplib_close_connection() closes the connection passed as a
  * parameter to this function. The function does not return a success or
  * failure value.
  */
 
-void httplib_close_connection( struct httplib_connection *conn ) {
+void httplib_close_connection( struct httplib_context *ctx, struct httplib_connection *conn ) {
 
 	struct httplib_context *client_ctx;
 	int i;
 
-	if ( conn == NULL ) return;
+	if ( ctx == NULL  ||  conn == NULL ) return;
 
-	if ( conn->ctx->ctx_type == CTX_TYPE_CLIENT ) {
+	if ( ctx->ctx_type == CTX_TYPE_CLIENT ) {
 
-		client_ctx        = conn->ctx;
-		conn->ctx->status = CTX_STATUS_STOPPING;
+		client_ctx  = ctx;
+		ctx->status = CTX_STATUS_STOPPING;
 	}
 
 	else client_ctx = NULL;
@@ -111,7 +111,7 @@ void httplib_close_connection( struct httplib_connection *conn ) {
 		conn->client_ssl_ctx = NULL;
 	}
 #endif
-	XX_httplib_close_connection( conn );
+	XX_httplib_close_connection( ctx, conn );
 
 	if ( client_ctx != NULL ) {
 

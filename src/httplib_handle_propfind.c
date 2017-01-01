@@ -30,20 +30,20 @@
 #include "httplib_utils.h"
 
 /*
- * static void print_props( struct httplib_connection *conn, const char *uri, struct file *filep );
+ * static void print_props( const struct httplib_context *ctx, struct httplib_connection *conn, const char *uri, struct file *filep );
  *
  * The function print_props() writes the PROPFIND properties for a collection
  * event.
  */
 
-static void print_props( struct httplib_connection *conn, const char *uri, struct file *filep ) {
+static void print_props( const struct httplib_context *ctx, struct httplib_connection *conn, const char *uri, struct file *filep ) {
 
 	char mtime[64];
 
 	if ( conn == NULL  ||  uri == NULL  ||  filep == NULL ) return;
 
 	XX_httplib_gmt_time_string( mtime, sizeof(mtime), &filep->last_modified );
-	conn->num_bytes_sent += httplib_printf(conn,
+	conn->num_bytes_sent += httplib_printf( ctx, conn,
 	              "<d:response>"
 	              "<d:href>%s</d:href>"
 	              "<d:propstat>"
@@ -63,13 +63,13 @@ static void print_props( struct httplib_connection *conn, const char *uri, struc
 }  /* print_props */
 
 /*
- * static void print_dav_dir_entry( struct de *de, void *data );
+ * static void print_dav_dir_entry( const struct httplib_context *ctx, struct de *de, void *data );
  *
  * The function print_dav_dir_entry() is used to send the properties of a
  * webdav directory to the remote client.
  */
 
-static void print_dav_dir_entry( struct de *de, void *data ) {
+static void print_dav_dir_entry( const struct httplib_context *ctx, struct de *de, void *data ) {
 
 	char href[PATH_MAX];
 	char href_encoded[PATH_MAX * 3 /* worst case */];
@@ -80,30 +80,30 @@ static void print_dav_dir_entry( struct de *de, void *data ) {
 
 	if ( de == NULL  ||  conn == NULL ) return;
 
-	XX_httplib_snprintf( conn, &truncated, href, sizeof(href), "%s%s", conn->request_info.local_uri, de->file_name );
+	XX_httplib_snprintf( ctx, conn, &truncated, href, sizeof(href), "%s%s", conn->request_info.local_uri, de->file_name );
 
 	if ( ! truncated ) {
 
 		httplib_url_encode( href, href_encoded, PATH_MAX * 3 );
-		print_props( conn, href_encoded, &de->file );
+		print_props( ctx, conn, href_encoded, &de->file );
 	}
 
 }  /* print_dav_dir_entry */
 
 /*
- * void XX_httplib_handle_propfind( struct httplib_connection *conn, const char *path, struct file *filep );
+ * void XX_httplib_handle_propfind( const stuct httplib_context *ctx, struct httplib_connection *conn, const char *path, struct file *filep );
  *
  * The function XX_httlib_handle_propfind() handles a propfind request.
  */
 
-void XX_httplib_handle_propfind( struct httplib_connection *conn, const char *path, struct file *filep ) {
+void XX_httplib_handle_propfind( const struct httplib_context *ctx, struct httplib_connection *conn, const char *path, struct file *filep ) {
 
 	const char *depth;
 	char date[64];
 	time_t curtime;
 
-	if ( conn == NULL  ||  conn->ctx == NULL  ||  path == NULL  ||  filep == NULL ) return;
-	if ( conn->ctx->document_root == NULL ) return;
+	if ( ctx == NULL  ||  conn == NULL  ||  path == NULL  ||  filep == NULL ) return;
+	if ( ctx->document_root == NULL ) return;
 
 	depth   = httplib_get_header( conn, "Depth" );
 	curtime = time( NULL );
@@ -112,27 +112,27 @@ void XX_httplib_handle_propfind( struct httplib_connection *conn, const char *pa
 
 	conn->must_close  = true;
 	conn->status_code = 207;
-	httplib_printf( conn, "HTTP/1.1 207 Multi-Status\r\n" "Date: %s\r\n", date );
-	XX_httplib_send_static_cache_header( conn );
-	httplib_printf( conn, "Connection: %s\r\n" "Content-Type: text/xml; charset=utf-8\r\n\r\n", XX_httplib_suggest_connection_header( conn ) );
+	httplib_printf( ctx, conn, "HTTP/1.1 207 Multi-Status\r\n" "Date: %s\r\n", date );
+	XX_httplib_send_static_cache_header( ctx, conn );
+	httplib_printf( ctx, conn, "Connection: %s\r\n" "Content-Type: text/xml; charset=utf-8\r\n\r\n", XX_httplib_suggest_connection_header( ctx, conn ) );
 
-	conn->num_bytes_sent += httplib_printf( conn, "<?xml version=\"1.0\" encoding=\"utf-8\"?>" "<d:multistatus xmlns:d='DAV:'>\n" );
+	conn->num_bytes_sent += httplib_printf( ctx, conn, "<?xml version=\"1.0\" encoding=\"utf-8\"?>" "<d:multistatus xmlns:d='DAV:'>\n" );
 
 	/*
 	 * Print properties for the requested resource itself
 	 */
 
-	print_props( conn, conn->request_info.local_uri, filep );
+	print_props( ctx, conn, conn->request_info.local_uri, filep );
 
 	/*
 	 * If it is a directory, print directory entries too if Depth is not 0
 	 */
 
-	if ( conn->ctx->enable_directory_listing  &&  filep  &&  filep->is_directory  &&  ( depth == NULL  ||  strcmp( depth, "0" ) != 0 ) ) {
+	if ( ctx->enable_directory_listing  &&  filep  &&  filep->is_directory  &&  ( depth == NULL  ||  strcmp( depth, "0" ) != 0 ) ) {
 
-		XX_httplib_scan_directory( conn, path, conn, &print_dav_dir_entry );
+		XX_httplib_scan_directory( ctx, conn, path, conn, &print_dav_dir_entry );
 	}
 
-	conn->num_bytes_sent += httplib_printf( conn, "%s\n", "</d:multistatus>" );
+	conn->num_bytes_sent += httplib_printf( ctx, conn, "%s\n", "</d:multistatus>" );
 
 }  /* XX_httplib_handle_propfind */

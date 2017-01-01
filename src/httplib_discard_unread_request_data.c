@@ -28,20 +28,20 @@
 #include "httplib_main.h"
 
 /*
- * void XX_httplib_discard_unread_request_data( struct httplib_connection *conn );
+ * void XX_httplib_discard_unread_request_data( const struct httplib_context *ctx, struct httplib_connection *conn );
  *
  * The function XX_httplib_discard_unread_request_data() discards any request
  * data on a connection which is not further needed but has alread been
  * received.
  */
 
-void XX_httplib_discard_unread_request_data( struct httplib_connection *conn ) {
+void XX_httplib_discard_unread_request_data( const struct httplib_context *ctx, struct httplib_connection *conn ) {
 
 	char buf[MG_BUF_LEN];
 	size_t to_read;
 	int nread;
 
-	if ( conn == NULL ) return;
+	if ( ctx == NULL  ||  conn == NULL ) return;
 
 	to_read = sizeof(buf);
 
@@ -54,7 +54,7 @@ void XX_httplib_discard_unread_request_data( struct httplib_connection *conn ) {
 
 		while ( conn->is_chunked == 1 ) {
 
-			nread = httplib_read( conn, buf, to_read );
+			nread = httplib_read( ctx, conn, buf, to_read );
 			if ( nread <= 0 ) break;
 		}
 
@@ -72,7 +72,7 @@ void XX_httplib_discard_unread_request_data( struct httplib_connection *conn ) {
 				to_read = (size_t)(conn->content_len - conn->consumed_content);
 			}
 
-			nread = httplib_read( conn, buf, to_read );
+			nread = httplib_read( ctx, conn, buf, to_read );
 			if (nread <= 0) break;
 		}
 	}

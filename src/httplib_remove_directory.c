@@ -29,13 +29,13 @@
 #include "httplib_string.h"
 
 /*
- * int XX_httplib_remove_directory( struct httplib_connection *conn, const char *dir );
+ * int XX_httplib_remove_directory( const struct httplib_context *ctx, struct httplib_connection *conn, const char *dir );
  *
- * The function XX_httplib_remove_directory() removes recirsively a directory
+ * The function XX_httplib_remove_directory() removes recursively a directory
  * tree.
  */
 
-int XX_httplib_remove_directory( struct httplib_connection *conn, const char *dir ) {
+int XX_httplib_remove_directory( const struct httplib_context *ctx, struct httplib_connection *conn, const char *dir ) {
 
 	char path[PATH_MAX];
 	char error_string[ERROR_STRING_LEN];
@@ -44,6 +44,8 @@ int XX_httplib_remove_directory( struct httplib_connection *conn, const char *di
 	struct de de;
 	bool truncated;
 	int ok;
+
+	if ( ctx == NULL  || dir == NULL ) return 0;
 
 	ok = 1;
 
@@ -61,7 +63,7 @@ int XX_httplib_remove_directory( struct httplib_connection *conn, const char *di
 
 		if ( ! strcmp( dp->d_name, "." )   ||   ! strcmp( dp->d_name, ".." ) ) continue;
 
-		XX_httplib_snprintf( conn, &truncated, path, sizeof(path), "%s/%s", dir, dp->d_name );
+		XX_httplib_snprintf( ctx, conn, &truncated, path, sizeof(path), "%s/%s", dir, dp->d_name );
 
 		/*
 		 * If we don't memset stat structure to zero, mtime will have
@@ -83,9 +85,9 @@ int XX_httplib_remove_directory( struct httplib_connection *conn, const char *di
 			continue;
 		}
 
-		if ( ! XX_httplib_stat( conn, path, & de.file ) ) {
+		if ( ! XX_httplib_stat( ctx, conn, path, & de.file ) ) {
 
-			httplib_cry( DEBUG_LEVEL_WARNING, conn->ctx, conn, "%s: XX_httplib_stat(%s) failed: %s", __func__, path, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
+			httplib_cry( DEBUG_LEVEL_WARNING, ctx, conn, "%s: XX_httplib_stat(%s) failed: %s", __func__, path, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 			ok = 0;
 		}
 		if ( de.file.membuf == NULL ) {
@@ -96,7 +98,7 @@ int XX_httplib_remove_directory( struct httplib_connection *conn, const char *di
 
 			if ( de.file.is_directory ) {
 
-				if ( XX_httplib_remove_directory( conn, path ) == 0 ) ok = 0;
+				if ( XX_httplib_remove_directory( ctx, conn, path ) == 0 ) ok = 0;
 			}
 			
 			else if ( httplib_remove( path ) == 0 ) ok = 0;

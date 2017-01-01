@@ -28,26 +28,26 @@
 #include "httplib_main.h"
 
 /*
- * void XX_httplib_handle_file_based_request( struct httplib_connection *conn, const char *path, struct file *file );
+ * void XX_httplib_handle_file_based_request( const struct httplib_context *ctx, struct httplib_connection *conn, const char *path, struct file *file );
  *
  * The function XX_httplib_handle_file_based_request() handles a request which
  * involves a file. This can either be a CGI request, an SSI request of a
  * request for a static file.
  */
 
-void XX_httplib_handle_file_based_request( struct httplib_connection *conn, const char *path, struct file *file ) {
+void XX_httplib_handle_file_based_request( const struct httplib_context *ctx, struct httplib_connection *conn, const char *path, struct file *file ) {
 
 #if !defined(NO_CGI)
 	const char *cgi_ext;
 #endif  /* ! NO_CGI */
 	const char *ssi_ext;
 
-	if ( conn == NULL  ||  conn->ctx == NULL ) return;
+	if ( ctx == NULL  ||  conn == NULL ) return;
 
 #if !defined(NO_CGI)
-	cgi_ext = conn->ctx->cgi_pattern;
+	cgi_ext = ctx->cgi_pattern;
 #endif  /* ! NO_CGI */
-	ssi_ext = conn->ctx->ssi_pattern;
+	ssi_ext = ctx->ssi_pattern;
 
 	if (0) {
 #if !defined(NO_CGI)
@@ -59,20 +59,20 @@ void XX_httplib_handle_file_based_request( struct httplib_connection *conn, cons
 		 * CGI scripts may support all HTTP methods
 		 */
 
-		XX_httplib_handle_cgi_request( conn, path );
+		XX_httplib_handle_cgi_request( ctx, conn, path );
 #endif /* !NO_CGI */
 	}
 	
 	else if ( ssi_ext != NULL  &&  XX_httplib_match_prefix( ssi_ext, strlen( ssi_ext ), path ) > 0 ) {
 
-		XX_httplib_handle_ssi_file_request( conn, path, file );
+		XX_httplib_handle_ssi_file_request( ctx, conn, path, file );
 	}
 	
-	else if ( conn->ctx->static_file_max_age > 0  &&  ! conn->in_error_handler  &&  XX_httplib_is_not_modified( conn, file ) ) {
+	else if ( ctx->static_file_max_age > 0  &&  ! conn->in_error_handler  &&  XX_httplib_is_not_modified( ctx, conn, file ) ) {
 
-		XX_httplib_handle_not_modified_static_file_request( conn, file );
+		XX_httplib_handle_not_modified_static_file_request( ctx, conn, file );
 	}
 	
-	else XX_httplib_handle_static_file_request( conn, path, file, NULL, NULL );
+	else XX_httplib_handle_static_file_request( ctx, conn, path, file, NULL, NULL );
 
 }  /* XX_httplib_handle_file_based_request */

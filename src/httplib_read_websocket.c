@@ -28,12 +28,12 @@
 #include "httplib_main.h"
 
 /*
- * void XX_httplib_read_websocket( struct httplib_connection *conn, httplib_websocket_data_handler ws_data_handler, void *calback_data );
+ * void XX_httplib_read_websocket( const struct httplib_context *ctx, struct httplib_connection *conn, httplib_websocket_data_handler ws_data_handler, void *calback_data );
  *
  * The function XX_httplib_read_websocket() reads from a websocket connection.
  */
 
-void XX_httplib_read_websocket( struct httplib_connection *conn, httplib_websocket_data_handler ws_data_handler, void *callback_data ) {
+void XX_httplib_read_websocket( const struct httplib_context *ctx, struct httplib_connection *conn, httplib_websocket_data_handler ws_data_handler, void *callback_data ) {
 
 	/* Pointer to the beginning of the portion of the incoming websocket
 	 * message queue.
@@ -76,27 +76,27 @@ void XX_httplib_read_websocket( struct httplib_connection *conn, httplib_websock
 	unsigned char mop; /* mask flag and opcode */
 	double timeout;
 
-	if ( conn == NULL  ||  conn->ctx == NULL ) return;
+	if ( ctx == NULL  ||   conn == NULL ) return;
 
 	data = mem;
 
-	timeout                       = ((double)conn->ctx->websocket_timeout) / 1000.0;
-	if ( timeout <= 0.0 ) timeout = ((double)conn->ctx->request_timeout) / 1000.0;
+	timeout                       = ((double)ctx->websocket_timeout) / 1000.0;
+	if ( timeout <= 0.0 ) timeout = ((double)ctx->request_timeout  ) / 1000.0;
 
-	XX_httplib_set_thread_name( "wsock" );
+	XX_httplib_set_thread_name( ctx, "wsock" );
 
 	/*
 	 * Loop continuously, reading messages from the socket, invoking the
 	 * callback, and waiting repeatedly until an error occurs.
 	 */
 
-	while ( conn->ctx->status == CTX_STATUS_RUNNING ) {
+	while ( ctx->status == CTX_STATUS_RUNNING ) {
 
 		header_len = 0;
 
 		if ( conn->data_len < conn->request_len ) {
 
-			httplib_cry( DEBUG_LEVEL_ERROR, conn->ctx, conn, "%s: websocket error: data len less than request len, closing connection", __func__ );
+			httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s: websocket error: data len less than request len, closing connection", __func__ );
 			break;
 		}
 
@@ -145,7 +145,7 @@ void XX_httplib_read_websocket( struct httplib_connection *conn, httplib_websock
 					 * connection
 					 */
 
-					httplib_cry( DEBUG_LEVEL_ERROR, conn->ctx, conn, "%s: websocket out of memory; closing connection", __func__ );
+					httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s: websocket out of memory; closing connection", __func__ );
 					break;
 				}
 			}
@@ -161,7 +161,7 @@ void XX_httplib_read_websocket( struct httplib_connection *conn, httplib_websock
 
 			if ( body_len < header_len ) {
 
-				httplib_cry( DEBUG_LEVEL_ERROR, conn->ctx, conn, "%s: websocket error: body len less than header len, closing connection", __func__ );
+				httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s: websocket error: body len less than header len, closing connection", __func__ );
 				break;
 			}
 
@@ -183,7 +183,7 @@ void XX_httplib_read_websocket( struct httplib_connection *conn, httplib_websock
 
 				while ( len < data_len ) {
 
-					n = XX_httplib_pull( NULL, conn, data + len, (int)(data_len - len), timeout );
+					n = XX_httplib_pull( ctx, NULL, conn, data + len, (int)(data_len - len), timeout );
 					if ( n <= 0 ) {
 
 						error = 1;
@@ -195,7 +195,7 @@ void XX_httplib_read_websocket( struct httplib_connection *conn, httplib_websock
 				
 				if (error) {
 
-					httplib_cry( DEBUG_LEVEL_ERROR, conn->ctx, conn, "%s: websocket pull failed; closing connection", __func__ );
+					httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s: websocket pull failed; closing connection", __func__ );
 					break;
 				}
 
@@ -270,7 +270,7 @@ void XX_httplib_read_websocket( struct httplib_connection *conn, httplib_websock
 			 * message queue.
 			 */
 
-			n = XX_httplib_pull( NULL, conn, conn->buf + conn->data_len, conn->buf_size - conn->data_len, timeout );
+			n = XX_httplib_pull( ctx, NULL, conn, conn->buf + conn->data_len, conn->buf_size - conn->data_len, timeout );
 
 			/*
 			 * Error, no bytes read
@@ -282,6 +282,6 @@ void XX_httplib_read_websocket( struct httplib_connection *conn, httplib_websock
 		}
 	}
 
-	XX_httplib_set_thread_name( "worker" );
+	XX_httplib_set_thread_name( ctx, "worker" );
 
 }  /* XX_httplib_read_websocket */

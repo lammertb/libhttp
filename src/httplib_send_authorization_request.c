@@ -29,43 +29,43 @@
 #include "httplib_pthread.h"
 #include "httplib_utils.h"
 
-void XX_httplib_send_authorization_request( struct httplib_connection *conn ) {
+void XX_httplib_send_authorization_request( struct httplib_context *ctx, struct httplib_connection *conn ) {
 
 	char date[64];
 	time_t curtime;
 	uint64_t nonce;
 	const char *auth_domain;
 
-	if ( conn == NULL  ||  conn->ctx == NULL ) return;
+	if ( ctx == NULL  ||  conn == NULL ) return;
 
 	curtime = time( NULL );
 
-	nonce = (uint64_t)conn->ctx->start_time;
+	nonce = (uint64_t)ctx->start_time;
 
-	httplib_pthread_mutex_lock( & conn->ctx->nonce_mutex );
-	nonce += conn->ctx->nonce_count;
-	++conn->ctx->nonce_count;
-	httplib_pthread_mutex_unlock( & conn->ctx->nonce_mutex );
+	httplib_pthread_mutex_lock( & ctx->nonce_mutex );
+	nonce += ctx->nonce_count;
+	++ctx->nonce_count;
+	httplib_pthread_mutex_unlock( & ctx->nonce_mutex );
 
-	nonce            ^= conn->ctx->auth_nonce_mask;
+	nonce            ^= ctx->auth_nonce_mask;
 	conn->status_code = 401;
 	conn->must_close  = true;
 
 	XX_httplib_gmt_time_string( date, sizeof(date), &curtime );
 
-	if ( conn->ctx->authentication_domain != NULL ) auth_domain = conn->ctx->authentication_domain;
-	else                                            auth_domain = "example.com";
+	if ( ctx->authentication_domain != NULL ) auth_domain = ctx->authentication_domain;
+	else                                      auth_domain = "example.com";
 
-	httplib_printf( conn, "HTTP/1.1 401 Unauthorized\r\n" );
-	XX_httplib_send_no_cache_header( conn );
-	httplib_printf( conn,
+	httplib_printf( ctx, conn, "HTTP/1.1 401 Unauthorized\r\n" );
+	XX_httplib_send_no_cache_header( ctx, conn );
+	httplib_printf( ctx, conn,
 	          "Date: %s\r\n"
 	          "Connection: %s\r\n"
 	          "Content-Length: 0\r\n"
 	          "WWW-Authenticate: Digest qop=\"auth\", realm=\"%s\", "
 	          "nonce=\"%" UINT64_FMT "\"\r\n\r\n",
 	          date,
-	          XX_httplib_suggest_connection_header(conn),
+	          XX_httplib_suggest_connection_header( ctx, conn ),
 	          auth_domain,
 	          nonce );
 

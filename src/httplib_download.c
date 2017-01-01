@@ -50,7 +50,7 @@ struct httplib_connection * httplib_download( struct httplib_context *ctx, const
 
 	if ( conn != NULL ) {
 
-		i = XX_httplib_vprintf( conn, fmt, ap );
+		i = XX_httplib_vprintf( ctx, conn, fmt, ap );
 
 		if ( i <= 0 ) httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s: error sending request", __func__ );
 		
@@ -74,7 +74,7 @@ struct httplib_connection * httplib_download( struct httplib_context *ctx, const
 
 	if ( i <= 0  &&  conn != NULL ) {
 
-		httplib_close_connection( conn );
+		httplib_close_connection( ctx, conn );
 		conn = NULL;
 	}
 

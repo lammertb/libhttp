@@ -29,7 +29,7 @@
 #include "httplib_string.h"
 #include "httplib_utils.h"
 
-void XX_httplib_send_http_error( struct httplib_connection *conn, int status, const char *fmt, ... ) {
+void XX_httplib_send_http_error( const struct httplib_context *ctx, struct httplib_connection *conn, int status, const char *fmt, ... ) {
 
 	char buf[MG_BUF_LEN];
 	va_list ap;
@@ -47,15 +47,15 @@ void XX_httplib_send_http_error( struct httplib_connection *conn, int status, co
 	const char *tstr;
 	const char *status_text;
 
-	if ( conn == NULL  ||  conn->ctx == NULL ) return;
+	if ( ctx == NULL  ||  conn == NULL ) return;
 
 	curtime       = time( NULL );
 	error_handler = NULL;
-	status_text   = httplib_get_response_code_text( conn, status );
+	status_text   = httplib_get_response_code_text( ctx, conn, status );
 
 	conn->status_code = status;
 
-	if ( conn->in_error_handler  ||  conn->ctx->callbacks.http_error == NULL  ||  conn->ctx->callbacks.http_error( conn, status ) ) {
+	if ( conn->in_error_handler  ||  ctx->callbacks.http_error == NULL  ||  ctx->callbacks.http_error( conn, status ) ) {
 
 		if ( ! conn->in_error_handler ) {
 
@@ -63,8 +63,8 @@ void XX_httplib_send_http_error( struct httplib_connection *conn, int status, co
 			 * Send user defined error pages, if defined
 			 */
 
-			error_handler       = conn->ctx->error_pages;
-			error_page_file_ext = conn->ctx->index_files;
+			error_handler       = ctx->error_pages;
+			error_page_file_ext = ctx->index_files;
 			page_handler_found  = 0;
 
 			if ( error_handler != NULL ) {
@@ -78,7 +78,7 @@ void XX_httplib_send_http_error( struct httplib_connection *conn, int status, co
 							 * Handler for specific error, e.g. 404 error
 							 */
 
-							XX_httplib_snprintf( conn, &truncated, buf, sizeof(buf) - 32, "%serror%03u.", error_handler, status );
+							XX_httplib_snprintf( ctx, conn, &truncated, buf, sizeof(buf) - 32, "%serror%03u.", error_handler, status );
 							break;
 
 						case 2 :
@@ -87,7 +87,7 @@ void XX_httplib_send_http_error( struct httplib_connection *conn, int status, co
 						         * for all server errors (500-599)
 							 */
 
-							XX_httplib_snprintf( conn, &truncated, buf, sizeof(buf) - 32, "%serror%01uxx.", error_handler, status / 100 );
+							XX_httplib_snprintf( ctx, conn, &truncated, buf, sizeof(buf) - 32, "%serror%01uxx.", error_handler, status / 100 );
 							break;
 
 						default :
@@ -95,7 +95,7 @@ void XX_httplib_send_http_error( struct httplib_connection *conn, int status, co
 							 * Handler for all errors
 							 */
 
-							XX_httplib_snprintf( conn, &truncated, buf, sizeof(buf) - 32, "%serror.", error_handler );
+							XX_httplib_snprintf( ctx, conn, &truncated, buf, sizeof(buf) - 32, "%serror.", error_handler );
 							break;
 					}
 
@@ -115,7 +115,7 @@ void XX_httplib_send_http_error( struct httplib_connection *conn, int status, co
 						for (i=1; i<32 && tstr[i] != 0 && tstr[i] != ','; i++) buf[len + i - 1] = tstr[i];
 						buf[len + i - 1] = 0;
 
-						if ( XX_httplib_stat( conn, buf, &error_page_file ) ) {
+						if ( XX_httplib_stat( ctx, conn, buf, &error_page_file ) ) {
 
 							page_handler_found = 1;
 							break;
@@ -128,7 +128,7 @@ void XX_httplib_send_http_error( struct httplib_connection *conn, int status, co
 			if ( page_handler_found ) {
 
 				conn->in_error_handler = true;
-				XX_httplib_handle_file_based_request( conn, buf, &error_page_file );
+				XX_httplib_handle_file_based_request( ctx, conn, buf, &error_page_file );
 				conn->in_error_handler = false;
 
 				return;
@@ -149,11 +149,11 @@ void XX_httplib_send_http_error( struct httplib_connection *conn, int status, co
 
 		conn->must_close = true;
 
-		httplib_printf( conn, "HTTP/1.1 %d %s\r\n", status, status_text );
-		XX_httplib_send_no_cache_header( conn );
+		httplib_printf( ctx, conn, "HTTP/1.1 %d %s\r\n", status, status_text );
+		XX_httplib_send_no_cache_header( ctx, conn );
 
-		if ( has_body ) httplib_printf( conn, "%s", "Content-Type: text/plain; charset=utf-8\r\n" );
-		httplib_printf( conn, "Date: %s\r\n" "Connection: close\r\n\r\n", date );
+		if ( has_body ) httplib_printf( ctx, conn, "%s", "Content-Type: text/plain; charset=utf-8\r\n" );
+		httplib_printf( ctx, conn, "Date: %s\r\n" "Connection: close\r\n\r\n", date );
 
 		/*
 		 * Errors 1xx, 204 and 304 MUST NOT send a body
@@ -161,14 +161,14 @@ void XX_httplib_send_http_error( struct httplib_connection *conn, int status, co
 
 		if ( has_body ) {
 
-			httplib_printf( conn, "Error %d: %s\n", status, status_text );
+			httplib_printf( ctx, conn, "Error %d: %s\n", status, status_text );
 
 			if ( fmt != NULL ) {
 
 				va_start( ap, fmt );
-				XX_httplib_vsnprintf( conn, NULL, buf, sizeof(buf), fmt, ap );
+				XX_httplib_vsnprintf( ctx, conn, NULL, buf, sizeof(buf), fmt, ap );
 				va_end( ap );
-				httplib_write( conn, buf, strlen(buf) );
+				httplib_write( ctx, conn, buf, strlen(buf) );
 			}
 		}
 		

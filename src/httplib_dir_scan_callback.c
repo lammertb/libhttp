@@ -28,10 +28,12 @@
 #include "httplib_main.h"
 #include "httplib_string.h"
 
-void XX_httplib_dir_scan_callback( struct de *de, void *data ) {
+void XX_httplib_dir_scan_callback( const struct httplib_context *ctx, struct de *de, void *data ) {
 
 	struct dir_scan_data *dsd;
 	struct de* old_entries;
+
+	UNUSED_PARAMETER(ctx);
 
 	dsd = data;
 

@@ -29,7 +29,7 @@
 #include "httplib_utils.h"
 
 /*
- * int XX_httplib_read_request( FILE *fp, struct httplib_connection *conn, char *buf, int bufsiz, int *nread );
+ * int XX_httplib_read_request( const struct httplib_context *ctx, FILE *fp, struct httplib_connection *conn, char *buf, int bufsiz, int *nread );
  *
  * The function XX_httplib_read_request() keeps reading the input (which can
  * either be an opened file descriptor, a socket sock or an SSL descriptor ssl)
@@ -39,20 +39,20 @@
  * is incremented by the number of bytes read.
  */
 
-int XX_httplib_read_request( FILE *fp, struct httplib_connection *conn, char *buf, int bufsiz, int *nread ) {
+int XX_httplib_read_request( const struct httplib_context *ctx, FILE *fp, struct httplib_connection *conn, char *buf, int bufsiz, int *nread ) {
 
 	int request_len;
 	int n;
 	struct timespec last_action_time;
 	double request_timeout;
 
-	if ( conn == NULL  ||  conn->ctx ==  NULL ) return 0;
+	if ( ctx == NULL  ||  conn == NULL ) return 0;
 
 	n = 0;
 
 	memset( & last_action_time, 0, sizeof(last_action_time) );
 
-	request_timeout = ((double)conn->ctx->request_timeout) / 1000.0;
+	request_timeout = ((double)ctx->request_timeout) / 1000.0;
 	request_len     = XX_httplib_get_request_len( buf, *nread );
 
 	/*
@@ -61,11 +61,11 @@ int XX_httplib_read_request( FILE *fp, struct httplib_connection *conn, char *bu
 
 	clock_gettime( CLOCK_MONOTONIC, & last_action_time );
 
-	while ( conn->ctx->status == CTX_STATUS_RUNNING  &&
-		*nread            <  bufsiz              &&
-		request_len       == 0                   &&
+	while ( ctx->status == CTX_STATUS_RUNNING  &&
+		*nread      <  bufsiz              &&
+		request_len == 0                   &&
 		((XX_httplib_difftimespec(&last_action_time, &(conn->req_time)) <= request_timeout) || (request_timeout < 0)) &&
-		((n = XX_httplib_pull(fp, conn, buf + *nread, bufsiz - *nread, request_timeout)) > 0)) {
+		( (n = XX_httplib_pull( ctx, fp, conn, buf + *nread, bufsiz - *nread, request_timeout )) > 0 ) ) {
 
 		*nread += n;
 		if ( *nread > bufsiz ) return -2;

@@ -29,7 +29,7 @@
 #include "httplib_string.h"
 
 /* Return 1 if request is authorised, 0 otherwise. */
-bool XX_httplib_check_authorization( struct httplib_connection *conn, const char *path ) {
+bool XX_httplib_check_authorization( const struct httplib_context *ctx, struct httplib_connection *conn, const char *path ) {
 
 	char fname[PATH_MAX];
 	char error_string[ERROR_STRING_LEN];
@@ -40,31 +40,31 @@ bool XX_httplib_check_authorization( struct httplib_connection *conn, const char
 	bool authorized;
 	bool truncated;
 
-	if ( conn == NULL  ||  conn->ctx == NULL ) return false;
+	if ( ctx == NULL  ||  conn == NULL ) return false;
 
 	authorized = true;
 
-	list = conn->ctx->protect_uri;
+	list = ctx->protect_uri;
 
 	while ( (list = XX_httplib_next_option( list, &uri_vec, &filename_vec )) != NULL ) {
 
 		if ( ! memcmp( conn->request_info.local_uri, uri_vec.ptr, uri_vec.len ) ) {
 
-			XX_httplib_snprintf( conn, &truncated, fname, sizeof(fname), "%.*s", (int)filename_vec.len, filename_vec.ptr );
+			XX_httplib_snprintf( ctx, conn, &truncated, fname, sizeof(fname), "%.*s", (int)filename_vec.len, filename_vec.ptr );
 
-			if ( truncated  ||  ! XX_httplib_fopen( conn, fname, "r", &file ) ) {
+			if ( truncated  ||  ! XX_httplib_fopen( ctx, conn, fname, "r", &file ) ) {
 
-				httplib_cry( DEBUG_LEVEL_WARNING, conn->ctx, conn, "%s: cannot open %s: %s", __func__, fname, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
+				httplib_cry( DEBUG_LEVEL_WARNING, ctx, conn, "%s: cannot open %s: %s", __func__, fname, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 			}
 			break;
 		}
 	}
 
-	if ( ! XX_httplib_is_file_opened( & file ) ) XX_httplib_open_auth_file( conn, path, & file );
+	if ( ! XX_httplib_is_file_opened( & file ) ) XX_httplib_open_auth_file( ctx, conn, path, & file );
 
 	if ( XX_httplib_is_file_opened( & file ) ) {
 
-		authorized = XX_httplib_authorize( conn, & file );
+		authorized = XX_httplib_authorize( ctx, conn, & file );
 		XX_httplib_fclose( & file );
 	}
 

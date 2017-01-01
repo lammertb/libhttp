@@ -36,7 +36,7 @@
  * request for a static file.
  */
 
-void XX_httplib_handle_static_file_request( struct httplib_connection *conn, const char *path, struct file *filep, const char *mime_type, const char *additional_headers ) {
+void XX_httplib_handle_static_file_request( const struct httplib_context *ctx, struct httplib_connection *conn, const char *path, struct file *filep, const char *mime_type, const char *additional_headers ) {
 
 	char date[64];
 	char lm[64];
@@ -58,20 +58,20 @@ void XX_httplib_handle_static_file_request( struct httplib_connection *conn, con
 	const char *cors2;
 	const char *cors3;
 
-	if ( conn == NULL || conn->ctx == NULL || filep == NULL ) return;
+	if ( ctx == NULL  ||  conn == NULL  ||  filep == NULL ) return;
 
 	msg      = "OK";
 	curtime  = time( NULL );
 	encoding = "";
 
-	if ( mime_type == NULL ) XX_httplib_get_mime_type( conn->ctx, path, &mime_vec );
+	if ( mime_type == NULL ) XX_httplib_get_mime_type( ctx, path, &mime_vec );
 	
 	else {
 		mime_vec.ptr = mime_type;
 		mime_vec.len = strlen( mime_type );
 	}
 
-	if ( filep->size > INT64_MAX ) XX_httplib_send_http_error( conn, 500, "Error: File size is too large to send\n%" INT64_FMT, filep->size );
+	if ( filep->size > INT64_MAX ) XX_httplib_send_http_error( ctx, conn, 500, "Error: File size is too large to send\n%" INT64_FMT, filep->size );
 
 	cl                = (int64_t)filep->size;
 	conn->status_code = 200;
@@ -85,11 +85,11 @@ void XX_httplib_handle_static_file_request( struct httplib_connection *conn, con
 
 	if ( filep->gzipped ) {
 
-		XX_httplib_snprintf( conn, &truncated, gz_path, sizeof(gz_path), "%s.gz", path );
+		XX_httplib_snprintf( ctx, conn, &truncated, gz_path, sizeof(gz_path), "%s.gz", path );
 
 		if ( truncated ) {
 
-			XX_httplib_send_http_error( conn, 500, "Error: Path of zipped file too long (%s)", path );
+			XX_httplib_send_http_error( ctx, conn, 500, "Error: Path of zipped file too long (%s)", path );
 			return;
 		}
 
@@ -97,13 +97,13 @@ void XX_httplib_handle_static_file_request( struct httplib_connection *conn, con
 		encoding = "Content-Encoding: gzip\r\n";
 	}
 
-	if ( ! XX_httplib_fopen( conn, path, "rb", filep ) ) {
+	if ( ! XX_httplib_fopen( ctx, conn, path, "rb", filep ) ) {
 
-		XX_httplib_send_http_error( conn, 500, "Error: Cannot open file\nfopen(%s): %s", path, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
+		XX_httplib_send_http_error( ctx, conn, 500, "Error: Cannot open file\nfopen(%s): %s", path, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 		return;
 	}
 
-	XX_httplib_fclose_on_exec( filep, conn );
+	XX_httplib_fclose_on_exec( ctx, filep, conn );
 
 	/*
 	 * If Range: header specified, act accordingly
@@ -122,13 +122,13 @@ void XX_httplib_handle_static_file_request( struct httplib_connection *conn, con
 
 		if ( filep->gzipped ) {
 
-			XX_httplib_send_http_error( conn, 501, "%s", "Error: Range requests in gzipped files are not supported"); XX_httplib_fclose(filep);
+			XX_httplib_send_http_error( ctx, conn, 501, "%s", "Error: Range requests in gzipped files are not supported"); XX_httplib_fclose(filep);
 			return;
 		}
 		conn->status_code = 206;
 		cl                = (n == 2) ? (((r2 > cl) ? cl : r2) - r1 + 1) : (cl - r1);
 
-		XX_httplib_snprintf( conn,
+		XX_httplib_snprintf( ctx, conn,
 		            NULL, /* range buffer is big enough */
 		            range,
 		            sizeof(range),
@@ -152,7 +152,7 @@ void XX_httplib_handle_static_file_request( struct httplib_connection *conn, con
 		 */
 
 		cors1 = "Access-Control-Allow-Origin: ";
-		cors2 = ( conn->ctx->access_control_allow_origin != NULL ) ? conn->ctx->access_control_allow_origin : "";
+		cors2 = ( ctx->access_control_allow_origin != NULL ) ? ctx->access_control_allow_origin : "";
 		cors3 = "\r\n";
 	}
 	else {
@@ -168,11 +168,11 @@ void XX_httplib_handle_static_file_request( struct httplib_connection *conn, con
 
 	XX_httplib_gmt_time_string( date, sizeof(date), & curtime              );
 	XX_httplib_gmt_time_string( lm,   sizeof(lm),   & filep->last_modified );
-	XX_httplib_construct_etag(  etag, sizeof(etag), filep                  );
+	XX_httplib_construct_etag(  ctx, etag, sizeof(etag), filep             );
 
-	httplib_printf( conn, "HTTP/1.1 %d %s\r\n" "%s%s%s" "Date: %s\r\n", conn->status_code, msg, cors1, cors2, cors3, date );
-	XX_httplib_send_static_cache_header( conn );
-	httplib_printf( conn,
+	httplib_printf( ctx, conn, "HTTP/1.1 %d %s\r\n" "%s%s%s" "Date: %s\r\n", conn->status_code, msg, cors1, cors2, cors3, date );
+	XX_httplib_send_static_cache_header( ctx, conn );
+	httplib_printf( ctx, conn,
 	                "Last-Modified: %s\r\n"
 	                "Etag: %s\r\n"
 	                "Content-Type: %.*s\r\n"
@@ -185,7 +185,7 @@ void XX_httplib_handle_static_file_request( struct httplib_connection *conn, con
 	                (int)mime_vec.len,
 	                mime_vec.ptr,
 	                cl,
-	                XX_httplib_suggest_connection_header(conn),
+	                XX_httplib_suggest_connection_header( ctx, conn ),
 	                range,
 	                encoding );
 
@@ -194,10 +194,10 @@ void XX_httplib_handle_static_file_request( struct httplib_connection *conn, con
 	 * sure no one of the additional_headers is included twice
 	 */
 
-	if ( additional_headers != NULL ) httplib_printf( conn, "%.*s\r\n\r\n", (int)strlen( additional_headers ), additional_headers );
-	else                              httplib_printf( conn, "\r\n"                                                                );
+	if ( additional_headers != NULL ) httplib_printf( ctx, conn, "%.*s\r\n\r\n", (int)strlen( additional_headers ), additional_headers );
+	else                              httplib_printf( ctx, conn, "\r\n"                                                                );
 
-	if ( strcmp( conn->request_info.request_method, "HEAD" ) != 0 ) XX_httplib_send_file_data( conn, filep, r1, cl );
+	if ( strcmp( conn->request_info.request_method, "HEAD" ) != 0 ) XX_httplib_send_file_data( ctx, conn, filep, r1, cl );
 
 	XX_httplib_fclose( filep );
 

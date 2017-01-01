@@ -28,16 +28,16 @@
 #include "httplib_main.h"
 
 /*
- * void XX_httplib_remove_bad_file( const struct httplib_connection *conn, const char *path );
+ * void XX_httplib_remove_bad_file( const struct httplib_context *ctx, const struct httplib_connection *conn, const char *path );
  *
  * The function XX_httplib_remove_bad_file() removes an invalid file and throws
  * an error message if this does not succeed.
  */
 
-void XX_httplib_remove_bad_file( const struct httplib_connection *conn, const char *path ) {
+void XX_httplib_remove_bad_file( const struct httplib_context *ctx, const struct httplib_connection *conn, const char *path ) {
 
 	int r = httplib_remove( path );
 
-	if ( r != 0  &&  conn != NULL  &&  conn->ctx != NULL ) httplib_cry( DEBUG_LEVEL_ERROR, conn->ctx, conn, "%s: Cannot remove invalid file %s", __func__, path );
+	if ( r != 0  &&  ctx != NULL  &&  conn != NULL ) httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s: Cannot remove invalid file %s", __func__, path );
 
 }  /* XX_httplib_remove_bad_file */

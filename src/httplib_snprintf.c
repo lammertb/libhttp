@@ -29,19 +29,19 @@
 #include "httplib_string.h"
 
 /*
- * void XX_httplib_snprintf( const struct httplib_connection *conn, bool *truncated, char *buf, size_t buflen, const char *fmt, ... );
+ * void XX_httplib_snprintf( const struct httplib_context *ctx, const struct httplib_connection *conn, bool *truncated, char *buf, size_t buflen, const char *fmt, ... );
  *
  * The function XX_httplib_snprintf() is an internal function to send a string
  * to a connection. The string can be formated with a format string and
  * parameters in the same way as the snprintf function works.
  */
 
-void XX_httplib_snprintf( const struct httplib_connection *conn, bool *truncated, char *buf, size_t buflen, const char *fmt, ... ) {
+void XX_httplib_snprintf( const struct httplib_context *ctx, const struct httplib_connection *conn, bool *truncated, char *buf, size_t buflen, const char *fmt, ... ) {
 
 	va_list ap;
 
 	va_start( ap, fmt );
-	XX_httplib_vsnprintf( conn, truncated, buf, buflen, fmt, ap );
+	XX_httplib_vsnprintf( ctx, conn, truncated, buf, buflen, fmt, ap );
 	va_end( ap );
 
 }  /* XX_httplib_snprintf */

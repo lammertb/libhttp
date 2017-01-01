@@ -32,7 +32,7 @@
  * Return 1 on success. Always initializes the ah structure.
  */
 
-int XX_httplib_parse_auth_header(struct httplib_connection *conn, char *buf, size_t buf_size, struct ah *ah) {
+int XX_httplib_parse_auth_header( const struct httplib_context *ctx, struct httplib_connection *conn, char *buf, size_t buf_size, struct ah *ah ) {
 
 	char *name;
 	char *value;
@@ -40,7 +40,7 @@ int XX_httplib_parse_auth_header(struct httplib_connection *conn, char *buf, siz
 	const char *auth_header;
 	uint64_t nonce;
 
-	if ( ah == NULL  ||  conn == NULL ) return 0;
+	if ( ctx == NULL  ||  ah == NULL  ||  conn == NULL ) return 0;
 
 	memset( ah, 0, sizeof(*ah) );
 	if ( (auth_header = httplib_get_header( conn, "Authorization" )) == NULL  ||  httplib_strncasecmp( auth_header, "Digest ", 7 ) != 0 ) return 0;
@@ -103,7 +103,7 @@ int XX_httplib_parse_auth_header(struct httplib_connection *conn, char *buf, siz
 	 * Convert the nonce from the client to a number.
 	 */
 
-	nonce ^= conn->ctx->auth_nonce_mask;
+	nonce ^= ctx->auth_nonce_mask;
 
 	/*
 	 * The converted number corresponds to the time the nounce has been
@@ -116,7 +116,7 @@ int XX_httplib_parse_auth_header(struct httplib_connection *conn, char *buf, siz
 	 * two restarts, a new login is required.
 	 */
 
-	if ( nonce < (uint64_t)conn->ctx->start_time ) {
+	if ( nonce < (uint64_t)ctx->start_time ) {
 
 		/*
 		 * nonce is from a previous start of the server and no longer valid
@@ -130,7 +130,7 @@ int XX_httplib_parse_auth_header(struct httplib_connection *conn, char *buf, siz
 	 * server.
 	 */
 
-	if ( nonce >= ( (uint64_t)conn->ctx->start_time + conn->ctx->nonce_count ) ) return 0;
+	if ( nonce >= ( (uint64_t)ctx->start_time + ctx->nonce_count ) ) return 0;
 
 	/*
 	 * CGI needs it as REMOTE_USER

@@ -65,7 +65,7 @@ static void master_thread_run(void *thread_func_param) {
 
 	if ( ctx == NULL ) return;
 
-	XX_httplib_set_thread_name( "master" );
+	XX_httplib_set_thread_name( ctx, "master" );
 
 /*
  * Increase priority of the master thread

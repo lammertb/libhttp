@@ -27,7 +27,7 @@
 
 #include "httplib_main.h"
 
-static int httplib_read_inner( struct httplib_connection *conn, void *buffie, size_t len ) {
+static int httplib_read_inner( const struct httplib_context *ctx, struct httplib_connection *conn, void *buffie, size_t len ) {
 
 	int64_t n;
 	int64_t buffered_len;
@@ -36,7 +36,7 @@ static int httplib_read_inner( struct httplib_connection *conn, void *buffie, si
 	const char *body;
 	char *buf;
 
-	if ( conn == NULL ) return 0;
+	if ( ctx == NULL  ||  conn == NULL ) return 0;
 
 	buf = buffie;
 
@@ -90,7 +90,7 @@ static int httplib_read_inner( struct httplib_connection *conn, void *buffie, si
 		 * socket.
 		 */
 
-		n = XX_httplib_pull_all( NULL, conn, buf, (int)len64 );
+		n = XX_httplib_pull_all( ctx, NULL, conn, buf, (int)len64 );
 
 		if ( n >= 0 ) nread += n;
 		else          nread  = (nread > 0) ? nread : n;
@@ -101,21 +101,21 @@ static int httplib_read_inner( struct httplib_connection *conn, void *buffie, si
 }  /* httplib_read_inner */
 
 
-static char httplib_getc(struct httplib_connection *conn) {
+static char httplib_getc( const struct httplib_context *ctx, struct httplib_connection *conn ) {
 
 	char c;
 
 	if ( conn == NULL ) return 0;
 
 	conn->content_len++;
-	if ( httplib_read_inner( conn, &c, 1 ) <= 0 ) return '\0';
+	if ( httplib_read_inner( ctx, conn, &c, 1 ) <= 0 ) return '\0';
 
 	return c;
 
 }  /* httplib_getc */
 
 
-int httplib_read( struct httplib_connection *conn, void *buf, size_t len ) {
+int httplib_read( const struct httplib_context *ctx, struct httplib_connection *conn, void *buf, size_t len ) {
 
 	if ( len > INT_MAX ) len = INT_MAX;
 
@@ -142,7 +142,7 @@ int httplib_read( struct httplib_connection *conn, void *buf, size_t len ) {
 				size_t read_now = ((conn->chunk_remainder > len) ? (len) : (conn->chunk_remainder));
 
 				conn->content_len += (int)read_now;
-				read_ret           = httplib_read_inner(conn, (char *)buf + all_read, read_now);
+				read_ret           = httplib_read_inner( ctx, conn, (char *)buf + all_read, read_now );
 				all_read          += (size_t)read_ret;
 
 				conn->chunk_remainder -= read_now;
@@ -154,7 +154,7 @@ int httplib_read( struct httplib_connection *conn, void *buf, size_t len ) {
 					 * the rest of the data in the current chunk has been read
 					 */
 
-					if ( httplib_getc(conn) != '\r'  ||  httplib_getc(conn) != '\n' ) {
+					if ( httplib_getc( ctx, conn ) != '\r'  ||  httplib_getc( ctx, conn ) != '\n' ) {
 
 						/*
 						 * Protocol violation
@@ -181,7 +181,7 @@ int httplib_read( struct httplib_connection *conn, void *buf, size_t len ) {
 
 				for (i=0; i < ((int)sizeof(lenbuf)-1); i++) {
 
-					lenbuf[i] = httplib_getc( conn );
+					lenbuf[i] = httplib_getc( ctx, conn );
 
 					if ( i > 0  &&  lenbuf[i] == '\r' && lenbuf[i-1] != '\r' ) continue;
 
@@ -220,6 +220,6 @@ int httplib_read( struct httplib_connection *conn, void *buf, size_t len ) {
 		return (int)all_read;
 	}
 
-	return httplib_read_inner( conn, buf, len );
+	return httplib_read_inner( ctx, conn, buf, len );
 
 }  /* httplib_read */

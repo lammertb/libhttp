@@ -83,8 +83,8 @@ void httplib_cry( enum debug_level_t debug_level, const struct httplib_context *
 	 * may not even be available on all platforms (Windows etc).
 	 */
 
-	if ( ctx->error_log_file == NULL                                ) return;
-	if ( ! XX_httplib_fopen( conn, ctx->error_log_file, "a+", &fi ) ) return;
+	if ( ctx->error_log_file == NULL                                     ) return;
+	if ( ! XX_httplib_fopen( ctx, conn, ctx->error_log_file, "a+", &fi ) ) return;
 
 	/*
 	 * We now have an open FILE stream pointer in fi.fp and can dump the

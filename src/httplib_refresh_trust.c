@@ -41,19 +41,19 @@ static long int data_check		= 0;
 
 #if !defined(NO_SSL)
 
-int XX_httplib_refresh_trust( struct httplib_connection *conn ) {
+int XX_httplib_refresh_trust( const struct httplib_context *ctx, struct httplib_connection *conn ) {
 
 	volatile int *p_reload_lock;
 	struct stat cert_buf;
 	long int t;
 	char *pem;
 
-	if ( conn == NULL  ||  conn->ctx == NULL ) return 0;
+	if ( ctx == NULL  ||  conn == NULL ) return 0;
 
 	p_reload_lock = & reload_lock;
-	pem           = conn->ctx->ssl_certificate;
+	pem           = ctx->ssl_certificate;
 
-	if ( pem == NULL  &&  conn->ctx->callbacks.init_ssl == NULL ) return 0;
+	if ( pem == NULL  &&  ctx->callbacks.init_ssl == NULL ) return 0;
 
 	if ( stat( pem, &cert_buf ) != -1 ) t = (long int)cert_buf.st_mtime;
 	else                                t = data_check;
@@ -62,11 +62,11 @@ int XX_httplib_refresh_trust( struct httplib_connection *conn ) {
 
 		data_check = t;
 
-		if ( conn->ctx->ssl_verify_peer ) {
+		if ( ctx->ssl_verify_peer ) {
 
-			if ( SSL_CTX_load_verify_locations( conn->ctx->ssl_ctx, conn->ctx->ssl_ca_file, conn->ctx->ssl_ca_path ) != 1 ) {
+			if ( SSL_CTX_load_verify_locations( ctx->ssl_ctx, ctx->ssl_ca_file, ctx->ssl_ca_path ) != 1 ) {
 
-				httplib_cry( DEBUG_LEVEL_ERROR, conn->ctx, conn, "%s: SSL_CTX_load_verify_locations error: %s ssl_verify_peer requires setting either ssl_ca_path or ssl_ca_file. Is any of them present in the .conf file?", __func__, XX_httplib_ssl_error() );
+				httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s: SSL_CTX_load_verify_locations error: %s ssl_verify_peer requires setting either ssl_ca_path or ssl_ca_file. Is any of them present in the .conf file?", __func__, XX_httplib_ssl_error() );
 
 				return 0;
 			}
@@ -74,7 +74,7 @@ int XX_httplib_refresh_trust( struct httplib_connection *conn ) {
 
 		if ( httplib_atomic_inc( p_reload_lock ) == 1 ) {
 
-			if ( XX_httplib_ssl_use_pem_file( conn->ctx, pem ) == 0 ) return 0;
+			if ( XX_httplib_ssl_use_pem_file( ctx, pem ) == 0 ) return 0;
 			*p_reload_lock = 0;
 		}
 	}

@@ -28,33 +28,33 @@
 #include "httplib_main.h"
 
 /*
- * void XX_httplib_delete_file( struct httplib_connection *conn, const char *path );
+ * void XX_httplib_delete_file( const struct httplib_context *ctx, struct httplib_connection *conn, const char *path );
  *
  * The function XX_httplib_delete_file() deletes a file after a request over a
  * connection.
  */
 
-void XX_httplib_delete_file( struct httplib_connection *conn, const char *path ) {
+void XX_httplib_delete_file( const struct httplib_context *ctx, struct httplib_connection *conn, const char *path ) {
 
 	struct de de;
 	char error_string[ERROR_STRING_LEN];
 
-	if ( conn == NULL  ||  conn->ctx == NULL ) return;
-	if ( conn->ctx->document_root == NULL ) {
+	if ( ctx == NULL  ||  conn == NULL ) return;
+	if ( ctx->document_root == NULL ) {
 
-		XX_httplib_send_http_error( conn, 405, "Error: File delete operations are not supported" );
+		XX_httplib_send_http_error( ctx, conn, 405, "Error: File delete operations are not supported" );
 		return;
 	}
 
 	memset( &de.file, 0, sizeof(de.file) );
 
-	if ( ! XX_httplib_stat( conn, path, &de.file ) ) {
+	if ( ! XX_httplib_stat( ctx, conn, path, &de.file ) ) {
 
 		/*
 		 * XX_httplib_stat returns 0 if the file does not exist
 		 */
 
-		XX_httplib_send_http_error( conn, 404, "Error: Cannot delete file\nFile %s not found", path );
+		XX_httplib_send_http_error( ctx, conn, 404, "Error: Cannot delete file\nFile %s not found", path );
 		return;
 	}
 
@@ -64,19 +64,19 @@ void XX_httplib_delete_file( struct httplib_connection *conn, const char *path )
 		 * the file is cached in memory
 		 */
 
-		XX_httplib_send_http_error( conn, 405, "Error: Delete not possible\nDeleting %s is not supported", path );
+		XX_httplib_send_http_error( ctx, conn, 405, "Error: Delete not possible\nDeleting %s is not supported", path );
 		return;
 	}
 
 	if ( de.file.is_directory ) {
 
-		if ( XX_httplib_remove_directory( conn, path ) ) {
+		if ( XX_httplib_remove_directory( ctx, conn, path ) ) {
 
 			/*
 			 * Delete is successful: Return 204 without content.
 			 */
 
-			XX_httplib_send_http_error( conn, 204, "%s", "" );
+			XX_httplib_send_http_error( ctx, conn, 204, "%s", "" );
 		}
 		
 		else {
@@ -84,7 +84,7 @@ void XX_httplib_delete_file( struct httplib_connection *conn, const char *path )
 			 * Delete is not successful: Return 500 (Server error).
 			 */
 
-			XX_httplib_send_http_error( conn, 500, "Error: Could not delete %s", path );
+			XX_httplib_send_http_error( ctx, conn, 500, "Error: Could not delete %s", path );
 		}
 		return;
 	}
@@ -100,7 +100,7 @@ void XX_httplib_delete_file( struct httplib_connection *conn, const char *path )
 		 * File is read only
 		 */
 
-		XX_httplib_send_http_error( conn, 403, "Error: Delete not possible\nDeleting %s is not allowed", path );
+		XX_httplib_send_http_error( ctx, conn, 403, "Error: Delete not possible\nDeleting %s is not allowed", path );
 		return;
 	}
 
@@ -108,7 +108,7 @@ void XX_httplib_delete_file( struct httplib_connection *conn, const char *path )
 	 * Try to delete it
 	 */
 
-	if ( httplib_remove( path ) == 0 ) XX_httplib_send_http_error( conn, 204, "%s", "" );
-	else                               XX_httplib_send_http_error( conn, 423, "Error: Cannot delete file\nremove(%s): %s", path, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
+	if ( httplib_remove( path ) == 0 ) XX_httplib_send_http_error( ctx, conn, 204, "%s", "" );
+	else                               XX_httplib_send_http_error( ctx, conn, 423, "Error: Cannot delete file\nremove(%s): %s", path, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 
 }  /* XX_httplib_delete_file */

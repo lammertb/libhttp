@@ -104,8 +104,8 @@ void XX_httplib_path_to_unicode( const char *path, wchar_t *wbuf, size_t wbuf_le
 	 */
 
 	/*
-	if (conn) {
-	    if (conn->ctx->config[WINDOWS_CASE_SENSITIVE]) {
+	if ( ctx != NULL ) {
+	    if (ctx->config[WINDOWS_CASE_SENSITIVE]) {
 	        fcompare = wcscmp;
 	    }
 	}

@@ -28,24 +28,26 @@
 #include "httplib_main.h"
 #include "httplib_string.h"
 
-void XX_httplib_print_dir_entry( struct de *de ) {
+void XX_httplib_print_dir_entry( const struct httplib_context *ctx, struct de *de ) {
 
 	char size[64];
 	char mod[64];
 	char href[PATH_MAX * 3 /* worst case */];
 	struct tm tmm;
 
-	if ( de->file.is_directory ) XX_httplib_snprintf( de->conn, NULL, size, sizeof(size), "%s", "[DIRECTORY]" );
+	if ( ctx == NULL ) return;
+
+	if ( de->file.is_directory ) XX_httplib_snprintf( ctx, de->conn, NULL, size, sizeof(size), "%s", "[DIRECTORY]" );
 	else {
 		/*
 		 * We use (signed) cast below because MSVC 6 compiler cannot
 		 * convert unsigned __int64 to double. Sigh.
 		 */
 
-		if      ( de->file.size <       1024)  XX_httplib_snprintf( de->conn, NULL, size, sizeof(size), "%d",     (int)   de->file.size                 );
-		else if ( de->file.size <   0x100000 ) XX_httplib_snprintf( de->conn, NULL, size, sizeof(size), "%.1fk", ((double)de->file.size) / 1024.0       );
-		else if ( de->file.size < 0x40000000 ) XX_httplib_snprintf( de->conn, NULL, size, sizeof(size), "%.1fM", ((double)de->file.size) / 1048576.0    );
-		else                                   XX_httplib_snprintf( de->conn, NULL, size, sizeof(size), "%.1fG", ((double)de->file.size) / 1073741824.0 );
+		if      ( de->file.size <       1024)  XX_httplib_snprintf( ctx, de->conn, NULL, size, sizeof(size), "%d",     (int)   de->file.size                 );
+		else if ( de->file.size <   0x100000 ) XX_httplib_snprintf( ctx, de->conn, NULL, size, sizeof(size), "%.1fk", ((double)de->file.size) / 1024.0       );
+		else if ( de->file.size < 0x40000000 ) XX_httplib_snprintf( ctx, de->conn, NULL, size, sizeof(size), "%.1fM", ((double)de->file.size) / 1048576.0    );
+		else                                   XX_httplib_snprintf( ctx, de->conn, NULL, size, sizeof(size), "%.1fG", ((double)de->file.size) / 1073741824.0 );
 	}
 
 	/*
@@ -61,7 +63,7 @@ void XX_httplib_print_dir_entry( struct de *de ) {
 	}
 
 	httplib_url_encode( de->file_name, href, sizeof(href) );
-	de->conn->num_bytes_sent += httplib_printf( de->conn,
+	de->conn->num_bytes_sent += httplib_printf( ctx, de->conn,
 	              "<tr><td><a href=\"%s%s%s\">%s%s</a></td>"
 	              "<td>&nbsp;%s</td><td>&nbsp;&nbsp;%s</td></tr>\n",
 	              de->conn->request_info.local_uri,

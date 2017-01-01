@@ -34,7 +34,7 @@
  * request on a connection.
  */
 
-void XX_httplib_handle_websocket_request( struct httplib_connection *conn, const char *path, int is_callback_resource, httplib_websocket_connect_handler ws_connect_handler, httplib_websocket_ready_handler ws_ready_handler, httplib_websocket_data_handler ws_data_handler, httplib_websocket_close_handler ws_close_handler, void *cbData ) {
+void XX_httplib_handle_websocket_request( const struct httplib_context *ctx, struct httplib_connection *conn, const char *path, int is_callback_resource, httplib_websocket_connect_handler ws_connect_handler, httplib_websocket_ready_handler ws_ready_handler, httplib_websocket_data_handler ws_data_handler, httplib_websocket_close_handler ws_close_handler, void *cbData ) {
 
 	const char *websock_key;
 	const char *version;
@@ -45,7 +45,7 @@ void XX_httplib_handle_websocket_request( struct httplib_connection *conn, const
 
 	UNUSED_PARAMETER(path);
 
-	if ( conn == NULL ) return;
+	if ( ctx == NULL  ||  conn == NULL ) return;
 
 	websock_key = httplib_get_header( conn, "Sec-WebSocket-Key"     );
 	version     = httplib_get_header( conn, "Sec-WebSocket-Version" );
@@ -77,13 +77,13 @@ void XX_httplib_handle_websocket_request( struct httplib_connection *conn, const
 
 			conn->content_len = 8;
 
-			if ( httplib_read( conn, key3, 8 ) == 8 ) {
+			if ( httplib_read( ctx, conn, key3, 8 ) == 8 ) {
 
 				/*
 				 * This is the hixie version
 				 */
 
-				XX_httplib_send_http_error( conn, 426, "%s", "Protocol upgrade to RFC 6455 required" );
+				XX_httplib_send_http_error( ctx, conn, 426, "%s", "Protocol upgrade to RFC 6455 required" );
 				return;
 			}
 		}
@@ -92,7 +92,7 @@ void XX_httplib_handle_websocket_request( struct httplib_connection *conn, const
 		 * This is an unknown version
 		 */
 
-		XX_httplib_send_http_error( conn, 400, "%s", "Malformed websocket request" );
+		XX_httplib_send_http_error( ctx, conn, 400, "%s", "Malformed websocket request" );
 		return;
 	}
 
@@ -107,7 +107,7 @@ void XX_httplib_handle_websocket_request( struct httplib_connection *conn, const
 		 * Reject wrong versions
 		 */
 
-		XX_httplib_send_http_error( conn, 426, "%s", "Protocol upgrade required" );
+		XX_httplib_send_http_error( ctx, conn, 426, "%s", "Protocol upgrade required" );
 		return;
 	}
 
@@ -149,7 +149,7 @@ void XX_httplib_handle_websocket_request( struct httplib_connection *conn, const
 		 * requests to invalid websocket addresses.
 		 */
 
-		XX_httplib_send_http_error( conn, 404, "%s", "Not found" );
+		XX_httplib_send_http_error( ctx, conn, 404, "%s", "Not found" );
 		return;
 	}
 
@@ -157,9 +157,9 @@ void XX_httplib_handle_websocket_request( struct httplib_connection *conn, const
 	 * Step 5: The websocket connection has been accepted
 	 */
 
-	if ( ! XX_httplib_send_websocket_handshake( conn, websock_key ) ) {
+	if ( ! XX_httplib_send_websocket_handshake( ctx, conn, websock_key ) ) {
 
-		XX_httplib_send_http_error( conn, 500, "%s", "Websocket handshake failed" );
+		XX_httplib_send_http_error( ctx, conn, 500, "%s", "Websocket handshake failed" );
 		return;
 	}
 
@@ -176,7 +176,7 @@ void XX_httplib_handle_websocket_request( struct httplib_connection *conn, const
 	 * Step 7: Enter the read loop
 	 */
 
-	if (is_callback_resource) XX_httplib_read_websocket(conn, ws_data_handler, cbData);
+	if (is_callback_resource) XX_httplib_read_websocket( ctx, conn, ws_data_handler, cbData );
 
 	/*
 	 * Step 8: Call the close handler
