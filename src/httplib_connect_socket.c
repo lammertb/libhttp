@@ -54,13 +54,13 @@ bool XX_httplib_connect_socket( struct lh_ctx_t *ctx, const char *host, int port
 
 	if ( host == NULL ) {
 
-		httplib_cry( DEBUG_LEVEL_ERROR, ctx, NULL, "%s: NULL host", __func__ );
+		httplib_cry( LH_DEBUG_ERROR, ctx, NULL, "%s: NULL host", __func__ );
 		return false;
 	}
 
 	if ( port < 0  ||  ! XX_httplib_is_valid_port( (unsigned)port) ) {
 
-		httplib_cry( DEBUG_LEVEL_ERROR, ctx, NULL, "%s: invalid port", __func__ );
+		httplib_cry( LH_DEBUG_ERROR, ctx, NULL, "%s: invalid port", __func__ );
 		return false;
 	}
 
@@ -68,7 +68,7 @@ bool XX_httplib_connect_socket( struct lh_ctx_t *ctx, const char *host, int port
 
 	if ( use_ssl  &&  SSLv23_client_method == NULL ) {
 
-		httplib_cry( DEBUG_LEVEL_ERROR, ctx, NULL, "%s: SSL is not initialized", __func__ );
+		httplib_cry( LH_DEBUG_ERROR, ctx, NULL, "%s: SSL is not initialized", __func__ );
 		return false;
 	}
 #else  /* NO_SSL */
@@ -112,7 +112,7 @@ bool XX_httplib_connect_socket( struct lh_ctx_t *ctx, const char *host, int port
 
 	if ( ip_ver == 0 ) {
 
-		httplib_cry( DEBUG_LEVEL_ERROR, ctx, NULL, "%s: host not found", __func__ );
+		httplib_cry( LH_DEBUG_ERROR, ctx, NULL, "%s: host not found", __func__ );
 		return false;
 	}
 
@@ -121,7 +121,7 @@ bool XX_httplib_connect_socket( struct lh_ctx_t *ctx, const char *host, int port
 
 	if ( *sock == INVALID_SOCKET ) {
 
-		httplib_cry( DEBUG_LEVEL_ERROR, ctx, NULL, "%s: socket(): %s", __func__, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
+		httplib_cry( LH_DEBUG_ERROR, ctx, NULL, "%s: socket(): %s", __func__, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 		return false;
 	}
 
@@ -134,7 +134,7 @@ bool XX_httplib_connect_socket( struct lh_ctx_t *ctx, const char *host, int port
 	 * Not connected
 	 */
 
-	httplib_cry( DEBUG_LEVEL_ERROR, ctx, NULL, "%s: connect(%s:%d): %s", __func__, host, port, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
+	httplib_cry( LH_DEBUG_ERROR, ctx, NULL, "%s: connect(%s:%d): %s", __func__, host, port, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 	closesocket( *sock );
 	*sock = INVALID_SOCKET;
 

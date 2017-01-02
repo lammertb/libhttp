@@ -38,6 +38,6 @@ void XX_httplib_remove_bad_file( const struct lh_ctx_t *ctx, const struct lh_con
 
 	int r = httplib_remove( path );
 
-	if ( r != 0  &&  ctx != NULL  &&  conn != NULL ) httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s: Cannot remove invalid file %s", __func__, path );
+	if ( r != 0  &&  ctx != NULL  &&  conn != NULL ) httplib_cry( LH_DEBUG_ERROR, ctx, conn, "%s: Cannot remove invalid file %s", __func__, path );
 
 }  /* XX_httplib_remove_bad_file */

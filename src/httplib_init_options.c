@@ -43,7 +43,7 @@ bool XX_httplib_init_options( struct lh_ctx_t *ctx ) {
 	ctx->cgi_environment             = NULL;
 	ctx->cgi_interpreter             = NULL;
 	ctx->cgi_pattern                 = NULL;
-	ctx->debug_level                 = DEBUG_LEVEL_WARNING;
+	ctx->debug_level                 = LH_DEBUG_WARNING;
 	ctx->decode_url                  = true;
 	ctx->document_root               = NULL;
 	ctx->enable_directory_listing    = true;

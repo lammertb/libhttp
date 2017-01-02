@@ -44,7 +44,7 @@ bool XX_httplib_getreq( const struct lh_ctx_t *ctx, struct lh_con_t *conn, int *
 
 	if ( conn == NULL ) {
 
-		httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s: internal error", __func__ );
+		httplib_cry( LH_DEBUG_ERROR, ctx, conn, "%s: internal error", __func__ );
 		*err = 500;
 		return false;
 	}
@@ -66,14 +66,14 @@ bool XX_httplib_getreq( const struct lh_ctx_t *ctx, struct lh_con_t *conn, int *
 
 	if ( conn->request_len >= 0  &&  conn->data_len < conn->request_len ) {
 
-		httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s: invalid request size", __func__ );
+		httplib_cry( LH_DEBUG_ERROR, ctx, conn, "%s: invalid request size", __func__ );
 		*err = 500;
 		return false;
 	}
 
 	if ( conn->request_len == 0  &&  conn->data_len == conn->buf_size ) {
 
-		httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s: request too large", __func__ );
+		httplib_cry( LH_DEBUG_ERROR, ctx, conn, "%s: request too large", __func__ );
 		*err = 413;
 		return false;
 	}
@@ -82,7 +82,7 @@ bool XX_httplib_getreq( const struct lh_ctx_t *ctx, struct lh_con_t *conn, int *
 
 		if ( conn->data_len > 0 ) {
 
-			httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s: client sent malformed request", __func__ );
+			httplib_cry( LH_DEBUG_ERROR, ctx, conn, "%s: client sent malformed request", __func__ );
 			*err = 400;
 		}
 		
@@ -93,7 +93,7 @@ bool XX_httplib_getreq( const struct lh_ctx_t *ctx, struct lh_con_t *conn, int *
 
 			conn->must_close = true;
 
-			httplib_cry( DEBUG_LEVEL_WARNING, ctx, conn, "%s: client did not send a request", __func__ );
+			httplib_cry( LH_DEBUG_WARNING, ctx, conn, "%s: client did not send a request", __func__ );
 			*err = 0;
 		}
 		return false;
@@ -101,7 +101,7 @@ bool XX_httplib_getreq( const struct lh_ctx_t *ctx, struct lh_con_t *conn, int *
 	
 	else if ( XX_httplib_parse_http_message( conn->buf, conn->buf_size, &conn->request_info ) <= 0 ) {
 
-		httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s: bad request", __func__ );
+		httplib_cry( LH_DEBUG_ERROR, ctx, conn, "%s: bad request", __func__ );
 		*err = 400;
 		return false;
 	}
@@ -122,7 +122,7 @@ bool XX_httplib_getreq( const struct lh_ctx_t *ctx, struct lh_con_t *conn, int *
 
 			if ( endptr == cl ) {
 
-				httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s: bad request", __func__ );
+				httplib_cry( LH_DEBUG_ERROR, ctx, conn, "%s: bad request", __func__ );
 				*err = 411;
 				return false;
 			}

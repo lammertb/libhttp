@@ -563,7 +563,7 @@ struct lh_ctx_t {
 	struct ttimers *timers;
 #endif
 
-	enum debug_level_t	debug_level;
+	enum lh_dbg_t	debug_level;
 
 	char *	access_control_allow_origin;
 	char *	access_control_list;

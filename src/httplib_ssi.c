@@ -98,19 +98,19 @@ static void do_ssi_include( const struct lh_ctx_t *ctx, struct lh_con_t *conn, c
 	}
 	
 	else {
-		httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s: bad SSI #include: [%s]", __func__, tag );
+		httplib_cry( LH_DEBUG_ERROR, ctx, conn, "%s: bad SSI #include: [%s]", __func__, tag );
 		return;
 	}
 
 	if ( truncated ) {
 
-		httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s: SSI #include path length overflow: [%s]", __func__, tag );
+		httplib_cry( LH_DEBUG_ERROR, ctx, conn, "%s: SSI #include path length overflow: [%s]", __func__, tag );
 		return;
 	}
 
 	if ( ! XX_httplib_fopen( ctx, conn, path, "rb", &file ) ) {
 
-		httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s: cannot open SSI #include: [%s]: fopen(%s): %s", __func__, tag, path, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
+		httplib_cry( LH_DEBUG_ERROR, ctx, conn, "%s: cannot open SSI #include: [%s]: fopen(%s): %s", __func__, tag, path, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 		return;
 	}
 	
@@ -135,14 +135,14 @@ static void do_ssi_exec( const struct lh_ctx_t *ctx, struct lh_con_t *conn, char
 
 	if ( sscanf(tag, " \"%1023[^\"]\"", cmd) != 1 ) {
 
-		httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s: bad SSI #exec: [%s]", __func__, tag );
+		httplib_cry( LH_DEBUG_ERROR, ctx, conn, "%s: bad SSI #exec: [%s]", __func__, tag );
 	}
 	
 	else {
 		cmd[1023] = 0;
 		if ( (file.fp = popen( cmd, "r" ) ) == NULL ) {
 
-			httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s: cannot SSI #exec: [%s]: %s", __func__, cmd, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
+			httplib_cry( LH_DEBUG_ERROR, ctx, conn, "%s: cannot SSI #exec: [%s]: %s", __func__, cmd, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 		}
 		
 		else {
@@ -175,7 +175,7 @@ static void send_ssi_file( const struct lh_ctx_t *ctx, struct lh_con_t *conn, co
 
 	if ( include_level > ctx->ssi_include_depth ) {
 
-		httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s: SSI #include level is too deep (%s)", __func__, path );
+		httplib_cry( LH_DEBUG_ERROR, ctx, conn, "%s: SSI #include level is too deep (%s)", __func__, path );
 		return;
 	}
 
@@ -213,7 +213,7 @@ static void send_ssi_file( const struct lh_ctx_t *ctx, struct lh_con_t *conn, co
 					do_ssi_exec( ctx, conn, buf+9 );
 				}
 #endif /* !NO_POPEN */
-				else httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s: %s: unknown SSI command: \"%s\"", __func__, path, buf );
+				else httplib_cry( LH_DEBUG_ERROR, ctx, conn, "%s: %s: unknown SSI command: \"%s\"", __func__, path, buf );
 			}
 
 			len = 0;
@@ -232,7 +232,7 @@ static void send_ssi_file( const struct lh_ctx_t *ctx, struct lh_con_t *conn, co
 			
 			else if ( len == (int)sizeof(buf) - 2 ) {
 
-				httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s: %s: SSI tag is too large", __func__, path );
+				httplib_cry( LH_DEBUG_ERROR, ctx, conn, "%s: %s: SSI tag is too large", __func__, path );
 				len = 0;
 			}
 

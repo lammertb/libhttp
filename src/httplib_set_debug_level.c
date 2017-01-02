@@ -23,17 +23,17 @@
 #include "httplib_main.h"
 
 /*
- * enum debug_level_t httplib_set_debug_level( struct lh_ctx_t *ctx, enum debug_level_t new_level );
+ * enum lh_dbg_t httplib_set_debug_level( struct lh_ctx_t *ctx, enum lh_dbg_t new_level );
  *
- * The function httplib_get_debug_level() sets the debug level for a context
+ * The function httplib_set_debug_level() sets the debug level for a context
  * and returns the previous debug level.
  */
 
-enum debug_level_t httplib_set_debug_level( struct lh_ctx_t *ctx, enum debug_level_t new_level ) {
+enum lh_dbg_t httplib_set_debug_level( struct lh_ctx_t *ctx, enum lh_dbg_t new_level ) {
 
-	enum debug_level_t prev_level;
+	enum lh_dbg_t prev_level;
 
-	if ( ctx == NULL ) return DEBUG_LEVEL_NONE;
+	if ( ctx == NULL ) return LH_DEBUG_NONE;
 
 	prev_level       = ctx->debug_level;
 	ctx->debug_level = new_level;

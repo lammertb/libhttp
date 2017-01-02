@@ -66,7 +66,7 @@ int XX_httplib_refresh_trust( const struct lh_ctx_t *ctx, struct lh_con_t *conn 
 
 			if ( SSL_CTX_load_verify_locations( ctx->ssl_ctx, ctx->ssl_ca_file, ctx->ssl_ca_path ) != 1 ) {
 
-				httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s: SSL_CTX_load_verify_locations error: %s ssl_verify_peer requires setting either ssl_ca_path or ssl_ca_file. Is any of them present in the .conf file?", __func__, XX_httplib_ssl_error() );
+				httplib_cry( LH_DEBUG_ERROR, ctx, conn, "%s: SSL_CTX_load_verify_locations error: %s ssl_verify_peer requires setting either ssl_ca_path or ssl_ca_file. Is any of them present in the .conf file?", __func__, XX_httplib_ssl_error() );
 
 				return 0;
 			}

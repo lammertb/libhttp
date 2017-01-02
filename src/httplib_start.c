@@ -99,7 +99,7 @@ struct lh_ctx_t *httplib_start( const struct lh_clb_t *callbacks, void *user_dat
 			 */
 
 			httplib_atomic_dec( & XX_httplib_sTlsInit );
-			httplib_cry( DEBUG_LEVEL_CRASH, ctx, NULL, "%s: cannot initialize thread local storage", __func__ );
+			httplib_cry( LH_DEBUG_CRASH, ctx, NULL, "%s: cannot initialize thread local storage", __func__ );
 			ctx = httplib_free( ctx );
 
 			return NULL;
@@ -230,7 +230,7 @@ struct lh_ctx_t *httplib_start( const struct lh_clb_t *callbacks, void *user_dat
 
 			wta = httplib_free( wta );
 
-			if ( i > 0 ) httplib_cry( DEBUG_LEVEL_ERROR, ctx, NULL, "%s: cannot start worker thread %i: error %ld", __func__, i+1, (long)ERRNO );
+			if ( i > 0 ) httplib_cry( LH_DEBUG_ERROR, ctx, NULL, "%s: cannot start worker thread %i: error %ld", __func__, i+1, (long)ERRNO );
 			
 			else return XX_httplib_abort_start( ctx, "Cannot create worker threads: error %ld", (long)ERRNO );
 

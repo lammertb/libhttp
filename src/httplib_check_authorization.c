@@ -54,7 +54,7 @@ bool XX_httplib_check_authorization( const struct lh_ctx_t *ctx, struct lh_con_t
 
 			if ( truncated  ||  ! XX_httplib_fopen( ctx, conn, fname, "r", &file ) ) {
 
-				httplib_cry( DEBUG_LEVEL_WARNING, ctx, conn, "%s: cannot open %s: %s", __func__, fname, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
+				httplib_cry( LH_DEBUG_WARNING, ctx, conn, "%s: cannot open %s: %s", __func__, fname, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 			}
 			break;
 		}

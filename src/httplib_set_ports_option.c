@@ -73,21 +73,21 @@ int XX_httplib_set_ports_option( struct lh_ctx_t *ctx ) {
 
 		if ( ! parse_port_string( &vec, &so, &ip_version ) ) {
 
-			httplib_cry( DEBUG_LEVEL_CRASH, ctx, NULL, "%s: %.*s: invalid port spec (entry %i). Expecting list of: %s", __func__, (int)vec.len, vec.ptr, ports_total, "[IP_ADDRESS:]PORT[s|r]" );
+			httplib_cry( LH_DEBUG_CRASH, ctx, NULL, "%s: %.*s: invalid port spec (entry %i). Expecting list of: %s", __func__, (int)vec.len, vec.ptr, ports_total, "[IP_ADDRESS:]PORT[s|r]" );
 			continue;
 		}
 
 #if !defined(NO_SSL)
 		if ( so.has_ssl  &&  ctx->ssl_ctx == NULL ) {
 
-			httplib_cry( DEBUG_LEVEL_CRASH, ctx, NULL, "%s: cannot add SSL socket (entry %i). Is -ssl_certificate option set?", __func__, ports_total );
+			httplib_cry( LH_DEBUG_CRASH, ctx, NULL, "%s: cannot add SSL socket (entry %i). Is -ssl_certificate option set?", __func__, ports_total );
 			continue;
 		}
 #endif  /* ! NO_SLL */
 
 		if ( ( so.sock = socket( so.lsa.sa.sa_family, SOCK_STREAM, 6 ) ) == INVALID_SOCKET ) {
 
-			httplib_cry( DEBUG_LEVEL_CRASH, ctx, NULL, "%s: cannot create socket (entry %i)", __func__, ports_total );
+			httplib_cry( LH_DEBUG_CRASH, ctx, NULL, "%s: cannot create socket (entry %i)", __func__, ports_total );
 			continue;
 		}
 
@@ -111,7 +111,7 @@ int XX_httplib_set_ports_option( struct lh_ctx_t *ctx ) {
 			 * Set reuse option, but don't abort on errors.
 			 */
 
-			httplib_cry( DEBUG_LEVEL_CRASH, ctx, NULL, "%s: cannot set socket option SO_EXCLUSIVEADDRUSE (entry %i)", __func__, ports_total );
+			httplib_cry( LH_DEBUG_CRASH, ctx, NULL, "%s: cannot set socket option SO_EXCLUSIVEADDRUSE (entry %i)", __func__, ports_total );
 		}
 #else  /* _WIN32 */
 		if ( setsockopt( so.sock, SOL_SOCKET, SO_REUSEADDR, (SOCK_OPT_TYPE)&on, sizeof(on) ) != 0 ) {
@@ -120,7 +120,7 @@ int XX_httplib_set_ports_option( struct lh_ctx_t *ctx ) {
 			 * Set reuse option, but don't abort on errors.
 			 */
 
-			httplib_cry( DEBUG_LEVEL_CRASH, ctx, NULL, "%s: cannot set socket option SO_REUSEADDR (entry %i)", __func__, ports_total );
+			httplib_cry( LH_DEBUG_CRASH, ctx, NULL, "%s: cannot set socket option SO_REUSEADDR (entry %i)", __func__, ports_total );
 		}
 #endif  /* _WIN32 */
 
@@ -134,7 +134,7 @@ int XX_httplib_set_ports_option( struct lh_ctx_t *ctx ) {
 					 * Set IPv6 only option, but don't abort on errors.
 					 */
 
-					httplib_cry( DEBUG_LEVEL_CRASH, ctx, NULL, "%s: cannot set socket option IPV6_V6ONLY (entry %i)", __func__, ports_total );
+					httplib_cry( LH_DEBUG_CRASH, ctx, NULL, "%s: cannot set socket option IPV6_V6ONLY (entry %i)", __func__, ports_total );
 				}
 			}
 		}
@@ -145,7 +145,7 @@ int XX_httplib_set_ports_option( struct lh_ctx_t *ctx ) {
 
 			if ( bind( so.sock, &so.lsa.sa, len ) != 0 ) {
 
-				httplib_cry( DEBUG_LEVEL_CRASH, ctx, NULL, "%s: cannot bind to %.*s: %d (%s)", __func__, (int)vec.len, vec.ptr, (int)ERRNO, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
+				httplib_cry( LH_DEBUG_CRASH, ctx, NULL, "%s: cannot bind to %.*s: %d (%s)", __func__, (int)vec.len, vec.ptr, (int)ERRNO, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 				closesocket( so.sock );
 				so.sock = INVALID_SOCKET;
 				continue;
@@ -158,7 +158,7 @@ int XX_httplib_set_ports_option( struct lh_ctx_t *ctx ) {
 
 			if ( bind( so.sock, &so.lsa.sa, len ) != 0 ) {
 
-				httplib_cry( DEBUG_LEVEL_CRASH, ctx, NULL, "%s: cannot bind to IPv6 %.*s: %d (%s)", __func__, (int)vec.len, vec.ptr, (int)ERRNO, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
+				httplib_cry( LH_DEBUG_CRASH, ctx, NULL, "%s: cannot bind to IPv6 %.*s: %d (%s)", __func__, (int)vec.len, vec.ptr, (int)ERRNO, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 				closesocket( so.sock );
 				so.sock = INVALID_SOCKET;
 				continue;
@@ -166,13 +166,13 @@ int XX_httplib_set_ports_option( struct lh_ctx_t *ctx ) {
 		}
 
 		else {
-			httplib_cry( DEBUG_LEVEL_CRASH, ctx, NULL, "%s: cannot bind: address family not supported (entry %i)", __func__, ports_total );
+			httplib_cry( LH_DEBUG_CRASH, ctx, NULL, "%s: cannot bind: address family not supported (entry %i)", __func__, ports_total );
 			continue;
 		}
 
 		if ( listen( so.sock, SOMAXCONN ) != 0 ) {
 
-			httplib_cry( DEBUG_LEVEL_CRASH, ctx, NULL, "%s: cannot listen to %.*s: %d (%s)", __func__, (int)vec.len, vec.ptr, (int)ERRNO, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
+			httplib_cry( LH_DEBUG_CRASH, ctx, NULL, "%s: cannot listen to %.*s: %d (%s)", __func__, (int)vec.len, vec.ptr, (int)ERRNO, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 			closesocket( so.sock );
 			so.sock = INVALID_SOCKET;
 			continue;
@@ -181,7 +181,7 @@ int XX_httplib_set_ports_option( struct lh_ctx_t *ctx ) {
 		if ( getsockname( so.sock, &(usa.sa), &len ) != 0  ||  usa.sa.sa_family  !=  so.lsa.sa.sa_family ) {
 
 			int err = (int)ERRNO;
-			httplib_cry( DEBUG_LEVEL_CRASH, ctx, NULL, "%s: call to getsockname failed %.*s: %d (%s)", __func__, (int)vec.len, vec.ptr, err, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
+			httplib_cry( LH_DEBUG_CRASH, ctx, NULL, "%s: call to getsockname failed %.*s: %d (%s)", __func__, (int)vec.len, vec.ptr, err, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 			closesocket( so.sock );
 			so.sock = INVALID_SOCKET;
 			continue;
@@ -198,7 +198,7 @@ int XX_httplib_set_ports_option( struct lh_ctx_t *ctx ) {
 
 		if ( ptr != NULL ) ctx->listening_sockets = ptr;
 		else {
-			httplib_cry( DEBUG_LEVEL_CRASH, ctx, NULL, "%s: out of memory on listening sockets", __func__ );
+			httplib_cry( LH_DEBUG_CRASH, ctx, NULL, "%s: out of memory on listening sockets", __func__ );
 			closesocket( so.sock );
 			so.sock = INVALID_SOCKET;
 			continue;
@@ -209,7 +209,7 @@ int XX_httplib_set_ports_option( struct lh_ctx_t *ctx ) {
 
 		if ( pfd != NULL ) ctx->listening_socket_fds = pfd;
 		else {
-			httplib_cry( DEBUG_LEVEL_CRASH, ctx, NULL, "%s: out of memory on fds", __func__ );
+			httplib_cry( LH_DEBUG_CRASH, ctx, NULL, "%s: out of memory on fds", __func__ );
 			closesocket( so.sock );
 			so.sock = INVALID_SOCKET;
 			continue;

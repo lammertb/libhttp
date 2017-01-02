@@ -52,7 +52,7 @@ int httplib_websocket_client_write( const struct lh_ctx_t *ctx, struct lh_con_t 
 
 	if ( masked_data == NULL ) {
 
-		httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s: cannot allocate buffer for masked websocket response: Out of memory", __func__ );
+		httplib_cry( LH_DEBUG_ERROR, ctx, conn, "%s: cannot allocate buffer for masked websocket response: Out of memory", __func__ );
 		return -1;
 	}
 

@@ -140,7 +140,7 @@ void XX_httplib_send_file_data( const struct lh_ctx_t *ctx, struct lh_con_t *con
 #endif
 		if ( offset > 0  &&  fseeko( filep->fp, offset, SEEK_SET ) != 0 ) {
 
-			httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s: fseeko() failed: %s", __func__, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
+			httplib_cry( LH_DEBUG_ERROR, ctx, conn, "%s: fseeko() failed: %s", __func__, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 			XX_httplib_send_http_error( ctx, conn, 500, "%s", "Error: Unable to access file at requested position." );
 		}
 		

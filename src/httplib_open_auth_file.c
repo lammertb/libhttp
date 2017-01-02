@@ -55,7 +55,7 @@ void XX_httplib_open_auth_file( const struct lh_ctx_t *ctx, struct lh_con_t *con
 
 		if ( ! XX_httplib_fopen( ctx, conn, gpass, "r", filep ) ) {
 
-			httplib_cry( DEBUG_LEVEL_INFO, ctx, conn, "%s: fopen(%s): %s", __func__, gpass, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
+			httplib_cry( LH_DEBUG_INFO, ctx, conn, "%s: fopen(%s): %s", __func__, gpass, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 		}
 		/*
 		 * Important: using local struct file to test path for is_directory
@@ -71,7 +71,7 @@ void XX_httplib_open_auth_file( const struct lh_ctx_t *ctx, struct lh_con_t *con
 
 		if ( truncated  ||  ! XX_httplib_fopen( ctx, conn, name, "r", filep ) ) {
 
-			httplib_cry( DEBUG_LEVEL_INFO, ctx, conn, "%s: fopen(%s): %s", __func__, name, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
+			httplib_cry( LH_DEBUG_INFO, ctx, conn, "%s: fopen(%s): %s", __func__, name, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 		}
 	}
 	
@@ -88,7 +88,7 @@ void XX_httplib_open_auth_file( const struct lh_ctx_t *ctx, struct lh_con_t *con
 
 		if ( truncated  ||  ! XX_httplib_fopen( ctx, conn, name, "r", filep ) ) {
 
-			httplib_cry( DEBUG_LEVEL_INFO, ctx, conn, "%s: fopen(%s): %s", __func__, name, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
+			httplib_cry( LH_DEBUG_INFO, ctx, conn, "%s: fopen(%s): %s", __func__, name, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 		}
 	}
 

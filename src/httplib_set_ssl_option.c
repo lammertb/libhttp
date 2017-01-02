@@ -77,7 +77,7 @@ bool XX_httplib_set_ssl_option( struct lh_ctx_t *ctx ) {
 	ctx->ssl_ctx = SSL_CTX_new( SSLv23_server_method() );
 	if ( ctx->ssl_ctx == NULL ) {
 
-		httplib_cry( DEBUG_LEVEL_CRASH, ctx, NULL, "%s: SSL_CTX_new (server) error: %s", __func__, XX_httplib_ssl_error() );
+		httplib_cry( LH_DEBUG_CRASH, ctx, NULL, "%s: SSL_CTX_new (server) error: %s", __func__, XX_httplib_ssl_error() );
 		return false;
 	}
 
@@ -101,7 +101,7 @@ bool XX_httplib_set_ssl_option( struct lh_ctx_t *ctx ) {
 
 	if ( callback_ret < 0 ) {
 
-		httplib_cry( DEBUG_LEVEL_CRASH, ctx, NULL, "%s: SSL callback returned error: %i", __func__, callback_ret );
+		httplib_cry( LH_DEBUG_CRASH, ctx, NULL, "%s: SSL callback returned error: %i", __func__, callback_ret );
 		return false;
 	}
 
@@ -130,7 +130,7 @@ bool XX_httplib_set_ssl_option( struct lh_ctx_t *ctx ) {
 
 		if ( SSL_CTX_load_verify_locations( ctx->ssl_ctx, ctx->ssl_ca_file, ctx->ssl_ca_path ) != 1 ) {
 
-			httplib_cry( DEBUG_LEVEL_CRASH, ctx, NULL, "%s: SSL_CTX_load_verify_locations error: %s ssl_verify_peer requires setting either ssl_ca_path or ssl_ca_file. Is any of them present in the .conf file?", __func__, XX_httplib_ssl_error() );
+			httplib_cry( LH_DEBUG_CRASH, ctx, NULL, "%s: SSL_CTX_load_verify_locations error: %s ssl_verify_peer requires setting either ssl_ca_path or ssl_ca_file. Is any of them present in the .conf file?", __func__, XX_httplib_ssl_error() );
 
 			return false;
 		}
@@ -139,7 +139,7 @@ bool XX_httplib_set_ssl_option( struct lh_ctx_t *ctx ) {
 
 		if ( ctx->ssl_verify_paths  &&  SSL_CTX_set_default_verify_paths( ctx->ssl_ctx ) != 1 ) {
 
-			httplib_cry( DEBUG_LEVEL_CRASH, ctx, NULL, "%s: SSL_CTX_set_default_verify_paths error: %s", __func__, XX_httplib_ssl_error());
+			httplib_cry( LH_DEBUG_CRASH, ctx, NULL, "%s: SSL_CTX_set_default_verify_paths error: %s", __func__, XX_httplib_ssl_error());
 			return false;
 		}
 
@@ -150,7 +150,7 @@ bool XX_httplib_set_ssl_option( struct lh_ctx_t *ctx ) {
 
 		if ( SSL_CTX_set_cipher_list( ctx->ssl_ctx, ctx->ssl_cipher_list ) != 1 ) {
 
-			httplib_cry( DEBUG_LEVEL_WARNING, ctx, NULL, "%s: SSL_CTX_set_cipher_list error: %s", __func__, XX_httplib_ssl_error() );
+			httplib_cry( LH_DEBUG_WARNING, ctx, NULL, "%s: SSL_CTX_set_cipher_list error: %s", __func__, XX_httplib_ssl_error() );
 		}
 	}
 

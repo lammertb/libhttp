@@ -23,7 +23,7 @@
 #include "httplib_main.h"
 
 static bool			check_bool( struct lh_ctx_t *ctx, const struct lh_opt_t *option, const char *name, bool *config  );
-static bool			check_dbg(  struct lh_ctx_t *ctx, const struct lh_opt_t *option, const char *name, enum debug_level_t *config );
+static bool			check_dbg(  struct lh_ctx_t *ctx, const struct lh_opt_t *option, const char *name, enum lh_dbg_t *config );
 static bool			check_dir(  struct lh_ctx_t *ctx, const struct lh_opt_t *option, const char *name, char **config );
 static bool			check_file( struct lh_ctx_t *ctx, const struct lh_opt_t *option, const char *name, char **config );
 static bool			check_int(  struct lh_ctx_t *ctx, const struct lh_opt_t *option, const char *name, int *config, int minval, int maxval );
@@ -297,7 +297,7 @@ static bool check_int( struct lh_ctx_t *ctx, const struct lh_opt_t *option, cons
 }  /* check_int */
 
 /*
- * static bool check_dbg( struct lh_ctx_t *ctx, const struct lh_opt_t *option, const char *name );
+ * static bool check_dbg( struct lh_ctx_t *ctx, const struct lh_opt_t *option, const char *name, enum lh_dbg_t *config );
  *
  * The function check_dbg() checks if an option is equal to a debug level
  * config parameter and stores the value if that is the case. If the value
@@ -307,7 +307,7 @@ static bool check_int( struct lh_ctx_t *ctx, const struct lh_opt_t *option, cons
  * valid, also false is returned.
  */
 
-static bool check_dbg( struct lh_ctx_t *ctx, const struct lh_opt_t *option, const char *name, enum debug_level_t *config ) {
+static bool check_dbg( struct lh_ctx_t *ctx, const struct lh_opt_t *option, const char *name, enum lh_dbg_t *config ) {
 
 	int val;
 
@@ -323,11 +323,11 @@ static bool check_dbg( struct lh_ctx_t *ctx, const struct lh_opt_t *option, cons
 
 		switch ( val ) {
 
-			case DEBUG_LEVEL_NONE    :
-			case DEBUG_LEVEL_CRASH   :
-			case DEBUG_LEVEL_ERROR   :
-			case DEBUG_LEVEL_WARNING :
-			case DEBUG_LEVEL_INFO    :
+			case LH_DEBUG_NONE    :
+			case LH_DEBUG_CRASH   :
+			case LH_DEBUG_ERROR   :
+			case LH_DEBUG_WARNING :
+			case LH_DEBUG_INFO    :
 				*config = val;
 				return false;
 		}

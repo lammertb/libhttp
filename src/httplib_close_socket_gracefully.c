@@ -67,7 +67,7 @@ void XX_httplib_close_socket_gracefully( const struct lh_ctx_t *ctx, struct lh_c
 	else {
 		if ( setsockopt( conn->client.sock, SOL_SOCKET, SO_LINGER, (char *)&linger, sizeof(linger) ) != 0 ) {
 
-			httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s: setsockopt(SOL_SOCKET SO_LINGER) failed: %s", __func__, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
+			httplib_cry( LH_DEBUG_ERROR, ctx, conn, "%s: setsockopt(SOL_SOCKET SO_LINGER) failed: %s", __func__, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 		}
 	}
 

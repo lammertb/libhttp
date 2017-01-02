@@ -184,17 +184,17 @@ struct pollfd {
 
 							/************************************************************************************************/
 							/*												*/
-							/* enum debug_level_t;										*/
+							/* enum lh_dbg_t;										*/
 							/*												*/
 							/* Error messages are generated depending on the debug level of a context. Different contexts	*/
 							/* can have different debug levels allowing an application to only generate debug messages of	*/
 							/* specific servers or client connections.							*/
-enum debug_level_t {					/*												*/
-	DEBUG_LEVEL_NONE                  = 0x00,	/* No error messages are generated at all							*/
-	DEBUG_LEVEL_CRASH                 = 0x10,	/* Messages for errors impacting multiple connections in a severe way are generated		*/
-	DEBUG_LEVEL_ERROR                 = 0x20,	/* Messages for errors impacting single connections in a severe way are generated (default)	*/
-	DEBUG_LEVEL_WARNING               = 0x30,	/* Messages for errors impacting single connections in a minor way are generated		*/
-	DEBUG_LEVEL_INFO                  = 0x40	/* All error, warning and informational messages are generated					*/
+enum lh_dbg_t {						/*												*/
+	LH_DEBUG_NONE                     = 0x00,	/* No error messages are generated at all							*/
+	LH_DEBUG_CRASH                    = 0x10,	/* Messages for errors impacting multiple connections in a severe way are generated		*/
+	LH_DEBUG_ERROR                    = 0x20,	/* Messages for errors impacting single connections in a severe way are generated (default)	*/
+	LH_DEBUG_WARNING                  = 0x30,	/* Messages for errors impacting single connections in a minor way are generated		*/
+	LH_DEBUG_INFO                     = 0x40	/* All error, warning and informational messages are generated					*/
 };							/*												*/
 							/************************************************************************************************/
 
@@ -375,13 +375,13 @@ LIBHTTP_API struct lh_con_t *		httplib_connect_client( struct lh_ctx_t *ctx, con
 LIBHTTP_API struct lh_con_t *		httplib_connect_client_secure( struct lh_ctx_t *ctx, const struct httplib_client_options *client_options );
 LIBHTTP_API struct lh_con_t *		httplib_connect_websocket_client( struct lh_ctx_t *ctx, const char *host, int port, int use_ssl, const char *path, const char *origin, httplib_websocket_data_handler data_func, httplib_websocket_close_handler close_func, void *user_data );
 LIBHTTP_API struct lh_ctx_t *		httplib_create_client_context( const struct lh_clb_t *callbacks, const struct lh_opt_t *options );
-LIBHTTP_API void			httplib_cry( enum debug_level_t debug_level, const struct lh_ctx_t *ctx, const struct lh_con_t *conn, PRINTF_FORMAT_STRING(const char *fmt), ...) PRINTF_ARGS(4, 5);
+LIBHTTP_API void			httplib_cry( enum lh_dbg_t debug_level, const struct lh_ctx_t *ctx, const struct lh_con_t *conn, PRINTF_FORMAT_STRING(const char *fmt), ...) PRINTF_ARGS(4, 5);
 LIBHTTP_API void			httplib_destroy_client_context( struct lh_ctx_t *ctx );
 LIBHTTP_API struct lh_con_t *		httplib_download( struct lh_ctx_t *ctx, const char *host, int port, int use_ssl, PRINTF_FORMAT_STRING(const char *request_fmt), ...) PRINTF_ARGS(5, 6);
 LIBHTTP_API char *			httplib_error_string( int error_code, char *buf, size_t buf_len );
 LIBHTTP_API const char *		httplib_get_builtin_mime_type( const char *file_name );
 LIBHTTP_API int				httplib_get_cookie( const char *cookie, const char *var_name, char *buf, size_t buf_len );
-LIBHTTP_API enum debug_level_t		httplib_get_debug_level( struct lh_ctx_t *ctx );
+LIBHTTP_API enum lh_dbg_t		httplib_get_debug_level( struct lh_ctx_t *ctx );
 LIBHTTP_API const char *		httplib_get_header( const struct lh_con_t *conn, const char *name );
 LIBHTTP_API const char *		httplib_get_option( const struct lh_ctx_t *ctx, const char *name, char *buffer, size_t buflen );
 LIBHTTP_API uint64_t			httplib_get_random( void );
@@ -428,7 +428,7 @@ LIBHTTP_API int				httplib_remove( const char *path );
 LIBHTTP_API void			httplib_send_file( const struct lh_ctx_t *ctx, struct lh_con_t *conn, const char *path, const char *mime_type, const char *additional_headers );
 LIBHTTP_API void			httplib_set_alloc_callback_func( httplib_alloc_callback_func log_func );
 LIBHTTP_API void			httplib_set_auth_handler( struct lh_ctx_t *ctx, const char *uri, httplib_authorization_handler handler, void *cbdata );
-LIBHTTP_API enum debug_level_t		httplib_set_debug_level( struct lh_ctx_t *ctx, enum debug_level_t new_level );
+LIBHTTP_API enum lh_dbg_t		httplib_set_debug_level( struct lh_ctx_t *ctx, enum lh_dbg_t new_level );
 LIBHTTP_API void			httplib_set_request_handler( struct lh_ctx_t *ctx, const char *uri, httplib_request_handler handler, void *cbdata );
 LIBHTTP_API void			httplib_set_user_connection_data( struct lh_con_t *conn, void *data );
 LIBHTTP_API void			httplib_set_websocket_handler( struct lh_ctx_t *ctx, const char *uri, httplib_websocket_connect_handler connect_handler, httplib_websocket_ready_handler ready_handler, httplib_websocket_data_handler data_handler, httplib_websocket_close_handler close_handler, void *cbdata );

@@ -140,7 +140,7 @@ void XX_httplib_set_handler_type( struct lh_ctx_t *ctx, const char *uri, int han
 	if ( tmp_rh == NULL ) {
 
 		httplib_unlock_context( ctx );
-		httplib_cry( DEBUG_LEVEL_ERROR, ctx, NULL, "%s: cannot create new request handler struct, OOM", __func__ );
+		httplib_cry( LH_DEBUG_ERROR, ctx, NULL, "%s: cannot create new request handler struct, OOM", __func__ );
 
 		return;
 	}
@@ -151,7 +151,7 @@ void XX_httplib_set_handler_type( struct lh_ctx_t *ctx, const char *uri, int han
 
 		httplib_unlock_context( ctx );
 		tmp_rh = httplib_free( tmp_rh );
-		httplib_cry( DEBUG_LEVEL_ERROR, ctx, NULL, "%s: cannot create new request handler struct, OOM", __func__ );
+		httplib_cry( LH_DEBUG_ERROR, ctx, NULL, "%s: cannot create new request handler struct, OOM", __func__ );
 
 		return;
 	}

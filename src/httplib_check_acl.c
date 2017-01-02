@@ -59,7 +59,7 @@ int XX_httplib_check_acl( struct lh_ctx_t *ctx, uint32_t remote_ip ) {
 
 		if ( (flag != '+'  &&  flag != '-')  ||  XX_httplib_parse_net( &vec.ptr[1], &net, &mask ) == 0 ) {
 
-			httplib_cry( DEBUG_LEVEL_WARNING, ctx, NULL, "%s: subnet must be [+|-]x.x.x.x[/x]", __func__ );
+			httplib_cry( LH_DEBUG_WARNING, ctx, NULL, "%s: subnet must be [+|-]x.x.x.x[/x]", __func__ );
 			return -1;
 		}
 

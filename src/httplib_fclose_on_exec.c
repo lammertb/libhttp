@@ -39,7 +39,7 @@ void XX_httplib_fclose_on_exec( const struct lh_ctx_t *ctx, struct file *filep, 
 
 	if ( fcntl( fileno( filep->fp ), F_SETFD, FD_CLOEXEC) != 0 ) {
 
-		if ( conn != NULL ) httplib_cry( DEBUG_LEVEL_ERROR, ctx, conn, "%s: fcntl(F_SETFD FD_CLOEXEC) failed: %s", __func__, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
+		if ( conn != NULL ) httplib_cry( LH_DEBUG_ERROR, ctx, conn, "%s: fcntl(F_SETFD FD_CLOEXEC) failed: %s", __func__, httplib_error_string( ERRNO, error_string, ERROR_STRING_LEN ) );
 	}
 #endif
 
