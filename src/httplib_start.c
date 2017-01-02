@@ -214,7 +214,7 @@ struct lh_ctx_t *httplib_start( const struct lh_clb_t *callbacks, void *user_dat
 
 		struct worker_thread_args *wta;
 	       
-		wta = httplib_malloc( sizeof(struct worker_thread_args) );
+		wta = httplib_calloc( 1, sizeof(struct worker_thread_args) );
 
 		if ( wta != NULL ) {
 

@@ -658,26 +658,26 @@ struct websocket_client_thread_data {
 };
 
 struct uriprot_tp {
-	const char *proto;
-	size_t proto_len;
-	unsigned default_port;
+	const char *	proto;
+	size_t		proto_len;
+	unsigned	default_port;
 };
 
 struct file {
-	uint64_t size;
-	time_t last_modified;
-	FILE *fp;
-	const char *membuf; /* Non-NULL if file data is in memory */
-	int is_directory;
-	int gzipped; /* set to 1 if the content is gzipped in which case we need a content-encoding: gzip header */
+	uint64_t	size;
+	time_t		last_modified;
+	FILE *		fp;
+	const char *	membuf; /* Non-NULL if file data is in memory */
+	int		is_directory;
+	int		gzipped; /* set to 1 if the content is gzipped in which case we need a content-encoding: gzip header */
 };
 
 #define STRUCT_FILE_INITIALIZER    { (uint64_t)0, (time_t)0, NULL, NULL, 0, 0 } 
 
 /* Describes a string (chunk of memory). */
 struct vec {
-	const char *ptr;
-	size_t len;
+	const char *	ptr;
+	size_t		len;
 };
 
 enum { REQUEST_HANDLER, WEBSOCKET_HANDLER, AUTH_HANDLER };
@@ -690,20 +690,23 @@ struct de {
 };
 
 struct dir_scan_data {
-	struct de *	entries;
-	unsigned int	num_entries;
-	unsigned int	arr_size;
+	struct de *		entries;
+	unsigned int		num_entries;
+	unsigned int		arr_size;
 };
 
 
-/* This structure helps to create an environment for the spawned CGI program.
+/*
+ * This structure helps to create an environment for the spawned CGI program.
  * Environment is an array of "VARIABLE=VALUE\0" ASCIIZ strings,
  * last element must be NULL.
  * However, on Windows there is a requirement that all these VARIABLE=VALUE\0
  * strings must reside in a contiguous buffer. The end of the buffer is
  * marked by two '\0' characters.
  * We satisfy both worlds: we create an envp array (which is vars), all
- * entries are actually pointers inside buf. */
+ * entries are actually pointers inside buf.
+ */
+
 struct cgi_environment {
 	struct lh_con_t *conn;
 	/* Data block */
@@ -718,13 +721,13 @@ struct cgi_environment {
 
 /* Parsed Authorization header */
 struct ah {
-	char *user;
-	char *uri;
-	char *cnonce;
-	char *response;
-	char *qop;
-	char *nc;
-	char *nonce;
+	char *	user;
+	char *	uri;
+	char *	cnonce;
+	char *	response;
+	char *	qop;
+	char *	nc;
+	char *	nonce;
 };
 
 struct read_auth_file_struct {
@@ -911,13 +914,13 @@ LIBHTTP_THREAD		XX_httplib_worker_thread( void *thread_func_param );
 
 
 
-typedef unsigned char md5_byte_t; /* 8-bit byte */
-typedef unsigned int md5_word_t;  /* 32-bit word */
+typedef unsigned char	md5_byte_t; /* 8-bit byte */
+typedef unsigned int	md5_word_t;  /* 32-bit word */
 
 typedef struct md5_state_s {
-	md5_word_t count[2]; /* message length in bits, lsw first */
-	md5_word_t abcd[4];  /* digest buffer */
-	md5_byte_t buf[64];  /* accumulate block */
+	md5_word_t	count[2]; /* message length in bits, lsw first */
+	md5_word_t	abcd[4];  /* digest buffer */
+	md5_byte_t	buf[64];  /* accumulate block */
 } md5_state_t;
 
 void			md5_init( md5_state_t *pms );

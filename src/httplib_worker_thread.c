@@ -30,7 +30,7 @@
 #include "httplib_ssl.h"
 #include "httplib_utils.h"
 
-static void *	worker_thread_run( struct worker_thread_args *thread_args );
+static void	worker_thread_run( struct worker_thread_args *thread_args );
 
 /*
  * ... XX_httplib_worker_thread( void *thread_func_param );
@@ -59,13 +59,13 @@ LIBHTTP_THREAD XX_httplib_worker_thread( void *thread_func_param ) {
 
 
 /*
- * static void *worker_thread_run( struct worker_thread_args *thread_args );
+ * static void worker_thread_run( struct worker_thread_args *thread_args );
  *
  * The function worker_thread_run is the function which does the heavy lifting
  * to run a worker thread.
  */
 
-static void *worker_thread_run( struct worker_thread_args *thread_args ) {
+static void worker_thread_run( struct worker_thread_args *thread_args ) {
 
 	struct lh_ctx_t *ctx;
 	struct lh_con_t *conn;
@@ -75,7 +75,7 @@ static void *worker_thread_run( struct worker_thread_args *thread_args ) {
 		void *		var;
 	} ptr;
 
-	if ( thread_args == NULL ) return NULL;
+	if ( thread_args == NULL ) return;
 
 	ctx = thread_args->ctx;
 
@@ -132,27 +132,10 @@ static void *worker_thread_run( struct worker_thread_args *thread_args ) {
 			if ( conn->client.has_ssl ) {
 
 #ifndef NO_SSL
-				/*
-				 * HTTPS connection
-				 */
-
 				if ( XX_httplib_sslize( ctx, conn, ctx->ssl_ctx, SSL_accept ) ) {
 
-					/*
-					 * Get SSL client certificate information (if set)
-					 */
-
-					XX_httplib_ssl_get_client_cert_info( conn );
-
-					/*
-					 * process HTTPS connection
-					 */
-
+					XX_httplib_ssl_get_client_cert_info(    conn );
 					XX_httplib_process_new_connection( ctx, conn );
-
-					/*
-					 * Free client certificate info
-					 */
 
 					if ( conn->request_info.client_cert != NULL ) {
 
@@ -160,6 +143,7 @@ static void *worker_thread_run( struct worker_thread_args *thread_args ) {
 						ptr.con = conn->request_info.client_cert->issuer;  ptr.var = httplib_free( ptr.var );
 						ptr.con = conn->request_info.client_cert->serial;  ptr.var = httplib_free( ptr.var );
 						ptr.con = conn->request_info.client_cert->finger;  ptr.var = httplib_free( ptr.var );
+
 						conn->request_info.client_cert = httplib_free( conn->request_info.client_cert );
 					}
 				}
@@ -178,7 +162,5 @@ static void *worker_thread_run( struct worker_thread_args *thread_args ) {
 #endif
 	httplib_pthread_mutex_destroy( & conn->mutex );
 	conn = httplib_free( conn );
-
-	return NULL;
 
 }  /* worker_thread_run */
