@@ -31,13 +31,13 @@
 #include "httplib_utils.h"
 
 /*
- * void XX_httplib_free_context( struct httplib_context *ctx );
+ * void XX_httplib_free_context( struct lh_ctx_t *ctx );
  *
  * The function XX_httplib_free_context() is used to free the resources
  * associated with a context.
  */
 
-void XX_httplib_free_context( struct httplib_context *ctx ) {
+void XX_httplib_free_context( struct lh_ctx_t *ctx ) {
 
 	struct httplib_handler_info *tmp_rh;
 

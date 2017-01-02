@@ -28,7 +28,7 @@
 #include "httplib_main.h"
 
 /*
- * bool XX_httplib_must_hide_file( const struct httplib_context *ctx, const char *path );
+ * bool XX_httplib_must_hide_file( const struct lh_ctx_t *ctx, const char *path );
  *
  * The function XX_httplib_must_hide_file() returns true, if a file must be
  * hidden from browsing by the remote client. A used provided list of file
@@ -36,7 +36,7 @@
  * the patterns defined by the user.
  */
 
-bool XX_httplib_must_hide_file( const struct httplib_context *ctx, const char *path ) {
+bool XX_httplib_must_hide_file( const struct lh_ctx_t *ctx, const char *path ) {
 
 	const char *pw_pattern;
 	const char *pattern;

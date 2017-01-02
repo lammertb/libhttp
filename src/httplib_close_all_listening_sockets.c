@@ -28,13 +28,13 @@
 #include "httplib_main.h"
 
 /*
- * void XX_httplib_close_all_listening_sockets( struct httplib_context *ctx );
+ * void XX_httplib_close_all_listening_sockets( struct lh_ctx_t *ctx );
  *
  * The function XX_httplib_close_all_listening_sockets() closes all listening
  * sockets of a given context.
  */
 
-void XX_httplib_close_all_listening_sockets( struct httplib_context *ctx ) {
+void XX_httplib_close_all_listening_sockets( struct lh_ctx_t *ctx ) {
 
 	unsigned int i;
 

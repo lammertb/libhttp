@@ -29,13 +29,13 @@
 #include "httplib_ssl.h"
 
 /*
- * void XX_httplib_accept_new_connection( const struct socket *lostener, struct httplib_context *ctx );
+ * void XX_httplib_accept_new_connection( const struct socket *lostener, struct lh_ctx_t *ctx );
  *
  * The function XX_httplib_accept_new_connection() is used to process new
  * incoming connections to the server.
  */
 
-void XX_httplib_accept_new_connection( const struct socket *listener, struct httplib_context *ctx ) {
+void XX_httplib_accept_new_connection( const struct socket *listener, struct lh_ctx_t *ctx ) {
 
 	struct socket so;
 	char src_addr[IP_ADDR_STR_LEN];

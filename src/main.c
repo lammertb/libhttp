@@ -147,7 +147,7 @@ static const char *g_server_name;   /* Set by init_server_name() */
 static const char *g_icon_name;     /* Set by init_server_name() */
 static char g_config_file_name[PATH_MAX] =
     "";                          /* Set by process_command_line_arguments() */
-static struct httplib_context *g_ctx; /* Set by start_libhttp() */
+static struct lh_ctx_t *g_ctx; /* Set by start_libhttp() */
 static struct tuser_data
     g_user_data; /* Passed to httplib_start() by start_libhttp() */
 
@@ -247,7 +247,7 @@ static const char *config_file_top_comment =
     "# To make a change, remove leading '#', modify option's value,\n"
     "# save this file and then restart LibHTTP.\n\n";
 
-static const char * get_url_to_first_open_port(const struct httplib_context *ctx) {
+static const char * get_url_to_first_open_port(const struct lh_ctx_t *ctx) {
 
 	static char url[100];
 	char ports_str[256];
@@ -272,7 +272,7 @@ static const char * get_url_to_first_open_port(const struct httplib_context *ctx
 
 
 #ifdef ENABLE_CREATE_CONFIG_FILE
-static void create_config_file(const struct httplib_context *ctx, const char *path) {
+static void create_config_file(const struct lh_ctx_t *ctx, const char *path) {
 
 	const struct httplib_option *options;
 	const char *value;
@@ -539,7 +539,7 @@ static void init_server_name(int argc, const char *argv[]) {
 }
 
 
-static int log_message( const struct httplib_context *ctx, const struct httplib_connection *conn, const char *message ) {
+static int log_message( const struct lh_ctx_t *ctx, const struct httplib_connection *conn, const char *message ) {
 
 	struct tuser_data *ud;
 

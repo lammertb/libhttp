@@ -28,13 +28,13 @@
 #include "httplib_main.h"
 
 /*
- * void httplib_send_file( const struct httplib_context *ctx, struct httplib_connection *conn, const char *path, const char *mime_type, const char *additional_headers );
+ * void httplib_send_file( const struct lh_ctx_t *ctx, struct httplib_connection *conn, const char *path, const char *mime_type, const char *additional_headers );
  *
  * The function httplib_send_file() sends a file to the other peer. Optionally
  * the MIME type and additional headers can be specified.
  */
 
-void httplib_send_file( const struct httplib_context *ctx, struct httplib_connection *conn, const char *path, const char *mime_type, const char *additional_headers ) {
+void httplib_send_file( const struct lh_ctx_t *ctx, struct httplib_connection *conn, const char *path, const char *mime_type, const char *additional_headers ) {
 
 	struct file file = STRUCT_FILE_INITIALIZER;
 

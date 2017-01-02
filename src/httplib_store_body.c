@@ -35,7 +35,7 @@
  * negative number to indicate a failure.
  */
 
-int64_t httplib_store_body( const struct httplib_context *ctx, struct httplib_connection *conn, const char *path ) {
+int64_t httplib_store_body( const struct lh_ctx_t *ctx, struct httplib_connection *conn, const char *path ) {
 
 	char buf[MG_BUF_LEN];
 	int64_t len;

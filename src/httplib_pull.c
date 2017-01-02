@@ -34,7 +34,7 @@
  * Return negative value on error, or number of bytes read on success.
  */
 
-int XX_httplib_pull( const struct httplib_context *ctx, FILE *fp, struct httplib_connection *conn, char *buf, int len, double timeout ) {
+int XX_httplib_pull( const struct lh_ctx_t *ctx, FILE *fp, struct httplib_connection *conn, char *buf, int len, double timeout ) {
 
 	int nread;
 	int err;

@@ -28,13 +28,13 @@
 #include "httplib_main.h"
 
 /*
- * bool XX_httplib_forward_body_data( const struct httplib_context *ctx, struct httplib_connection *conn, FILE *fp, SOCKET sock, SSL *ssl );
+ * bool XX_httplib_forward_body_data( const struct lh_ctx_t *ctx, struct httplib_connection *conn, FILE *fp, SOCKET sock, SSL *ssl );
  *
  * The function XX_httplib_forward_body_data() forwards body data to the
  * client. The function returns true if successful, and false otherwise.
  */
 
-bool XX_httplib_forward_body_data( const struct httplib_context *ctx, struct httplib_connection *conn, FILE *fp, SOCKET sock, SSL *ssl ) {
+bool XX_httplib_forward_body_data( const struct lh_ctx_t *ctx, struct httplib_connection *conn, FILE *fp, SOCKET sock, SSL *ssl ) {
 
 	const char *expect;
 	const char *body;

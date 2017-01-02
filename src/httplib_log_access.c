@@ -32,12 +32,12 @@
 static const char *header_val( const struct httplib_connection *conn, const char *header );
 
 /*
- * void XX_httplib_log_access( const struct httplib_context *ctx, const struct httplib_connection *conn );
+ * void XX_httplib_log_access( const struct lh_ctx_t *ctx, const struct httplib_connection *conn );
  *
  * The function XX_httplib_log_access() logs an access of a client.
  */
 
-void XX_httplib_log_access( const struct httplib_context *ctx, const struct httplib_connection *conn ) {
+void XX_httplib_log_access( const struct lh_ctx_t *ctx, const struct httplib_connection *conn ) {
 
 	const struct httplib_request_info *ri;
 	struct file fi;

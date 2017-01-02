@@ -31,7 +31,7 @@
 #include "httplib_utils.h"
 
 /*
- * void XX_httplib_unitialize_ssl( struct httplib_context *ctx );
+ * void XX_httplib_unitialize_ssl( struct lh_ctx_t *ctx );
  *
  * The function XX_httplib_unititialize_ssl() is used to properly stop the SSL
  * subsystem.
@@ -39,7 +39,7 @@
 
 #if !defined(NO_SSL)
 
-void XX_httplib_uninitialize_ssl( struct httplib_context *ctx ) {
+void XX_httplib_uninitialize_ssl( struct lh_ctx_t *ctx ) {
 
 	UNUSED_PARAMETER(ctx);
 

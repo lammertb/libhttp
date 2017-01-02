@@ -28,13 +28,13 @@
 #include "httplib_main.h"
 
 /*
- * const char *httplib_get_response_code_text( const struct httplib_context *ctx, struct httplib_connection *conn, int response_code );
+ * const char *httplib_get_response_code_text( const struct lh_ctx_t *ctx, struct httplib_connection *conn, int response_code );
  *
  * The function httplib_get_response_code_text() returns a text associated with an
  * HTTP response code.
  */
 
-const char *httplib_get_response_code_text( const struct httplib_context *ctx, struct httplib_connection *conn, int response_code ) {
+const char *httplib_get_response_code_text( const struct lh_ctx_t *ctx, struct httplib_connection *conn, int response_code ) {
 
 	/*
 	 * See IANA HTTP status code assignment:

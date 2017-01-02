@@ -29,14 +29,14 @@
 #include "httplib_utils.h"
 
 /*
- * void XX_httplib_mkcol( const struct httplib_context *ctx, struct httplib_connection *conn, const char *path );
+ * void XX_httplib_mkcol( const struct lh_ctx_t *ctx, struct httplib_connection *conn, const char *path );
  *
  * The function XX_httplib_mkcol() handles a MKCOL command from a remote
  * client. The MKCOL method is used to create a new collection resource at the
  * location specificied by the request URI.
  */
 
-void XX_httplib_mkcol( const struct httplib_context *ctx, struct httplib_connection *conn, const char *path ) {
+void XX_httplib_mkcol( const struct lh_ctx_t *ctx, struct httplib_connection *conn, const char *path ) {
 
 	int rc;
 	int body_len;

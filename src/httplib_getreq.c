@@ -29,12 +29,12 @@
 #include "httplib_string.h"
 
 /*
- * bool XX_httplib_getreq( const struct httplib_context *ctx, struct httplib_connection *conn, int *err );
+ * bool XX_httplib_getreq( const struct lh_ctx_t *ctx, struct httplib_connection *conn, int *err );
  *
  * The function XX_httplib_getreq() processes a request from a remote client.
  */
 
-bool XX_httplib_getreq( const struct httplib_context *ctx, struct httplib_connection *conn, int *err ) {
+bool XX_httplib_getreq( const struct lh_ctx_t *ctx, struct httplib_connection *conn, int *err ) {
 
 	const char *cl;
 

@@ -29,7 +29,7 @@
 #include "httplib_string.h"
 
 /*
- * int httplib_get_response( const struct httplib_context *ctx, struct httplib_connection *conn, int timeout );
+ * int httplib_get_response( const struct lh_ctx_t *ctx, struct httplib_connection *conn, int timeout );
  *
  * The function httplib_get_response() tries to get a response from a remote
  * peer. This function does some dirty action by temporarily replacing the
@@ -40,11 +40,11 @@
  * place.
  */
 
-int httplib_get_response( const struct httplib_context *ctx, struct httplib_connection *conn, int timeout ) {
+int httplib_get_response( const struct lh_ctx_t *ctx, struct httplib_connection *conn, int timeout ) {
 
 	int err;
 	int ret;
-	struct httplib_context rctx;
+	struct lh_ctx_t rctx;
 
 	if ( ctx == NULL  ||  conn == NULL ) return -1;
 

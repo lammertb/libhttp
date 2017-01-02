@@ -25,7 +25,7 @@
 #include "httplib_main.h"
 
 /*
- * int httplib_write( const struct httplib_context *ctx, struct httplib_connection *conn, const void *buffie, size_t lennie );
+ * int httplib_write( const struct lh_ctx_t *ctx, struct httplib_connection *conn, const void *buffie, size_t lennie );
  *
  * The function httplib_write() writes a number of bytes over a connection.
  * The amount of characters written is returned. If an error occurs
@@ -39,7 +39,7 @@
  * case a monotonic clock with guaranteed increase would be a better choice.
  */
 
-int httplib_write( const struct httplib_context *ctx, struct httplib_connection *conn, const void *buffie, size_t lennie ) {
+int httplib_write( const struct lh_ctx_t *ctx, struct httplib_connection *conn, const void *buffie, size_t lennie ) {
 
 	time_t now;
 	int64_t n;

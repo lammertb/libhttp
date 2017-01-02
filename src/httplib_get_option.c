@@ -27,7 +27,7 @@ static const char *	store_int(  char *buffer, size_t buflen, int value         )
 static const char *	store_str(  char *buffer, size_t buflen, const char *value );
 
 /*
- * const char *httplib_get_option( const struct httplib_context *ctx, const char *name, char *buffer, size_t buflen );
+ * const char *httplib_get_option( const struct lh_ctx_t *ctx, const char *name, char *buffer, size_t buflen );
  *
  * The function httplib_get_option() returns the content of an option for a
  * given context. If an error occurs, NULL is returned. If the option is valid
@@ -35,7 +35,7 @@ static const char *	store_str(  char *buffer, size_t buflen, const char *value )
  * string.
  */
 
-const char *httplib_get_option( const struct httplib_context *ctx, const char *name, char *buffer, size_t buflen ) {
+const char *httplib_get_option( const struct lh_ctx_t *ctx, const char *name, char *buffer, size_t buflen ) {
 
 	if ( name == NULL  ||  buffer == NULL  ||  buflen < 1 ) return NULL;
 

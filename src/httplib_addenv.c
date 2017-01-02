@@ -30,7 +30,7 @@
 #include "httplib_utils.h"
 
 /*
- * void XX_httplib_addenv( const struct httplib_context *ctx, struct cgi_environment *env, const char *fmt, ... );
+ * void XX_httplib_addenv( const struct lh_ctx_t *ctx, struct cgi_environment *env, const char *fmt, ... );
  *
  * The function XX_httplib_addenv() adds one item to the environment before
  * a CGI script is called. The environment variable has the form
@@ -44,7 +44,7 @@
 
 #if !defined(NO_CGI)
 
-void XX_httplib_addenv( const struct httplib_context *ctx, struct cgi_environment *env, const char *fmt, ... ) {
+void XX_httplib_addenv( const struct lh_ctx_t *ctx, struct cgi_environment *env, const char *fmt, ... ) {
 
 	size_t n;
 	size_t space;

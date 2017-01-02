@@ -36,7 +36,7 @@
 
 #if !defined(NO_SSL)
 
-int XX_httplib_sslize( const struct httplib_context *ctx, struct httplib_connection *conn, SSL_CTX *s, int (*func)(SSL *) ) {
+int XX_httplib_sslize( const struct lh_ctx_t *ctx, struct httplib_connection *conn, SSL_CTX *s, int (*func)(SSL *) ) {
 
 	int ret;
 	int err;

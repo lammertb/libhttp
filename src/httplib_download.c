@@ -35,7 +35,7 @@
  * and returns a pointer to the connection on success, or NULL on error.
  */
 
-struct httplib_connection * httplib_download( struct httplib_context *ctx, const char *host, int port, int use_ssl, const char *fmt, ... ) {
+struct httplib_connection * httplib_download( struct lh_ctx_t *ctx, const char *host, int port, int use_ssl, const char *fmt, ... ) {
 
 	struct httplib_connection *conn;
 	va_list ap;

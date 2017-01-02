@@ -33,7 +33,7 @@
  * or search for .htpasswd in the requested directory.
  */
 
-void XX_httplib_open_auth_file( const struct httplib_context *ctx, struct httplib_connection *conn, const char *path, struct file *filep ) {
+void XX_httplib_open_auth_file( const struct lh_ctx_t *ctx, struct httplib_connection *conn, const char *path, struct file *filep ) {
 
 	char name[PATH_MAX];
 	char error_string[ERROR_STRING_LEN];

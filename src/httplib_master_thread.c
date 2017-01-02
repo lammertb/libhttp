@@ -58,7 +58,7 @@ LIBHTTP_THREAD XX_httplib_master_thread( void *thread_func_param ) {
 
 static void master_thread_run(void *thread_func_param) {
 
-	struct httplib_context *ctx = (struct httplib_context *)thread_func_param;
+	struct lh_ctx_t *ctx = (struct lh_ctx_t *)thread_func_param;
 	struct httplib_workerTLS tls;
 	struct pollfd *pfd;
 	int i;

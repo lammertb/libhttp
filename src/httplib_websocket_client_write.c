@@ -38,7 +38,7 @@ static void mask_data( const char *in, size_t in_len, uint32_t masking_key, char
  * otherwise the amount of bytes written.
  */
 
-int httplib_websocket_client_write( const struct httplib_context *ctx, struct httplib_connection *conn, int opcode, const char *data, size_t dataLen ) {
+int httplib_websocket_client_write( const struct lh_ctx_t *ctx, struct httplib_connection *conn, int opcode, const char *data, size_t dataLen ) {
 
 	int retval;
 	char *masked_data;

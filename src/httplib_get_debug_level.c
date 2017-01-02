@@ -23,13 +23,13 @@
 #include "httplib_main.h"
 
 /*
- * enum debug_level_t httplib_get_debug_level( struct httplib_context *ctx );
+ * enum debug_level_t httplib_get_debug_level( struct lh_ctx_t *ctx );
  *
  * The function httplib_get_debug_level() returns the debug level for a
  * context.
  */
 
-enum debug_level_t httplib_get_debug_level( struct httplib_context *ctx ) {
+enum debug_level_t httplib_get_debug_level( struct lh_ctx_t *ctx ) {
 
 	if ( ctx == NULL ) return DEBUG_LEVEL_NONE;
 	return ctx->debug_level;

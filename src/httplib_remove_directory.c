@@ -29,13 +29,13 @@
 #include "httplib_string.h"
 
 /*
- * int XX_httplib_remove_directory( const struct httplib_context *ctx, struct httplib_connection *conn, const char *dir );
+ * int XX_httplib_remove_directory( const struct lh_ctx_t *ctx, struct httplib_connection *conn, const char *dir );
  *
  * The function XX_httplib_remove_directory() removes recursively a directory
  * tree.
  */
 
-int XX_httplib_remove_directory( const struct httplib_context *ctx, struct httplib_connection *conn, const char *dir ) {
+int XX_httplib_remove_directory( const struct lh_ctx_t *ctx, struct httplib_connection *conn, const char *dir ) {
 
 	char path[PATH_MAX];
 	char error_string[ERROR_STRING_LEN];

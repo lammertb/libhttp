@@ -29,13 +29,13 @@
 #include "httplib_utils.h"
 
 /*
- * void XX_httplib_put_file( const struct httplib_context *ctx, struct httplib_connection *conn, const char *path );
+ * void XX_httplib_put_file( const struct lh_ctx_t *ctx, struct httplib_connection *conn, const char *path );
  *
  * The function XX_httplib_put_file() processes a file PUT request coming from
  * a remote client.
  */
 
-void XX_httplib_put_file( const struct httplib_context *ctx, struct httplib_connection *conn, const char *path ) {
+void XX_httplib_put_file( const struct lh_ctx_t *ctx, struct httplib_connection *conn, const char *path ) {
 
 	struct file file = STRUCT_FILE_INITIALIZER;
 	const char *range;

@@ -27,7 +27,7 @@
 
 #include "httplib_main.h"
 
-int httplib_get_server_ports( const struct httplib_context *ctx, int size, struct httplib_server_ports *ports ) {
+int httplib_get_server_ports( const struct lh_ctx_t *ctx, int size, struct httplib_server_ports *ports ) {
 
 	int i;
 	int cnt;

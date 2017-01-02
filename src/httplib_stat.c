@@ -48,7 +48,7 @@ static bool path_cannot_disclose_cgi( const char *path ) {
 }
 
 
-int XX_httplib_stat( const struct httplib_context *ctx, struct httplib_connection *conn, const char *path, struct file *filep ) {
+int XX_httplib_stat( const struct lh_ctx_t *ctx, struct httplib_connection *conn, const char *path, struct file *filep ) {
 
 	wchar_t wbuf[PATH_MAX];
 	WIN32_FILE_ATTRIBUTE_DATA info;
@@ -121,7 +121,7 @@ int XX_httplib_stat( const struct httplib_context *ctx, struct httplib_connectio
 
 #else
 
-int XX_httplib_stat( const struct httplib_context *ctx, struct httplib_connection *conn, const char *path, struct file *filep ) {
+int XX_httplib_stat( const struct lh_ctx_t *ctx, struct httplib_connection *conn, const char *path, struct file *filep ) {
 
 	struct stat st;
 

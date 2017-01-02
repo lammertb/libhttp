@@ -41,7 +41,7 @@ static long int data_check		= 0;
 
 #if !defined(NO_SSL)
 
-int XX_httplib_refresh_trust( const struct httplib_context *ctx, struct httplib_connection *conn ) {
+int XX_httplib_refresh_trust( const struct lh_ctx_t *ctx, struct httplib_connection *conn ) {
 
 	volatile int *p_reload_lock;
 	struct stat cert_buf;

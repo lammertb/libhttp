@@ -40,7 +40,7 @@
 LIBHTTP_THREAD XX_httplib_websocket_client_thread( void *data ) {
 
 	struct websocket_client_thread_data *cdata;
-	struct httplib_context *ctx;
+	struct lh_ctx_t *ctx;
 	struct httplib_connection *conn;
 
 	if ( (cdata = data       ) == NULL ) return LIBHTTP_THREAD_RETNULL;

@@ -27,7 +27,7 @@
 
 #include "httplib_main.h"
 
-int XX_httplib_pull_all( const struct httplib_context *ctx, FILE *fp, struct httplib_connection *conn, char *buf, int len ) {
+int XX_httplib_pull_all( const struct lh_ctx_t *ctx, FILE *fp, struct httplib_connection *conn, char *buf, int len ) {
 
 	int n;
 	int nread;

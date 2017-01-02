@@ -41,7 +41,7 @@
  * has been established.
  */
 
-bool XX_httplib_connect_socket( struct httplib_context *ctx, const char *host, int port, int use_ssl, SOCKET *sock, union usa *sa ) {
+bool XX_httplib_connect_socket( struct lh_ctx_t *ctx, const char *host, int port, int use_ssl, SOCKET *sock, union usa *sa ) {
 
 	int ip_ver;
 	char error_string[ERROR_STRING_LEN];

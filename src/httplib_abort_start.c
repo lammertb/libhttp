@@ -23,14 +23,14 @@
 #include "httplib_main.h"
 
 /* 
- * struct httplib_context *XX_httplib_abort_start( struct httplib_context *ctx, const char *fmt, ... );
+ * struct lh_ctx_t *XX_httplib_abort_start( struct lh_ctx_t *ctx, const char *fmt, ... );
  *
  * The function XX_httplib_abort_start() is called to do some cleanup work when
  * an error occured initializing a context. The function returns NULL which is
  * then further returned to the calling party.
  */
 
-struct httplib_context *XX_httplib_abort_start( struct httplib_context *ctx, const char *fmt, ... ) {
+struct lh_ctx_t *XX_httplib_abort_start( struct lh_ctx_t *ctx, const char *fmt, ... ) {
 
 	va_list ap;
 	char buf[MG_BUF_LEN];

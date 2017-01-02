@@ -40,7 +40,7 @@ static void trim_trailing_whitespaces( char *s ) {
 }  /* trim_trailing_whitespaces */
 
 
-pid_t XX_httplib_spawn_process( const struct httplib_context *ctx, struct httplib_connection *conn, const char *prog, char *envblk, char *envp[], int fdin[2], int fdout[2], int fderr[2], const char *dir ) {
+pid_t XX_httplib_spawn_process( const struct lh_ctx_t *ctx, struct httplib_connection *conn, const char *prog, char *envblk, char *envp[], int fdin[2], int fdout[2], int fderr[2], const char *dir ) {
 
 	HANDLE me;
 	char *p;
@@ -157,7 +157,7 @@ spawn_cleanup:
 #else  /* _WIN32 */
 
 #ifndef NO_CGI
-pid_t XX_httplib_spawn_process( const struct httplib_context *ctx, struct httplib_connection *conn, const char *prog, char *envblk, char *envp[], int fdin[2], int fdout[2], int fderr[2], const char *dir ) {
+pid_t XX_httplib_spawn_process( const struct lh_ctx_t *ctx, struct httplib_connection *conn, const char *prog, char *envblk, char *envp[], int fdin[2], int fdout[2], int fderr[2], const char *dir ) {
 
 	pid_t pid;
 	const char *interp;

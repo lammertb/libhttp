@@ -45,13 +45,13 @@ static void *cryptolib_dll_handle; /* Store the crypto library handle. */
 
 
 /*
- * int XX_httplib_initialize_ssl( struct httplib_context *ctx );
+ * int XX_httplib_initialize_ssl( struct lh_ctx_t *ctx );
  *
  * The function XX_httplib_initialize_ssl() initializes the use of SSL
  * encrypted communication on the given context.
  */
 
-int XX_httplib_initialize_ssl( struct httplib_context *ctx ) {
+int XX_httplib_initialize_ssl( struct lh_ctx_t *ctx ) {
 
 	int i;
 	size_t size;

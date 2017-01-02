@@ -28,14 +28,14 @@
 #include "httplib_main.h"
 
 /*
- * bool XX_httplib_set_gpass_option( struct httplib_context *ctx );
+ * bool XX_httplib_set_gpass_option( struct lh_ctx_t *ctx );
  *
  * The function XX_httplib_set_gpass_option() sets the global password file
  * option for a context. The function returns false when an error occurs and
  * true when successful.
  */
 
-bool XX_httplib_set_gpass_option( struct httplib_context *ctx ) {
+bool XX_httplib_set_gpass_option( struct lh_ctx_t *ctx ) {
 
 	struct file file = STRUCT_FILE_INITIALIZER;
 	const char *path;

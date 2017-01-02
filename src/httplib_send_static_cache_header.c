@@ -28,13 +28,13 @@
 #include "httplib_main.h"
 
 /*
- * int XX_httlib_send_static_cache_header( const struct httplib_context *ctx, struct httplib_connection *conn );
+ * int XX_httlib_send_static_cache_header( const struct lh_ctx_t *ctx, struct httplib_connection *conn );
  *
  * The function XX_httplib_send_static_cache_header() sends cache headers
  * depending on the cache setting of the current context.
  */
 
-int XX_httplib_send_static_cache_header( const struct httplib_context *ctx, struct httplib_connection *conn ) {
+int XX_httplib_send_static_cache_header( const struct lh_ctx_t *ctx, struct httplib_connection *conn ) {
 
 	if ( ctx == NULL  ||  conn == NULL ) return 0;
 

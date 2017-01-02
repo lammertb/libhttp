@@ -26,7 +26,7 @@
 
 #include "httplib_main.h"
 
-static int url_encoded_field_found( const struct httplib_context *ctx, const struct httplib_connection *conn, const char *key, size_t key_len, const char *filename, size_t filename_len, char *path, size_t path_len, struct httplib_form_data_handler *fdh ) {
+static int url_encoded_field_found( const struct lh_ctx_t *ctx, const struct httplib_connection *conn, const char *key, size_t key_len, const char *filename, size_t filename_len, char *path, size_t path_len, struct httplib_form_data_handler *fdh ) {
 
 	char key_dec[1024];
 	char filename_dec[1024];
@@ -77,7 +77,7 @@ static int url_encoded_field_found( const struct httplib_context *ctx, const str
 }
 
 
-static int url_encoded_field_get( const struct httplib_context *ctx, const struct httplib_connection *conn, const char *key, size_t key_len, const char *value, size_t value_len, struct httplib_form_data_handler *fdh ) {
+static int url_encoded_field_get( const struct lh_ctx_t *ctx, const struct httplib_connection *conn, const char *key, size_t key_len, const char *value, size_t value_len, struct httplib_form_data_handler *fdh ) {
 
 	char key_dec[1024];
 
@@ -155,7 +155,7 @@ static const char * search_boundary(const char *buf, size_t buf_len, const char 
 }
 
 
-int httplib_handle_form_request( const struct httplib_context *ctx, struct httplib_connection *conn, struct httplib_form_data_handler *fdh ) {
+int httplib_handle_form_request( const struct lh_ctx_t *ctx, struct httplib_connection *conn, struct httplib_form_data_handler *fdh ) {
 
 	const char *content_type;
 	char path[512];

@@ -28,7 +28,7 @@
 #include "httplib_main.h"
 
 /*
- * bool XX_httplib_set_uid_option( struct httplib_contect *ctx );
+ * bool XX_httplib_set_uid_option( struct lh_ctx_t *ctx );
  *
  * The function XX_httplib_set_uid_option() runs on systems which support it
  * the context in the security environment of a specific user. The function can
@@ -38,7 +38,7 @@
  * False is returned in case a problem is detected, true otherwise.
  */
 
-bool XX_httplib_set_uid_option( struct httplib_context *ctx ) {
+bool XX_httplib_set_uid_option( struct lh_ctx_t *ctx ) {
 
 #if defined(_WIN32)
 

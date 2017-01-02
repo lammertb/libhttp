@@ -23,13 +23,13 @@
 #include "httplib_main.h"
 
 /*
- * void XX_httplib_free_config_options( struct htptlib_context *ctx );
+ * void XX_httplib_free_config_options( struct lh_ctx_t *ctx );
  *
  * The function XX_httplib_free_config_options() returns all the from the heap
  * allocated space to store config options back to the heap.
  */
 
-void XX_httplib_free_config_options( struct httplib_context *ctx ) {
+void XX_httplib_free_config_options( struct lh_ctx_t *ctx ) {
 
 	if ( ctx == NULL ) return;
 

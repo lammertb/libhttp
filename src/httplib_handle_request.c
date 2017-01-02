@@ -30,7 +30,7 @@
 #include "httplib_utils.h"
 
 /*
- * void XX_httplib_handle_request( const struct httplib_context *ctx, struct httplib_connection *conn );
+ * void XX_httplib_handle_request( const struct lh_ctx_t *ctx, struct httplib_connection *conn );
  *
  * The function XX_httplib_handle_request() handles an incoming request. This
  * is the heart of the LibHTTP's logic. This function is called when the
@@ -38,7 +38,7 @@
  * to take: serve a file, or a directory, or call embedded function, etcetera.
  */
 
-void XX_httplib_handle_request( struct httplib_context *ctx, struct httplib_connection *conn ) {
+void XX_httplib_handle_request( struct lh_ctx_t *ctx, struct httplib_connection *conn ) {
 
 	struct httplib_request_info *ri;
 	char path[PATH_MAX];

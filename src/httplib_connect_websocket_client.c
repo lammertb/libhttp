@@ -36,7 +36,7 @@
  * returned, otherwise NULL.
  */
 
-struct httplib_connection *httplib_connect_websocket_client( struct httplib_context *ctx, const char *host, int port, int use_ssl, const char *path, const char *origin, httplib_websocket_data_handler data_func, httplib_websocket_close_handler close_func, void *user_data ) {
+struct httplib_connection *httplib_connect_websocket_client( struct lh_ctx_t *ctx, const char *host, int port, int use_ssl, const char *path, const char *origin, httplib_websocket_data_handler data_func, httplib_websocket_close_handler close_func, void *user_data ) {
 
 	struct httplib_connection *conn;
 	struct websocket_client_thread_data *thread_data;

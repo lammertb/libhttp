@@ -28,13 +28,13 @@
 #include "httplib_main.h"
 
 /*
- * const char *XX_httplib_get_rel_url_at_current_server( const struct httplib_context *ctx, const char *uri, const struct httplib_connection *conn );
+ * const char *XX_httplib_get_rel_url_at_current_server( const struct lh_ctx_t *ctx, const char *uri, const struct httplib_connection *conn );
  *
  * The function XX_httplib_get_rel_url_at_current_server() returns the relative
  * uri at the current server.
  */
 
-const char *XX_httplib_get_rel_url_at_current_server( const struct httplib_context *ctx, const char *uri, const struct httplib_connection *conn ) {
+const char *XX_httplib_get_rel_url_at_current_server( const struct lh_ctx_t *ctx, const char *uri, const struct httplib_connection *conn ) {
 
 	const char *server_domain;
 	size_t server_domain_len;

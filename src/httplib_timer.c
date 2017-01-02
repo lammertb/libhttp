@@ -49,7 +49,7 @@ struct ttimers {
 	unsigned timer_count;			/* Current size of timer list	*/
 };
 
-static int timer_add( struct httplib_context *ctx, double next_time, double period, int is_relative, taction action, void *arg ) {
+static int timer_add( struct lh_ctx_t *ctx, double next_time, double period, int is_relative, taction action, void *arg ) {
 
 	unsigned u;
 	unsigned v;
@@ -113,7 +113,7 @@ static int timer_add( struct httplib_context *ctx, double next_time, double peri
 
 static void timer_thread_run( void *thread_func_param ) {
 
-	struct httplib_context *ctx = (struct httplib_context *)thread_func_param;
+	struct lh_ctx_t *ctx = (struct lh_ctx_t *)thread_func_param;
 	struct timespec now;
 	double d;
 	unsigned u;
@@ -178,7 +178,7 @@ static void * timer_thread( void *thread_func_param ) {
 
 #endif /* _WIN32 */
 
-static int timers_init( struct httplib_context *ctx ) {
+static int timers_init( struct lh_ctx_t *ctx ) {
 
 	ctx->timers = httplib_calloc( sizeof(struct ttimers), 1 );
 	httplib_pthread_mutex_init( & ctx->timers->mutex, NULL );
@@ -193,7 +193,7 @@ static int timers_init( struct httplib_context *ctx ) {
 
 }  /* timers_init */
 
-static void timers_exit( struct httplib_context *ctx ) {
+static void timers_exit( struct lh_ctx_t *ctx ) {
 
 	if ( ctx->timers != NULL ) {
 

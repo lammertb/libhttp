@@ -31,14 +31,14 @@
 static void *ssllib_dll_handle;    /* Store the ssl library handle. */
 
 /*
- * bool XX_httplib_set_ssl_option( struct httplib_context *ctx );
+ * bool XX_httplib_set_ssl_option( struct lh_ctx_t *ctx );
  *
  * The function XX_httplib_set_ssl_option() loads the SSL library in a dynamic
  * way. The function returns false if an error occured, otherwise true.
  */
 
 #if !defined(NO_SSL)
-bool XX_httplib_set_ssl_option( struct httplib_context *ctx ) {
+bool XX_httplib_set_ssl_option( struct lh_ctx_t *ctx ) {
 
 	const char *pem;
 	int callback_ret;

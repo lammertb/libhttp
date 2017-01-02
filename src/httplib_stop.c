@@ -28,13 +28,13 @@
 #include "httplib_main.h"
 
 /*
- * void httplib_stop( struct httplib_context *ctx );
+ * void httplib_stop( struct lh_ctx_t *ctx );
  *
  * The function httplib_stop() is used to stop an instance of a LibHTTP server
  * completely and return all its resources.
  */
 
-void httplib_stop( struct httplib_context *ctx ) {
+void httplib_stop( struct lh_ctx_t *ctx ) {
 
 	pthread_t mt;
 

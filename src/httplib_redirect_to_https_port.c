@@ -29,13 +29,13 @@
 #include "httplib_string.h"
 
 /*
- * void XX_httplib_redirect_to_https_port( const struct httplib_context *ctx, struct httplib_connection *conn, int ssl_index );
+ * void XX_httplib_redirect_to_https_port( const struct lh_ctx_t *ctx, struct httplib_connection *conn, int ssl_index );
  *
  * The function XX_httplib_redirect_to_https_port() redirects a request to an
  * encrypted connection over HTTPS.
  */
 
-void XX_httplib_redirect_to_https_port( const struct httplib_context *ctx, struct httplib_connection *conn, int ssl_index ) {
+void XX_httplib_redirect_to_https_port( const struct lh_ctx_t *ctx, struct httplib_connection *conn, int ssl_index ) {
 
 	char host[1024+1];
 	const char *host_header;

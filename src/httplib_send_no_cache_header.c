@@ -27,7 +27,7 @@
 
 #include "httplib_main.h"
 
-int XX_httplib_send_no_cache_header( const struct httplib_context *ctx, struct httplib_connection *conn ) {
+int XX_httplib_send_no_cache_header( const struct lh_ctx_t *ctx, struct httplib_connection *conn ) {
 
 	/*
 	 * Send all current and obsolete cache opt-out directives.

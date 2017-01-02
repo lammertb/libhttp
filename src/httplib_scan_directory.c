@@ -28,7 +28,7 @@
 #include "httplib_main.h"
 #include "httplib_string.h"
 
-int XX_httplib_scan_directory( const struct httplib_context *ctx, struct httplib_connection *conn, const char *dir, void *data, void (*cb)(const struct httplib_context *ctx, struct de *, void *) ) {
+int XX_httplib_scan_directory( const struct lh_ctx_t *ctx, struct httplib_connection *conn, const char *dir, void *data, void (*cb)(const struct lh_ctx_t *ctx, struct de *, void *) ) {
 
 	char path[PATH_MAX];
 	char error_string[ERROR_STRING_LEN];

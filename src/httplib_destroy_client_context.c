@@ -23,14 +23,14 @@
 #include "httplib_main.h"
 
 /*
- * void httplib_destroy_client_context( struct httplib_context *ctx );
+ * void httplib_destroy_client_context( struct lh_ctx_t *ctx );
  *
  * The function httplib_destroy_client_context() destroys the context for a
  * client connection. This function should not be called for server contexts.
  * Use httplib_stop() for server contexts instead.
  */
 
-void httplib_destroy_client_context( struct httplib_context *ctx ) {
+void httplib_destroy_client_context( struct lh_ctx_t *ctx ) {
 
 	if ( ctx == NULL ) return;
 

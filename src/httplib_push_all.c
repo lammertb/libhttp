@@ -36,7 +36,7 @@
 #endif
 
 /*
- * static int64_t push( const struct httplib_context *ctx, FILE *fp, SOCKET sock, SSL *ssl, const char *buf, int64_t len, double timeout );
+ * static int64_t push( const struct lh_ctx_t *ctx, FILE *fp, SOCKET sock, SSL *ssl, const char *buf, int64_t len, double timeout );
  *
  * The function push() writes data to the I/O channel, opened file descriptor,
  * socket or SSL descriptor. The function returns the number of bytes which
@@ -50,7 +50,7 @@
  * been written.
  */
 
-static int64_t push( const struct httplib_context *ctx, FILE *fp, SOCKET sock, SSL *ssl, const char *buf, int64_t len, double timeout ) {
+static int64_t push( const struct lh_ctx_t *ctx, FILE *fp, SOCKET sock, SSL *ssl, const char *buf, int64_t len, double timeout ) {
 
 	struct timespec start;
 	struct timespec now;
@@ -146,13 +146,13 @@ static int64_t push( const struct httplib_context *ctx, FILE *fp, SOCKET sock, S
 
 
 /*
- * int64_t XX_httplib_push_all( const struct httplib_context *ctx, FILE *fp, SOCKET sock, SSL *ssl, const char *buf, int64_t len );
+ * int64_t XX_httplib_push_all( const struct lh_ctx_t *ctx, FILE *fp, SOCKET sock, SSL *ssl, const char *buf, int64_t len );
  *
  * The function XX_httplib_push_all() pushes all data in a buffer to a socket.
  * The number of bytes written is returned.
  */
 
-int64_t XX_httplib_push_all( const struct httplib_context *ctx, FILE *fp, SOCKET sock, SSL *ssl, const char *buf, int64_t len ) {
+int64_t XX_httplib_push_all( const struct lh_ctx_t *ctx, FILE *fp, SOCKET sock, SSL *ssl, const char *buf, int64_t len ) {
 
 	double timeout;
 	int64_t n;

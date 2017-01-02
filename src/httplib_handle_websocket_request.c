@@ -34,7 +34,7 @@
  * request on a connection.
  */
 
-void XX_httplib_handle_websocket_request( const struct httplib_context *ctx, struct httplib_connection *conn, const char *path, int is_callback_resource, httplib_websocket_connect_handler ws_connect_handler, httplib_websocket_ready_handler ws_ready_handler, httplib_websocket_data_handler ws_data_handler, httplib_websocket_close_handler ws_close_handler, void *cbData ) {
+void XX_httplib_handle_websocket_request( const struct lh_ctx_t *ctx, struct httplib_connection *conn, const char *path, int is_callback_resource, httplib_websocket_connect_handler ws_connect_handler, httplib_websocket_ready_handler ws_ready_handler, httplib_websocket_data_handler ws_data_handler, httplib_websocket_close_handler ws_close_handler, void *cbData ) {
 
 	const char *websock_key;
 	const char *version;

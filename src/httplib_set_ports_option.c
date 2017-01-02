@@ -31,14 +31,14 @@
 static bool parse_port_string( const struct vec *vec, struct socket *so, int *ip_version );
 
 /*
- * int XX_httplib_set_ports_option( struct httplib_context *ctx );
+ * int XX_httplib_set_ports_option( struct lh_ctx_t *ctx );
  *
  * The function XX_httplib_set_ports_option() set the port options for a
  * context. The function returns the total number of ports opened, or 0 if no
  * ports have been opened.
  */
 
-int XX_httplib_set_ports_option( struct httplib_context *ctx ) {
+int XX_httplib_set_ports_option( struct lh_ctx_t *ctx ) {
 
 	const char *list;
 	char error_string[ERROR_STRING_LEN];

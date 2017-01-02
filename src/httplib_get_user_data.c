@@ -28,7 +28,7 @@
 #include "httplib_main.h"
 
 /*
- * void *httplib_get_user_data( const struct httplib_context *ctx );
+ * void *httplib_get_user_data( const struct lh_ctx_t *ctx );
  *
  * The function httplib_get_user_data() returns a pointer to user data which is
  * associated with the context, or NULL if no user data has been registered.
@@ -36,7 +36,7 @@
  * httplib_start() function.
  */
 
-void *httplib_get_user_data( const struct httplib_context *ctx ) {
+void *httplib_get_user_data( const struct lh_ctx_t *ctx ) {
 
 	if ( ctx == NULL ) return NULL;
 

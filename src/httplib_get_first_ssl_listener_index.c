@@ -29,13 +29,13 @@
 #include "httplib_ssl.h"
 
 /*
- * int XX_httplib_get_first_ssl_listener_index( const struct httplib_context *ctx );
+ * int XX_httplib_get_first_ssl_listener_index( const struct lh_ctx_t *ctx );
  *
  * The function XX_httplib_get_first_ssl_listener_index() returns the first
  * index of a listening socket where SSL encryption is active.
  */
 
-int XX_httplib_get_first_ssl_listener_index( const struct httplib_context *ctx ) {
+int XX_httplib_get_first_ssl_listener_index( const struct lh_ctx_t *ctx ) {
 
 	unsigned int i;
 	int idx;

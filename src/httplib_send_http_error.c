@@ -29,7 +29,7 @@
 #include "httplib_string.h"
 #include "httplib_utils.h"
 
-void XX_httplib_send_http_error( const struct httplib_context *ctx, struct httplib_connection *conn, int status, const char *fmt, ... ) {
+void XX_httplib_send_http_error( const struct lh_ctx_t *ctx, struct httplib_connection *conn, int status, const char *fmt, ... ) {
 
 	char buf[MG_BUF_LEN];
 	va_list ap;

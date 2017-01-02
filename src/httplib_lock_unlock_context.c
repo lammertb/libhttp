@@ -29,12 +29,12 @@
 #include "httplib_pthread.h"
 
 /*
- * void httplib_lock_context( struct httplib_context *ctx );
+ * void httplib_lock_context( struct lh_ctx_t *ctx );
  *
  * The function httplib_lock_context() puts a lock on the context.
  */
 
-void httplib_lock_context( struct httplib_context *ctx ) {
+void httplib_lock_context( struct lh_ctx_t *ctx ) {
 
 	if ( ctx != NULL ) httplib_pthread_mutex_lock( & ctx->nonce_mutex );
 
@@ -43,12 +43,12 @@ void httplib_lock_context( struct httplib_context *ctx ) {
 
 
 /*
- * void httplib_unlock_context( struct httplib_context *ctx );
+ * void httplib_unlock_context( struct lh_ctx_t *ctx );
  *
  * The function httplib_unlock_context() removes the current lock from the context.
  */
 
-void httplib_unlock_context( struct httplib_context *ctx ) {
+void httplib_unlock_context( struct lh_ctx_t *ctx ) {
 
 	if ( ctx != NULL ) httplib_pthread_mutex_unlock( & ctx->nonce_mutex );
 
