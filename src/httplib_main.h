@@ -525,7 +525,7 @@ struct lh_ctx_t {
 
 	volatile enum ctx_status_t status;	/* Should we stop event loop								*/
 	SSL_CTX *ssl_ctx;			/* SSL context										*/
-	struct httplib_callbacks callbacks;	/* User-defined callback function							*/
+	struct lh_clb_t callbacks;		/* User-defined callback function							*/
 	void *user_data;			/* User-defined data									*/
 	enum ctx_type_t ctx_type;		/* CTX_TYPE_SERVER or CTX_TYPE_CLIENT							*/
 

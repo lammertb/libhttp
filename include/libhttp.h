@@ -191,7 +191,7 @@ struct client_cert {
  * https://github.com/lammertb/libhttp/blob/master/docs/UserManual.md
  */
 
-struct httplib_callbacks {
+struct lh_clb_t {
 	int		(*begin_request)(    const struct lh_ctx_t *ctx,       struct lh_con_t *conn );
 	void		(*end_request)(      const struct lh_ctx_t *ctx, const struct lh_con_t *conn, int reply_status_code );
 	int		(*log_message)(      const struct lh_ctx_t *ctx, const struct lh_con_t *conn, const char *message );
@@ -620,7 +620,7 @@ LIBHTTP_API int			httplib_closedir( DIR *dir );
 LIBHTTP_API struct lh_con_t *	httplib_connect_client( struct lh_ctx_t *ctx, const char *host, int port, int use_ssl );
 LIBHTTP_API struct lh_con_t *	httplib_connect_client_secure( struct lh_ctx_t *ctx, const struct httplib_client_options *client_options );
 LIBHTTP_API struct lh_con_t *	httplib_connect_websocket_client( struct lh_ctx_t *ctx, const char *host, int port, int use_ssl, const char *path, const char *origin, httplib_websocket_data_handler data_func, httplib_websocket_close_handler close_func, void *user_data );
-LIBHTTP_API struct lh_ctx_t *	httplib_create_client_context( const struct httplib_callbacks *callbacks, const struct httplib_option_t *options );
+LIBHTTP_API struct lh_ctx_t *	httplib_create_client_context( const struct lh_clb_t *callbacks, const struct httplib_option_t *options );
 LIBHTTP_API void		httplib_cry( enum debug_level_t debug_level, const struct lh_ctx_t *ctx, const struct lh_con_t *conn, PRINTF_FORMAT_STRING(const char *fmt), ...) PRINTF_ARGS(4, 5);
 LIBHTTP_API void		httplib_destroy_client_context( struct lh_ctx_t *ctx );
 LIBHTTP_API struct lh_con_t *	httplib_download( struct lh_ctx_t *ctx, const char *host, int port, int use_ssl, PRINTF_FORMAT_STRING(const char *request_fmt), ...) PRINTF_ARGS(5, 6);
@@ -674,7 +674,7 @@ LIBHTTP_API enum debug_level_t	httplib_set_debug_level( struct lh_ctx_t *ctx, en
 LIBHTTP_API void		httplib_set_request_handler( struct lh_ctx_t *ctx, const char *uri, httplib_request_handler handler, void *cbdata );
 LIBHTTP_API void		httplib_set_user_connection_data( struct lh_con_t *conn, void *data );
 LIBHTTP_API void		httplib_set_websocket_handler( struct lh_ctx_t *ctx, const char *uri, httplib_websocket_connect_handler connect_handler, httplib_websocket_ready_handler ready_handler, httplib_websocket_data_handler data_handler, httplib_websocket_close_handler close_handler, void *cbdata );
-LIBHTTP_API struct lh_ctx_t *	httplib_start(const struct httplib_callbacks *callbacks, void *user_data, const struct httplib_option_t *options );
+LIBHTTP_API struct lh_ctx_t *	httplib_start( const struct lh_clb_t *callbacks, void *user_data, const struct httplib_option_t *options );
 LIBHTTP_API void		httplib_stop( struct lh_ctx_t *ctx );
 LIBHTTP_API int64_t		httplib_store_body( const struct lh_ctx_t *ctx, struct lh_con_t *conn, const char *path );
 LIBHTTP_API int			httplib_strcasecmp( const char *s1, const char *s2 );
