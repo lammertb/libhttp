@@ -43,7 +43,7 @@ struct lh_ctx_t *httplib_start( const struct lh_clb_t *callbacks, void *user_dat
 
 	struct lh_ctx_t *ctx;
 	int i;
-	void (*exit_callback)(const struct lh_ctx_t *ctx);
+	void (*exit_callback)(struct lh_ctx_t *ctx);
 	struct httplib_workerTLS tls;
 
 	/*

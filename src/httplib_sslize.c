@@ -29,14 +29,14 @@
 #include "httplib_ssl.h"
 
 /*
- * int XX_httplib_sslize( struct lh_con_t *conn, SSL_CTX *s, int (*func)(SSL *) );
+ * int XX_httplib_sslize( lh_con_t *conn, SSL_CTX *s, int (*func)(SSL *) );
  *
  * The fucntion XX_httplib_sslize() initiates SSL on a connection.
  */
 
 #if !defined(NO_SSL)
 
-int XX_httplib_sslize( const struct lh_ctx_t *ctx, struct lh_con_t *conn, SSL_CTX *s, int (*func)(SSL *) ) {
+int XX_httplib_sslize( struct lh_ctx_t *ctx, struct lh_con_t *conn, SSL_CTX *s, int (*func)(SSL *) ) {
 
 	int ret;
 	int err;

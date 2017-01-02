@@ -34,7 +34,7 @@
 struct lh_ctx_t *httplib_create_client_context( const struct lh_clb_t *callbacks, const struct lh_opt_t *options ) {
 
 	struct lh_ctx_t *ctx;
-	void (*exit_callback)(const struct lh_ctx_t *ctx);
+	void (*exit_callback)(struct lh_ctx_t *ctx);
 
 	exit_callback = NULL;
 	ctx           = httplib_calloc( 1, sizeof(struct lh_ctx_t) );

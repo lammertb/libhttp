@@ -28,7 +28,7 @@
 #include "httplib_main.h"
 #include "httplib_string.h"
 
-void XX_httplib_print_dir_entry( const struct lh_ctx_t *ctx, struct de *de ) {
+void XX_httplib_print_dir_entry( struct lh_ctx_t *ctx, struct de *de ) {
 
 	char size[64];
 	char mod[64];

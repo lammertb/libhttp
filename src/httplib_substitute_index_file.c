@@ -29,7 +29,7 @@
 #include "httplib_string.h"
 
 /*
- * bool XX_httplib_substitute_index_file( const struct lh_ctx_t *ctx, struct lh_con_t *conn, char *path, size_t path_len, struct file *filep );
+ * bool XX_httplib_substitute_index_file( struct lh_ctx_t *ctx, struct lh_con_t *conn, char *path, size_t path_len, struct file *filep );
  *
  * The function XX_httplib_substiture_index_file() tries to find an index file
  * matching a given directory path. The function returns true of an index file
@@ -37,7 +37,7 @@
  * located, it's stats are returnd in stp.
  */
 
-int XX_httplib_substitute_index_file( const struct lh_ctx_t *ctx, struct lh_con_t *conn, char *path, size_t path_len, struct file *filep ) {
+int XX_httplib_substitute_index_file( struct lh_ctx_t *ctx, struct lh_con_t *conn, char *path, size_t path_len, struct file *filep ) {
 
 	const char *list;
 	struct file file = STRUCT_FILE_INITIALIZER;

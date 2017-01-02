@@ -34,6 +34,7 @@
  * The function XX_httplib_interpret_uri() interprets an URI and decides what
  * type of request is involved. The function takes the following parameters:
  *
+ * ctx:				in:  The context in which to communicate
  * conn:			in:  The request (must be valid)
  * filename:			out: Filename
  * filename_buf_len:		in:  Size of the filename buffer
@@ -44,7 +45,7 @@
  * is_put_or_delete_request:	out: put/delete file?
  */
 
-void XX_httplib_interpret_uri( const struct lh_ctx_t *ctx, struct lh_con_t *conn, char *filename, size_t filename_buf_len, struct file *filep, bool *is_found, bool *is_script_resource, bool *is_websocket_request, bool *is_put_or_delete_request ) {
+void XX_httplib_interpret_uri( struct lh_ctx_t *ctx, struct lh_con_t *conn, char *filename, size_t filename_buf_len, struct file *filep, bool *is_found, bool *is_script_resource, bool *is_websocket_request, bool *is_put_or_delete_request ) {
 
 /* TODO (high): Restructure this function */
 

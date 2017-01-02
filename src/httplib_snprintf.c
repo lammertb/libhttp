@@ -29,14 +29,14 @@
 #include "httplib_string.h"
 
 /*
- * void XX_httplib_snprintf( const struct lh_ctx_t *ctx, const struct lh_con_t *conn, bool *truncated, char *buf, size_t buflen, const char *fmt, ... );
+ * void XX_httplib_snprintf( struct lh_ctx_t *ctx, const struct lh_con_t *conn, bool *truncated, char *buf, size_t buflen, const char *fmt, ... );
  *
  * The function XX_httplib_snprintf() is an internal function to send a string
  * to a connection. The string can be formated with a format string and
  * parameters in the same way as the snprintf function works.
  */
 
-void XX_httplib_snprintf( const struct lh_ctx_t *ctx, const struct lh_con_t *conn, bool *truncated, char *buf, size_t buflen, const char *fmt, ... ) {
+void XX_httplib_snprintf( struct lh_ctx_t *ctx, const struct lh_con_t *conn, bool *truncated, char *buf, size_t buflen, const char *fmt, ... ) {
 
 	va_list ap;
 

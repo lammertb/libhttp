@@ -28,14 +28,14 @@
 #include "httplib_main.h"
 
 /*
- * bool XX_httplib_is_not_modified( const struct lh_ctx_t *ctx, const struct lh_con_t *conn, const struct file *filep );
+ * bool XX_httplib_is_not_modified( struct lh_ctx_t *ctx, const struct lh_con_t *conn, const struct file *filep );
  *
  * The function XX_httplib_is_not_modified() returns true, if a resource has
  * not been modified sinze a given datetime and a 304 response should therefore
  * be sufficient.
  */
 
-bool XX_httplib_is_not_modified( const struct lh_ctx_t *ctx, const struct lh_con_t *conn, const struct file *filep ) {
+bool XX_httplib_is_not_modified( struct lh_ctx_t *ctx, const struct lh_con_t *conn, const struct file *filep ) {
 
 	char etag[64];
 	const char *ims = httplib_get_header( conn, "If-Modified-Since" );

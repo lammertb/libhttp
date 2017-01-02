@@ -28,14 +28,14 @@
 #include "httplib_main.h"
 
 /*
- * int64_t httplib_store_body( struct lh_con_t *conn, const char *path );
+ * int64_t httplib_store_body( struct lh_ctx_t *ctx, struct lh_con_t *conn, const char *path );
  *
  * The function httplib_store_body() stores in incoming body for future
  * processing. The function returns the number of bytes actually read, or a
  * negative number to indicate a failure.
  */
 
-int64_t httplib_store_body( const struct lh_ctx_t *ctx, struct lh_con_t *conn, const char *path ) {
+int64_t httplib_store_body( struct lh_ctx_t *ctx, struct lh_con_t *conn, const char *path ) {
 
 	char buf[MG_BUF_LEN];
 	int64_t len;

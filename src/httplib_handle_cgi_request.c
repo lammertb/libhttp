@@ -29,7 +29,7 @@
 #include "httplib_string.h"
 
 /*
- * void XX_httplib_handle_cgi_request( const struct lh_ctx_t *ctx, struct lh_con_t *conn, const char *prog );
+ * void XX_httplib_handle_cgi_request( struct lh_ctx_t *ctx, struct lh_con_t *conn, const char *prog );
  *
  * The function XX_httplib_handle_cgi_request() handles a request for a CGI
  * resource.
@@ -37,7 +37,7 @@
 
 #if !defined(NO_CGI)
 
-void XX_httplib_handle_cgi_request( const struct lh_ctx_t *ctx, struct lh_con_t *conn, const char *prog ) {
+void XX_httplib_handle_cgi_request( struct lh_ctx_t *ctx, struct lh_con_t *conn, const char *prog ) {
 
 	char *buf;
 	size_t buflen;

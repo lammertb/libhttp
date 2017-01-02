@@ -27,7 +27,7 @@
 
 #include "httplib_main.h"
 
-void XX_httplib_fclose_on_exec( const struct lh_ctx_t *ctx, struct file *filep, struct lh_con_t *conn ) {
+void XX_httplib_fclose_on_exec( struct lh_ctx_t *ctx, struct file *filep, struct lh_con_t *conn ) {
 
 	if ( ctx == NULL  ||  filep == NULL  ||  filep->fp == NULL ) return;
 

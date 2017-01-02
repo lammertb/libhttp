@@ -31,7 +31,7 @@
 #include "httplib_utils.h"
 
 /*
- * void XX_httplib_prepare_cgi_environment( const struct lh_ctx_t *ctx, struct lh_con_t *conn, const char *prog, struct cgi_environment *env );
+ * void XX_httplib_prepare_cgi_environment( struct lh_ctx_t *ctx, struct lh_con_t *conn, const char *prog, struct cgi_environment *env );
  *
  * The function XX_httplib_prepare_cgi_environment() is used to prepare all
  * environment variables before a CGI script is called.
@@ -39,7 +39,7 @@
 
 #if !defined(NO_CGI)
 
-void XX_httplib_prepare_cgi_environment( const struct lh_ctx_t *ctx, struct lh_con_t *conn, const char *prog, struct cgi_environment *env ) {
+void XX_httplib_prepare_cgi_environment( struct lh_ctx_t *ctx, struct lh_con_t *conn, const char *prog, struct cgi_environment *env ) {
 
 	const char *s;
 	struct vec var_vec;

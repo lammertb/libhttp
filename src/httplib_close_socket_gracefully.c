@@ -28,13 +28,13 @@
 #include "httplib_main.h"
 
 /*
- * void XX_httplib_close_socket_gracefully( const struct lh_ctx_t *ctx, struct lh_con_t *conn );
+ * void XX_httplib_close_socket_gracefully( struct lh_ctx_t *ctx, struct lh_con_t *conn );
  *
  * The function XX_httplib_close_socket_gracefully() closes a socket in a
  * graceful way.
  */
 
-void XX_httplib_close_socket_gracefully( const struct lh_ctx_t *ctx, struct lh_con_t *conn ) {
+void XX_httplib_close_socket_gracefully( struct lh_ctx_t *ctx, struct lh_con_t *conn ) {
 
 #if defined(_WIN32)
 	char buf[MG_BUF_LEN];

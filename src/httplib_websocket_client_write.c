@@ -31,14 +31,14 @@
 static void mask_data( const char *in, size_t in_len, uint32_t masking_key, char *out );
 
 /*
- * int httplib_websocket_client_write( struct lh_con_t *conn, int opcode, const char *data, size_t dataLen );
+ * int httplib_websocket_client_write( struct lh_ctx *ctx, struct lh_con_t *conn, int opcode, const char *data, size_t dataLen );
  *
  * The function httplib_websocket_client_write() is used to write as a client
  * to a websocket server. The function returns -1 if an error occures,
  * otherwise the amount of bytes written.
  */
 
-int httplib_websocket_client_write( const struct lh_ctx_t *ctx, struct lh_con_t *conn, int opcode, const char *data, size_t dataLen ) {
+int httplib_websocket_client_write( struct lh_ctx_t *ctx, struct lh_con_t *conn, int opcode, const char *data, size_t dataLen ) {
 
 	int retval;
 	char *masked_data;

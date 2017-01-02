@@ -28,13 +28,13 @@
 #include "httplib_main.h"
 
 /*
- * void XX_httplib_delete_file( const struct lh_ctx_t *ctx, struct lh_con_t *conn, const char *path );
+ * void XX_httplib_delete_file( struct lh_ctx_t *ctx, struct lh_con_t *conn, const char *path );
  *
  * The function XX_httplib_delete_file() deletes a file after a request over a
  * connection.
  */
 
-void XX_httplib_delete_file( const struct lh_ctx_t *ctx, struct lh_con_t *conn, const char *path ) {
+void XX_httplib_delete_file( struct lh_ctx_t *ctx, struct lh_con_t *conn, const char *path ) {
 
 	struct de de;
 	char error_string[ERROR_STRING_LEN];
