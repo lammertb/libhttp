@@ -32,13 +32,13 @@
 #define B64_SHA_LEN	(sizeof(sha)*2)
 
 /*
- * int XX_httplib_send_websocket_handshake( const struct lh_ctx_t *ctx, struct httplib_connection *conn, const char *websock_key );
+ * int XX_httplib_send_websocket_handshake( const struct lh_ctx_t *ctx, struct lh_con_t *conn, const char *websock_key );
  *
  * The function XX_httplib_send_websocket_handshake() sends a handshake over
  * a websocket connection.
  */
 
-int XX_httplib_send_websocket_handshake( const struct lh_ctx_t *ctx, struct httplib_connection *conn, const char *websock_key ) {
+int XX_httplib_send_websocket_handshake( const struct lh_ctx_t *ctx, struct lh_con_t *conn, const char *websock_key ) {
 
 	static const char *magic = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
 	const char *protocol;

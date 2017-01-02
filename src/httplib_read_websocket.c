@@ -28,12 +28,12 @@
 #include "httplib_main.h"
 
 /*
- * void XX_httplib_read_websocket( const struct lh_ctx_t *ctx, struct httplib_connection *conn, httplib_websocket_data_handler ws_data_handler, void *calback_data );
+ * void XX_httplib_read_websocket( const struct lh_ctx_t *ctx, struct lh_con_t *conn, httplib_websocket_data_handler ws_data_handler, void *calback_data );
  *
  * The function XX_httplib_read_websocket() reads from a websocket connection.
  */
 
-void XX_httplib_read_websocket( const struct lh_ctx_t *ctx, struct httplib_connection *conn, httplib_websocket_data_handler ws_data_handler, void *callback_data ) {
+void XX_httplib_read_websocket( const struct lh_ctx_t *ctx, struct lh_con_t *conn, httplib_websocket_data_handler ws_data_handler, void *callback_data ) {
 
 	/* Pointer to the beginning of the portion of the incoming websocket
 	 * message queue.

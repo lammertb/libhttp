@@ -30,13 +30,13 @@
 #include "httplib_ssl.h"
 
 /*
- * void XX_httplib_close_connection( struct lh_ctx_t *ctx, struct httplib_connection *conn );
+ * void XX_httplib_close_connection( struct lh_ctx_t *ctx, struct lh_con_t *conn );
  *
  * The function XX_httplib_close_connection() is the internal function which
  * does the heavy lifting to close a connection.
  */
 
-void XX_httplib_close_connection( struct lh_ctx_t *ctx, struct httplib_connection *conn ) {
+void XX_httplib_close_connection( struct lh_ctx_t *ctx, struct lh_con_t *conn ) {
 
 	if ( ctx == NULL  ||  conn == NULL ) return;
 
@@ -82,14 +82,14 @@ void XX_httplib_close_connection( struct lh_ctx_t *ctx, struct httplib_connectio
 
 
 /*
- * void httplib_close_connection( const struct lh_ctx_t *ctx, struct httplib_connection *conn );
+ * void httplib_close_connection( const struct lh_ctx_t *ctx, struct lh_con_t *conn );
  *
  * The function httplib_close_connection() closes the connection passed as a
  * parameter to this function. The function does not return a success or
  * failure value.
  */
 
-void httplib_close_connection( struct lh_ctx_t *ctx, struct httplib_connection *conn ) {
+void httplib_close_connection( struct lh_ctx_t *ctx, struct lh_con_t *conn ) {
 
 	struct lh_ctx_t *client_ctx;
 	int i;

@@ -29,13 +29,13 @@
 #include "httplib_utils.h"
 
 /*
- * void XX_httplib_send_options( const struct lh_ctx_t *ctx, struct httplib_connection *conn );
+ * void XX_httplib_send_options( const struct lh_ctx_t *ctx, struct lh_con_t *conn );
  *
  * The function XX_httplib_send_options() sends a list of allowed options a
  * client can use to connect to the server.
  */
 
-void XX_httplib_send_options( const struct lh_ctx_t *ctx, struct httplib_connection *conn ) {
+void XX_httplib_send_options( const struct lh_ctx_t *ctx, struct lh_con_t *conn ) {
 
 	char date[64];
 	time_t curtime;

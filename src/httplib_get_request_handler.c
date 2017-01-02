@@ -35,7 +35,7 @@
  * and 0 otherwise.
  */
 
-int XX_httplib_get_request_handler( struct lh_ctx_t *ctx, struct httplib_connection *conn, int handler_type, httplib_request_handler *handler, httplib_websocket_connect_handler *connect_handler, httplib_websocket_ready_handler *ready_handler, httplib_websocket_data_handler *data_handler, httplib_websocket_close_handler *close_handler, httplib_authorization_handler *auth_handler, void **cbdata ) {
+int XX_httplib_get_request_handler( struct lh_ctx_t *ctx, struct lh_con_t *conn, int handler_type, httplib_request_handler *handler, httplib_websocket_connect_handler *connect_handler, httplib_websocket_ready_handler *ready_handler, httplib_websocket_data_handler *data_handler, httplib_websocket_close_handler *close_handler, httplib_authorization_handler *auth_handler, void **cbdata ) {
 
 	const struct httplib_request_info *request_info;
 	const char *uri;

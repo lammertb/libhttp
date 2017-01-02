@@ -539,7 +539,7 @@ static void init_server_name(int argc, const char *argv[]) {
 }
 
 
-static int log_message( const struct lh_ctx_t *ctx, const struct httplib_connection *conn, const char *message ) {
+static int log_message( const struct lh_ctx_t *ctx, const struct lh_con_t *conn, const char *message ) {
 
 	struct tuser_data *ud;
 

@@ -611,11 +611,11 @@ struct lh_ctx_t {
 };
 
 /*
- * struct httplib_connection;
+ * struct lh_con_t;
  */
 
 								/****************************************************************************************/
-struct httplib_connection {					/*											*/
+struct lh_con_t {						/*											*/
 	struct		httplib_request_info request_info;	/* The request info of the connection							*/
 	SSL *		ssl;					/* SSL descriptor									*/
 	SSL_CTX *	client_ssl_ctx;				/* SSL context for client connections							*/
@@ -651,7 +651,7 @@ struct worker_thread_args {
 
 struct websocket_client_thread_data {
 	struct lh_ctx_t *		ctx;
-	struct httplib_connection *	conn;
+	struct lh_con_t *		conn;
 	httplib_websocket_data_handler	data_handler;
 	httplib_websocket_close_handler	close_handler;
 	void *				callback_data;
@@ -684,15 +684,15 @@ enum { REQUEST_HANDLER, WEBSOCKET_HANDLER, AUTH_HANDLER };
 
 /* Directory entry */
 struct de {
-	struct httplib_connection *conn;
-	char *file_name;
-	struct file file;
+	struct lh_con_t *	conn;
+	char *			file_name;
+	struct file		file;
 };
 
 struct dir_scan_data {
-	struct de *entries;
-	unsigned int num_entries;
-	unsigned int arr_size;
+	struct de *	entries;
+	unsigned int	num_entries;
+	unsigned int	arr_size;
 };
 
 
@@ -705,7 +705,7 @@ struct dir_scan_data {
  * We satisfy both worlds: we create an envp array (which is vars), all
  * entries are actually pointers inside buf. */
 struct cgi_environment {
-	struct httplib_connection *conn;
+	struct lh_con_t *conn;
 	/* Data block */
 	char *buf;      /* Environment buffer */
 	size_t buflen;  /* Space available in buf */
@@ -728,13 +728,13 @@ struct ah {
 };
 
 struct read_auth_file_struct {
-	struct httplib_connection *conn;
-	struct ah ah;
-	char *domain;
-	char buf[256 + 256 + 40];
-	char *f_user;
-	char *f_domain;
-	char *f_ha1;
+	struct lh_con_t *	conn;
+	struct ah 		ah;
+	char *			domain;
+	char 			buf[256 + 256 + 40];
+	char *			f_user;
+	char *			f_domain;
+	char *			f_ha1;
 };
 
 /*
@@ -788,102 +788,102 @@ void			SHA1Update( SHA1_CTX *context, const unsigned char *data, uint32_t len );
 
 struct lh_ctx_t *	XX_httplib_abort_start( struct lh_ctx_t *ctx, PRINTF_FORMAT_STRING(const char *fmt), ...) PRINTF_ARGS(2, 3);
 void			XX_httplib_accept_new_connection( const struct socket *listener, struct lh_ctx_t *ctx );
-bool			XX_httplib_authorize( const struct lh_ctx_t *ctx, struct httplib_connection *conn, struct file *filep );
+bool			XX_httplib_authorize( const struct lh_ctx_t *ctx, struct lh_con_t *conn, struct file *filep );
 const char *		XX_httplib_builtin_mime_ext( int index );
 const char *		XX_httplib_builtin_mime_type( int index );
 int			XX_httplib_check_acl( struct lh_ctx_t *ctx, uint32_t remote_ip );
-bool			XX_httplib_check_authorization( const struct lh_ctx_t *ctx, struct httplib_connection *conn, const char *path );
+bool			XX_httplib_check_authorization( const struct lh_ctx_t *ctx, struct lh_con_t *conn, const char *path );
 bool			XX_httplib_check_password( const char *method, const char *ha1, const char *uri, const char *nonce, const char *nc, const char *cnonce, const char *qop, const char *response );
 void			XX_httplib_close_all_listening_sockets( struct lh_ctx_t *ctx );
-void			XX_httplib_close_connection( struct lh_ctx_t *ctx, struct httplib_connection *conn );
-void			XX_httplib_close_socket_gracefully( const struct lh_ctx_t *ctx, struct httplib_connection *conn );
+void			XX_httplib_close_connection( struct lh_ctx_t *ctx, struct lh_con_t *conn );
+void			XX_httplib_close_socket_gracefully( const struct lh_ctx_t *ctx, struct lh_con_t *conn );
 int WINCDECL		XX_httplib_compare_dir_entries( const void *p1, const void *p2 );
 bool			XX_httplib_connect_socket( struct lh_ctx_t *ctx, const char *host, int port, int use_ssl, SOCKET *sock, union usa *sa );
 void			XX_httplib_construct_etag( const struct lh_ctx_t *ctx, char *buf, size_t buf_len, const struct file *filep );
 int			XX_httplib_consume_socket( struct lh_ctx_t *ctx, struct socket *sp, int thread_index );
-void			XX_httplib_delete_file( const struct lh_ctx_t *ctx, struct httplib_connection *conn, const char *path );
+void			XX_httplib_delete_file( const struct lh_ctx_t *ctx, struct lh_con_t *conn, const char *path );
 void			XX_httplib_dir_scan_callback( const struct lh_ctx_t *ctx, struct de *de, void *data );
-void			XX_httplib_discard_unread_request_data( const struct lh_ctx_t *ctx, struct httplib_connection *conn );
+void			XX_httplib_discard_unread_request_data( const struct lh_ctx_t *ctx, struct lh_con_t *conn );
 int			XX_httplib_fclose( struct file *filep );
-void			XX_httplib_fclose_on_exec( const struct lh_ctx_t *ctx, struct file *filep, struct httplib_connection *conn );
+void			XX_httplib_fclose_on_exec( const struct lh_ctx_t *ctx, struct file *filep, struct lh_con_t *conn );
 const char *		XX_httplib_fgets( char *buf, size_t size, struct file *filep, char **p );
-bool			XX_httplib_fopen( const struct lh_ctx_t *ctx, const struct httplib_connection *conn, const char *path, const char *mode, struct file *filep );
-bool			XX_httplib_forward_body_data( const struct lh_ctx_t *ctx, struct httplib_connection *conn, FILE *fp, SOCKET sock, SSL *ssl );
+bool			XX_httplib_fopen( const struct lh_ctx_t *ctx, const struct lh_con_t *conn, const char *path, const char *mode, struct file *filep );
+bool			XX_httplib_forward_body_data( const struct lh_ctx_t *ctx, struct lh_con_t *conn, FILE *fp, SOCKET sock, SSL *ssl );
 void			XX_httplib_free_config_options( struct lh_ctx_t *ctx );
 void			XX_httplib_free_context( struct lh_ctx_t *ctx );
 const char *		XX_httplib_get_header( const struct httplib_request_info *ri, const char *name );
 void			XX_httplib_get_mime_type( const struct lh_ctx_t *ctx, const char *path, struct vec *vec );
-const char *		XX_httplib_get_rel_url_at_current_server( const struct lh_ctx_t *ctx, const char *uri, const struct httplib_connection *conn );
-uint32_t		XX_httplib_get_remote_ip( const struct httplib_connection *conn );
-int			XX_httplib_get_request_handler( struct lh_ctx_t *ctx, struct httplib_connection *conn, int handler_type, httplib_request_handler *handler, httplib_websocket_connect_handler *connect_handler, httplib_websocket_ready_handler *ready_handler, httplib_websocket_data_handler *data_handler, httplib_websocket_close_handler *close_handler, httplib_authorization_handler *auth_handler, void **cbdata );
+const char *		XX_httplib_get_rel_url_at_current_server( const struct lh_ctx_t *ctx, const char *uri, const struct lh_con_t *conn );
+uint32_t		XX_httplib_get_remote_ip( const struct lh_con_t *conn );
+int			XX_httplib_get_request_handler( struct lh_ctx_t *ctx, struct lh_con_t *conn, int handler_type, httplib_request_handler *handler, httplib_websocket_connect_handler *connect_handler, httplib_websocket_ready_handler *ready_handler, httplib_websocket_data_handler *data_handler, httplib_websocket_close_handler *close_handler, httplib_authorization_handler *auth_handler, void **cbdata );
 int			XX_httplib_get_request_len( const char *buf, int buflen );
 void			XX_httplib_get_system_name( char **sysName );
 enum uri_type_t		XX_httplib_get_uri_type( const char *uri );
-bool			XX_httplib_getreq( const struct lh_ctx_t *ctx, struct httplib_connection *conn, int *err );
-void			XX_httplib_handle_cgi_request( const struct lh_ctx_t *ctx, struct httplib_connection *conn, const char *prog );
-void			XX_httplib_handle_directory_request( const struct lh_ctx_t *ctx, struct httplib_connection *conn, const char *dir );
-void			XX_httplib_handle_file_based_request( const struct lh_ctx_t *ctx, struct httplib_connection *conn, const char *path, struct file *filep );
-void			XX_httplib_handle_not_modified_static_file_request( const struct lh_ctx_t *ctx, struct httplib_connection *conn, struct file *filep );
-void			XX_httplib_handle_propfind( const struct lh_ctx_t *ctx, struct httplib_connection *conn, const char *path, struct file *filep );
-void			XX_httplib_handle_request( struct lh_ctx_t *ctx, struct httplib_connection *conn );
-void			XX_httplib_handle_ssi_file_request( const struct lh_ctx_t *ctx, struct httplib_connection *conn, const char *path, struct file *filep );
-void			XX_httplib_handle_static_file_request( const struct lh_ctx_t *ctx, struct httplib_connection *conn, const char *path, struct file *filep, const char *mime_type, const char *additional_headers );
-void			XX_httplib_handle_websocket_request( const struct lh_ctx_t *ctx, struct httplib_connection *conn, const char *path, int is_callback_resource, httplib_websocket_connect_handler ws_connect_handler, httplib_websocket_ready_handler ws_ready_handler, httplib_websocket_data_handler ws_data_handler, httplib_websocket_close_handler ws_close_handler, void *cbData );
+bool			XX_httplib_getreq( const struct lh_ctx_t *ctx, struct lh_con_t *conn, int *err );
+void			XX_httplib_handle_cgi_request( const struct lh_ctx_t *ctx, struct lh_con_t *conn, const char *prog );
+void			XX_httplib_handle_directory_request( const struct lh_ctx_t *ctx, struct lh_con_t *conn, const char *dir );
+void			XX_httplib_handle_file_based_request( const struct lh_ctx_t *ctx, struct lh_con_t *conn, const char *path, struct file *filep );
+void			XX_httplib_handle_not_modified_static_file_request( const struct lh_ctx_t *ctx, struct lh_con_t *conn, struct file *filep );
+void			XX_httplib_handle_propfind( const struct lh_ctx_t *ctx, struct lh_con_t *conn, const char *path, struct file *filep );
+void			XX_httplib_handle_request( struct lh_ctx_t *ctx, struct lh_con_t *conn );
+void			XX_httplib_handle_ssi_file_request( const struct lh_ctx_t *ctx, struct lh_con_t *conn, const char *path, struct file *filep );
+void			XX_httplib_handle_static_file_request( const struct lh_ctx_t *ctx, struct lh_con_t *conn, const char *path, struct file *filep, const char *mime_type, const char *additional_headers );
+void			XX_httplib_handle_websocket_request( const struct lh_ctx_t *ctx, struct lh_con_t *conn, const char *path, int is_callback_resource, httplib_websocket_connect_handler ws_connect_handler, httplib_websocket_ready_handler ws_ready_handler, httplib_websocket_data_handler ws_data_handler, httplib_websocket_close_handler ws_close_handler, void *cbData );
 bool			XX_httplib_header_has_option( const char *header, const char *option );
 bool			XX_httplib_init_options( struct lh_ctx_t *ctx );
-void			XX_httplib_interpret_uri( const struct lh_ctx_t *ctx, struct httplib_connection *conn, char *filename, size_t filename_buf_len, struct file *filep, bool *is_found, bool *is_script_resource, bool *is_websocket_request, bool *is_put_or_delete_request );
-bool			XX_httplib_is_authorized_for_put( const struct lh_ctx_t *ctx, struct httplib_connection *conn );
-bool			XX_httplib_is_file_in_memory( const struct lh_ctx_t *ctx, const struct httplib_connection *conn, const char *path, struct file *filep );
+void			XX_httplib_interpret_uri( const struct lh_ctx_t *ctx, struct lh_con_t *conn, char *filename, size_t filename_buf_len, struct file *filep, bool *is_found, bool *is_script_resource, bool *is_websocket_request, bool *is_put_or_delete_request );
+bool			XX_httplib_is_authorized_for_put( const struct lh_ctx_t *ctx, struct lh_con_t *conn );
+bool			XX_httplib_is_file_in_memory( const struct lh_ctx_t *ctx, const struct lh_con_t *conn, const char *path, struct file *filep );
 bool			XX_httplib_is_file_opened( const struct file *filep );
-bool			XX_httplib_is_not_modified( const struct lh_ctx_t *ctx, const struct httplib_connection *conn, const struct file *filep );
-bool			XX_httplib_is_put_or_delete_method( const struct httplib_connection *conn );
+bool			XX_httplib_is_not_modified( const struct lh_ctx_t *ctx, const struct lh_con_t *conn, const struct file *filep );
+bool			XX_httplib_is_put_or_delete_method( const struct lh_con_t *conn );
 bool			XX_httplib_is_valid_http_method( const char *method );
 int			XX_httplib_is_valid_port( unsigned long port );
-bool			XX_httplib_is_websocket_protocol( const struct httplib_connection *conn );
+bool			XX_httplib_is_websocket_protocol( const struct lh_con_t *conn );
 void *			XX_httplib_load_dll( struct lh_ctx_t *ctx, const char *dll_name, struct ssl_func *sw );
-void			XX_httplib_log_access( const struct lh_ctx_t *ctx, const struct httplib_connection *conn );
+void			XX_httplib_log_access( const struct lh_ctx_t *ctx, const struct lh_con_t *conn );
 LIBHTTP_THREAD		XX_httplib_master_thread( void *thread_func_param );
 int			XX_httplib_match_prefix(const char *pattern, size_t pattern_len, const char *str);
-void			XX_httplib_mkcol( const struct lh_ctx_t *ctx, struct httplib_connection *conn, const char *path );
+void			XX_httplib_mkcol( const struct lh_ctx_t *ctx, struct lh_con_t *conn, const char *path );
 bool			XX_httplib_must_hide_file( const struct lh_ctx_t *ctx, const char *path );
 const char *		XX_httplib_next_option( const char *list, struct vec *val, struct vec *eq_val );
-void			XX_httplib_open_auth_file( const struct lh_ctx_t *ctx, struct httplib_connection *conn, const char *path, struct file *filep );
+void			XX_httplib_open_auth_file( const struct lh_ctx_t *ctx, struct lh_con_t *conn, const char *path, struct file *filep );
 bool			XX_httplib_option_value_to_bool( const char *value, bool *config );
 bool			XX_httplib_option_value_to_int( const char *value, int *config );
-int			XX_httplib_parse_auth_header( const struct lh_ctx_t *ctx, struct httplib_connection *conn, char *buf, size_t buf_size, struct ah *ah );
+int			XX_httplib_parse_auth_header( const struct lh_ctx_t *ctx, struct lh_con_t *conn, char *buf, size_t buf_size, struct ah *ah );
 time_t			XX_httplib_parse_date_string( const char *datetime );
 int			XX_httplib_parse_http_headers( char **buf, struct httplib_request_info *ri );
 int			XX_httplib_parse_http_message( char *buf, int len, struct httplib_request_info *ri );
 int			XX_httplib_parse_net( const char *spec, uint32_t *net, uint32_t *mask );
 int			XX_httplib_parse_range_header( const char *header, int64_t *a, int64_t *b );
 void			XX_httplib_path_to_unicode( const char *path, wchar_t *wbuf, size_t wbuf_len );
-void			XX_httplib_prepare_cgi_environment( const struct lh_ctx_t *ctx, struct httplib_connection *conn, const char *prog, struct cgi_environment *env );
+void			XX_httplib_prepare_cgi_environment( const struct lh_ctx_t *ctx, struct lh_con_t *conn, const char *prog, struct cgi_environment *env );
 void			XX_httplib_print_dir_entry( const struct lh_ctx_t *ctx, struct de *de );
-void			XX_httplib_process_new_connection( struct lh_ctx_t *ctx, struct httplib_connection *conn );
+void			XX_httplib_process_new_connection( struct lh_ctx_t *ctx, struct lh_con_t *conn );
 bool			XX_httplib_process_options( struct lh_ctx_t *ctx, const struct httplib_option_t *options );
 void			XX_httplib_produce_socket( struct lh_ctx_t *ctx, const struct socket *sp );
-int			XX_httplib_pull( const struct lh_ctx_t *ctx, FILE *fp, struct httplib_connection *conn, char *buf, int len, double timeout );
-int			XX_httplib_pull_all( const struct lh_ctx_t *ctx, FILE *fp, struct httplib_connection *conn, char *buf, int len );
+int			XX_httplib_pull( const struct lh_ctx_t *ctx, FILE *fp, struct lh_con_t *conn, char *buf, int len, double timeout );
+int			XX_httplib_pull_all( const struct lh_ctx_t *ctx, FILE *fp, struct lh_con_t *conn, char *buf, int len );
 int64_t			XX_httplib_push_all( const struct lh_ctx_t *ctx, FILE *fp, SOCKET sock, SSL *ssl, const char *buf, int64_t len );
-int			XX_httplib_put_dir( const struct lh_ctx_t *ctx, struct httplib_connection *conn, const char *path );
-void			XX_httplib_put_file( const struct lh_ctx_t *ctx, struct httplib_connection *conn, const char *path );
+int			XX_httplib_put_dir( const struct lh_ctx_t *ctx, struct lh_con_t *conn, const char *path );
+void			XX_httplib_put_file( const struct lh_ctx_t *ctx, struct lh_con_t *conn, const char *path );
 bool			XX_httplib_read_auth_file( const struct lh_ctx_t *ctx, struct file *filep, struct read_auth_file_struct *workdata );
-int			XX_httplib_read_request( const struct lh_ctx_t *ctx, FILE *fp, struct httplib_connection *conn, char *buf, int bufsiz, int *nread );
-void			XX_httplib_read_websocket( const struct lh_ctx_t *ctx, struct httplib_connection *conn, httplib_websocket_data_handler ws_data_handler, void *callback_data );
-void			XX_httplib_redirect_to_https_port( const struct lh_ctx_t *ctx, struct httplib_connection *conn, int ssl_index );
-int			XX_httplib_refresh_trust( const struct lh_ctx_t *ctx, struct httplib_connection *conn );
-void			XX_httplib_remove_bad_file( const struct lh_ctx_t *ctx, const struct httplib_connection *conn, const char *path );
-int			XX_httplib_remove_directory( const struct lh_ctx_t *ctx, struct httplib_connection *conn, const char *dir );
+int			XX_httplib_read_request( const struct lh_ctx_t *ctx, FILE *fp, struct lh_con_t *conn, char *buf, int bufsiz, int *nread );
+void			XX_httplib_read_websocket( const struct lh_ctx_t *ctx, struct lh_con_t *conn, httplib_websocket_data_handler ws_data_handler, void *callback_data );
+void			XX_httplib_redirect_to_https_port( const struct lh_ctx_t *ctx, struct lh_con_t *conn, int ssl_index );
+int			XX_httplib_refresh_trust( const struct lh_ctx_t *ctx, struct lh_con_t *conn );
+void			XX_httplib_remove_bad_file( const struct lh_ctx_t *ctx, const struct lh_con_t *conn, const char *path );
+int			XX_httplib_remove_directory( const struct lh_ctx_t *ctx, struct lh_con_t *conn, const char *dir );
 void			XX_httplib_remove_double_dots_and_double_slashes( char *s );
-void			XX_httplib_reset_per_request_attributes( struct httplib_connection *conn );
-int			XX_httplib_scan_directory( const struct lh_ctx_t *ctx, struct httplib_connection *conn, const char *dir, void *data, void (*cb)(const struct lh_ctx_t *ctx, struct de *, void *) );
-void			XX_httplib_send_authorization_request( struct lh_ctx_t *ctx, struct httplib_connection *conn );
-void			XX_httplib_send_file_data( const struct lh_ctx_t *ctx, struct httplib_connection *conn, struct file *filep, int64_t offset, int64_t len );
-void			XX_httplib_send_http_error( const struct lh_ctx_t *ctx, struct httplib_connection *, int, PRINTF_FORMAT_STRING(const char *fmt), ... ) PRINTF_ARGS(4, 5);
-int			XX_httplib_send_no_cache_header( const struct lh_ctx_t *ctx, struct httplib_connection *conn );
-void			XX_httplib_send_options( const struct lh_ctx_t *ctx, struct httplib_connection *conn );
-int			XX_httplib_send_static_cache_header( const struct lh_ctx_t *ctx, struct httplib_connection *conn );
-int			XX_httplib_send_websocket_handshake( const struct lh_ctx_t *ctx, struct httplib_connection *conn, const char *websock_key );
+void			XX_httplib_reset_per_request_attributes( struct lh_con_t *conn );
+int			XX_httplib_scan_directory( const struct lh_ctx_t *ctx, struct lh_con_t *conn, const char *dir, void *data, void (*cb)(const struct lh_ctx_t *ctx, struct de *, void *) );
+void			XX_httplib_send_authorization_request( struct lh_ctx_t *ctx, struct lh_con_t *conn );
+void			XX_httplib_send_file_data( const struct lh_ctx_t *ctx, struct lh_con_t *conn, struct file *filep, int64_t offset, int64_t len );
+void			XX_httplib_send_http_error( const struct lh_ctx_t *ctx, struct lh_con_t *, int, PRINTF_FORMAT_STRING(const char *fmt), ... ) PRINTF_ARGS(4, 5);
+int			XX_httplib_send_no_cache_header( const struct lh_ctx_t *ctx, struct lh_con_t *conn );
+void			XX_httplib_send_options( const struct lh_ctx_t *ctx, struct lh_con_t *conn );
+int			XX_httplib_send_static_cache_header( const struct lh_ctx_t *ctx, struct lh_con_t *conn );
+int			XX_httplib_send_websocket_handshake( const struct lh_ctx_t *ctx, struct lh_con_t *conn, const char *websock_key );
 int			XX_httplib_set_acl_option( struct lh_ctx_t *ctx );
 void			XX_httplib_set_close_on_exec( SOCKET sock );
 bool			XX_httplib_set_gpass_option( struct lh_ctx_t *ctx );
@@ -896,17 +896,17 @@ void			XX_httplib_set_thread_name( const struct lh_ctx_t *ctx, const char *name 
 int			XX_httplib_set_throttle( const char *spec, uint32_t remote_ip, const char *uri );
 bool			XX_httplib_set_uid_option( struct lh_ctx_t *ctx );
 bool			XX_httplib_should_decode_url( const struct lh_ctx_t *ctx );
-bool			XX_httplib_should_keep_alive( const struct lh_ctx_t *ctx, const struct httplib_connection *conn );
+bool			XX_httplib_should_keep_alive( const struct lh_ctx_t *ctx, const struct lh_con_t *conn );
 char *			XX_httplib_skip( char **buf, const char *delimiters );
 char *			XX_httplib_skip_quoted( char **buf, const char *delimiters, const char *whitespace, char quotechar );
 void			XX_httplib_sockaddr_to_string(char *buf, size_t len, const union usa *usa );
-pid_t			XX_httplib_spawn_process( const struct lh_ctx_t *ctx, struct httplib_connection *conn, const char *prog, char *envblk, char *envp[], int fdin[2], int fdout[2], int fderr[2], const char *dir );
+pid_t			XX_httplib_spawn_process( const struct lh_ctx_t *ctx, struct lh_con_t *conn, const char *prog, char *envblk, char *envp[], int fdin[2], int fdout[2], int fderr[2], const char *dir );
 int			XX_httplib_start_thread_with_id( httplib_thread_func_t func, void *param, pthread_t *threadidptr );
-int			XX_httplib_stat( const struct lh_ctx_t *ctx, struct httplib_connection *conn, const char *path, struct file *filep );
-int			XX_httplib_substitute_index_file( const struct lh_ctx_t *ctx, struct httplib_connection *conn, char *path, size_t path_len, struct file *filep );
-const char *		XX_httplib_suggest_connection_header( const struct lh_ctx_t *ctx, const struct httplib_connection *conn );
+int			XX_httplib_stat( const struct lh_ctx_t *ctx, struct lh_con_t *conn, const char *path, struct file *filep );
+int			XX_httplib_substitute_index_file( const struct lh_ctx_t *ctx, struct lh_con_t *conn, char *path, size_t path_len, struct file *filep );
+const char *		XX_httplib_suggest_connection_header( const struct lh_ctx_t *ctx, const struct lh_con_t *conn );
 LIBHTTP_THREAD		XX_httplib_websocket_client_thread( void *data );
-int			XX_httplib_websocket_write_exec( const struct lh_ctx_t *ctx, struct httplib_connection *conn, int opcode, const char *data, size_t dataLen, uint32_t masking_key );
+int			XX_httplib_websocket_write_exec( const struct lh_ctx_t *ctx, struct lh_con_t *conn, int opcode, const char *data, size_t dataLen, uint32_t masking_key );
 LIBHTTP_THREAD		XX_httplib_worker_thread( void *thread_func_param );
 
 

@@ -29,7 +29,7 @@
 #include "httplib_utils.h"
 
 /*
- * int XX_httplib_read_request( const struct lh_ctx_t *ctx, FILE *fp, struct httplib_connection *conn, char *buf, int bufsiz, int *nread );
+ * int XX_httplib_read_request( const struct lh_ctx_t *ctx, FILE *fp, struct lh_con_t *conn, char *buf, int bufsiz, int *nread );
  *
  * The function XX_httplib_read_request() keeps reading the input (which can
  * either be an opened file descriptor, a socket sock or an SSL descriptor ssl)
@@ -39,7 +39,7 @@
  * is incremented by the number of bytes read.
  */
 
-int XX_httplib_read_request( const struct lh_ctx_t *ctx, FILE *fp, struct httplib_connection *conn, char *buf, int bufsiz, int *nread ) {
+int XX_httplib_read_request( const struct lh_ctx_t *ctx, FILE *fp, struct lh_con_t *conn, char *buf, int bufsiz, int *nread ) {
 
 	int request_len;
 	int n;

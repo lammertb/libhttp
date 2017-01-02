@@ -29,7 +29,7 @@
 #include "httplib_string.h"
 
 /* Return 1 if request is authorised, 0 otherwise. */
-bool XX_httplib_check_authorization( const struct lh_ctx_t *ctx, struct httplib_connection *conn, const char *path ) {
+bool XX_httplib_check_authorization( const struct lh_ctx_t *ctx, struct lh_con_t *conn, const char *path ) {
 
 	char fname[PATH_MAX];
 	char error_string[ERROR_STRING_LEN];

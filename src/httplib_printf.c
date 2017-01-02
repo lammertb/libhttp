@@ -28,7 +28,7 @@
 #include "httplib_main.h"
 #include "httplib_string.h"
 
-int httplib_printf( const struct lh_ctx_t *ctx, struct httplib_connection *conn, const char *fmt, ... ) {
+int httplib_printf( const struct lh_ctx_t *ctx, struct lh_con_t *conn, const char *fmt, ... ) {
 
 	va_list ap;
 	int result;

@@ -34,13 +34,13 @@
 static bool	hexdump2string( void *mem, int memlen, char *buf, int buflen );
 
 /*
- * void XX_httplib_ssl_get_client_cert_info( struct httplib_connection *conn );
+ * void XX_httplib_ssl_get_client_cert_info( struct lh_con_t *conn );
  *
  * The function XX_httplib_ssl_get_client_cert_info() returns information from
  * a client provided certificate and hooks it up to the connection info.
  */
 
-void XX_httplib_ssl_get_client_cert_info( struct httplib_connection *conn ) {
+void XX_httplib_ssl_get_client_cert_info( struct lh_con_t *conn ) {
 
 	char str_subject[1024];
 	char str_issuer[1024];

@@ -28,13 +28,13 @@
 #include "httplib_main.h"
 
 /*
- * void XX_httplib_remove_bad_file( const struct lh_ctx_t *ctx, const struct httplib_connection *conn, const char *path );
+ * void XX_httplib_remove_bad_file( const struct lh_ctx_t *ctx, const struct lh_con_t *conn, const char *path );
  *
  * The function XX_httplib_remove_bad_file() removes an invalid file and throws
  * an error message if this does not succeed.
  */
 
-void XX_httplib_remove_bad_file( const struct lh_ctx_t *ctx, const struct httplib_connection *conn, const char *path ) {
+void XX_httplib_remove_bad_file( const struct lh_ctx_t *ctx, const struct lh_con_t *conn, const char *path ) {
 
 	int r = httplib_remove( path );
 

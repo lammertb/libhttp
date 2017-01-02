@@ -28,13 +28,13 @@
 #include "httplib_main.h"
 
 /*
- * int XX_httplib_websocket_write_exec( const struct lh_ctx_t *ctx, struct httplib_connection *conn, int opcode, const char *data, size_t data_len, uint32_t masking_key );
+ * int XX_httplib_websocket_write_exec( const struct lh_ctx_t *ctx, struct lh_con_t *conn, int opcode, const char *data, size_t data_len, uint32_t masking_key );
  *
  * The function XX_httplib_websocket_write_exec() does the heavy lifting in
  * writing data over a websocket connectin to a remote peer.
  */
 
-int XX_httplib_websocket_write_exec( const struct lh_ctx_t *ctx, struct httplib_connection *conn, int opcode, const char *data, size_t data_len, uint32_t masking_key ) {
+int XX_httplib_websocket_write_exec( const struct lh_ctx_t *ctx, struct lh_con_t *conn, int opcode, const char *data, size_t data_len, uint32_t masking_key ) {
 
 	unsigned char header[14];
 	size_t header_len;

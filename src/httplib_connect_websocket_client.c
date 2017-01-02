@@ -29,16 +29,16 @@
 #include "httplib_string.h"
 
 /*
- * struct httplib_connection *httplib_connect_websocket_client();
+ * struct lh_con_t *httplib_connect_websocket_client();
  *
  * The function httplib_connect_websocket_client() connects as a client to a
  * websocket on another server. If this succeeds a connection pointer is
  * returned, otherwise NULL.
  */
 
-struct httplib_connection *httplib_connect_websocket_client( struct lh_ctx_t *ctx, const char *host, int port, int use_ssl, const char *path, const char *origin, httplib_websocket_data_handler data_func, httplib_websocket_close_handler close_func, void *user_data ) {
+struct lh_con_t *httplib_connect_websocket_client( struct lh_ctx_t *ctx, const char *host, int port, int use_ssl, const char *path, const char *origin, httplib_websocket_data_handler data_func, httplib_websocket_close_handler close_func, void *user_data ) {
 
-	struct httplib_connection *conn;
+	struct lh_con_t *conn;
 	struct websocket_client_thread_data *thread_data;
 	static const char *magic = "x3JJHMbDL1EzLkh9GBhXDw==";
 	const char *handshake_req;

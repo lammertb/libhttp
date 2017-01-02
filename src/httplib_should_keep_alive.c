@@ -25,7 +25,7 @@
 #include "httplib_main.h"
 
 /*
- * bool XX_httplib_should_keep_alive( const struct lh_ctx_t *ctx, const struct httplib_connection *conn );
+ * bool XX_httplib_should_keep_alive( const struct lh_ctx_t *ctx, const struct lh_con_t *conn );
  *
  * The function XX_httplib_should_keep_alive() returns true if the connection
  * should be kept alive and false if it should be closed.
@@ -35,7 +35,7 @@
  * request parsing failed.
  */
 
-bool XX_httplib_should_keep_alive( const struct lh_ctx_t *ctx, const struct httplib_connection *conn ) {
+bool XX_httplib_should_keep_alive( const struct lh_ctx_t *ctx, const struct lh_con_t *conn ) {
 
 	const char *http_version;
 	const char *header;

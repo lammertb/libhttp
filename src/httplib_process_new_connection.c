@@ -29,13 +29,13 @@
 #include "httplib_string.h"
 
 /*
- * void XX_httplib_process_new_connection( struct lh_ctx_t *ctx, struct httplib_connection *conn );
+ * void XX_httplib_process_new_connection( struct lh_ctx_t *ctx, struct lh_con_t *conn );
  *
  * The function XX_httplib_process_new_connection() is used to process a new
  * incoming connection on a socket.
  */
 
-void XX_httplib_process_new_connection( struct lh_ctx_t *ctx, struct httplib_connection *conn ) {
+void XX_httplib_process_new_connection( struct lh_ctx_t *ctx, struct lh_con_t *conn ) {
 
 	struct httplib_request_info *ri;
 	int keep_alive;

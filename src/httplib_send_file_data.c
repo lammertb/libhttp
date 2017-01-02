@@ -34,7 +34,7 @@
  * Send len bytes from the opened file to the client.
  */
 
-void XX_httplib_send_file_data( const struct lh_ctx_t *ctx, struct httplib_connection *conn, struct file *filep, int64_t offset, int64_t len ) {
+void XX_httplib_send_file_data( const struct lh_ctx_t *ctx, struct lh_con_t *conn, struct file *filep, int64_t offset, int64_t len ) {
 
 	char buf[MG_BUF_LEN];
 	char error_string[ERROR_STRING_LEN];

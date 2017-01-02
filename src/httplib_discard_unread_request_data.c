@@ -28,14 +28,14 @@
 #include "httplib_main.h"
 
 /*
- * void XX_httplib_discard_unread_request_data( const struct lh_ctx_t *ctx, struct httplib_connection *conn );
+ * void XX_httplib_discard_unread_request_data( const struct lh_ctx_t *ctx, struct lh_con_t *conn );
  *
  * The function XX_httplib_discard_unread_request_data() discards any request
  * data on a connection which is not further needed but has alread been
  * received.
  */
 
-void XX_httplib_discard_unread_request_data( const struct lh_ctx_t *ctx, struct httplib_connection *conn ) {
+void XX_httplib_discard_unread_request_data( const struct lh_ctx_t *ctx, struct lh_con_t *conn ) {
 
 	char buf[MG_BUF_LEN];
 	size_t to_read;

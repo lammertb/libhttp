@@ -29,10 +29,10 @@
 #include "httplib_string.h"
 #include "httplib_utils.h"
 
-static void send_ssi_file( const struct lh_ctx_t *ctx, struct httplib_connection *conn, const char *, struct file *, int );
+static void send_ssi_file( const struct lh_ctx_t *ctx, struct lh_con_t *conn, const char *, struct file *, int );
 
 
-static void do_ssi_include( const struct lh_ctx_t *ctx, struct httplib_connection *conn, const char *ssi, char *tag, int include_level ) {
+static void do_ssi_include( const struct lh_ctx_t *ctx, struct lh_con_t *conn, const char *ssi, char *tag, int include_level ) {
 
 	char file_name[MG_BUF_LEN];
 	char path[512];
@@ -127,7 +127,7 @@ static void do_ssi_include( const struct lh_ctx_t *ctx, struct httplib_connectio
 
 
 #if !defined(NO_POPEN)
-static void do_ssi_exec( const struct lh_ctx_t *ctx, struct httplib_connection *conn, char *tag ) {
+static void do_ssi_exec( const struct lh_ctx_t *ctx, struct lh_con_t *conn, char *tag ) {
 
 	char cmd[1024] = "";
 	char error_string[ERROR_STRING_LEN];
@@ -165,7 +165,7 @@ static int httplib_fgetc( struct file *filep, int offset ) {
 }  /* httplib_fgetc */
 
 
-static void send_ssi_file( const struct lh_ctx_t *ctx, struct httplib_connection *conn, const char *path, struct file *filep, int include_level ) {
+static void send_ssi_file( const struct lh_ctx_t *ctx, struct lh_con_t *conn, const char *path, struct file *filep, int include_level ) {
 
 	char buf[MG_BUF_LEN];
 	int ch;
@@ -269,7 +269,7 @@ static void send_ssi_file( const struct lh_ctx_t *ctx, struct httplib_connection
 }  /* send_ssi_file */
 
 
-void XX_httplib_handle_ssi_file_request( const struct lh_ctx_t *ctx, struct httplib_connection *conn, const char *path, struct file *filep ) {
+void XX_httplib_handle_ssi_file_request( const struct lh_ctx_t *ctx, struct lh_con_t *conn, const char *path, struct file *filep ) {
 
 	char date[64];
 	char error_string[ERROR_STRING_LEN];

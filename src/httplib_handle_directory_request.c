@@ -28,7 +28,7 @@
 #include "httplib_main.h"
 #include "httplib_utils.h"
 
-void XX_httplib_handle_directory_request( const struct lh_ctx_t *ctx, struct httplib_connection *conn, const char *dir ) {
+void XX_httplib_handle_directory_request( const struct lh_ctx_t *ctx, struct lh_con_t *conn, const char *dir ) {
 
 	unsigned int i;
 	int sort_direction;

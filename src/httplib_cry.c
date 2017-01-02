@@ -26,14 +26,14 @@
 #include "httplib_ssl.h"
 
 /*
- * void httplib_cry( enum debug_level_t debug_level, const struct lh_ctx_t *ctx, const struct httplib_connection *conn, const char *fmt, ... );
+ * void httplib_cry( enum debug_level_t debug_level, const struct lh_ctx_t *ctx, const struct lh_con_t *conn, const char *fmt, ... );
  *
  * The function httplib_cry() prints a formatted error message to the opened
  * error log stream. It first tries to use a user supplied error handler. If
  * that doesn't work, the alternative is to write to an error log file.
  */
 
-void httplib_cry( enum debug_level_t debug_level, const struct lh_ctx_t *ctx, const struct httplib_connection *conn, const char *fmt, ... ) {
+void httplib_cry( enum debug_level_t debug_level, const struct lh_ctx_t *ctx, const struct lh_con_t *conn, const char *fmt, ... ) {
 
 	char buf[MG_BUF_LEN];
 	char src_addr[IP_ADDR_STR_LEN];

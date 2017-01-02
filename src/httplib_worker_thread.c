@@ -68,7 +68,7 @@ LIBHTTP_THREAD XX_httplib_worker_thread( void *thread_func_param ) {
 static void *worker_thread_run( struct worker_thread_args *thread_args ) {
 
 	struct lh_ctx_t *ctx;
-	struct httplib_connection *conn;
+	struct lh_con_t *conn;
 	struct httplib_workerTLS tls;
 	union {
 		const void *	con;

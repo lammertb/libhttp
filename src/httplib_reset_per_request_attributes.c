@@ -28,13 +28,13 @@
 #include "httplib_main.h"
 
 /*
- * void XX_httplib_reset_per_request_attributes( struct httplib_connection *conn );
+ * void XX_httplib_reset_per_request_attributes( struct lh_con_t *conn );
  *
  * The function XX_httplib_reset_per_request_attributes() resets the request
  * attributes of a connection.
  */
 
-void XX_httplib_reset_per_request_attributes( struct httplib_connection *conn ) {
+void XX_httplib_reset_per_request_attributes( struct lh_con_t *conn ) {
 
 	if ( conn == NULL ) return;
 

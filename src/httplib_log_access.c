@@ -29,15 +29,15 @@
 #include "httplib_ssl.h"
 #include "httplib_string.h"
 
-static const char *header_val( const struct httplib_connection *conn, const char *header );
+static const char *header_val( const struct lh_con_t *conn, const char *header );
 
 /*
- * void XX_httplib_log_access( const struct lh_ctx_t *ctx, const struct httplib_connection *conn );
+ * void XX_httplib_log_access( const struct lh_ctx_t *ctx, const struct lh_con_t *conn );
  *
  * The function XX_httplib_log_access() logs an access of a client.
  */
 
-void XX_httplib_log_access( const struct lh_ctx_t *ctx, const struct httplib_connection *conn ) {
+void XX_httplib_log_access( const struct lh_ctx_t *ctx, const struct lh_con_t *conn ) {
 
 	const struct httplib_request_info *ri;
 	struct file fi;
@@ -111,13 +111,13 @@ void XX_httplib_log_access( const struct lh_ctx_t *ctx, const struct httplib_con
 
 
 /*
- * static const char *header_val( const struct httplib_connection *conn, const char *header );
+ * static const char *header_val( const struct lh_con_t *conn, const char *header );
  *
  * The function header_val() returns the value of a specific header of a
  * connection.
  */
 
-static const char *header_val( const struct httplib_connection *conn, const char *header ) {
+static const char *header_val( const struct lh_con_t *conn, const char *header ) {
 
 	const char *header_value;
 

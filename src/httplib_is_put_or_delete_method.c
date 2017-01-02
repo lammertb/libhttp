@@ -28,14 +28,14 @@
 #include "httplib_main.h"
 
 /*
- * bool XX_httplib_is_put_or_delete_method( const struct httplib_connection *conn );
+ * bool XX_httplib_is_put_or_delete_method( const struct lh_con_t *conn );
  *
  * The function XX_httplib_is_put_or_delete_method() returns true of the method
  * of the request on a connection is one which writes at the file level on the
  * server like PUT, DELETE, MKCOL and PATCH.
  */
 
-bool XX_httplib_is_put_or_delete_method( const struct httplib_connection *conn ) {
+bool XX_httplib_is_put_or_delete_method( const struct lh_con_t *conn ) {
 
 	const char *s;
 

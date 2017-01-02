@@ -29,15 +29,15 @@
 #include "httplib_string.h"
 
 /*
- * struct httplib_connection *httplib_download();
+ * struct lh_con_t *httplib_download();
  *
  * The function httplib_download() is used to download a file from a remote location
  * and returns a pointer to the connection on success, or NULL on error.
  */
 
-struct httplib_connection * httplib_download( struct lh_ctx_t *ctx, const char *host, int port, int use_ssl, const char *fmt, ... ) {
+struct lh_con_t *httplib_download( struct lh_ctx_t *ctx, const char *host, int port, int use_ssl, const char *fmt, ... ) {
 
-	struct httplib_connection *conn;
+	struct lh_con_t *conn;
 	va_list ap;
 	int i;
 	int reqerr;

@@ -44,7 +44,7 @@ const char *XX_httplib_get_header( const struct httplib_request_info *ri, const 
 }  /* XX_httplib_get_header */
 
 
-const char *httplib_get_header( const struct httplib_connection *conn, const char *name ) {
+const char *httplib_get_header( const struct lh_con_t *conn, const char *name ) {
 
 	if ( conn == NULL ) return NULL;
 

@@ -29,13 +29,13 @@
 #include "httplib_string.h"
 
 /*
- * int XX_httplib_is_websocket_protocol( const struct httplib_connection *conn );
+ * int XX_httplib_is_websocket_protocol( const struct lh_con_t *conn );
  *
  * The function XX_httplib_is_websocket_protocol() checks the request headers
  * to see if the connection is a valid websocket protocol.
  */
 
-bool XX_httplib_is_websocket_protocol( const struct httplib_connection *conn ) {
+bool XX_httplib_is_websocket_protocol( const struct lh_con_t *conn ) {
 
 	const char *upgrade;
 	const char *connection;

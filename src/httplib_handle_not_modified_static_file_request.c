@@ -29,14 +29,14 @@
 #include "httplib_utils.h"
 
 /*
- * void XX_httplib_handle_not_modified_static_file_request( const struct lh_ctx_t *ctx, struct httplib_connection *conn, struct file *filep );
+ * void XX_httplib_handle_not_modified_static_file_request( const struct lh_ctx_t *ctx, struct lh_con_t *conn, struct file *filep );
  *
  * The function XX_httplib_handle_not_modified_static_file_request() is used to
  * send a 304 response to a client to indicate that the requested resource has
  * not been changed.
  */
 
-void XX_httplib_handle_not_modified_static_file_request( const struct lh_ctx_t *ctx, struct httplib_connection *conn, struct file *filep ) {
+void XX_httplib_handle_not_modified_static_file_request( const struct lh_ctx_t *ctx, struct lh_con_t *conn, struct file *filep ) {
 
 	char date[64];
 	char lm[64];

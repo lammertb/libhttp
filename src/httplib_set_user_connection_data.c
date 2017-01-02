@@ -25,14 +25,14 @@
 #include "httplib_main.h"
 
 /*
- * void httplib_set_user_connection_data( struct httplib_connection *conn, void *data );
+ * void httplib_set_user_connection_data( struct lh_con_t *conn, void *data );
  *
  * The function void htptlib_set_user_connection_data() registers a block of
  * data with a connection. If the function is called with NULL as parameter for
  * the data, the link between the connection and data is removed.
  */
 
-LIBHTTP_API void httplib_set_user_connection_data( struct httplib_connection *conn, void *data ) {
+LIBHTTP_API void httplib_set_user_connection_data( struct lh_con_t *conn, void *data ) {
 
 	if ( conn != NULL ) conn->request_info.conn_data = data;
 

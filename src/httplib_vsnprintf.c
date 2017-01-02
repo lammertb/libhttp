@@ -33,7 +33,7 @@
  * Report errors if length is exceeded.
  */
 
-void XX_httplib_vsnprintf( const struct lh_ctx_t *ctx, const struct httplib_connection *conn, bool *truncated, char *buf, size_t buflen, const char *fmt, va_list ap ) {
+void XX_httplib_vsnprintf( const struct lh_ctx_t *ctx, const struct lh_con_t *conn, bool *truncated, char *buf, size_t buflen, const char *fmt, va_list ap ) {
 
 	int n;
 	bool ok;

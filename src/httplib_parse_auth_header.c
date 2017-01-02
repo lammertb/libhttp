@@ -32,7 +32,7 @@
  * Return 1 on success. Always initializes the ah structure.
  */
 
-int XX_httplib_parse_auth_header( const struct lh_ctx_t *ctx, struct httplib_connection *conn, char *buf, size_t buf_size, struct ah *ah ) {
+int XX_httplib_parse_auth_header( const struct lh_ctx_t *ctx, struct lh_con_t *conn, char *buf, size_t buf_size, struct ah *ah ) {
 
 	char *name;
 	char *value;

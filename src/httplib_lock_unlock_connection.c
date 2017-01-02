@@ -29,12 +29,12 @@
 #include "httplib_pthread.h"
 
 /*
- * void httplib_lock_connection( struct httplib_connection *conn );
+ * void httplib_lock_connection( struct lh_con_t *conn );
  *
  * The function httplib_lock_connection() puts a lock on a connection.
  */
 
-void httplib_lock_connection( struct httplib_connection *conn ) {
+void httplib_lock_connection( struct lh_con_t *conn ) {
 
 	if ( conn != NULL ) httplib_pthread_mutex_lock( & conn->mutex );
 
@@ -43,13 +43,13 @@ void httplib_lock_connection( struct httplib_connection *conn ) {
 
 
 /*
- * void httplib_unlock_connection( struct httplib_connection *conn );
+ * void httplib_unlock_connection( struct lh_con_t *conn );
  *
  * The function httplib_unlock_connection() removes the current lock from a
  * connection.
  */
 
-void httplib_unlock_connection( struct httplib_connection *conn ) {
+void httplib_unlock_connection( struct lh_con_t *conn ) {
 
 	if ( conn != NULL ) httplib_pthread_mutex_unlock( & conn->mutex );
 

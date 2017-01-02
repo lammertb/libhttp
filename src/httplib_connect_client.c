@@ -30,30 +30,30 @@
 #include "httplib_ssl.h"
 #include "httplib_string.h"
 
-static struct httplib_connection *	httplib_connect_client_impl( struct lh_ctx_t *ctx, const struct httplib_client_options *client_options, int use_ssl );
+static struct lh_con_t *	httplib_connect_client_impl( struct lh_ctx_t *ctx, const struct httplib_client_options *client_options, int use_ssl );
 
 /*
- * struct httplib_connection *httplib_connect_client_secure( struct lh_ctx_t *ctx, const struct httplib_client_options *client options );
+ * struct lh_con_t *httplib_connect_client_secure( struct lh_ctx_t *ctx, const struct httplib_client_options *client options );
  *
  * The function httplib_connect_client_secure() creates a secure connection as a
  * client to a remote server and returns a pointer to the connection
  * information, or NULL if an error occured.
  */
 
-LIBHTTP_API struct httplib_connection *httplib_connect_client_secure( struct lh_ctx_t *ctx, const struct httplib_client_options *client_options ) {
+LIBHTTP_API struct lh_con_t *httplib_connect_client_secure( struct lh_ctx_t *ctx, const struct httplib_client_options *client_options ) {
 
 	return httplib_connect_client_impl( ctx, client_options, true );
 
 }  /* httplib_connect_client_secure */
 
 /*
- * struct httplib_connection *httplib_connect_client( struct lh_ctx_t *ctx, const char *host, int port, int use_ssl );
+ * struct lh_con_t *httplib_connect_client( struct lh_ctx_t *ctx, const char *host, int port, int use_ssl );
  *
  * The function httplib_connect_client() connects to a remote server as a client
  * with the options of the connection provided as parameters.
  */
 
-struct httplib_connection *httplib_connect_client( struct lh_ctx_t *ctx, const char *host, int port, int use_ssl ) {
+struct lh_con_t *httplib_connect_client( struct lh_ctx_t *ctx, const char *host, int port, int use_ssl ) {
 
 	struct httplib_client_options opts;
 
@@ -68,15 +68,15 @@ struct httplib_connection *httplib_connect_client( struct lh_ctx_t *ctx, const c
 
 
 /*
- * static struct httplib_connection *httplib_connect_client_impl( struct lh_ctx_t *ctx, const struct httplib_client_options *client_options, int use_ssl );
+ * static struct lh_con_t *httplib_connect_client_impl( struct lh_ctx_t *ctx, const struct httplib_client_options *client_options, int use_ssl );
  *
  * The function httplib_connect_client_impl() is the background function doing the
  * heavy lifting to make connections as a client to remote servers.
  */
 
-static struct httplib_connection *httplib_connect_client_impl( struct lh_ctx_t *ctx, const struct httplib_client_options *client_options, int use_ssl ) {
+static struct lh_con_t *httplib_connect_client_impl( struct lh_ctx_t *ctx, const struct httplib_client_options *client_options, int use_ssl ) {
 
-	struct httplib_connection *conn;
+	struct lh_con_t *conn;
 	SOCKET sock;
 	union usa sa;
 	socklen_t len;
