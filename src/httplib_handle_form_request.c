@@ -524,7 +524,7 @@ int httplib_handle_form_request( const struct lh_ctx_t *ctx, struct lh_con_t *co
 		const char *boundary;
 		size_t bl;
 		ptrdiff_t used;
-		struct httplib_request_info part_header;
+		struct lh_rqi_t part_header;
 		char *hbuf;
 		char *hend;
 		char *fbeg;

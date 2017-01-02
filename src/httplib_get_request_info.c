@@ -27,7 +27,7 @@
 
 #include "httplib_main.h"
 
-const struct httplib_request_info *httplib_get_request_info( const struct lh_con_t *conn ) {
+const struct lh_rqi_t *httplib_get_request_info( const struct lh_con_t *conn ) {
 
 	if ( conn == NULL ) return NULL;
 

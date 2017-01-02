@@ -152,7 +152,7 @@ struct lh_con_t;					/* Handle for the individual connection								*/
 							/************************************************************************************************/
 							/*												*/
 							/* This structure contains information about the HTTP request.					*/
-struct httplib_request_info {				/*												*/
+struct lh_rqi_t {					/*												*/
 	const char *		request_method;		/* "GET", "POST", etc										*/
 	const char *		request_uri;		/* URL-decoded URI (absolute or relative, as in the request)					*/
 	const char *		local_uri;		/* URL-decoded URI (relative). Can be NULL if request_uri is not a resource at the server host	*/
@@ -176,7 +176,7 @@ struct httplib_request_info {				/*												*/
 							/************************************************************************************************/
 
 
-/* Client certificate information (part of httplib_request_info) */
+/* Client certificate information (part of lh_rqi_t) */
 struct client_cert {
 	const char *subject;
 	const char *issuer;
@@ -300,7 +300,7 @@ LIBHTTP_API int httplib_modify_passwords_file(const char *passwords_file_name, c
 
 
 /* Return information associated with the request. */
-LIBHTTP_API const struct httplib_request_info *httplib_get_request_info( const struct lh_con_t *conn );
+LIBHTTP_API const struct lh_rqi_t *httplib_get_request_info( const struct lh_con_t *conn );
 
 
 /* Send data to the client.

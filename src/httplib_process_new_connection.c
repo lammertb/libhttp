@@ -37,7 +37,7 @@
 
 void XX_httplib_process_new_connection( struct lh_ctx_t *ctx, struct lh_con_t *conn ) {
 
-	struct httplib_request_info *ri;
+	struct lh_rqi_t *ri;
 	int keep_alive;
 	int discard_len;
 	bool was_error;

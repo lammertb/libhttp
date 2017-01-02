@@ -616,7 +616,7 @@ struct lh_ctx_t {
 
 								/****************************************************************************************/
 struct lh_con_t {						/*											*/
-	struct		httplib_request_info request_info;	/* The request info of the connection							*/
+	struct lh_rqi_t	request_info;				/* The request info of the connection							*/
 	SSL *		ssl;					/* SSL descriptor									*/
 	SSL_CTX *	client_ssl_ctx;				/* SSL context for client connections							*/
 	struct		socket client;				/* Connected client									*/
@@ -811,7 +811,7 @@ bool			XX_httplib_fopen( const struct lh_ctx_t *ctx, const struct lh_con_t *conn
 bool			XX_httplib_forward_body_data( const struct lh_ctx_t *ctx, struct lh_con_t *conn, FILE *fp, SOCKET sock, SSL *ssl );
 void			XX_httplib_free_config_options( struct lh_ctx_t *ctx );
 void			XX_httplib_free_context( struct lh_ctx_t *ctx );
-const char *		XX_httplib_get_header( const struct httplib_request_info *ri, const char *name );
+const char *		XX_httplib_get_header( const struct lh_rqi_t *ri, const char *name );
 void			XX_httplib_get_mime_type( const struct lh_ctx_t *ctx, const char *path, struct vec *vec );
 const char *		XX_httplib_get_rel_url_at_current_server( const struct lh_ctx_t *ctx, const char *uri, const struct lh_con_t *conn );
 uint32_t		XX_httplib_get_remote_ip( const struct lh_con_t *conn );
@@ -852,8 +852,8 @@ bool			XX_httplib_option_value_to_bool( const char *value, bool *config );
 bool			XX_httplib_option_value_to_int( const char *value, int *config );
 int			XX_httplib_parse_auth_header( const struct lh_ctx_t *ctx, struct lh_con_t *conn, char *buf, size_t buf_size, struct ah *ah );
 time_t			XX_httplib_parse_date_string( const char *datetime );
-int			XX_httplib_parse_http_headers( char **buf, struct httplib_request_info *ri );
-int			XX_httplib_parse_http_message( char *buf, int len, struct httplib_request_info *ri );
+int			XX_httplib_parse_http_headers( char **buf, struct lh_rqi_t *ri );
+int			XX_httplib_parse_http_message( char *buf, int len, struct lh_rqi_t *ri );
 int			XX_httplib_parse_net( const char *spec, uint32_t *net, uint32_t *mask );
 int			XX_httplib_parse_range_header( const char *header, int64_t *a, int64_t *b );
 void			XX_httplib_path_to_unicode( const char *path, wchar_t *wbuf, size_t wbuf_len );

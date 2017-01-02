@@ -40,7 +40,7 @@
 
 void XX_httplib_handle_request( struct lh_ctx_t *ctx, struct lh_con_t *conn ) {
 
-	struct httplib_request_info *ri;
+	struct lh_rqi_t *ri;
 	char path[PATH_MAX];
 	int uri_len;
 	int ssl_index;

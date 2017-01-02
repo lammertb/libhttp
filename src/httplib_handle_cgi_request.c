@@ -56,7 +56,7 @@ void XX_httplib_handle_cgi_request( const struct lh_ctx_t *ctx, struct lh_con_t 
 	char error_string[ERROR_STRING_LEN];
 	char *ptr;
 	const char *cptr;
-	struct httplib_request_info ri;
+	struct lh_rqi_t ri;
 	struct cgi_environment blk;
 	FILE *in;
 	FILE *out;

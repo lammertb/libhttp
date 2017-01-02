@@ -28,7 +28,7 @@
 #include "httplib_main.h"
 
 /* Return HTTP header value, or NULL if not found. */
-const char *XX_httplib_get_header( const struct httplib_request_info *ri, const char *name ) {
+const char *XX_httplib_get_header( const struct lh_rqi_t *ri, const char *name ) {
 
 	int i;
 

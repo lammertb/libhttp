@@ -39,7 +39,7 @@ static const char *header_val( const struct lh_con_t *conn, const char *header )
 
 void XX_httplib_log_access( const struct lh_ctx_t *ctx, const struct lh_con_t *conn ) {
 
-	const struct httplib_request_info *ri;
+	const struct lh_rqi_t *ri;
 	struct file fi;
 	char date[64];
 	char src_addr[IP_ADDR_STR_LEN];
