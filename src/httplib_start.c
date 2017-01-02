@@ -32,14 +32,14 @@
 #include "httplib_utils.h"
 
 /*
- * struct lh_ctx_t *httplib_start( const struct lh_clb_t *callbacks, void *user_data, const struct httplib_t *options );
+ * struct lh_ctx_t *httplib_start( const struct lh_clb_t *callbacks, void *user_data, const struct lh_opt_t *options );
  *
  * The function httplib_start() functions as the main entry point for the LibHTTP
  * server. The function starts all threads and when finished returns the
  * context to the running server for future reference.
  */
 
-struct lh_ctx_t *httplib_start( const struct lh_clb_t *callbacks, void *user_data, const struct httplib_option_t *options ) {
+struct lh_ctx_t *httplib_start( const struct lh_clb_t *callbacks, void *user_data, const struct lh_opt_t *options ) {
 
 	struct lh_ctx_t *ctx;
 	int i;

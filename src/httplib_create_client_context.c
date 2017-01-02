@@ -23,7 +23,7 @@
 #include "httplib_main.h"
 
 /*
- * struct lh_ctx_t *httplib_create_client_context( const struct lh_clb_t *callbacks, const struct httplib_option_t *options );
+ * struct lh_ctx_t *httplib_create_client_context( const struct lh_clb_t *callbacks, const struct lh_opt_t *options );
  *
  * The function httplib_create_client_context() creates a context to be used
  * for one simultaneous client connection. It is not possible to use one client
@@ -31,7 +31,7 @@
  * contains SSL context information which is specific for one connection.
  */
 
-struct lh_ctx_t *httplib_create_client_context( const struct lh_clb_t *callbacks, const struct httplib_option_t *options ) {
+struct lh_ctx_t *httplib_create_client_context( const struct lh_clb_t *callbacks, const struct lh_opt_t *options ) {
 
 	struct lh_ctx_t *ctx;
 	void (*exit_callback)(const struct lh_ctx_t *ctx);

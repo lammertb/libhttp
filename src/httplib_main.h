@@ -860,7 +860,7 @@ void			XX_httplib_path_to_unicode( const char *path, wchar_t *wbuf, size_t wbuf_
 void			XX_httplib_prepare_cgi_environment( const struct lh_ctx_t *ctx, struct lh_con_t *conn, const char *prog, struct cgi_environment *env );
 void			XX_httplib_print_dir_entry( const struct lh_ctx_t *ctx, struct de *de );
 void			XX_httplib_process_new_connection( struct lh_ctx_t *ctx, struct lh_con_t *conn );
-bool			XX_httplib_process_options( struct lh_ctx_t *ctx, const struct httplib_option_t *options );
+bool			XX_httplib_process_options( struct lh_ctx_t *ctx, const struct lh_opt_t *options );
 void			XX_httplib_produce_socket( struct lh_ctx_t *ctx, const struct socket *sp );
 int			XX_httplib_pull( const struct lh_ctx_t *ctx, FILE *fp, struct lh_con_t *conn, char *buf, int len, double timeout );
 int			XX_httplib_pull_all( const struct lh_ctx_t *ctx, FILE *fp, struct lh_con_t *conn, char *buf, int len );
