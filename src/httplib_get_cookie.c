@@ -26,7 +26,6 @@
  */
 
 #include "httplib_main.h"
-#include "httplib_string.h"
 
 /*
  * HCP24: some changes to compare hole var_name

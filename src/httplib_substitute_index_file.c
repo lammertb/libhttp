@@ -26,7 +26,6 @@
  */
 
 #include "httplib_main.h"
-#include "httplib_string.h"
 
 /*
  * bool XX_httplib_substitute_index_file( struct lh_ctx_t *ctx, struct lh_con_t *conn, char *path, size_t path_len, struct file *filep );

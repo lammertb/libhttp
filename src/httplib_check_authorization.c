@@ -26,7 +26,6 @@
  */
 
 #include "httplib_main.h"
-#include "httplib_string.h"
 
 /* Return 1 if request is authorised, 0 otherwise. */
 bool XX_httplib_check_authorization( struct lh_ctx_t *ctx, struct lh_con_t *conn, const char *path ) {

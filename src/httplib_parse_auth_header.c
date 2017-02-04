@@ -26,7 +26,6 @@
  */
 
 #include "httplib_main.h"
-#include "httplib_string.h"
 
 /*
  * Return 1 on success. Always initializes the ah structure.

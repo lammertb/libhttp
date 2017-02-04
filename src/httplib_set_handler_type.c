@@ -26,7 +26,6 @@
  */
 
 #include "httplib_main.h"
-#include "httplib_string.h"
 
 /*
  * void XX_httplib_set_handler_type();

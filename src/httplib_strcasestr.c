@@ -26,7 +26,6 @@
  */
 
 #include "httplib_main.h"
-#include "httplib_string.h"
 
 /*
  * const char *httplib_strcasestr( const char *big_str, const char *small_str );

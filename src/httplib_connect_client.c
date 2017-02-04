@@ -28,7 +28,6 @@
 #include "httplib_main.h"
 #include "httplib_pthread.h"
 #include "httplib_ssl.h"
-#include "httplib_string.h"
 
 static struct lh_con_t *	httplib_connect_client_impl( struct lh_ctx_t *ctx, const struct httplib_client_options *client_options, int use_ssl );
 

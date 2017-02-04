@@ -26,7 +26,6 @@
  */
 
 #include "httplib_main.h"
-#include "httplib_string.h"
 
 /*
  * Alternative alloc_vprintf() for non-compliant C runtimes

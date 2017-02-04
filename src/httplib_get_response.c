@@ -26,7 +26,6 @@
  */
 
 #include "httplib_main.h"
-#include "httplib_string.h"
 
 /*
  * int httplib_get_response( const struct lh_ctx_t *ctx, struct lh_con_t *conn, int timeout );

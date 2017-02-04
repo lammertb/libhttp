@@ -614,34 +614,49 @@ struct lh_ctx_t {
  * struct lh_con_t;
  */
 
-								/****************************************************************************************/
-struct lh_con_t {						/*											*/
-	struct lh_rqi_t	request_info;				/* The request info of the connection							*/
-	SSL *		ssl;					/* SSL descriptor									*/
-	SSL_CTX *	client_ssl_ctx;				/* SSL context for client connections							*/
-	struct		socket client;				/* Connected client									*/
-	time_t		conn_birth_time;			/* Time (wall clock) when connection was established					*/
-	struct		timespec req_time;			/* Time (since system start) when the request was received				*/
-	int64_t		num_bytes_sent;				/* Total bytes sent to client								*/
-	int64_t		content_len;				/* Content-Length header value								*/
-	int64_t		consumed_content;			/* How many bytes of content have been read						*/
-	int		is_chunked;				/* Transfer-Encoding is chunked: 0=no, 1=yes: data available, 2: all data read		*/
-	size_t		chunk_remainder;			/* Unread data from the last chunk							*/
-	char *		buf;					/* Buffer for received data								*/
-	char *		path_info;				/* PATH_INFO part of the URL								*/
-	bool		must_close;				/* true, if connection must be closed							*/
-	bool		in_error_handler;			/* true, if in handler for user defined error pages					*/
-	int		buf_size;				/* Buffer size										*/
-	int		request_len;				/* Size of the request + headers in a buffer						*/
-	int		data_len;				/* Total size of data in a buffer							*/
-	int		status_code;				/* HTTP reply status code, e.g. 200							*/
-	time_t		last_throttle_time;			/* Last time throttled data was sent							*/
-	int64_t		throttle;				/* Throttling, bytes/sec. <= 0 means no throttle					*/
-	int64_t		last_throttle_bytes;			/* Bytes sent this second								*/
-	pthread_mutex_t	mutex;					/* Used by httplib_(un)lock_connection to ensure atomic transmissions for websockets	*/
-	int		thread_index;				/* Thread index within ctx								*/
-};								/*											*/
-								/****************************************************************************************/
+							/************************************************************************************************/
+struct lh_con_t {					/*												*/
+	struct lh_rqi_t	request_info;			/* The request info of the connection								*/
+	SSL *		ssl;				/* SSL descriptor										*/
+	SSL_CTX *	client_ssl_ctx;			/* SSL context for client connections								*/
+	struct		socket client;			/* Connected client										*/
+	time_t		conn_birth_time;		/* Time (wall clock) when connection was established						*/
+	struct		timespec req_time;		/* Time (since system start) when the request was received					*/
+	int64_t		num_bytes_sent;			/* Total bytes sent to client									*/
+	int64_t		content_len;			/* Content-Length header value									*/
+	int64_t		consumed_content;		/* How many bytes of content have been read							*/
+	int		is_chunked;			/* Transfer-Encoding is chunked: 0=no, 1=yes: data available, 2: all data read			*/
+	size_t		chunk_remainder;		/* Unread data from the last chunk								*/
+	char *		buf;				/* Buffer for received data									*/
+	char *		path_info;			/* PATH_INFO part of the URL									*/
+	bool		must_close;			/* true, if connection must be closed								*/
+	bool		in_error_handler;		/* true, if in handler for user defined error pages						*/
+	int		buf_size;			/* Buffer size											*/
+	int		request_len;			/* Size of the request + headers in a buffer							*/
+	int		data_len;			/* Total size of data in a buffer								*/
+	int		status_code;			/* HTTP reply status code, e.g. 200								*/
+	time_t		last_throttle_time;		/* Last time throttled data was sent								*/
+	int64_t		throttle;			/* Throttling, bytes/sec. <= 0 means no throttle						*/
+	int64_t		last_throttle_bytes;		/* Bytes sent this second									*/
+	pthread_mutex_t	mutex;				/* Used by httplib_(un)lock_connection to ensure atomic transmissions for websockets		*/
+	int		thread_index;			/* Thread index within ctx									*/
+};							/*												*/
+							/************************************************************************************************/
+
+							/************************************************************************************************/
+							/*												*/
+							/* struct lh_ip_t;										*/
+							/*												*/
+							/* LibHTTP allows both IPv4 and IPv6 communication. The code base doesn't make any difference	*/
+							/* between the two by encoding internally both address variations as a structure with two	*/
+							/* 64 bit values. IPv6 values will fit in this structure perfectly as they need 128 bits, while	*/
+							/* IPv4 addresses are stored as ::FFFF:0:0/96 addresses which is the official dual stack way	*/
+							/* of representing IPv4 addresses in IPv6 address space.					*/
+struct lh_ip_t {					/*												*/
+	uint64_t	high_quad;			/* The high order 64 bits of an IP address							*/
+	uint64_t	low_quad;			/* The low order 64 bits of an IP address							*/
+};							/*												*/
+							/************************************************************************************************/
 
 struct worker_thread_args {
 	struct lh_ctx_t *	ctx;
@@ -902,12 +917,15 @@ bool			XX_httplib_should_decode_url( const struct lh_ctx_t *ctx );
 bool			XX_httplib_should_keep_alive( const struct lh_ctx_t *ctx, const struct lh_con_t *conn );
 char *			XX_httplib_skip( char **buf, const char *delimiters );
 char *			XX_httplib_skip_quoted( char **buf, const char *delimiters, const char *whitespace, char quotechar );
+void			XX_httplib_snprintf( struct lh_ctx_t *ctx, const struct lh_con_t *conn, bool *truncated, char *buf, size_t buflen, PRINTF_FORMAT_STRING(const char *fmt), ... ) PRINTF_ARGS(6, 7);
 void			XX_httplib_sockaddr_to_string(char *buf, size_t len, const union usa *usa );
 pid_t			XX_httplib_spawn_process( struct lh_ctx_t *ctx, struct lh_con_t *conn, const char *prog, char *envblk, char *envp[], int fdin[2], int fdout[2], int fderr[2], const char *dir );
 int			XX_httplib_start_thread_with_id( httplib_thread_func_t func, void *param, pthread_t *threadidptr );
 int			XX_httplib_stat( struct lh_ctx_t *ctx, struct lh_con_t *conn, const char *path, struct file *filep );
 int			XX_httplib_substitute_index_file( struct lh_ctx_t *ctx, struct lh_con_t *conn, char *path, size_t path_len, struct file *filep );
 const char *		XX_httplib_suggest_connection_header( const struct lh_ctx_t *ctx, const struct lh_con_t *conn );
+int			XX_httplib_vprintf( const struct lh_ctx_t *ctx, struct lh_con_t *conn, const char *fmt, va_list ap );
+void			XX_httplib_vsnprintf( struct lh_ctx_t *ctx, const struct lh_con_t *conn, bool *truncated, char *buf, size_t buflen, const char *fmt, va_list ap );
 LIBHTTP_THREAD		XX_httplib_websocket_client_thread( void *data );
 int			XX_httplib_websocket_write_exec( const struct lh_ctx_t *ctx, struct lh_con_t *conn, int opcode, const char *data, size_t dataLen, uint32_t masking_key );
 LIBHTTP_THREAD		XX_httplib_worker_thread( void *thread_func_param );

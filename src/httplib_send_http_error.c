@@ -26,7 +26,6 @@
  */
 
 #include "httplib_main.h"
-#include "httplib_string.h"
 #include "httplib_utils.h"
 
 void XX_httplib_send_http_error( struct lh_ctx_t *ctx, struct lh_con_t *conn, int status, const char *fmt, ... ) {

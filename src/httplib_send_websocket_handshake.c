@@ -26,7 +26,6 @@
  */
 
 #include "httplib_main.h"
-#include "httplib_string.h"
 #include "httplib_utils.h"
 
 #define B64_SHA_LEN	(sizeof(sha)*2)

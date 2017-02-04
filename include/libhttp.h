@@ -226,11 +226,13 @@ enum {							/*												*/
 							/*												*/
 							/* struct lh_ctx_t;										*/
 							/* struct lh_con_t;										*/
+							/* struct lh_ip_t;										*/
 							/*												*/
 							/* Hidden structures used by the library to store context and connection information		*/
 							/*												*/
 struct lh_ctx_t;					/* Handle for an HTTP context									*/
 struct lh_con_t;					/* Handle for an individual connection								*/
+struct lh_ip_t;						/* Handle for an IPv4/IPv6 ip address								*/
 							/*												*/
 							/************************************************************************************************/
 
@@ -322,10 +324,11 @@ struct lh_slp_t {					/*												*/
 };							/*												*/
 							/************************************************************************************************/
 
+/*
+ * This structure contains callback functions for handling form fields.
+ * It is used as an argument to httplib_handle_form_request.
+ */
 
-
-/* This structure contains callback functions for handling form fields.
-   It is used as an argument to httplib_handle_form_request. */
 struct httplib_form_data_handler {
 	int 	(*field_found)( const char *key, const char *filename, char *path, size_t pathlen, void *user_data );
 	int 	(*field_get)(   const char *key, const char *value, size_t valuelen,               void *user_data );
@@ -452,6 +455,10 @@ LIBHTTP_API const char *		httplib_version( void );
 LIBHTTP_API int				httplib_websocket_client_write( struct lh_ctx_t *ctx, struct lh_con_t *conn, int opcode, const char *data, size_t data_len );
 LIBHTTP_API int				httplib_websocket_write( const struct lh_ctx_t *ctx, struct lh_con_t *conn, int opcode, const char *data, size_t data_len );
 LIBHTTP_API int				httplib_write( const struct lh_ctx_t *ctx, struct lh_con_t * conn, const void *buf, size_t len );
+
+LIBHTTP_API char *			lh_ipt_to_up(  const struct lh_ip_t *in, char *buffwe, size_t buflen, bool compress, bool hybrid );
+LIBHTTP_API char *			lh_ipt_to_ip4( const struct lh_ip_t *in, char *buffer, size_t buflen,                bool hybrid );
+LIBHTTP_API char *			lh_ipt_to_ip6( const struct lh_ip_t *in, char *buffer, size_t buflen, bool compress              );
 
 #ifdef __cplusplus
 }

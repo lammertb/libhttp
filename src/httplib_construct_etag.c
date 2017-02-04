@@ -26,7 +26,6 @@
  */
 
 #include "httplib_main.h"
-#include "httplib_string.h"
 
 /*
  * void XX_httplib_construct_etag( struct lh_ctx_t *ctx, char *buf, size_t buf_len, const struct file *filep );

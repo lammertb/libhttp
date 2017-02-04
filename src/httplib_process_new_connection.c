@@ -26,7 +26,6 @@
  */
 
 #include "httplib_main.h"
-#include "httplib_string.h"
 
 /*
  * void XX_httplib_process_new_connection( struct lh_ctx_t *ctx, struct lh_con_t *conn );

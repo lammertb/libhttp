@@ -26,7 +26,6 @@
  */
 
 #include "httplib_main.h"
-#include "httplib_string.h"
 
 void XX_httplib_dir_scan_callback( struct lh_ctx_t *ctx, struct de *de, void *data ) {
 

@@ -26,7 +26,6 @@
  */
 
 #include "httplib_main.h"
-#include "httplib_string.h"
 #include "httplib_utils.h"
 
 static void send_ssi_file( struct lh_ctx_t *ctx, struct lh_con_t *conn, const char *, struct file *, int );

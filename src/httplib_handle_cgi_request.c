@@ -26,7 +26,6 @@
  */
 
 #include "httplib_main.h"
-#include "httplib_string.h"
 
 /*
  * void XX_httplib_handle_cgi_request( struct lh_ctx_t *ctx, struct lh_con_t *conn, const char *prog );

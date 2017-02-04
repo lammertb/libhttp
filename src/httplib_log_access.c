@@ -27,7 +27,6 @@
 
 #include "httplib_main.h"
 #include "httplib_ssl.h"
-#include "httplib_string.h"
 
 static const char *header_val( const struct lh_con_t *conn, const char *header );
 

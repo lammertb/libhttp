@@ -26,7 +26,6 @@
  */
 
 #include "httplib_main.h"
-#include "httplib_string.h"
 
 /*
  * int XX_httplib_remove_directory( struct lh_ctx_t *ctx, struct lh_con_t *conn, const char *dir );
