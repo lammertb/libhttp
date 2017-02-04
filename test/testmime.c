@@ -24,7 +24,6 @@
 #include <stdio.h> 
 #include "libhttp.h"
 #include "../src/httplib_main.h"
-#include "../src/httplib_string.h"
 
 #define BUFLEN		1024
 
