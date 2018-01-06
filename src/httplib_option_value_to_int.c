@@ -50,6 +50,7 @@ bool XX_httplib_option_value_to_int( const char *value, int *config ) {
 
 		val *= 10;
 		val += *ptr - '0';
+		ptr++;
 	}
 
 	if ( *ptr != '\0' ) return true;
