@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2016 Lammert Bies
+ * Copyright (C) 2016-2018 Lammert Bies
  * Copyright (c) 2013-2016 the Civetweb developers
  * Copyright (c) 2004-2013 Sergey Lyubka
  *
@@ -619,9 +619,9 @@ struct lh_con_t {					/*												*/
 	struct lh_rqi_t	request_info;			/* The request info of the connection								*/
 	SSL *		ssl;				/* SSL descriptor										*/
 	SSL_CTX *	client_ssl_ctx;			/* SSL context for client connections								*/
-	struct		socket client;			/* Connected client										*/
+	struct socket	client;				/* Connected client										*/
 	time_t		conn_birth_time;		/* Time (wall clock) when connection was established						*/
-	struct		timespec req_time;		/* Time (since system start) when the request was received					*/
+	struct timespec	req_time;			/* Time (since system start) when the request was received					*/
 	int64_t		num_bytes_sent;			/* Total bytes sent to client									*/
 	int64_t		content_len;			/* Content-Length header value									*/
 	int64_t		consumed_content;		/* How many bytes of content have been read							*/
