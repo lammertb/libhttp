@@ -1,5 +1,5 @@
 /* 
- * Copyright (c) 2016 Lammert Bies
+ * Copyright (c) 2016-2018 Lammert Bies
  * Copyright (c) 2013-2016 the Civetweb developers
  * Copyright (c) 2004-2013 Sergey Lyubka
  *
@@ -59,7 +59,7 @@ LIBHTTP_API uint64_t httplib_get_random( void ) {
 		 */
 
 		lfsr = (lfsr >> 1) | ((((lfsr >> 0) ^ (lfsr >> 1) ^ (lfsr >> 3) ^ (lfsr >> 4)) & 1) << 63);
-		lcg  = lcg * 6364136223846793005 + 1442695040888963407;
+		lcg  = lcg * 6364136223846793005ull + 1442695040888963407ull;
 	}
 
 	/*
