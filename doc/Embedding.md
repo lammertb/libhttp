@@ -3,7 +3,7 @@ Embedding LibHTTP
 
 LibHTTP is primarily designed so applications can easily add HTTP and HTTPS server as well as WebSocket functionality.  For example, an application server could use LibHTTP to enable a web service interface for automation or remote control.
 
-However, it can also be used as a stand-alone executable. It can deliver static files and offers built-in server side Lua, JavaScript and CGI support. Some instructions how to build the stand-alone server can be found in [Building.md](Building.md).
+It can deliver static files and offers built-in server side Lua, JavaScript and CGI support. Some instructions how to build the stand-alone server can be found in [Building.md](Building.md).
 
 Files
 ------
@@ -25,28 +25,6 @@ but all functions required to run a HTTP server.
     - src/libhttp.c
     - src/md5.inl (MD5 calculation)
     - src/handle_form.inl (HTML form handling functions)
-  - Optional: C++ wrapper
-    - include/LibHTTPServer.h (C++ interface)
-    - src/LibHTTPServer.cpp (C++ wrapper implementation)
-  - Optional: Third party components
-    - src/third_party/* (third party components, mainly used for the standalone server)
-    - src/mod_*.inl (modules to access third party components from LibHTTP)
-
-Note: The C++ wrapper uses the official C interface (libhttp.h) and does not add new features to the server. Some features available in the C interface might be missing in the C++ interface.
-
-#### Additional Source Files for Executables
-
-These files can be used to build a server executable. They contain a `main` function
-starting the HTTP server.
-
-  - Stand-alone C Server
-      - src/main.c
-  - Reference embedded C Server
-      - examples/embedded_c/embedded_c.c
-  - Reference embedded C++ Server
-      - examples/embedded_cpp/embedded_cpp.cpp
-
-Note: The "embedded" example is actively maintained, updated, extended and tested. Other examples in the examples/ folder might be outdated and remain there for reference.
 
 Quick Start
 ------
@@ -60,72 +38,6 @@ By default, the server will automatically serve up files like a normal HTTP serv
       - Use *callbacks* to add your own hooks.
   - Use `httplib_set_request_handler()` to easily add your own request handlers.
   - Use `httplib_stop()` to stop the server.
-
-### C++
-  - Note that LibHTTP is Clean C, and C++ interface ```LibHTTPServer.h``` is only a wrapper layer around the C interface.
-    Not all LibHTTP features available in C are also available in C++.
-  - Create LibHTTPHandlers for each URI.
-  - Register the handlers with `LibHTTPServer::addHandler()`
-  - `LibHTTPServer` starts on contruction and stops on destruction.
-  - Use contructor *options* to select the port and document root among other things.
-  - Use constructor *callbacks* to add your own hooks.
-
-Lua Support
-------
-
-Lua is a server side include functionality.  Files ending in .lua will be processed with Lua.
-
-##### Add the following CFLAGS
-
-  - -DLUA_COMPAT_ALL
-  - -DUSE_LUA
-  - -DUSE_LUA_SQLITE3
-  - -DUSE_LUA_FILE_SYSTEM
-
-##### Add the following sources
-
-  - src/mod_lua.inl
-  - src/third_party/lua-5.2.4/src
-     + lapi.c
-     + lauxlib.c
-     + lbaselib.c
-     + lbitlib.c
-     + lcode.c
-     + lcorolib.c
-     + lctype.c
-     + ldblib.c
-     + ldebug.c
-     + ldo.c
-     + ldump.c
-     + lfunc.c
-     + lgc.c
-     + linit.c
-     + liolib.c
-     + llex.c
-     + lmathlib.c
-     + lmem.c
-     + loadlib.c
-     + lobject.c
-     + lopcodes.c
-     + loslib.c
-     + lparser.c
-     + lstate.c
-     + lstring.c
-     + lstrlib.c
-     + ltable.c
-     + ltablib.c
-     + ltm.c
-     + lundump.c
-     + lvm.c
-     + lzio.c
-  - src/third_party/sqlite3.c
-  - src/third_party/sqlite3.h
-  - src/third_party/lsqlite3.c
-  - src/third_party/lfs.c
-  - src/third_party/lfs.h
-
-This build is valid for Lua version Lua 5.2. It is also possible to build with Lua 5.1 (including LuaJIT) or Lua 5.3.
-
 
 JavaScript Support
 ------

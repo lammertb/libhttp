@@ -152,16 +152,10 @@ ${TSTDIR}${OBJDIR}%${OBJEXT} : ${TSTDIR}%.c
 
 all: ${LIBDIR}libhttp${LIBEXT} testmime${EXEEXT}
 
-#
-# Temporarily removed from all: rule
-# libhttpserver${EXEEXT}
-#
-
 clean:
 	${RM} ${OBJDIR}*${OBJEXT}
 	${RM} ${LIBDIR}libhttp${LIBEXT}
 	${RM} testmime${EXEEXT}
-	${RM} libhttpserver${EXEEXT}
 
 testmime${EXEEXT} :					\
 		${TSTDIR}${OBJDIR}testmime${OBJEXT}	\
@@ -172,18 +166,6 @@ testmime${EXEEXT} :					\
 		${LIBDIR}libhttp${LIBEXT}		\
 		${LIBS}
 	${STRIP} testmime${EXEEXT}
-
-
-libhttpserver${EXEEXT} :				\
-		${OBJDIR}main${OBJEXT}			\
-		${LIBDIR}libhttp${LIBEXT}		\
-		Makefile
-	${LINK} ${XFLAG}libhttpserver${EXEEXT}		\
-		${OBJDIR}main${OBJEXT}			\
-		${LIBDIR}libhttp${LIBEXT}		\
-		${LIBS}
-	${STRIP} libhttpserver${EXEEXT}
-
 
 OBJLIST =									\
 	${OBJDIR}extern_md5${OBJEXT}						\
