@@ -45,7 +45,7 @@ static int alloc_vprintf2( char **buf, const char *fmt, va_list ap ) {
 
 	while ( len < 0 ) {
 
-		*buf = httplib_free( *buf );
+		if ( *buf != NULL ) *buf = httplib_free( *buf );
 
 		size *= 4;
 		*buf = httplib_malloc( size );
@@ -94,7 +94,7 @@ static int alloc_vprintf( char **out_buf, char *prealloc_buf, size_t prealloc_si
 		*/
 
 		va_copy( ap_copy, ap );
-		len = alloc_vprintf2( out_buf, fmt, ap );
+		len = alloc_vprintf2( out_buf, fmt, ap_copy );
 		va_end( ap_copy );
 
 	}
