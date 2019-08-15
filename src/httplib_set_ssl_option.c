@@ -1,5 +1,5 @@
 /* 
- * Copyright (c) 2016 Lammert Bies
+ * Copyright (c) 2016-2019 Lammert Bies
  * Copyright (c) 2013-2016 the Civetweb developers
  * Copyright (c) 2004-2013 Sergey Lyubka
  *
@@ -25,6 +25,8 @@
  * Release: 2.0
  */
 
+#if !defined(NO_SSL)
+
 #include "httplib_main.h"
 #include "httplib_ssl.h"
 
@@ -37,7 +39,6 @@ static void *ssllib_dll_handle;    /* Store the ssl library handle. */
  * way. The function returns false if an error occured, otherwise true.
  */
 
-#if !defined(NO_SSL)
 bool XX_httplib_set_ssl_option( struct lh_ctx_t *ctx ) {
 
 	const char *pem;

@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2016-2018 Lammert Bies
+ * Copyright (C) 2016-2019 Lammert Bies
  * Copyright (c) 2013-2016 the Civetweb developers
  * Copyright (c) 2004-2013 Sergey Lyubka
  *
@@ -360,6 +360,7 @@ typedef int SOCKET;
 #endif /* defined(_WIN32) -                         \
           WINDOWS / UNIX include block */
 
+#define IP_ADDR_STR_LEN (50)
 
 #define ARRAY_SIZE(array) (sizeof(array) / sizeof(array[0]))
 
@@ -858,7 +859,11 @@ bool			XX_httplib_is_put_or_delete_method( const struct lh_con_t *conn );
 bool			XX_httplib_is_valid_http_method( const char *method );
 int			XX_httplib_is_valid_port( unsigned long port );
 bool			XX_httplib_is_websocket_protocol( const struct lh_con_t *conn );
+#if defined(NO_SSL)
+void *			XX_httplib_load_dll( struct lh_ctx_t *ctx, const char *dll_name );
+#else  /* NO_SSL */
 void *			XX_httplib_load_dll( struct lh_ctx_t *ctx, const char *dll_name, struct ssl_func *sw );
+#endif
 void			XX_httplib_log_access( struct lh_ctx_t *ctx, const struct lh_con_t *conn );
 LIBHTTP_THREAD		XX_httplib_master_thread( void *thread_func_param );
 int			XX_httplib_match_prefix(const char *pattern, size_t pattern_len, const char *str);

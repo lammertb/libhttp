@@ -1,5 +1,5 @@
 /* 
- * Copyright (c) 2016 Lammert Bies
+ * Copyright (c) 2016-2019 Lammert Bies
  * Copyright (c) 2013-2016 the Civetweb developers
  * Copyright (c) 2004-2013 Sergey Lyubka
  *
@@ -25,10 +25,10 @@
  * Release: 2.0
  */
 
+#if !defined(NO_SSL)
+
 #include "httplib_main.h"
 #include "httplib_ssl.h"
-
-#if !defined(NO_SSL)
 
 static bool	hexdump2string( void *mem, int memlen, char *buf, int buflen );
 

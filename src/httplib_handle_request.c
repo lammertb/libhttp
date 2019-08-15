@@ -1,5 +1,5 @@
 /* 
- * Copyright (c) 2016 Lammert Bies
+ * Copyright (c) 2016-2019 Lammert Bies
  * Copyright (c) 2013-2016 the Civetweb developers
  * Copyright (c) 2004-2013 Sergey Lyubka
  *
@@ -43,7 +43,11 @@ void XX_httplib_handle_request( struct lh_ctx_t *ctx, struct lh_con_t *conn ) {
 	struct lh_rqi_t *ri;
 	char path[PATH_MAX];
 	int uri_len;
+
+#if !defined(NO_SSL)
 	int ssl_index;
+#endif  /* NO_SSL */
+
 	bool is_found;
 	bool is_script_resource;
 	bool is_websocket_request;
@@ -103,6 +107,8 @@ void XX_httplib_handle_request( struct lh_ctx_t *ctx, struct lh_con_t *conn ) {
 	 * 1.2. do a https redirect, if required. Do not decode URIs yet.
 	 */
 
+#if !defined(NO_SSL)
+
 	if ( ! conn->client.has_ssl  &&  conn->client.has_redir ) {
 
 		ssl_index = XX_httplib_get_first_ssl_listener_index( ctx );
@@ -121,6 +127,8 @@ void XX_httplib_handle_request( struct lh_ctx_t *ctx, struct lh_con_t *conn ) {
 
 		return;
 	}
+
+#endif  /* NO_SSL */
 
 	uri_len = (int)strlen( ri->local_uri );
 

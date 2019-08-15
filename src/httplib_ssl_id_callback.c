@@ -1,5 +1,5 @@
 /* 
- * Copyright (c) 2016 Lammert Bies
+ * Copyright (c) 2016-2019 Lammert Bies
  * Copyright (c) 2013-2016 the Civetweb developers
  * Copyright (c) 2004-2013 Sergey Lyubka
  *
@@ -25,6 +25,8 @@
  * Release: 2.0
  */
 
+#if !defined(NO_SSL)
+
 #include "httplib_main.h"
 #include "httplib_pthread.h"
 #include "httplib_ssl.h"
@@ -36,8 +38,6 @@
  * The function XX_httplib_ssl_id_callback() returns a handle representing the
  * thread running the SSL callback.
  */
-
-#if !defined(NO_SSL)
 
 /* Must be set if sizeof(pthread_t) > sizeof(unsigned long) */
 unsigned long XX_httplib_ssl_id_callback( void ) {

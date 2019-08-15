@@ -1,5 +1,5 @@
 /* 
- * Copyright (c) 2016 Lammert Bies
+ * Copyright (c) 2016-2019 Lammert Bies
  * Copyright (c) 2013-2016 the Civetweb developers
  * Copyright (c) 2004-2013 Sergey Lyubka
  *
@@ -25,6 +25,8 @@
  * Release: 1.9
  */
 
+#if !defined(NO_SSL)
+
 #include "httplib_main.h"
 #include "httplib_ssl.h"
 #include "httplib_utils.h"
@@ -38,8 +40,6 @@ static long int data_check		= 0;
  * The function XX_httplib_refresh_trust() is used to reload a certificate if
  * it only has a short trust span.
  */
-
-#if !defined(NO_SSL)
 
 int XX_httplib_refresh_trust( struct lh_ctx_t *ctx, struct lh_con_t *conn ) {
 

@@ -1,5 +1,5 @@
 /* 
- * Copyright (c) 2016 Lammert Bies
+ * Copyright (c) 2016-2019 Lammert Bies
  * Copyright (c) 2013-2016 the Civetweb developers
  * Copyright (c) 2004-2013 Sergey Lyubka
  *
@@ -134,6 +134,8 @@ static int64_t push( const struct lh_ctx_t *ctx, FILE *fp, SOCKET sock, SSL *ssl
 		 * This code is not reached in the moment.
 		 * ==> Fix the TODOs above first.
 		 */
+
+		if ( err ) return -1;
 
 		if ( timeout > 0.0 ) clock_gettime( CLOCK_MONOTONIC, &now );
 

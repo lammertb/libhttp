@@ -1,5 +1,5 @@
 /* 
- * Copyright (c) 2016 Lammert Bies
+ * Copyright (c) 2016-2019 Lammert Bies
  * Copyright (c) 2013-2016 the Civetweb developers
  * Copyright (c) 2004-2013 Sergey Lyubka
  *
@@ -90,6 +90,7 @@ struct lh_ctx_t *httplib_start( const struct lh_clb_t *callbacks, void *user_dat
 		pthread_mutexattr_settype( & XX_httplib_pthread_mutex_attr, PTHREAD_MUTEX_RECURSIVE );
 #endif  /* _WIN32 */
 
+#if !defined(NO_SSL)
 		if ( httplib_pthread_key_create( & XX_httplib_sTlsKey, XX_httplib_tls_dtor ) != 0 ) {
 
 			/*
@@ -103,6 +104,7 @@ struct lh_ctx_t *httplib_start( const struct lh_clb_t *callbacks, void *user_dat
 
 			return NULL;
 		}
+#endif  /* NO_SSL */
 	}
 	
 	else {

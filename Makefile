@@ -4,7 +4,7 @@
 #
 # This file is licensed under the MIT License as stated below
 #
-# Copyright (c) 2016 Lammert Bies
+# Copyright (c) 2016-2019 Lammert Bies
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -81,6 +81,7 @@ ifneq ($(OS),Windows_NT)
 OS:=$(shell uname -s)
 endif
 
+# -DNO_SSL=1 -DNO_SSL_DL=1
 DFLAGS = -DUSE_STACK_SIZE=102400
 
 INCDIR = include/

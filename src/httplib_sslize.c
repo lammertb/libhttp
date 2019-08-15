@@ -1,5 +1,5 @@
 /* 
- * Copyright (c) 2016 Lammert Bies
+ * Copyright (c) 2016-2019 Lammert Bies
  * Copyright (c) 2013-2016 the Civetweb developers
  * Copyright (c) 2004-2013 Sergey Lyubka
  *
@@ -25,6 +25,8 @@
  * Release: 2.0
  */
 
+#if !defined(NO_SSL)
+
 #include "httplib_main.h"
 #include "httplib_ssl.h"
 
@@ -33,8 +35,6 @@
  *
  * The fucntion XX_httplib_sslize() initiates SSL on a connection.
  */
-
-#if !defined(NO_SSL)
 
 int XX_httplib_sslize( struct lh_ctx_t *ctx, struct lh_con_t *conn, SSL_CTX *s, int (*func)(SSL *) ) {
 

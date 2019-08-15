@@ -1,5 +1,5 @@
 /* 
- * Copyright (c) 2016 Lammert Bies
+ * Copyright (c) 2016-2019 Lammert Bies
  * Copyright (c) 2013-2016 the Civetweb developers
  * Copyright (c) 2004-2013 Sergey Lyubka
  *
@@ -70,10 +70,12 @@ static void worker_thread_run( struct worker_thread_args *thread_args ) {
 	struct lh_ctx_t *ctx;
 	struct lh_con_t *conn;
 	struct httplib_workerTLS tls;
+#if !defined(NO_SSL)
 	union {
 		const void *	con;
 		void *		var;
 	} ptr;
+#endif  /* NO_SSL */
 
 	if ( thread_args == NULL ) return;
 

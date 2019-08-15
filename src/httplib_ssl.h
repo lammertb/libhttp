@@ -30,9 +30,6 @@
  * I put the prototypes here to be independent from OpenSSL source
  * installation. */
 
-#define IP_ADDR_STR_LEN (50) /* IPv6 hex string is 46 chars */
-
-
 #define SSL_CTRL_OPTIONS (32)
 #define SSL_CTRL_CLEAR_OPTIONS (77)
 #define SSL_CTRL_SET_ECDH_AUTO (94)
