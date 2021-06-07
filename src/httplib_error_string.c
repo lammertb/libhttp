@@ -165,9 +165,9 @@ LIBHTTP_API char *httplib_error_string( int error_code, char *buf, size_t buf_le
 	strerror_s( buf, buf_len, error_code );
 	return buf;
 
-#else  /* _WIN32 */
+#else  /* not _WIN32 (e.g. Linux, BSD, Solaris etc. */
 
-	strerror_r( error_code, buf, buf_len );
+	if(strerror_r( error_code, buf, buf_len )) return NULL;
 	return buf;
 
 #endif  /* _WIN32 */
