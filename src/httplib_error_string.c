@@ -165,11 +165,26 @@ LIBHTTP_API char *httplib_error_string( int error_code, char *buf, size_t buf_le
 	strerror_s( buf, buf_len, error_code );
 	return buf;
 
-#else  /* _WIN32 */
+#else  /* not _WIN32 */
 
-	strerror_r( error_code, buf, buf_len );
+#if ((_POSIX_C_SOURCE >= 200112L || _XOPEN_SOURCE >= 600) && ! defined(_GNU_SOURCE))  /* XSI version of strerror_r */
+
+	int return_val;
+
+	return_val = strerror_r( error_code, buf, buf_len );
+
+	if ( return_val != 0 ) return NULL;
 	return buf;
 
-#endif  /* _WIN32 */
+#else /* GNU version of strerror_r */
+
+	char *return_ptr;
+
+	return_ptr = strerror_r( error_code, buf, buf_len );
+	return return_ptr;
+
+#endif
+
+#endif  /* _WIN32 or not _WIN32 */
 
 }  /* httplib_error_string */
