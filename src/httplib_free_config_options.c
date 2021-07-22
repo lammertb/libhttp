@@ -39,6 +39,7 @@ void XX_httplib_free_config_options( struct lh_ctx_t *ctx ) {
 	ctx->authentication_domain       = httplib_free( ctx->authentication_domain       );
 	ctx->cgi_environment             = httplib_free( ctx->cgi_environment             );
 	ctx->cgi_interpreter             = httplib_free( ctx->cgi_interpreter             );
+	ctx->cgi_pattern                 = httplib_free( ctx->cgi_pattern                 );
 	ctx->document_root               = httplib_free( ctx->document_root               );
 	ctx->error_log_file              = httplib_free( ctx->error_log_file              );
 	ctx->error_pages                 = httplib_free( ctx->error_pages                 );
