@@ -25,7 +25,7 @@
 
 #include "httplib_main.h"
 
-#if defined(_WIN32)
+#if defined(_MSC_VER)
 #include <winerror.h>
 #endif
 
@@ -46,9 +46,10 @@ LIBHTTP_API char *httplib_error_string( int error_code, char *buf, size_t buf_le
 
 	if ( buf == NULL  ||  buf_len < 1 ) return NULL;
 
-#if defined(_WIN32)
+#if defined(_MSC_VER)
 
 	const char *ptr;
+	errno_t retval;
 
 	ptr = "";
 
@@ -162,10 +163,12 @@ LIBHTTP_API char *httplib_error_string( int error_code, char *buf, size_t buf_le
 		return buf;
 	}
 
-	strerror_s( buf, buf_len, error_code );
+	retval = strerror_s( buf, buf_len, error_code );
+
+	if ( retval == 0 ) return buf;
 	return buf;
 
-#else  /* not _WIN32 */
+#else  /* not _MSC_VER */
 
 #if defined(__FreeBSD__)  ||  ((_POSIX_C_SOURCE >= 200112L || _XOPEN_SOURCE >= 600) && ! defined(_GNU_SOURCE))  /* XSI version of strerror_r */
 
@@ -183,8 +186,8 @@ LIBHTTP_API char *httplib_error_string( int error_code, char *buf, size_t buf_le
 	return_ptr = strerror_r( error_code, buf, buf_len );
 	return return_ptr;
 
-#endif
+#endif  /* POSIX or GNU */
 
-#endif  /* _WIN32 or not _WIN32 */
+#endif  /* _MSC_VER or not _MSC_VER */
 
 }  /* httplib_error_string */
