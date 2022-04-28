@@ -1,6 +1,6 @@
 Release Notes v2.0 (work in progress)
 ===
-### Objectives: *Clean up source code, Proper documentation, Restructure embedding API*
+### Objectives: *Clean up source code, Proper documentation, Restructure embedding API, Switch to OpenSSL v1.1*
 
 Changes
 -------
@@ -27,6 +27,7 @@ Changes
 - Removed deprecated function `mg_get_valid_option_names();`
 - Removed all build scripts except the script for `make`
 - Added website [`www.libhttp.org`](http://www.libhttp.org)
+- Switched OpenSSL support to OpenSSL v1.1
 
 Release Notes v1.9 (will never be released as LibHTTP)
 ===
