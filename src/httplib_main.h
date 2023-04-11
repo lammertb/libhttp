@@ -216,11 +216,19 @@ typedef long off_t;
 #define NO_SOCKLEN_T
 
 #if defined(_WIN64) || defined(__MINGW64__)
+#if !defined(SSL_LIB)
 #define SSL_LIB "libssl-1_1-x64.dll"
+#endif
+#if !defined(CRYPTO_LIB)
 #define CRYPTO_LIB "libcrypto-1_1-x64.dll"
+#endif
 #else  /* _WIN64  ||  __MINGW64__ */
+#if !defined(SSL_LIB)
 #define SSL_LIB "libssl-1_1.dll"
+#endif
+#if !defined(CRYPTO_LIB)
 #define CRYPTO_LIB "libcrypto-1_1.dll"
+#endif
 #endif  /* _WIN64  ||  __MINGW64__ */
 
 #define O_NONBLOCK (0)
@@ -318,8 +326,12 @@ typedef unsigned short int in_port_t;
 #endif
 #include <pthread.h>
 #if defined(__MACH__)
+#if !defined(SSL_LIB)
 #define SSL_LIB "libssl.dylib"
+#endif
+#if !defined(CRYPTO_LIB)
 #define CRYPTO_LIB "libcrypto.dylib"
+#endif
 #else
 #if !defined(SSL_LIB)
 #define SSL_LIB "libssl.so"
