@@ -73,6 +73,10 @@ ifdef SSL_LIB
   CFLAGS += -DSSL_LIB=\"$(SSL_LIB)\"
 endif
 
+ifdef SSL_VERSION_MAJOR
+  CFLAGS += -DSSL_VERSION_MAJOR=$(SSL_VERSION_MAJOR)
+endif
+
 ifdef CRYPTO_LIB
   CFLAGS += -DCRYPTO_LIB=\"$(CRYPTO_LIB)\"
 endif

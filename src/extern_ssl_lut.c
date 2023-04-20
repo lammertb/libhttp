@@ -62,7 +62,11 @@ struct ssl_func XX_httplib_ssl_sw[] = {
 	{ "SSL_CTX_load_verify_locations",      NULL },
 	{ "SSL_CTX_set_default_verify_paths",   NULL },
 	{ "SSL_CTX_set_verify_depth",           NULL },
+#if SSL_VERSION_MAJOR >= 3
+	{ "SSL_get1_peer_certificate",			NULL },
+#else
 	{ "SSL_get_peer_certificate",           NULL },
+#endif
 	{ "SSL_get_version",                    NULL },
 	{ "SSL_get_current_cipher",             NULL },
 	{ "SSL_CIPHER_get_name",                NULL },
@@ -72,7 +76,6 @@ struct ssl_func XX_httplib_ssl_sw[] = {
 	{ "SSL_CTX_set_cipher_list",            NULL },
 	{ NULL,                                 NULL }
 };
-
 
 /*
  * struct ssl_func XX_httplib_crypto_sw[];
