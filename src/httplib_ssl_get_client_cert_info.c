@@ -43,17 +43,15 @@ void XX_httplib_ssl_get_client_cert_info( struct lh_con_t *conn ) {
 
 	char str_subject[1024];
 	char str_issuer[1024];
-	char str_serial[1024];
+	char *str_serial = NULL;
 	char str_finger[1024];
 	unsigned char buf[256];
-	unsigned char *pbuf;
-	int len;
-	int len2;
 	unsigned int ulen;
 	X509 *cert;
 	X509_NAMEX *subj;
 	X509_NAMEX *iss;
 	ASN1_INTEGER *serial;
+	BIGNUM *bignum_serial;
 	const EVP_MD *digest;
 
 	if ( conn == NULL ) return;
@@ -81,17 +79,12 @@ void XX_httplib_ssl_get_client_cert_info( struct lh_con_t *conn ) {
 	 * Translate serial number to a hex string
 	 */
 
-	len = i2c_ASN1_INTEGER( serial, NULL );
+	bignum_serial = ASN1_INTEGER_to_BN( serial, NULL );
 
-	if ( len > 0  &&  (unsigned)len < (unsigned)sizeof(buf) ) {
+	if ( bignum_serial ) {
 
-		pbuf = buf;
-		len2 = i2c_ASN1_INTEGER( serial, &pbuf );
-
-		if ( ! hexdump2string( buf, len2, str_serial, (int)sizeof(str_serial) ) ) *str_serial = 0;
+		str_serial = BN_bn2hex( bignum_serial );
 	}
-	
-	else *str_serial = 0;
 
 	/*
 	 * Calculate SHA1 fingerprint and store as a hex string
@@ -108,13 +101,16 @@ void XX_httplib_ssl_get_client_cert_info( struct lh_con_t *conn ) {
 
 		conn->request_info.client_cert->subject = httplib_strdup( str_subject );
 		conn->request_info.client_cert->issuer  = httplib_strdup( str_issuer  );
-		conn->request_info.client_cert->serial  = httplib_strdup( str_serial  );
+		conn->request_info.client_cert->serial  = httplib_strdup( str_serial ? str_serial : "" );
 		conn->request_info.client_cert->finger  = httplib_strdup( str_finger  );
 	}
 	
 	else {
 		/* TODO: write some OOM message */
 	}
+
+	BN_free( bignum_serial );
+	OPENSSL_free( str_serial );
 
 	X509_free( cert );
 

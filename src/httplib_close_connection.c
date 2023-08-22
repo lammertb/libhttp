@@ -60,12 +60,6 @@ void XX_httplib_close_connection( struct lh_ctx_t *ctx, struct lh_con_t *conn ) 
 		SSL_shutdown( conn->ssl );
 		SSL_free(     conn->ssl );
 
-		/*
-		 * Avoid CRYPTO_cleanup_all_ex_data(); See discussion:
-		 * https://wiki.openssl.org/index.php/Talk:Library_Initialization
-		 */
-
-		ERR_remove_state( 0 );
 		conn->ssl = NULL;
 	}
 #endif

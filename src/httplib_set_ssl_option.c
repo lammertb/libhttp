@@ -72,10 +72,7 @@ bool XX_httplib_set_ssl_option( struct lh_ctx_t *ctx ) {
 
 #endif /* NO_SSL_DL */
 
-	SSL_library_init();
-	SSL_load_error_strings();
-
-	ctx->ssl_ctx = SSL_CTX_new( SSLv23_server_method() );
+	ctx->ssl_ctx = SSL_CTX_new( TLS_server_method() );
 	if ( ctx->ssl_ctx == NULL ) {
 
 		httplib_cry( LH_DEBUG_CRASH, ctx, NULL, "%s: SSL_CTX_new (server) error: %s", __func__, XX_httplib_ssl_error() );
