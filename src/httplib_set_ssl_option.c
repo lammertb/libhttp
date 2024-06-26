@@ -30,7 +30,9 @@
 #include "httplib_main.h"
 #include "httplib_ssl.h"
 
+#if !defined(NO_SSL_DL)
 static void *ssllib_dll_handle;    /* Store the ssl library handle. */
+#endif /* NO_SSL_DL */
 
 /*
  * bool XX_httplib_set_ssl_option( struct lh_ctx_t *ctx );

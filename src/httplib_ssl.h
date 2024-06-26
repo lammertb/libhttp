@@ -121,6 +121,11 @@ typedef struct bignum_st BIGNUM;
 
 #define OPENSSL_free(addr)			CRYPTO_free(addr, __FILE__, __LINE__)
 
+
+
+extern struct ssl_func		XX_httplib_crypto_sw[];
+extern struct ssl_func		XX_httplib_ssl_sw[];
+
 #endif  /* NO_SSL_DL */
 
 
@@ -136,10 +141,5 @@ int				XX_httplib_ssl_use_pem_file( struct lh_ctx_t *ctx, const char *pem );
 int				XX_httplib_sslize( struct lh_ctx_t *ctx, struct lh_con_t *conn, SSL_CTX *s, int (*func)(SSL *) );
 void				XX_httplib_tls_dtor( void *key );
 void				XX_httplib_uninitialize_ssl( struct lh_ctx_t *ctx );
-
-
-
-extern struct ssl_func		XX_httplib_crypto_sw[];
-extern struct ssl_func		XX_httplib_ssl_sw[];
 
 #endif  /* NO_SSL */

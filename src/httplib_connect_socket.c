@@ -63,7 +63,7 @@ bool XX_httplib_connect_socket( struct lh_ctx_t *ctx, const char *host, int port
 		return false;
 	}
 
-#if !defined(NO_SSL)
+#if !defined(NO_SSL) && !defined(NO_SSL_DL)
 
 	if ( use_ssl  &&  TLS_client_method == NULL ) {
 

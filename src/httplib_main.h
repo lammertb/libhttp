@@ -871,9 +871,7 @@ bool			XX_httplib_is_put_or_delete_method( const struct lh_con_t *conn );
 bool			XX_httplib_is_valid_http_method( const char *method );
 int			XX_httplib_is_valid_port( unsigned long port );
 bool			XX_httplib_is_websocket_protocol( const struct lh_con_t *conn );
-#if defined(NO_SSL)
-void *			XX_httplib_load_dll( struct lh_ctx_t *ctx, const char *dll_name );
-#else  /* NO_SSL */
+#if !defined(NO_SSL) && !defined(NO_SSL_DL)
 void *			XX_httplib_load_dll( struct lh_ctx_t *ctx, const char *dll_name, struct ssl_func *sw );
 #endif
 void			XX_httplib_log_access( struct lh_ctx_t *ctx, const struct lh_con_t *conn );
