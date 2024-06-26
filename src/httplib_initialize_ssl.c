@@ -32,12 +32,6 @@
 #include "httplib_ssl.h"
 #include "httplib_utils.h"
 
-#if defined(SSL_ALREADY_INITIALIZED)
-int XX_httplib_cryptolib_users = 1; /* Reference counter for crypto library. */
-#else
-int XX_httplib_cryptolib_users = 0; /* Reference counter for crypto library. */
-#endif
-
 #if !defined(NO_SSL_DL)
 static void *cryptolib_dll_handle; /* Store the crypto library handle. */
 #endif  /* NO_SSL_DL */
@@ -60,13 +54,6 @@ int XX_httplib_initialize_ssl( struct lh_ctx_t *ctx ) {
 		if ( ! cryptolib_dll_handle ) return 0;
 	}
 #endif /* NO_SSL_DL */
-
-	if ( httplib_atomic_inc( & XX_httplib_cryptolib_users ) > 1 ) return 1;
-
-	/*
-	 * Initialize locking callbacks, needed for thread safety.
-	 * http://www.openssl.org/support/faq.html#PROG1
-	 */
 
 	return 1;
 

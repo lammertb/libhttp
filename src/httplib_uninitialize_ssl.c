@@ -43,16 +43,7 @@ void XX_httplib_uninitialize_ssl( struct lh_ctx_t *ctx ) {
 
 	UNUSED_PARAMETER(ctx);
 
-	if ( httplib_atomic_dec( & XX_httplib_cryptolib_users ) == 0 ) {
-
-		/*
-		 * Shutdown according to
-		 * https://wiki.openssl.org/index.php/Library_Initialization#Cleanup
-		 * http://stackoverflow.com/questions/29845527/how-to-properly-uninitialize-openssl
-		 */
-
-		CONF_modules_unload( 1 );
-	}
+	/* This is no longer necessary since OpenSSL 1.1.0 */
 
 }  /* XX_httplib_unitialize_ssl */
 
