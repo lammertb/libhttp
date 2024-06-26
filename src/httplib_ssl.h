@@ -116,8 +116,8 @@ typedef struct bignum_st BIGNUM;
 #define BN_free					(*(void(*)(BIGNUM *))XX_httplib_crypto_sw[10].ptr)
 #define CRYPTO_free				(*(void(*)(void *, const char *, int))XX_httplib_crypto_sw[11].ptr)
 #define EVP_get_digestbyname			(*(const EVP_MD *(*)(const char *))XX_httplib_crypto_sw[12].ptr)
-#define ASN1_digest				(*(int (*)(int (*)(void *,unsigned char **), const EVP_MD *, char *, unsigned char *, unsigned int *))XX_httplib_crypto_sw[13].ptr)
-#define i2d_X509				(*(int (*)(X509 *, unsigned char **))XX_httplib_crypto_sw[14].ptr)
+#define ASN1_digest				(*(int (*)(int (*)(const void *,unsigned char **), const EVP_MD *, char *, unsigned char *, unsigned int *))XX_httplib_crypto_sw[13].ptr)
+#define i2d_X509				(*(int (*)(const X509 *, unsigned char **))XX_httplib_crypto_sw[14].ptr)
 
 #define OPENSSL_free(addr)			CRYPTO_free(addr, __FILE__, __LINE__)
 
