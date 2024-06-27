@@ -216,11 +216,19 @@ typedef long off_t;
 #define NO_SOCKLEN_T
 
 #if defined(_WIN64) || defined(__MINGW64__)
-#define SSL_LIB "ssleay64.dll"
-#define CRYPTO_LIB "libeay64.dll"
+#if !defined(SSL_LIB)
+#define SSL_LIB "libssl-1_1-x64.dll"
+#endif
+#if !defined(CRYPTO_LIB)
+#define CRYPTO_LIB "libcrypto-1_1-x64.dll"
+#endif
 #else  /* _WIN64  ||  __MINGW64__ */
-#define SSL_LIB "ssleay32.dll"
-#define CRYPTO_LIB "libeay32.dll"
+#if !defined(SSL_LIB)
+#define SSL_LIB "libssl-1_1.dll"
+#endif
+#if !defined(CRYPTO_LIB)
+#define CRYPTO_LIB "libcrypto-1_1.dll"
+#endif
 #endif  /* _WIN64  ||  __MINGW64__ */
 
 #define O_NONBLOCK (0)
@@ -318,8 +326,12 @@ typedef unsigned short int in_port_t;
 #endif
 #include <pthread.h>
 #if defined(__MACH__)
+#if !defined(SSL_LIB)
 #define SSL_LIB "libssl.dylib"
+#endif
+#if !defined(CRYPTO_LIB)
 #define CRYPTO_LIB "libcrypto.dylib"
+#endif
 #else
 #if !defined(SSL_LIB)
 #define SSL_LIB "libssl.so"
@@ -859,9 +871,7 @@ bool			XX_httplib_is_put_or_delete_method( const struct lh_con_t *conn );
 bool			XX_httplib_is_valid_http_method( const char *method );
 int			XX_httplib_is_valid_port( unsigned long port );
 bool			XX_httplib_is_websocket_protocol( const struct lh_con_t *conn );
-#if defined(NO_SSL)
-void *			XX_httplib_load_dll( struct lh_ctx_t *ctx, const char *dll_name );
-#else  /* NO_SSL */
+#if !defined(NO_SSL) && !defined(NO_SSL_DL)
 void *			XX_httplib_load_dll( struct lh_ctx_t *ctx, const char *dll_name, struct ssl_func *sw );
 #endif
 void			XX_httplib_log_access( struct lh_ctx_t *ctx, const struct lh_con_t *conn );

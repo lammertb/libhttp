@@ -77,6 +77,7 @@ void *XX_httplib_load_dll( struct lh_ctx_t *ctx, const char *dll_name, struct ss
 	} u;
 	void *dll_handle;
 	struct ssl_func *fp;
+	bool missing_symbols = false;
 
 	dll_handle = dlopen( dll_name, RTLD_LAZY );
 
@@ -110,14 +111,17 @@ void *XX_httplib_load_dll( struct lh_ctx_t *ctx, const char *dll_name, struct ss
 		if ( u.fp == NULL ) {
 
 			httplib_cry( LH_DEBUG_CRASH, ctx, NULL, "%s: %s: cannot find %s", __func__, dll_name, fp->name );
-			dlclose( dll_handle );
-
-			return NULL;
+			missing_symbols = true;
 		}
 		
 		else fp->ptr = u.fp;
 	}
 
+	if( missing_symbols ) {
+		dlclose( dll_handle );
+
+		return NULL;
+	}
 	return dll_handle;
 
 }  /* XX_httplib_load_dll */

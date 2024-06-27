@@ -62,12 +62,6 @@ int XX_httplib_sslize( struct lh_ctx_t *ctx, struct lh_con_t *conn, SSL_CTX *s, 
 		SSL_free( conn->ssl );
 		conn->ssl = NULL;
 
-		/*
-		 * Avoid CRYPTO_cleanup_all_ex_data(); See discussion:
-		 * https://wiki.openssl.org/index.php/Talk:Library_Initialization
-		 */
-
-		ERR_remove_state( 0 );
 		return 0;
 	}
 
@@ -96,12 +90,6 @@ int XX_httplib_sslize( struct lh_ctx_t *ctx, struct lh_con_t *conn, SSL_CTX *s, 
 
 		SSL_free( conn->ssl );
 		conn->ssl = NULL;
-		/*
-		 * Avoid CRYPTO_cleanup_all_ex_data(); See discussion:
-		 * https://wiki.openssl.org/index.php/Talk:Library_Initialization
-		 */
-
-		ERR_remove_state( 0 );
 
 		return 0;
 	}

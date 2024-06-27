@@ -32,12 +32,6 @@
 #include "httplib_ssl.h"
 #include "httplib_utils.h"
 
-#if defined(SSL_ALREADY_INITIALIZED)
-int XX_httplib_cryptolib_users = 1; /* Reference counter for crypto library. */
-#else
-int XX_httplib_cryptolib_users = 0; /* Reference counter for crypto library. */
-#endif
-
 #if !defined(NO_SSL_DL)
 static void *cryptolib_dll_handle; /* Store the crypto library handle. */
 #endif  /* NO_SSL_DL */
@@ -53,9 +47,6 @@ static void *cryptolib_dll_handle; /* Store the crypto library handle. */
 
 int XX_httplib_initialize_ssl( struct lh_ctx_t *ctx ) {
 
-	int i;
-	size_t size;
-
 #if !defined(NO_SSL_DL)
 	if ( ! cryptolib_dll_handle ) {
 
@@ -63,29 +54,6 @@ int XX_httplib_initialize_ssl( struct lh_ctx_t *ctx ) {
 		if ( ! cryptolib_dll_handle ) return 0;
 	}
 #endif /* NO_SSL_DL */
-
-	if ( httplib_atomic_inc( & XX_httplib_cryptolib_users ) > 1 ) return 1;
-
-	/*
-	 * Initialize locking callbacks, needed for thread safety.
-	 * http://www.openssl.org/support/faq.html#PROG1
-	 */
-
-	i = CRYPTO_num_locks();
-	if ( i < 0 ) i = 0;
-
-	size = sizeof(pthread_mutex_t) * ((size_t)(i));
-
-	if ( (XX_httplib_ssl_mutexes = httplib_malloc( size )) == NULL ) {
-
-		httplib_cry( LH_DEBUG_CRASH, ctx, NULL, "%s: cannot allocate mutexes: %s", __func__, XX_httplib_ssl_error() );
-		return 0;
-	}
-
-	for (i=0; i<CRYPTO_num_locks(); i++) httplib_pthread_mutex_init( & XX_httplib_ssl_mutexes[i], &XX_httplib_pthread_mutex_attr);
-
-	CRYPTO_set_locking_callback( & XX_httplib_ssl_locking_callback );
-	CRYPTO_set_id_callback(      & XX_httplib_ssl_id_callback      );
 
 	return 1;
 
