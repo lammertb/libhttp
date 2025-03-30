@@ -202,12 +202,12 @@ static void send_ssi_file( struct lh_ctx_t *ctx, struct lh_con_t *conn, const ch
 			}
 			
 			else {
-				if ( ! memcmp( buf + 5, "include", 7 ) ) {
+				if ( (len > 12) && ! memcmp( buf + 5, "include", 7 ) ) {
 
 					do_ssi_include( ctx, conn, path, buf+12, include_level );
 				}
 #if !defined(NO_POPEN)
-				else if ( ! memcmp( buf+5, "exec", 4 ) ) {
+				else if ( (len > 9) &&  ! memcmp( buf+5, "exec", 4 ) ) {
 
 					do_ssi_exec( ctx, conn, buf+9 );
 				}
