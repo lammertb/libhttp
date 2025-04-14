@@ -1,4 +1,4 @@
-# 
+#
 # Copyright (c) 2013 No Face Press, LLC
 # License http://opensource.org/licenses/mit-license.php MIT License
 #
@@ -10,27 +10,27 @@ PROG = hello
 SRC = hello.c
 
 TOP = ../..
-CIVETWEB_LIB = libcivetweb.a
+HTTP_LIB = libhttp.a
 
 CFLAGS = -I$(TOP)/include $(COPT)
 LIBS = -lpthread
 
 include $(TOP)/resources/Makefile.in-os
 
-ifeq ($(TARGET_OS),LINUX) 
+ifeq ($(TARGET_OS),LINUX)
 	LIBS += -ldl
 endif
 
 all: $(PROG)
 
-$(PROG): $(CIVETWEB_LIB) $(SRC)
-	$(CC) -o $@ $(CFLAGS) $(LDFLAGS) $(SRC) $(CIVETWEB_LIB) $(LIBS)
+$(PROG): $(HTTP_LIB) $(SRC)
+	$(CC) -o $@ $(CFLAGS) $(LDFLAGS) $(SRC) $(HTTP_LIB) $(LIBS)
 
-$(CIVETWEB_LIB):
-	$(MAKE) -C $(TOP) clean lib
-	cp $(TOP)/$(CIVETWEB_LIB) .
+$(HTTP_LIB):
+	$(MAKE) -C $(TOP)
+	cp $(TOP)/lib/$(HTTP_LIB) .
 
 clean:
-	rm -f $(CIVETWEB_LIB) $(PROG)
+	rm -f $(HTTP_LIB) $(PROG)
 
 .PHONY: all clean
