@@ -66,10 +66,6 @@ some threads: a master thread, that accepts new connections, and several
 worker threads, that process accepted connections. The number of worker threads
 is configurable via `num_threads` configuration option. That number puts a
 limit on number of simultaneous requests that can be handled by LibHTTP.
-If you embed LibHTTP into a program that uses SSL outside LibHTTP as well,
-you may need to initialize SSL before calling `httplib_start()`, and set the pre-
-processor define SSL_ALREADY_INITIALIZED. This is not required if SSL is used
-only within LibHTTP.
 
 When master thread accepts new a connection, a new accepted socket (described
 by `struct socket`) it placed into the accepted sockets queue,

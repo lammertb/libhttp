@@ -49,22 +49,24 @@ struct ssl_func XX_httplib_ssl_sw[] = {
 	{ "SSL_set_fd",                         NULL },
 	{ "SSL_new",                            NULL },
 	{ "SSL_CTX_new",                        NULL },
-	{ "SSLv23_server_method",               NULL },
-	{ "SSL_library_init",                   NULL },
+	{ "TLS_server_method",                  NULL },
 	{ "SSL_CTX_use_PrivateKey_file",        NULL },
 	{ "SSL_CTX_use_certificate_file",       NULL },
 	{ "SSL_CTX_set_default_passwd_cb",      NULL },
 	{ "SSL_CTX_free",                       NULL },
-	{ "SSL_load_error_strings",             NULL },
 	{ "SSL_CTX_use_certificate_chain_file", NULL },
-	{ "SSLv23_client_method",               NULL },
+	{ "TLS_client_method",                  NULL },
 	{ "SSL_pending",                        NULL },
 	{ "SSL_CTX_set_verify",                 NULL },
 	{ "SSL_shutdown",                       NULL },
 	{ "SSL_CTX_load_verify_locations",      NULL },
 	{ "SSL_CTX_set_default_verify_paths",   NULL },
 	{ "SSL_CTX_set_verify_depth",           NULL },
+#if SSL_VERSION_MAJOR >= 3
+	{ "SSL_get1_peer_certificate",			NULL },
+#else
 	{ "SSL_get_peer_certificate",           NULL },
+#endif
 	{ "SSL_get_version",                    NULL },
 	{ "SSL_get_current_cipher",             NULL },
 	{ "SSL_CIPHER_get_name",                NULL },
@@ -75,7 +77,6 @@ struct ssl_func XX_httplib_ssl_sw[] = {
 	{ NULL,                                 NULL }
 };
 
-
 /*
  * struct ssl_func XX_httplib_crypto_sw[];
  *
@@ -84,27 +85,22 @@ struct ssl_func XX_httplib_ssl_sw[] = {
  */
 
 struct ssl_func XX_httplib_crypto_sw[] = {
-	{ "CRYPTO_num_locks",            NULL },
-	{ "CRYPTO_set_locking_callback", NULL },
-	{ "CRYPTO_set_id_callback",      NULL },
-       	{ "ERR_get_error",               NULL },
-	{ "ERR_error_string",            NULL },
-	{ "ERR_remove_state",            NULL },
-	{ "ERR_free_strings",            NULL },
-	{ "ENGINE_cleanup",              NULL },
-	{ "CONF_modules_unload",         NULL },
-	{ "CRYPTO_cleanup_all_ex_data",  NULL },
-	{ "EVP_cleanup",                 NULL },
-	{ "X509_free",                   NULL },
-	{ "X509_get_subject_name",       NULL },
-	{ "X509_get_issuer_name",        NULL },
-	{ "X509_NAME_oneline",           NULL },
-	{ "X509_get_serialNumber",       NULL },
-	{ "i2c_ASN1_INTEGER",            NULL },
-	{ "EVP_get_digestbyname",        NULL },
-	{ "ASN1_digest",                 NULL },
-	{ "i2d_X509",                    NULL },
-	{ NULL,                          NULL }
+	{ "ERR_get_error",                NULL },
+	{ "ERR_error_string",             NULL },
+	{ "CONF_modules_unload",          NULL },
+	{ "X509_free",                    NULL },
+	{ "X509_get_subject_name",        NULL },
+	{ "X509_get_issuer_name",         NULL },
+	{ "X509_NAME_oneline",            NULL },
+	{ "X509_get_serialNumber",        NULL },
+	{ "ASN1_INTEGER_to_BN",           NULL },
+	{ "BN_bn2hex",                    NULL },
+	{ "BN_free",                      NULL },
+	{ "CRYPTO_free",                  NULL },
+	{ "EVP_get_digestbyname",         NULL },
+	{ "ASN1_digest",                  NULL },
+	{ "i2d_X509",                     NULL },
+	{ NULL,                           NULL }
 };
 
 #endif /* !defined(NO_SSL)  &&  !defined(NO_SSL_DL) */

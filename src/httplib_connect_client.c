@@ -93,7 +93,7 @@ static struct lh_con_t *httplib_connect_client_impl( struct lh_ctx_t *ctx, const
 	}
 #ifndef NO_SSL
 	
-	else if ( use_ssl  &&  (conn->client_ssl_ctx = SSL_CTX_new(SSLv23_client_method())) == NULL ) {
+	else if ( use_ssl  &&  (conn->client_ssl_ctx = SSL_CTX_new(TLS_client_method())) == NULL ) {
 
 		httplib_cry( LH_DEBUG_ERROR, ctx, conn, "%s: SSL_CTX_new error", __func__ );
 		closesocket( sock );

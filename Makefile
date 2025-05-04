@@ -73,6 +73,10 @@ ifdef SSL_LIB
   CFLAGS += -DSSL_LIB=\"$(SSL_LIB)\"
 endif
 
+ifdef SSL_VERSION_MAJOR
+  CFLAGS += -DSSL_VERSION_MAJOR=$(SSL_VERSION_MAJOR)
+endif
+
 ifdef CRYPTO_LIB
   CFLAGS += -DCRYPTO_LIB=\"$(CRYPTO_LIB)\"
 endif
@@ -344,8 +348,6 @@ OBJLIST =									\
 	${OBJDIR}httplib_ssl_error${OBJEXT}					\
 	${OBJDIR}httplib_ssl_get_client_cert_info${OBJEXT}			\
 	${OBJDIR}httplib_ssl_get_protocol${OBJEXT}				\
-	${OBJDIR}httplib_ssl_id_callback${OBJEXT}				\
-	${OBJDIR}httplib_ssl_locking_callback${OBJEXT}				\
 	${OBJDIR}httplib_ssl_use_pem_file${OBJEXT}				\
 	${OBJDIR}httplib_sslize${OBJEXT}					\
 	${OBJDIR}httplib_start${OBJEXT}						\
@@ -1186,19 +1188,6 @@ ${OBJDIR}httplib_ssl_get_client_cert_info${OBJEXT}			: ${SRCDIR}httplib_ssl_get_
 									  ${INCDIR}libhttp.h
 
 ${OBJDIR}httplib_ssl_get_protocol${OBJEXT}				: ${SRCDIR}httplib_ssl_get_protocol.c				\
-									  ${SRCDIR}httplib_ssl.h					\
-									  ${SRCDIR}httplib_main.h					\
-									  ${INCDIR}libhttp.h
-
-${OBJDIR}httplib_ssl_id_callback${OBJEXT}				: ${SRCDIR}httplib_ssl_id_callback.c				\
-									  ${SRCDIR}httplib_pthread.h					\
-									  ${SRCDIR}httplib_ssl.h					\
-									  ${SRCDIR}httplib_utils.h					\
-									  ${SRCDIR}httplib_main.h					\
-									  ${INCDIR}libhttp.h
-
-${OBJDIR}httplib_ssl_locking_callback${OBJEXT}				: ${SRCDIR}httplib_ssl_locking_callback.c			\
-									  ${SRCDIR}httplib_pthread.h					\
 									  ${SRCDIR}httplib_ssl.h					\
 									  ${SRCDIR}httplib_main.h					\
 									  ${INCDIR}libhttp.h

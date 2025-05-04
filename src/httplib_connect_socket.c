@@ -63,9 +63,9 @@ bool XX_httplib_connect_socket( struct lh_ctx_t *ctx, const char *host, int port
 		return false;
 	}
 
-#if !defined(NO_SSL)
+#if !defined(NO_SSL) && !defined(NO_SSL_DL)
 
-	if ( use_ssl  &&  SSLv23_client_method == NULL ) {
+	if ( use_ssl  &&  TLS_client_method == NULL ) {
 
 		httplib_cry( LH_DEBUG_ERROR, ctx, NULL, "%s: SSL is not initialized", __func__ );
 		return false;

@@ -73,6 +73,7 @@ make build WITH_IPV6=1
 | PORTS=8080                | listening ports override when installing |
 | SSL_LIB=libssl.so.0       | use versioned SSL library                |
 | CRYPTO_LIB=libcrypto.so.0 | system versioned CRYPTO library          |
+| SSL_VERSION_MAJOR=3       | spcify major version on SSL library      |
 | PREFIX=/usr/local         | sets the install directory               |
 | COPT='-DNO_SSL'           | method to insert compile flags           |
 
@@ -96,7 +97,6 @@ make build COPT="-DNDEBUG -DNO_CGI"
 | NO_SSL_DL                 | link against system libssl library   |
 | NO_FILES                  | do not serve files from a directory  |
 | SQLITE_DISABLE_LFS        | disables large files (Lua only)      |
-| SSL_ALREADY_INITIALIZED   | do not initialize libcrypto          |
 
 ## Cross Compiling
 

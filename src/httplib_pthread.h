@@ -22,5 +22,4 @@
 
 
 
-extern pthread_mutex_t *	XX_httplib_ssl_mutexes;
 extern int			XX_httplib_thread_idx_max;
